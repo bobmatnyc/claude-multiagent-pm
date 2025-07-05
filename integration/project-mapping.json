@@ -1,0 +1,200 @@
+{
+  "framework_version": "v1.0.0-alpha",
+  "last_updated": "2025-07-05",
+  "milestones": {
+    "M01_Foundation": {
+      "target_completion": "2025-07-31",
+      "status": "in_progress",
+      "progress": 25,
+      "projects": [
+        {
+          "name": "ai-code-review",
+          "path": "~/Projects/ai-code-review",
+          "priority": "critical",
+          "status": "active",
+          "last_commit": null,
+          "health": "unknown"
+        },
+        {
+          "name": "git-portfolio-manager", 
+          "path": "~/Projects/git-portfolio-manager",
+          "priority": "critical",
+          "status": "active",
+          "last_commit": null,
+          "health": "unknown"
+        },
+        {
+          "name": "mcp-desktop-gateway",
+          "path": "~/Projects/mcp-desktop-gateway", 
+          "priority": "critical",
+          "status": "active",
+          "last_commit": null,
+          "health": "unknown"
+        },
+        {
+          "name": "zen-mcp-server",
+          "path": "~/Projects/zen-mcp-server",
+          "priority": "critical", 
+          "status": "active",
+          "last_commit": null,
+          "health": "unknown"
+        },
+        {
+          "name": "eva-agent",
+          "path": "~/Projects/eva-agent",
+          "priority": "high",
+          "status": "active", 
+          "last_commit": null,
+          "health": "unknown"
+        },
+        {
+          "name": "eva-monorepo",
+          "path": "~/Projects/eva-monorepo",
+          "priority": "high",
+          "status": "active",
+          "last_commit": null, 
+          "health": "unknown"
+        },
+        {
+          "name": "scraper-engine",
+          "path": "~/Projects/scraper-engine",
+          "priority": "high",
+          "status": "active",
+          "last_commit": null,
+          "health": "unknown"
+        },
+        {
+          "name": "ai-power-rankings",
+          "path": "~/Projects/ai-power-rankings", 
+          "priority": "medium",
+          "status": "active",
+          "last_commit": null,
+          "health": "unknown",
+          "notes": "Has existing TrackDown system - reference implementation"
+        },
+        {
+          "name": "matsuoka-com",
+          "path": "~/Projects/matsuoka-com",
+          "priority": "medium", 
+          "status": "active",
+          "last_commit": null,
+          "health": "unknown"
+        },
+        {
+          "name": "hot-flash",
+          "path": "~/Projects/hot-flash",
+          "priority": "medium",
+          "status": "active",
+          "last_commit": null,
+          "health": "unknown"
+        }
+      ]
+    },
+    "M02_Automation": {
+      "target_completion": "2025-09-30",
+      "status": "planning",
+      "progress": 5,
+      "projects": [
+        {
+          "name": "hyperdev-cli",
+          "path": "~/Projects/hyperdev-cli",
+          "priority": "high",
+          "status": "planning"
+        },
+        {
+          "name": "hd2", 
+          "path": "~/Projects/hd2",
+          "priority": "high",
+          "status": "planning"
+        },
+        {
+          "name": "tripbot-flow",
+          "path": "~/Projects/tripbot-flow",
+          "priority": "medium",
+          "status": "planning"
+        },
+        {
+          "name": "tripbot-agents",
+          "path": "~/Projects/tripbot-agents",
+          "priority": "medium", 
+          "status": "planning"
+        },
+        {
+          "name": "mcp-cloud-bridge",
+          "path": "~/Projects/mcp-cloud-bridge",
+          "priority": "high",
+          "status": "planning"
+        },
+        {
+          "name": "mcp-memory-service",
+          "path": "~/Projects/mcp-memory-service",
+          "priority": "high",
+          "status": "planning"
+        },
+        {
+          "name": "surfin-safari",
+          "path": "~/Projects/surfin-safari", 
+          "priority": "low",
+          "status": "planning"
+        },
+        {
+          "name": "ai-web-scraper",
+          "path": "~/Projects/ai-web-scraper",
+          "priority": "medium",
+          "status": "planning"
+        }
+      ]
+    },
+    "M03_Orchestration": {
+      "target_completion": "2025-11-30",
+      "status": "backlog",
+      "progress": 0,
+      "projects": [
+        {
+          "name": "commons",
+          "path": "~/Projects/commons",
+          "priority": "medium",
+          "status": "backlog"
+        },
+        {
+          "name": "common",
+          "path": "~/Projects/common", 
+          "priority": "medium",
+          "status": "backlog"
+        },
+        {
+          "name": "storymint3",
+          "path": "~/Projects/storymint3",
+          "priority": "low",
+          "status": "backlog"
+        },
+        {
+          "name": "mood-board",
+          "path": "~/Projects/mood-board",
+          "priority": "low",
+          "status": "backlog"
+        },
+        {
+          "name": "voice-extractor",
+          "path": "~/Projects/voice-extractor",
+          "priority": "low", 
+          "status": "backlog"
+        },
+        {
+          "name": "ai-event-scraper",
+          "path": "~/Projects/ai-event-scraper",
+          "priority": "low",
+          "status": "backlog"
+        }
+      ]
+    }
+  },
+  "framework_health": {
+    "last_check": null,
+    "total_projects": 24,
+    "healthy_projects": 0,
+    "warning_projects": 0,
+    "critical_projects": 0,
+    "overall_percentage": 0
+  }
+}
