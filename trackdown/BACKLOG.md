@@ -18,6 +18,7 @@ milestone_active: M01_Foundation
 - [ ] **[M01-006]** Implement automated project health monitoring
 - [ ] **[M01-007]** Deploy and test MCP service connections
 - [ ] **[M01-008]** Create functional slash command implementations
+- [x] **[M01-009]** Migrate git-portfolio-manager to Claude-PM framework
 
 ### Sprint Goals
 - ✅ Basic framework structure established
@@ -29,15 +30,15 @@ milestone_active: M01_Foundation
 ## 📋 Product Backlog
 
 ### M01 Foundation - Critical Infrastructure
-- [ ] **[M01-009]** Set up ai-code-review integration across all M01 projects
-- [ ] **[M01-010]** Configure git-portfolio-manager automated tracking
-- [ ] **[M01-011]** Deploy mcp-desktop-gateway service mesh
-- [ ] **[M01-012]** Implement zen-mcp-server base infrastructure
-- [ ] **[M01-013]** Create eva-agent framework coordination
-- [ ] **[M01-014]** Establish scraper-engine data collection patterns
-- [ ] **[M01-015]** Optimize ai-power-rankings performance tracking
-- [ ] **[M01-016]** Enhance matsuoka-com deployment pipeline
-- [ ] **[M01-017]** Streamline hot-flash development workflows
+- [ ] **[M01-010]** Set up ai-code-review integration across all M01 projects
+- [ ] **[M01-011]** Configure git-portfolio-manager automated tracking
+- [ ] **[M01-012]** Deploy mcp-desktop-gateway service mesh
+- [ ] **[M01-013]** Implement zen-mcp-server base infrastructure
+- [ ] **[M01-014]** Create eva-agent framework coordination
+- [ ] **[M01-015]** Establish scraper-engine data collection patterns
+- [ ] **[M01-016]** Optimize ai-power-rankings performance tracking
+- [ ] **[M01-017]** Enhance matsuoka-com deployment pipeline
+- [ ] **[M01-018]** Streamline hot-flash development workflows
 
 ### M02 Automation - Workflow Systems  
 - [ ] **[M02-001]** Implement hyperdev-cli advanced automation

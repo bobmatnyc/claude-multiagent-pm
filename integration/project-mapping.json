@@ -19,9 +19,12 @@
           "name": "git-portfolio-manager", 
           "path": "~/Projects/git-portfolio-manager",
           "priority": "critical",
-          "status": "active",
+          "status": "integrated",
           "last_commit": null,
-          "health": "unknown"
+          "health": "good",
+          "claude_pm_integration": true,
+          "migration_ticket": "M01-009",
+          "notes": "Successfully integrated with Claude-PM framework"
         },
         {
           "name": "mcp-desktop-gateway",
