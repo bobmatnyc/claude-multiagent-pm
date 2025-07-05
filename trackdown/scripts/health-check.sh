@@ -163,9 +163,23 @@ check_project_health() {
 echo -e "${BLUE}🏗️  M01 Foundation Projects Health${NC}"
 echo "--------------------------------------------------"
 
+# Check managed projects first
+echo -e "${BLUE}📁 Managed Projects${NC}"
+if [ -d "/Users/masa/Projects/managed" ]; then
+    for project_path in /Users/masa/Projects/managed/*/; do
+        if [ -d "$project_path" ]; then
+            check_project_health "$project_path"
+        fi
+    done
+else
+    echo -e "  ⚠️  ${YELLOW}No managed directory found${NC}"
+fi
+
+echo ""
+echo -e "${BLUE}📦 Other M01 Foundation Projects${NC}"
+
 M01_PROJECTS=(
     "ai-code-review"
-    "git-portfolio-manager" 
     "mcp-desktop-gateway"
     "zen-mcp-server"
     "eva-agent"

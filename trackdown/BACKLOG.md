@@ -19,6 +19,7 @@ milestone_active: M01_Foundation
 - [ ] **[M01-007]** Deploy and test MCP service connections
 - [ ] **[M01-008]** Create functional slash command implementations
 - [x] **[M01-009]** Migrate git-portfolio-manager to Claude-PM framework
+- [x] **[M01-019]** Migrate git-portfolio-manager to ~/Projects/managed/ subdirectory
 
 ### Sprint Goals
 - ✅ Basic framework structure established

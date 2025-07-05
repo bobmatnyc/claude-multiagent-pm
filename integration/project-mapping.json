@@ -17,14 +17,15 @@
         },
         {
           "name": "git-portfolio-manager", 
-          "path": "~/Projects/git-portfolio-manager",
+          "path": "~/Projects/managed/git-portfolio-manager",
           "priority": "critical",
-          "status": "integrated",
+          "status": "migrated",
           "last_commit": null,
-          "health": "good",
+          "health": "excellent",
           "claude_pm_integration": true,
-          "migration_ticket": "M01-009",
-          "notes": "Successfully integrated with Claude-PM framework"
+          "migration_ticket": "M01-019",
+          "subdirectory_model": true,
+          "notes": "Successfully migrated to managed subdirectory - first fully migrated M01 project"
         },
         {
           "name": "mcp-desktop-gateway",
