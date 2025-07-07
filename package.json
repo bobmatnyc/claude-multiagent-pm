@@ -1,6 +1,6 @@
 {
   "name": "@claudepm/framework",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Claude PM - Multi-Subprocess Orchestration Framework for AI-driven project management",
   "main": "framework/CLAUDE.md",
   "keywords": [
@@ -17,7 +17,7 @@
     "api-first"
   ],
   "author": {
-    "name": "Robert (Masa) Matsuoka", 
+    "name": "Robert (Masa) Matsuoka",
     "email": "masa@matsuoka.com",
     "url": "https://github.com/matsuoka"
   },
@@ -39,7 +39,7 @@
     "validate": "node scripts/validate-framework.js",
     "release": "standard-version",
     "release:major": "standard-version --release-as major",
-    "release:minor": "standard-version --release-as minor", 
+    "release:minor": "standard-version --release-as minor",
     "release:patch": "standard-version --release-as patch"
   },
   "files": [
@@ -60,7 +60,7 @@
         "section": "Features"
       },
       {
-        "type": "fix", 
+        "type": "fix",
         "section": "Bug Fixes"
       },
       {
