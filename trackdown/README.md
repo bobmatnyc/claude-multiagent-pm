@@ -18,12 +18,20 @@ grep -A20 "## 🎯 Current Sprint" BACKLOG.md
 ./scripts/status-report.sh
 ```
 
+### View Priority Tickets (Claude Max + mem0AI)
+```bash
+grep -A50 "## 🚀 Priority Implementation Tickets" BACKLOG.md
+```
+
 ### Update Task Status
 1. Open `BACKLOG.md`
 2. Find your task
 3. Update status field
 4. Mark checkboxes as complete: `- [x]`
 5. Commit changes
+
+### For AI Assistants
+**CRITICAL**: Always reference `/Users/masa/Projects/Claude-PM/docs/TICKETING_SYSTEM.md` for complete explanation of the 42-ticket Claude Max + mem0AI enhancement system before working on any tasks.
 
 ## Files
 
@@ -68,6 +76,7 @@ Use templates in `templates/` as starting point:
 - **Cross-Project Tasks:** CPT-XXX (CPT-001, CPT-002...)
 - **Integration Tasks:** INT-XXX (INT-001, INT-002...)
 - **Infrastructure:** INF-XXX (INF-001, INF-002...)
+- **Memory Enhancement:** MEM-XXX (MEM-001, MEM-002...) - Claude Max + mem0AI integration
 
 ### Legacy Compatibility
 - **Epics:** EP-XXX (for single-project epics)

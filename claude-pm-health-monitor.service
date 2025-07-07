@@ -1,0 +1,21 @@
+[Unit]
+Description=Claude PM Framework Health Monitor
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=masa
+WorkingDirectory=/Users/masa/Projects/Claude-PM
+ExecStart=/usr/local/bin/node scripts/automated-health-monitor.js monitor --interval=5 --threshold=60
+StandardOutput=append:/Users/masa/Projects/Claude-PM/logs/health-monitor-systemd.log
+StandardError=append:/Users/masa/Projects/Claude-PM/logs/health-monitor-systemd-error.log
+SyslogIdentifier=claude-pm-health-monitor
+KillMode=mixed
+KillSignal=SIGINT
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

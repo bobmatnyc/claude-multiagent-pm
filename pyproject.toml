@@ -1,0 +1,363 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "claude-pm-framework"
+version = "3.0.0"
+description = "Multi-Agent Orchestration Framework for AI-driven project management"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Robert (Masa) Matsuoka", email = "masa@matsuoka.com"}
+]
+maintainers = [
+    {name = "Robert (Masa) Matsuoka", email = "masa@matsuoka.com"}
+]
+keywords = [
+    "claude",
+    "project-management", 
+    "ai-orchestration",
+    "subprocess-coordination",
+    "development-framework",
+    "automation",
+    "trackdown",
+    "task-management",
+    "mem0ai",
+    "langgraph"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Project Management",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+requires-python = ">=3.9"
+dependencies = [
+    # Core dependencies
+    "aiohttp>=3.9.0",
+    "asyncio-mqtt>=0.16.0",
+    "click>=8.1.0",
+    "pydantic>=2.5.0",
+    "rich>=13.7.0",
+    "typer>=0.9.0",
+    
+    # Data handling
+    "pyyaml>=6.0.1",
+    "toml>=0.10.2",
+    "python-dotenv>=1.0.0",
+    
+    # Monitoring and metrics
+    "psutil>=5.9.0",
+    "httpx>=0.25.0",
+    
+    # Memory and AI integration
+    "openai>=1.0.0",
+    "requests>=2.31.0",
+    
+    # Development tools (optional in base)
+    "pathspec>=0.11.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.0",
+    "coverage[toml]>=7.3.0",
+    
+    # Code quality
+    "black>=23.9.0",
+    "isort>=5.12.0",
+    "flake8>=6.1.0",
+    "mypy>=1.6.0",
+    "pre-commit>=3.5.0",
+    
+    # Documentation
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.4.0",
+    "mkdocstrings[python]>=0.23.0",
+    
+    # Development utilities
+    "ipython>=8.16.0",
+    "jupyter>=1.0.0",
+    "python-dotenv>=1.0.0"
+]
+
+production = [
+    # Production monitoring
+    "sentry-sdk>=1.38.0",
+    "prometheus-client>=0.18.0",
+    
+    # Production deployment
+    "gunicorn>=21.2.0",
+    "uvicorn[standard]>=0.24.0",
+    
+    # Production databases
+    "redis>=5.0.0",
+    "psycopg2-binary>=2.9.0"
+]
+
+ai = [
+    # AI and ML libraries
+    "mem0ai>=0.1.0",
+    "langgraph>=0.1.0",
+    "langchain>=0.1.0",
+    "openai>=1.0.0",
+    "anthropic>=0.7.0",
+    
+    # Vector databases
+    "chromadb>=0.4.0",
+    "faiss-cpu>=1.7.0",
+    
+    # Additional AI tools
+    "tiktoken>=0.5.0",
+    "transformers>=4.35.0"
+]
+
+all = [
+    "claude-pm-framework[dev,production,ai]"
+]
+
+[project.urls]
+Homepage = "https://github.com/bobmatnyc/claude-pm"
+Documentation = "https://github.com/bobmatnyc/claude-pm#readme"
+Repository = "https://github.com/bobmatnyc/claude-pm.git"
+"Bug Reports" = "https://github.com/bobmatnyc/claude-pm/issues"
+Changelog = "https://github.com/bobmatnyc/claude-pm/blob/main/CHANGELOG.md"
+
+[project.scripts]
+claude-pm = "claude_pm.cli:main"
+claude-pm-health = "claude_pm.scripts.health_monitor:main"
+claude-pm-service = "claude_pm.scripts.service_manager:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["claude_pm*"]
+exclude = ["tests*", "docs*", "examples*"]
+
+[tool.setuptools.package-data]
+claude_pm = [
+    "py.typed",
+    "schemas/*.json",
+    "templates/*.md",
+    "templates/*.yml"
+]
+
+# Testing configuration
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "-ra",
+    "-q", 
+    "--strict-markers",
+    "--strict-config",
+    "--cov=claude_pm",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml"
+]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_functions = ["test_*"]
+python_classes = ["Test*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "mem0ai: marks tests that require mem0ai service",
+    "health: marks tests for health monitoring"
+]
+
+[tool.coverage.run]
+branch = true
+source = ["claude_pm"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/migrations/*",
+    "*/venv/*",
+    "*/.venv/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod"
+]
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+directory = "coverage_html_report"
+
+# Code formatting with Black
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | migrations
+)/
+'''
+
+# Import sorting with isort
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+known_first_party = ["claude_pm"]
+known_third_party = [
+    "aiohttp",
+    "click", 
+    "pydantic",
+    "rich",
+    "pytest",
+    "yaml",
+    "psutil"
+]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+# Type checking with mypy
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "mem0ai.*",
+    "langgraph.*",
+    "langchain.*",
+    "chromadb.*",
+    "faiss.*"
+]
+ignore_missing_imports = true
+
+# Linting with flake8 (configuration in setup.cfg for now)
+[tool.flake8]
+max-line-length = 100
+extend-ignore = [
+    "E203",  # whitespace before ':'
+    "E501",  # line too long (handled by black)
+    "W503",  # line break before binary operator
+    "W504"   # line break after binary operator
+]
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".eggs",
+    "*.egg-info",
+    ".venv",
+    ".mypy_cache",
+    ".pytest_cache"
+]
+per-file-ignores = [
+    "__init__.py:F401",  # imported but unused
+    "test_*.py:D100,D101,D102,D103,D104"  # missing docstrings in tests
+]
+
+# Documentation with MkDocs
+[tool.mkdocs]
+site_name = "Claude PM Framework"
+site_description = "Multi-Agent Orchestration Framework for AI-driven project management"
+site_url = "https://github.com/bobmatnyc/claude-pm"
+repo_url = "https://github.com/bobmatnyc/claude-pm"
+edit_uri = "edit/main/docs/"
+
+# Development and build tools
+[tool.setuptools_scm]
+write_to = "claude_pm/_version.py"
+fallback_version = "3.0.0"
+
+[tool.wheel]
+universal = false
+
+# Environment and dependency management
+[tool.pip-tools]
+generate-hashes = true
+allow-unsafe = true
+
+# Pre-commit hooks configuration
+[tool.pre-commit]
+repos = [
+    {
+        repo = "https://github.com/pre-commit/pre-commit-hooks",
+        rev = "v4.4.0",
+        hooks = [
+            "trailing-whitespace",
+            "end-of-file-fixer", 
+            "check-yaml",
+            "check-json",
+            "check-merge-conflict",
+            "check-added-large-files"
+        ]
+    },
+    {
+        repo = "https://github.com/psf/black",
+        rev = "23.9.1", 
+        hooks = ["black"]
+    },
+    {
+        repo = "https://github.com/pycqa/isort",
+        rev = "5.12.0",
+        hooks = ["isort"]
+    },
+    {
+        repo = "https://github.com/pycqa/flake8",
+        rev = "6.1.0",
+        hooks = ["flake8"]
+    },
+    {
+        repo = "https://github.com/pre-commit/mirrors-mypy",
+        rev = "v1.6.1",
+        hooks = ["mypy"]
+    }
+]

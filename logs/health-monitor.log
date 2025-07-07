@@ -1,0 +1,40 @@
+[2025-07-07T03:11:29.589Z] INFO: Starting comprehensive health check...
+[2025-07-07T03:11:29.591Z] INFO: Checking service health...
+[2025-07-07T03:11:29.594Z] INFO: Checking framework compliance...
+[2025-07-07T03:11:29.594Z] DEBUG: Found required file: trackdown/BACKLOG.md
+[2025-07-07T03:11:29.595Z] DEBUG: Found required file: trackdown/MILESTONES.md
+[2025-07-07T03:11:29.595Z] WARNING: Missing required file: CLAUDE.md
+[2025-07-07T03:11:29.595Z] DEBUG: Found required file: README.md
+[2025-07-07T03:11:29.595Z] DEBUG: Found required file: package.json
+[2025-07-07T03:11:29.595Z] DEBUG: Found required directory: trackdown
+[2025-07-07T03:11:29.595Z] DEBUG: Found required directory: docs
+[2025-07-07T03:11:29.595Z] DEBUG: Found required directory: scripts
+[2025-07-07T03:11:29.595Z] DEBUG: Found required directory: logs
+[2025-07-07T03:11:29.595Z] INFO: Checking managed projects framework compliance...
+[2025-07-07T03:11:29.604Z] INFO: Service mem0ai_mcp | {"status":"healthy","response_time":13,"performance":"excellent"}
+[2025-07-07T03:11:29.606Z] INFO: Service portfolio_manager | {"status":"unhealthy","response_time":2}
+[2025-07-07T03:11:29.607Z] INFO: Service git_portfolio_manager | {"status":"down"}
+[2025-07-07T03:11:29.607Z] INFO: Service claude_pm_dashboard | {"status":"down"}
+[2025-07-07T03:11:29.607Z] INFO: Scanning all projects...
+[2025-07-07T03:11:40.630Z] INFO: Health report saved | {"json_report":"/Users/masa/Projects/Claude-PM/logs/health-report.json","markdown_summary":"/Users/masa/Projects/Claude-PM/logs/health-summary.md"}
+[2025-07-07T03:11:40.630Z] INFO: Health check completed | {"duration_ms":11040,"total_projects":23,"healthy":3,"warnings":19,"critical":1,"framework_compliance":89,"overall_health":36,"alerts_generated":2}
+[2025-07-07T03:13:21.336Z] INFO: Starting comprehensive health check...
+[2025-07-07T03:13:21.337Z] INFO: Checking service health...
+[2025-07-07T03:13:21.341Z] INFO: Checking framework compliance...
+[2025-07-07T03:13:21.341Z] DEBUG: Found required file: trackdown/BACKLOG.md
+[2025-07-07T03:13:21.341Z] DEBUG: Found required file: trackdown/MILESTONES.md
+[2025-07-07T03:13:21.341Z] WARNING: Missing required file: CLAUDE.md
+[2025-07-07T03:13:21.342Z] DEBUG: Found required file: README.md
+[2025-07-07T03:13:21.342Z] DEBUG: Found required file: package.json
+[2025-07-07T03:13:21.342Z] DEBUG: Found required directory: trackdown
+[2025-07-07T03:13:21.342Z] DEBUG: Found required directory: docs
+[2025-07-07T03:13:21.342Z] DEBUG: Found required directory: scripts
+[2025-07-07T03:13:21.342Z] DEBUG: Found required directory: logs
+[2025-07-07T03:13:21.342Z] INFO: Checking managed projects framework compliance...
+[2025-07-07T03:13:21.346Z] INFO: Service mem0ai_mcp | {"status":"healthy","response_time":9,"performance":"excellent"}
+[2025-07-07T03:13:21.348Z] INFO: Service portfolio_manager | {"status":"unhealthy","response_time":2}
+[2025-07-07T03:13:21.348Z] INFO: Service git_portfolio_manager | {"status":"down"}
+[2025-07-07T03:13:21.349Z] INFO: Service claude_pm_dashboard | {"status":"down"}
+[2025-07-07T03:13:21.349Z] INFO: Scanning all projects...
+[2025-07-07T03:13:30.206Z] INFO: Health report saved | {"json_report":"/Users/masa/Projects/Claude-PM/logs/health-report.json","markdown_summary":"/Users/masa/Projects/Claude-PM/logs/health-summary.md"}
+[2025-07-07T03:13:30.207Z] INFO: Health check completed | {"duration_ms":8870,"total_projects":23,"healthy":3,"warnings":19,"critical":1,"framework_compliance":89,"overall_health":36,"alerts_generated":2}

@@ -1,0 +1,32 @@
+# Development requirements for Claude PM Framework
+# Install with: pip install -r requirements/dev.txt
+
+-r base.txt
+
+# Testing framework
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.0
+coverage[toml]>=7.3.0
+
+# Code quality and formatting
+black>=23.9.0
+isort>=5.12.0
+flake8>=6.1.0
+mypy>=1.6.0
+pre-commit>=3.5.0
+
+# Documentation
+mkdocs>=1.5.0
+mkdocs-material>=9.4.0
+mkdocstrings[python]>=0.23.0
+
+# Development utilities
+ipython>=8.16.0
+jupyter>=1.0.0
+
+# Additional testing tools
+factory-boy>=3.3.0
+freezegun>=1.2.0
+responses>=0.23.0

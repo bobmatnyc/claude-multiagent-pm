@@ -15,9 +15,9 @@ milestone_active: M01_Foundation
 - [x] **[M01-003]** Set up MCP integration configuration
 - [x] **[M01-004]** Classify and organize existing projects into milestones
 - [x] **[M01-005]** Create TrackDown project management system
-- [ ] **[M01-006]** Implement automated project health monitoring
-- [ ] **[M01-007]** Deploy and test MCP service connections
-- [ ] **[M01-008]** Create functional slash command implementations
+- [x] **[M01-006]** Implement automated project health monitoring
+- [x] **[M01-007]** Deploy and test MCP service connections
+- [x] **[M01-008]** Create functional slash command implementations
 - [x] **[M01-009]** Migrate git-portfolio-manager to Claude-PM framework
 - [x] **[M01-019]** Migrate git-portfolio-manager to ~/Projects/managed/ subdirectory
 - [x] **[M01-020]** Create Claude PM Portfolio Manager as new managed project
@@ -73,6 +73,10 @@ milestone_active: M01_Foundation
 - [ ] **[M02-012]** Parallel Agent Execution Framework (NEW - MEDIUM PRIORITY)
 - [ ] **[M02-013]** Memory-Augmented Agent Capabilities (NEW - MEDIUM PRIORITY)
 - [ ] **[M02-014]** Intelligent Workflow Selection System (NEW - MEDIUM PRIORITY)
+- [ ] **[M02-015]** LangGraph Core Infrastructure Setup (NEW - HIGH PRIORITY)
+- [ ] **[M02-016]** State Management System for Workflows (NEW - HIGH PRIORITY)
+- [ ] **[M02-017]** Agent Node Implementation Framework (NEW - HIGH PRIORITY)
+- [ ] **[M02-018]** Conditional Routing and Workflow Orchestration (NEW - MEDIUM PRIORITY)
 
 ### M03 Orchestration - Advanced Systems
 - [ ] **[M03-001]** Standardize commons shared libraries
@@ -99,6 +103,8 @@ milestone_active: M01_Foundation
 - [ ] **[FEP-008]** Memory-Augmented Agent Ecosystem (NEW - HIGH PRIORITY)
 - [ ] **[FEP-009]** Intelligent Task Decomposition System (NEW - MEDIUM PRIORITY)
 - [ ] **[FEP-010]** Continuous Learning Engine (NEW - MEDIUM PRIORITY)
+- [ ] **[FEP-011]** LangGraph State-Based Workflow Orchestration (NEW - HIGH PRIORITY)
+- [ ] **[FEP-012]** Human-in-the-Loop Decision Framework (NEW - MEDIUM PRIORITY)
 
 ### Cross-Project Tasks (CPT)
 - [ ] **[CPT-001]** Create standardized CLAUDE.md templates for all projects
@@ -118,6 +124,9 @@ milestone_active: M01_Foundation
 - [ ] **[INT-008]** Memory Schema Design and Implementation (NEW - HIGH PRIORITY)
 - [ ] **[INT-009]** Agent Context Preparation System (NEW - MEDIUM PRIORITY)
 - [ ] **[INT-010]** Parallel Agent Coordination Protocol (NEW - MEDIUM PRIORITY)
+- [ ] **[INT-011]** LangGraph CLI Command Integration (NEW - HIGH PRIORITY)
+- [ ] **[INT-012]** Workflow State Persistence and Recovery (NEW - HIGH PRIORITY)
+- [ ] **[INT-013]** Code Review Engineer Integration with Existing Tools (NEW - MEDIUM PRIORITY)
 
 ### Infrastructure Tasks (INF)
 - [ ] **[INF-001]** Archive management and cleanup procedures
@@ -130,6 +139,9 @@ milestone_active: M01_Foundation
 - [ ] **[INF-008]** Agent Isolation Infrastructure (Git Worktrees) (NEW - HIGH PRIORITY)
 - [ ] **[INF-009]** Memory Analytics and Monitoring Dashboard (NEW - MEDIUM PRIORITY)
 - [ ] **[INF-010]** Backup and Recovery for Memory Systems (NEW - LOW PRIORITY)
+- [ ] **[INF-011]** LangGraph Workflow State Database Setup (NEW - HIGH PRIORITY)
+- [ ] **[INF-012]** Workflow Execution Environment Containerization (NEW - MEDIUM PRIORITY)
+- [ ] **[INF-013]** Human Approval Notification Infrastructure (NEW - MEDIUM PRIORITY)
 
 ## 🚀 Priority Implementation Tickets (Phase 1: Claude Max + mem0AI)
 
@@ -184,19 +196,26 @@ milestone_active: M01_Foundation
 **Dependencies**: MEM-002 complete, Git worktree infrastructure  
 
 **Scope**:
-- Implement 10-agent ecosystem (Core + Specialist agents)
+- Implement 11-agent ecosystem (Core + Specialist agents including Code Review Engineer)
 - Create agent isolation through git worktrees
 - Design parallel execution framework (max 5 concurrent)
 - Implement memory-augmented context preparation
 - Create agent coordination messaging system
 
+**Agent Types**:
+- **Core Agents**: Orchestrator, Architect, Engineer, QA, Researcher
+- **Specialist Agents**: Security Engineer, Performance Engineer, DevOps Engineer, Data Engineer, UI/UX Engineer
+- **NEW**: Code Review Engineer (comprehensive code review with security, performance, style, and testing analysis)
+
 **Acceptance Criteria**:
-- [ ] All 10 agent roles defined with memory integration
+- [ ] All 11 agent roles defined with memory integration
+- [ ] Code Review Engineer agent implemented with multi-dimensional review capabilities
 - [ ] Git worktree isolation working for parallel agents
 - [ ] Parallel execution framework supports 5 concurrent agents
 - [ ] Memory-augmented context preparation functional
 - [ ] Agent coordination messaging system operational
-- [ ] Integration tests pass for multi-agent scenarios
+- [ ] Code Review Engineer can perform parallel security, performance, style, and test reviews
+- [ ] Integration tests pass for multi-agent scenarios including code review workflows
 
 ---
 
@@ -266,6 +285,146 @@ milestone_active: M01_Foundation
 - [ ] Pattern recognition identifies trends automatically
 - [ ] Learning metrics track improvement over time
 - [ ] Historical analysis shows learning effectiveness
+
+---
+
+### LGR-001: LangGraph Core Infrastructure Setup
+**Priority**: HIGH  
+**Story Points**: 12  
+**Epic**: M02-015 LangGraph Core Infrastructure Setup  
+**Dependencies**: MEM-001 complete, Python LangGraph installation  
+
+**Scope**:
+- Install and configure LangGraph dependencies
+- Create base directory structure for workflows
+- Implement StateGraph foundation classes
+- Set up checkpointing with SQLite backend
+- Create basic state management for TaskState and ProjectState
+
+**Acceptance Criteria**:
+- [ ] LangGraph installed and integrated with Claude PM
+- [ ] Base state classes (BaseState, TaskState, ProjectState) implemented
+- [ ] SQLite checkpointing working for state persistence
+- [ ] Directory structure matches design specification
+- [ ] Basic workflow graph can be created and executed
+- [ ] Integration tests pass for core infrastructure
+
+---
+
+### LGR-002: Agent Node Implementation Framework
+**Priority**: HIGH  
+**Story Points**: 15  
+**Epic**: M02-017 Agent Node Implementation Framework  
+**Dependencies**: LGR-001, MEM-002 complete  
+
+**Scope**:
+- Implement core agent node types (Orchestrator, Architect, Engineer, QA, Researcher, Code Review Engineer)
+- Create agent isolation using git worktrees
+- Implement memory-augmented context preparation for agents
+- Design agent coordination messaging system
+- Create agent capability and availability tracking
+
+**Acceptance Criteria**:
+- [ ] All 6 core agent node types implemented with memory integration
+- [ ] Git worktree isolation working for parallel agent execution
+- [ ] Memory-augmented context preparation functional for each agent type
+- [ ] Agent coordination messaging system operational
+- [ ] Agent capability matching system working
+- [ ] Code Review Engineer agent integrated with security, performance, and style review capabilities
+- [ ] Unit tests pass for all agent implementations
+
+---
+
+### LGR-003: Workflow Graph Design and Implementation
+**Priority**: HIGH  
+**Story Points**: 10  
+**Epic**: M02-018 Conditional Routing and Workflow Orchestration  
+**Dependencies**: LGR-002 complete  
+
+**Scope**:
+- Implement TaskWorkflowGraph for single task execution
+- Create ProjectWorkflowGraph for full project workflows
+- Design CodeReviewWorkflowGraph with parallel review agents
+- Implement conditional routing based on complexity, priority, and cost
+- Create workflow composition system for combining graphs
+
+**Acceptance Criteria**:
+- [ ] TaskWorkflowGraph handles simple to complex task routing
+- [ ] ProjectWorkflowGraph manages milestone-based execution
+- [ ] CodeReviewWorkflowGraph runs security, performance, style, and test reviews in parallel
+- [ ] Conditional routing works for complexity/priority/cost factors
+- [ ] Workflow composition allows chaining of workflows
+- [ ] Human approval nodes work for complex tasks
+- [ ] End-to-end workflow tests pass
+
+---
+
+### LGR-004: Human-in-the-Loop Integration
+**Priority**: MEDIUM  
+**Story Points**: 8  
+**Epic**: FEP-007 Claude Max + mem0AI Enhanced Architecture  
+**Dependencies**: LGR-003 complete  
+
+**Scope**:
+- Implement HumanApprovalNode with timeout handling
+- Create approval notification system (CLI, file-based)
+- Design approval decision persistence and tracking
+- Implement escalation handling for timeout scenarios
+- Create approval workflow visualization
+
+**Acceptance Criteria**:
+- [ ] HumanApprovalNode can request and wait for approvals
+- [ ] Notification system alerts users of pending approvals
+- [ ] Approval decisions are persisted with reasoning
+- [ ] Timeout handling works with configurable escalation
+- [ ] Approval workflow can be visualized and tracked
+- [ ] Integration with existing Claude PM CLI commands
+
+---
+
+### LGR-005: CLI Integration and Commands
+**Priority**: MEDIUM  
+**Story Points**: 6  
+**Epic**: INT-001 MCP service mesh configuration and testing  
+**Dependencies**: LGR-004 complete  
+
+**Scope**:
+- Create `/graph` command group for LangGraph operations
+- Implement `graph execute` for task workflow execution
+- Add `graph visualize` for workflow graph visualization
+- Create `graph status` for monitoring running workflows
+- Implement `graph history` for workflow execution history
+
+**Acceptance Criteria**:
+- [ ] `/graph execute <task>` command executes tasks through LangGraph
+- [ ] `/graph visualize` displays workflow graphs in mermaid format
+- [ ] `/graph status` shows current workflow status and metrics
+- [ ] `/graph history` displays completed workflow history
+- [ ] All commands integrate with existing Claude PM CLI structure
+- [ ] Command help documentation complete
+
+---
+
+### LGR-006: Monitoring and Observability
+**Priority**: MEDIUM  
+**Story Points**: 7  
+**Epic**: INF-009 Memory Analytics and Monitoring Dashboard  
+**Dependencies**: LGR-005 complete  
+
+**Scope**:
+- Implement WorkflowMetrics collection system
+- Create MetricsCollector for real-time tracking
+- Design performance dashboard for workflow monitoring
+- Implement token usage tracking and alerts
+- Create workflow debugging and inspection tools
+
+**Acceptance Criteria**:
+- [ ] WorkflowMetrics captures execution data comprehensively
+- [ ] Real-time metrics collection during workflow execution
+- [ ] Performance dashboard shows agent utilization and throughput
+- [ ] Token usage tracking works with configurable alerts
+- [ ] Debug tools allow state inspection and execution tracing
+- [ ] Metrics export functionality for analysis
 
 ## ✅ Completed Tasks
 

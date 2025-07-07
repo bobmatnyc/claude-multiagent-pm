@@ -1,0 +1,1012 @@
+{
+  "timestamp": "2025-07-07T03:13:21.337Z",
+  "version": "2.0.0",
+  "config": {
+    "checkInterval": 300000,
+    "alertThreshold": 60,
+    "enableAlerting": true,
+    "enableServiceChecks": true,
+    "enableGitChecks": true,
+    "verboseLogging": false
+  },
+  "summary": {
+    "total_projects": 23,
+    "healthy_projects": 3,
+    "warning_projects": 19,
+    "critical_projects": 1,
+    "framework_compliance": 89,
+    "overall_health_percentage": 36,
+    "project_health_percentage": 13,
+    "service_health_percentage": 25
+  },
+  "services": {
+    "mem0ai_mcp": {
+      "name": "mem0ai_mcp",
+      "description": "mem0AI MCP Service",
+      "port": 8002,
+      "critical": true,
+      "last_check": "2025-07-07T03:13:21.337Z",
+      "status": "healthy",
+      "response_time": 9,
+      "http_status": 200,
+      "error": null,
+      "performance": "excellent"
+    },
+    "portfolio_manager": {
+      "name": "portfolio_manager",
+      "description": "Claude PM Portfolio Manager",
+      "port": 3000,
+      "critical": false,
+      "last_check": "2025-07-07T03:13:21.346Z",
+      "status": "unhealthy",
+      "response_time": 2,
+      "http_status": 404,
+      "error": null
+    },
+    "git_portfolio_manager": {
+      "name": "git_portfolio_manager",
+      "description": "Git Portfolio Manager",
+      "port": 3001,
+      "critical": false,
+      "last_check": "2025-07-07T03:13:21.348Z",
+      "status": "down",
+      "error": "Port not listening"
+    },
+    "claude_pm_dashboard": {
+      "name": "claude_pm_dashboard",
+      "description": "Claude PM Dashboard (Vite)",
+      "port": 5173,
+      "critical": false,
+      "last_check": "2025-07-07T03:13:21.348Z",
+      "status": "down",
+      "error": "Port not listening"
+    }
+  },
+  "projects": {
+    "managed/ai-code-review": {
+      "name": "ai-code-review",
+      "path": "/Users/masa/Projects/managed/ai-code-review",
+      "status": "warning",
+      "issues": [
+        "22 outdated dependencies"
+      ],
+      "metrics": {
+        "git": {
+          "last_commit_hash": "6276ac145e0ae6c23e78eba95fd779a85d1b08aa",
+          "last_commit_date": "2025-07-02 11:03:31 -0400",
+          "last_commit_message": "feat(toolchain): complete Biome migration and TypeScript 5.8.3 upgrade",
+          "days_since_last_commit": 4,
+          "current_branch": "main",
+          "branch_count": 13,
+          "recent_commits_30d": 58,
+          "has_uncommitted_changes": true,
+          "health_status": "active"
+        },
+        "dependencies": {
+          "type": "node",
+          "total_dependencies": 56,
+          "outdated_count": 22,
+          "health_status": "critical"
+        }
+      },
+      "last_check": "2025-07-07T03:13:21.349Z"
+    },
+    "managed/ai-power-rankings": {
+      "name": "ai-power-rankings",
+      "path": "/Users/masa/Projects/managed/ai-power-rankings",
+      "status": "warning",
+      "issues": [
+        "29 outdated dependencies"
+      ],
+      "metrics": {
+        "git": {
+          "last_commit_hash": "36a68d14febd9eef77153dd1120e03fcd34816df",
+          "last_commit_date": "2025-07-04 17:18:18 -0400",
+          "last_commit_message": "Debug Turnstile Error 400020 with simplified config",
+          "days_since_last_commit": 2,
+          "current_branch": "main",
+          "branch_count": 18,
+          "recent_commits_30d": 402,
+          "has_uncommitted_changes": true,
+          "health_status": "active"
+        },
+        "dependencies": {
+          "type": "node",
+          "total_dependencies": 91,
+          "outdated_count": 29,
+          "health_status": "critical"
+        }
+      },
+      "last_check": "2025-07-07T03:13:22.334Z"
+    },
+    "managed/ai-power-rankings-data": {
+      "name": "ai-power-rankings-data",
+      "path": "/Users/masa/Projects/managed/ai-power-rankings-data",
+      "status": "healthy",
+      "issues": [],
+      "metrics": {
+        "git": {
+          "last_commit_hash": "5596b465bcae41c31d08aa132f09ec66a6285035",
+          "last_commit_date": "2025-07-02 11:54:30 -0400",
+          "last_commit_message": "Complete data directory cleanup and canonical model establishment",
+          "days_since_last_commit": 4,
+          "current_branch": "main",
+          "branch_count": 1,
+          "recent_commits_30d": 16,
+          "has_uncommitted_changes": true,
+          "health_status": "active"
+        },
+        "dependencies": {
+          "type": "python",
+          "total_dependencies": 0,
+          "outdated_count": 0,
+          "health_status": "unknown"
+        }
+      },
+      "last_check": "2025-07-07T03:13:24.533Z"
+    },
+    "managed/claude-pm-portfolio-manager": {
+      "name": "claude-pm-portfolio-manager",
+      "path": "/Users/masa/Projects/managed/claude-pm-portfolio-manager",
+      "status": "warning",
+      "issues": [
+        "20 outdated dependencies"
+      ],
+      "metrics": {
+        "git": {
+          "last_commit_hash": "e670aa3a08eeff8b80eec70348a31a20cf04de74",
+          "last_commit_date": "2025-07-05 17:58:22 -0400",
+          "last_commit_message": "fix: update to use correct OPENAI_ADMIN_KEY and ANTHROPIC_ADMIN_KEY",
+          "days_since_last_commit": 1,
+          "current_branch": "main",
+          "branch_count": 0,
+          "recent_commits_30d": 5,
+          "has_uncommitted_changes": true,
+          "health_status": "active"
+        },
+        "dependencies": {
+          "type": "node",
+          "total_dependencies": 30,
+          "outdated_count": 20,
+          "health_status": "critical"
+        }
+      },
+      "last_check": "2025-07-07T03:13:24.600Z"
+    },
+    "managed/eva-monorepo": {
+      "name": "eva-monorepo",
+      "path": "/Users/masa/Projects/managed/eva-monorepo",
+      "status": "healthy",
+      "issues": [],
+      "metrics": {
+        "git": {
+          "last_commit_hash": "cf2a5dc8c01adb654eb3158a37976c1e479d1d12",
+          "last_commit_date": "2025-07-02 23:35:53 -0400",
+          "last_commit_message": "docs: add post-development deployment process to workflow",
+          "days_since_last_commit": 3,
+          "current_branch": "epic/CONTACTS-EPIC-001-macos-contacts-sync",
+          "branch_count": 1,
+          "recent_commits_30d": 28,
+          "has_uncommitted_changes": true,
+          "health_status": "active"
+        },
+        "dependencies": {
+          "type": "node",
+          "total_dependencies": 1,
+          "outdated_count": 1,
+          "health_status": "moderate"
+        }
+      },
+      "last_check": "2025-07-07T03:13:25.079Z"
+    },
+    "managed/git-portfolio-manager": {
+      "name": "git-portfolio-manager",
+      "path": "/Users/masa/Projects/managed/git-portfolio-manager",
+      "status": "warning",
+      "issues": [
+        "14 outdated dependencies"
+      ],
+      "metrics": {
+        "git": {
+          "last_commit_hash": "5eeaa79a4dc3c97b90c5bbb6539a916bea736671",
+          "last_commit_date": "2025-07-06 20:57:14 -0400",
+          "last_commit_message": "chore(release): 1.1.2",
+          "days_since_last_commit": 0,
+          "current_branch": "main",
+          "branch_count": 2,
+          "recent_commits_30d": 16,
+          "has_uncommitted_changes": true,
+          "health_status": "active"
+        },
+        "dependencies": {
+          "type": "node",
+          "total_dependencies": 29,
+          "outdated_count": 14,
+          "health_status": "critical"
+        }
+      },
+      "last_check": "2025-07-07T03:13:25.394Z"
+    },
+    "managed/hot-flash": {
+      "name": "hot-flash",
+      "path": "/Users/masa/Projects/managed/hot-flash",
+      "status": "warning",
+      "issues": [
+        "No commits in 67 days",
+        "16 outdated dependencies"
+      ],
+      "metrics": {
+        "git": {
+          "last_commit_hash": "8b2bcbf068fc190fed3a9093593f211cd2c25867",
+          "last_commit_date": "2025-04-30 17:17:46 -0400",
+          "last_commit_message": "Enhance layout and scrolling functionality across multiple components",
+          "days_since_last_commit": 67,
+          "current_branch": "develop",
+          "branch_count": 5,
+          "recent_commits_30d": 0,
+          "has_uncommitted_changes": true,
+          "health_status": "stale"
+        },
+        "dependencies": {
+          "type": "node",
+          "total_dependencies": 78,
+          "outdated_count": 16,
+          "health_status": "critical"
+        }
+      },
+      "last_check": "2025-07-07T03:13:25.856Z"
+    },
+    "managed/matsuoka-com": {
+      "name": "matsuoka-com",
+      "path": "/Users/masa/Projects/managed/matsuoka-com",
+      "status": "warning",
+      "issues": [
+        "16 outdated dependencies"
+      ],
+      "metrics": {
+        "git": {
+          "last_commit_hash": "1829eb5269ccdf25bb59edf0b910dfa80bb921f2",
+          "last_commit_date": "2025-07-04 13:42:52 -0400",
+          "last_commit_message": "feat(rss): fix Substack feed daily updates and automation",
+          "days_since_last_commit": 2,
+          "current_branch": "main",
+          "branch_count": 25,
+          "recent_commits_30d": 3,
+          "has_uncommitted_changes": true,
+          "health_status": "active"
+        },
+        "dependencies": {
+          "type": "node",
+          "total_dependencies": 75,
+          "outdated_count": 16,
+          "health_status": "critical"
+        }
+      },
+      "last_check": "2025-07-07T03:13:27.194Z"
+    },
+    "managed/mem0ai": {
+      "name": "mem0ai",
+      "path": "/Users/masa/Projects/managed/mem0ai",
+      "status": "healthy",
+      "issues": [],
+      "metrics": {
+        "git": {
+          "last_commit_hash": "2992c298cbce10ddd16cf4f322012fddb04aa315",
+          "last_commit_date": "2025-07-05 10:25:35 -0700",
+          "last_commit_message": "Security Link updated (#3108)",
+          "days_since_last_commit": 1,
+          "current_branch": "main",
+          "branch_count": 46,
+          "recent_commits_30d": 67,
+          "has_uncommitted_changes": true,
+          "health_status": "active"
+        },
+        "dependencies": {
+          "type": "python",
+          "total_dependencies": 6,
+          "outdated_count": 0,
+          "health_status": "unknown"
+        }
+      },
+      "last_check": "2025-07-07T03:13:28.281Z"
+    },
+    "managed/py-mcp-ipc": {
+      "name": "py-mcp-ipc",
+      "path": "/Users/masa/Projects/managed/py-mcp-ipc",
+      "status": "error",
+      "issues": [
+        "Git check failed: Command failed: git log -1 --format=\"%H|%cd|%s\" --date=iso\nfatal: your current branch 'main' does not have any commits yet\n"
+      ],
+      "metrics": {
+        "dependencies": {
+          "type": "node",
+          "total_dependencies": 19,
+          "outdated_count": 5,
+          "health_status": "moderate"
+        }
+      },
+      "last_check": "2025-07-07T03:13:28.346Z"
+    },
+    "managed/scraper-engine": {
+      "name": "scraper-engine",
+      "path": "/Users/masa/Projects/managed/scraper-engine",
+      "status": "warning",
+      "issues": [
+        "17 outdated dependencies"
+      ],
+      "metrics": {
+        "git": {
+          "last_commit_hash": "99e8847fd3df9f2c850a45e1295e6cc1f8ad386c",
+          "last_commit_date": "2025-07-04 18:55:36 -0400",
+          "last_commit_message": "feat: Complete i9Sports autonomous extraction validation test",
+          "days_since_last_commit": 2,
+          "current_branch": "main",
+          "branch_count": 2,
+          "recent_commits_30d": 50,
+          "has_uncommitted_changes": true,
+          "health_status": "active"
+        },
+        "dependencies": {
+          "type": "node",
+          "total_dependencies": 48,
+          "outdated_count": 17,
+          "health_status": "critical"
+        }
+      },
+      "last_check": "2025-07-07T03:13:28.640Z"
+    },
+    "Clients": {
+      "name": "Clients",
+      "path": "/Users/masa/Projects/Clients",
+      "status": "warning",
+      "issues": [
+        "Missing CLAUDE.md",
+        "Missing README.md",
+        "No build configuration found"
+      ],
+      "metrics": {},
+      "last_check": "2025-07-07T03:13:29.896Z"
+    },
+    "Github": {
+      "name": "Github",
+      "path": "/Users/masa/Projects/Github",
+      "status": "warning",
+      "issues": [
+        "Missing CLAUDE.md",
+        "Missing README.md",
+        "No build configuration found"
+      ],
+      "metrics": {},
+      "last_check": "2025-07-07T03:13:29.896Z"
+    },
+    "M01_Foundation": {
+      "name": "M01_Foundation",
+      "path": "/Users/masa/Projects/M01_Foundation",
+      "status": "warning",
+      "issues": [
+        "Missing README.md",
+        "No build configuration found"
+      ],
+      "metrics": {},
+      "last_check": "2025-07-07T03:13:29.896Z"
+    },
+    "M02_Automation": {
+      "name": "M02_Automation",
+      "path": "/Users/masa/Projects/M02_Automation",
+      "status": "warning",
+      "issues": [
+        "Missing CLAUDE.md",
+        "Missing README.md",
+        "No build configuration found"
+      ],
+      "metrics": {},
+      "last_check": "2025-07-07T03:13:29.896Z"
+    },
+    "M03_Orchestration": {
+      "name": "M03_Orchestration",
+      "path": "/Users/masa/Projects/M03_Orchestration",
+      "status": "warning",
+      "issues": [
+        "Missing CLAUDE.md",
+        "Missing README.md",
+        "No build configuration found"
+      ],
+      "metrics": {},
+      "last_check": "2025-07-07T03:13:29.896Z"
+    },
+    "S01_M01_Core_Structure": {
+      "name": "S01_M01_Core_Structure",
+      "path": "/Users/masa/Projects/S01_M01_Core_Structure",
+      "status": "warning",
+      "issues": [
+        "Missing CLAUDE.md",
+        "Missing README.md",
+        "No build configuration found"
+      ],
+      "metrics": {},
+      "last_check": "2025-07-07T03:13:29.896Z"
+    },
+    "_archive": {
+      "name": "_archive",
+      "path": "/Users/masa/Projects/_archive",
+      "status": "warning",
+      "issues": [
+        "Missing CLAUDE.md",
+        "Missing README.md"
+      ],
+      "metrics": {
+        "dependencies": {
+          "type": "node",
+          "total_dependencies": 4,
+          "outdated_count": 2,
+          "health_status": "moderate"
+        }
+      },
+      "last_check": "2025-07-07T03:13:29.896Z"
+    },
+    "_temp": {
+      "name": "_temp",
+      "path": "/Users/masa/Projects/_temp",
+      "status": "warning",
+      "issues": [
+        "Missing CLAUDE.md",
+        "Missing README.md",
+        "No build configuration found"
+      ],
+      "metrics": {},
+      "last_check": "2025-07-07T03:13:30.198Z"
+    },
+    "data": {
+      "name": "data",
+      "path": "/Users/masa/Projects/data",
+      "status": "warning",
+      "issues": [
+        "Missing CLAUDE.md",
+        "Missing README.md",
+        "No build configuration found"
+      ],
+      "metrics": {},
+      "last_check": "2025-07-07T03:13:30.198Z"
+    },
+    "eva-monorepo": {
+      "name": "eva-monorepo",
+      "path": "/Users/masa/Projects/eva-monorepo",
+      "status": "warning",
+      "issues": [
+        "Missing CLAUDE.md",
+        "Missing README.md",
+        "No build configuration found"
+      ],
+      "metrics": {},
+      "last_check": "2025-07-07T03:13:30.198Z"
+    },
+    "services": {
+      "name": "services",
+      "path": "/Users/masa/Projects/services",
+      "status": "warning",
+      "issues": [
+        "Missing CLAUDE.md",
+        "No build configuration found"
+      ],
+      "metrics": {},
+      "last_check": "2025-07-07T03:13:30.198Z"
+    },
+    "~": {
+      "name": "~",
+      "path": "/Users/masa/Projects/~",
+      "status": "warning",
+      "issues": [
+        "Missing CLAUDE.md",
+        "Missing README.md",
+        "No build configuration found"
+      ],
+      "metrics": {},
+      "last_check": "2025-07-07T03:13:30.198Z"
+    }
+  },
+  "framework": {
+    "compliance_percentage": 89,
+    "total_checks": 9,
+    "passed_checks": 8,
+    "optional_compliance": 1,
+    "optional_total": 5,
+    "file_checks": {
+      "trackdown/BACKLOG.md": {
+        "exists": true,
+        "path": "/Users/masa/Projects/Claude-PM/trackdown/BACKLOG.md",
+        "required": true,
+        "size": 21109,
+        "lastModified": "2025-07-07T03:04:10.948Z",
+        "contentHealth": {
+          "total_tickets": 189,
+          "completed_tickets": 28,
+          "in_progress_tickets": 0,
+          "pending_tickets": 161,
+          "high_priority_tickets": 25,
+          "critical_tickets": 1,
+          "recently_updated_lines": 7,
+          "completion_rate": 15,
+          "health_status": "fair"
+        }
+      },
+      "trackdown/MILESTONES.md": {
+        "exists": true,
+        "path": "/Users/masa/Projects/Claude-PM/trackdown/MILESTONES.md",
+        "required": true
+      },
+      "CLAUDE.md": {
+        "exists": false,
+        "path": "/Users/masa/Projects/Claude-PM/CLAUDE.md",
+        "required": true
+      },
+      "README.md": {
+        "exists": true,
+        "path": "/Users/masa/Projects/Claude-PM/README.md",
+        "required": true
+      },
+      "package.json": {
+        "exists": true,
+        "path": "/Users/masa/Projects/Claude-PM/package.json",
+        "required": true
+      }
+    },
+    "directory_checks": {
+      "trackdown": {
+        "exists": true,
+        "path": "/Users/masa/Projects/Claude-PM/trackdown",
+        "required": true,
+        "fileCount": 11,
+        "files": [
+          "BACKLOG.md",
+          "M01-036.md",
+          "MEM-001-STATUS.md",
+          "MEM-002-STATUS.md",
+          "MEM-003-PROGRESS.md",
+          "MILESTONES.md",
+          "README.md",
+          "archive",
+          "issues",
+          "scripts",
+          "templates"
+        ]
+      },
+      "docs": {
+        "exists": true,
+        "path": "/Users/masa/Projects/Claude-PM/docs",
+        "required": true,
+        "fileCount": 5,
+        "files": [
+          "HEALTH_MONITORING.md",
+          "SAMPLE_HEALTH_REPORT.md",
+          "TICKETING_SYSTEM.md",
+          "design",
+          "services.md"
+        ]
+      },
+      "scripts": {
+        "exists": true,
+        "path": "/Users/masa/Projects/Claude-PM/scripts",
+        "required": true,
+        "fileCount": 4,
+        "files": [
+          "automated-health-monitor.js",
+          "create-managed-project.sh",
+          "health-check-services.sh",
+          "setup-health-monitoring.sh"
+        ]
+      },
+      "logs": {
+        "exists": true,
+        "path": "/Users/masa/Projects/Claude-PM/logs",
+        "required": true,
+        "fileCount": 5,
+        "files": [
+          "health-alerts.log",
+          "health-monitor.log",
+          "health-report.json",
+          "health-summary.md",
+          "monitor-status.json"
+        ]
+      }
+    },
+    "last_check": "2025-07-07T03:13:21.342Z",
+    "managed_projects": {
+      "total_projects": 11,
+      "compliant_projects": 10,
+      "compliance_rate": 91,
+      "project_details": {
+        "ai-code-review": {
+          "project_name": "ai-code-review",
+          "score": 100,
+          "max_score": 100,
+          "checks": {
+            "CLAUDE.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "README.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "trackdown/BACKLOG.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "docs/INSTRUCTIONS.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "package.json": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            }
+          },
+          "status": "compliant"
+        },
+        "ai-power-rankings": {
+          "project_name": "ai-power-rankings",
+          "score": 100,
+          "max_score": 100,
+          "checks": {
+            "CLAUDE.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "README.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "trackdown/BACKLOG.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "docs/INSTRUCTIONS.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "package.json": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            }
+          },
+          "status": "compliant"
+        },
+        "ai-power-rankings-data": {
+          "project_name": "ai-power-rankings-data",
+          "score": 80,
+          "max_score": 100,
+          "checks": {
+            "CLAUDE.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "README.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "trackdown/BACKLOG.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "docs/INSTRUCTIONS.md": {
+              "exists": false,
+              "required": false,
+              "weight": 10
+            },
+            "package.json": {
+              "exists": false,
+              "required": false,
+              "weight": 10
+            }
+          },
+          "status": "compliant"
+        },
+        "claude-pm-portfolio-manager": {
+          "project_name": "claude-pm-portfolio-manager",
+          "score": 100,
+          "max_score": 100,
+          "checks": {
+            "CLAUDE.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "README.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "trackdown/BACKLOG.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "docs/INSTRUCTIONS.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "package.json": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            }
+          },
+          "status": "compliant"
+        },
+        "eva-monorepo": {
+          "project_name": "eva-monorepo",
+          "score": 100,
+          "max_score": 100,
+          "checks": {
+            "CLAUDE.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "README.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "trackdown/BACKLOG.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "docs/INSTRUCTIONS.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "package.json": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            }
+          },
+          "status": "compliant"
+        },
+        "git-portfolio-manager": {
+          "project_name": "git-portfolio-manager",
+          "score": 100,
+          "max_score": 100,
+          "checks": {
+            "CLAUDE.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "README.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "trackdown/BACKLOG.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "docs/INSTRUCTIONS.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "package.json": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            }
+          },
+          "status": "compliant"
+        },
+        "hot-flash": {
+          "project_name": "hot-flash",
+          "score": 100,
+          "max_score": 100,
+          "checks": {
+            "CLAUDE.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "README.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "trackdown/BACKLOG.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "docs/INSTRUCTIONS.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "package.json": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            }
+          },
+          "status": "compliant"
+        },
+        "matsuoka-com": {
+          "project_name": "matsuoka-com",
+          "score": 100,
+          "max_score": 100,
+          "checks": {
+            "CLAUDE.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "README.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "trackdown/BACKLOG.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "docs/INSTRUCTIONS.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "package.json": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            }
+          },
+          "status": "compliant"
+        },
+        "mem0ai": {
+          "project_name": "mem0ai",
+          "score": 70,
+          "max_score": 100,
+          "checks": {
+            "CLAUDE.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "README.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "trackdown/BACKLOG.md": {
+              "exists": false,
+              "required": false,
+              "weight": 10
+            },
+            "docs/INSTRUCTIONS.md": {
+              "exists": false,
+              "required": false,
+              "weight": 10
+            },
+            "package.json": {
+              "exists": false,
+              "required": false,
+              "weight": 10
+            }
+          },
+          "status": "partial"
+        },
+        "py-mcp-ipc": {
+          "project_name": "py-mcp-ipc",
+          "score": 100,
+          "max_score": 100,
+          "checks": {
+            "CLAUDE.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "README.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "trackdown/BACKLOG.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "docs/INSTRUCTIONS.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "package.json": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            }
+          },
+          "status": "compliant"
+        },
+        "scraper-engine": {
+          "project_name": "scraper-engine",
+          "score": 100,
+          "max_score": 100,
+          "checks": {
+            "CLAUDE.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "README.md": {
+              "exists": true,
+              "required": true,
+              "weight": 35
+            },
+            "trackdown/BACKLOG.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "docs/INSTRUCTIONS.md": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            },
+            "package.json": {
+              "exists": true,
+              "required": false,
+              "weight": 10
+            }
+          },
+          "status": "compliant"
+        }
+      }
+    },
+    "trackdown": {
+      "total_tickets": 189,
+      "completed_tickets": 28,
+      "pending_tickets": 161,
+      "completion_rate": 15,
+      "last_update_days": 0,
+      "health_status": "active"
+    }
+  },
+  "recommendations": [
+    "Create missing file: CLAUDE.md",
+    "Address 1 critical project issues immediately",
+    "More than half of projects have warnings - consider a framework compliance review",
+    "Restart or fix services: portfolio_manager, git_portfolio_manager, claude_pm_dashboard"
+  ],
+  "alerts": [
+    {
+      "timestamp": "2025-07-07T03:13:30.198Z",
+      "level": "critical",
+      "message": "Overall health 36% is below alert threshold 60%",
+      "data": null
+    },
+    {
+      "timestamp": "2025-07-07T03:13:30.198Z",
+      "level": "critical",
+      "message": "1 project(s) have critical issues requiring immediate attention",
+      "data": null
+    }
+  ]
+}
