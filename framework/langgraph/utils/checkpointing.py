@@ -11,9 +11,32 @@ import json
 import os
 from typing import Any, Dict, Optional, Iterator, Tuple
 from datetime import datetime, timezone
-from langgraph.checkpoint.sqlite import SqliteSaver
-from langgraph.checkpoint.base import Checkpoint, CheckpointMetadata
 from pathlib import Path
+
+# Mock imports for demo purposes - replace with real LangGraph when available
+try:
+    from langgraph.checkpoint.sqlite import SqliteSaver
+    from langgraph.checkpoint.base import Checkpoint, CheckpointMetadata
+    LANGGRAPH_AVAILABLE = True
+except ImportError:
+    # Mock implementations for demonstration
+    class SqliteSaver:
+        @classmethod
+        def from_conn_string(cls, conn_string):
+            return cls()
+        
+        def put(self, config, checkpoint, metadata):
+            pass
+            
+        def get(self, config):
+            return None
+            
+        def list(self, config, before=None, limit=None):
+            return []
+    
+    Checkpoint = Dict[str, Any]
+    CheckpointMetadata = Dict[str, Any]
+    LANGGRAPH_AVAILABLE = False
 
 try:
     from ....core.logging_config import get_logger

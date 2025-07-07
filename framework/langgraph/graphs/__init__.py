@@ -8,11 +8,24 @@ Provides pre-built workflow graphs for common Claude PM operations:
 """
 
 from .task_graph import TaskWorkflowGraph
-from .project_graph import ProjectWorkflowGraph
-from .review_graph import CodeReviewWorkflowGraph
+
+# Only import other graphs if they exist
+try:
+    from .project_graph import ProjectWorkflowGraph
+except ImportError:
+    ProjectWorkflowGraph = None
+
+try:
+    from .review_graph import CodeReviewWorkflowGraph
+except ImportError:
+    CodeReviewWorkflowGraph = None
 
 __all__ = [
-    "TaskWorkflowGraph",
-    "ProjectWorkflowGraph", 
-    "CodeReviewWorkflowGraph"
+    "TaskWorkflowGraph"
 ]
+
+# Add to __all__ only if successfully imported
+if ProjectWorkflowGraph:
+    __all__.append("ProjectWorkflowGraph")
+if CodeReviewWorkflowGraph:
+    __all__.append("CodeReviewWorkflowGraph")

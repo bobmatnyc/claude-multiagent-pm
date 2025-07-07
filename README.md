@@ -1,34 +1,37 @@
-# Claude PM Framework v3.1.0 - Zero-Configuration Memory-Augmented Orchestration
+# Claude Multi-Agent Project Management Framework v3.1.0 - Zero-Configuration Memory-Augmented Orchestration
 
-[![Version](https://img.shields.io/badge/Version-3.1.0-blue.svg)](https://github.com/bobmatnyc/claude-pm)
+[![Version](https://img.shields.io/badge/Version-3.1.0-blue.svg)](https://github.com/masa/claude-multiagent-pm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Phase 1](https://img.shields.io/badge/Phase%201-83%25%20Complete-green.svg)](./trackdown/CURRENT-STATUS.md)
+[![Phase 1](https://img.shields.io/badge/Phase%201-Dual%20Foundation%20Complete-brightgreen.svg)](./trackdown/CURRENT-STATUS.md)
 [![Memory Integration](https://img.shields.io/badge/Memory-Zero%20Config-purple.svg)](./docs/CLAUDE_PM_MEMORY_README.md)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Workflow%20Orchestration-blue.svg)](./docs/design/claude-pm-langgraph-design.md)
 
-> **Zero-configuration memory-augmented AI orchestration with 11-agent ecosystem and LangGraph workflows**
+> **Zero-configuration dual integration: Memzero AI + LangGraph workflow orchestration**
 
-Claude PM Framework revolutionizes AI-assisted development through intelligent memory integration and multi-agent orchestration. The v3.1.0 release delivers zero-configuration Memzero AI integration, eliminating setup complexity while providing universal memory access across all agents and projects.
+Claude Multi-Agent Project Management Framework revolutionizes AI-assisted development through the powerful combination of intelligent memory integration and advanced workflow orchestration. The v3.1.0 release delivers Phase 1's dual foundation: zero-configuration Memzero AI integration alongside comprehensive LangGraph workflow management, creating a sophisticated memory-augmented orchestration system.
 
 ## 🚀 Key Features
 
-### Zero-Configuration Memory Integration
+### Dual Foundation Architecture
+
+#### Zero-Configuration Memory Integration (Memzero AI)
 - **Instant Memory Access**: No API keys or configuration required
 - **Universal Memory Service**: Automatic service discovery on localhost:8002
 - **Memory Categories**: Project, Pattern, Team, and Error memories with enterprise schemas
 - **Factory Functions**: Simple memory access via environment-based configuration
 
-### 11-Agent Orchestration Ecosystem
+#### Advanced Workflow Orchestration (LangGraph)
+- **State Management**: Advanced workflow orchestration with persistent state
+- **Conditional Routing**: Intelligent task routing based on complexity and cost
+- **Human-in-the-Loop**: Approval workflows for complex or sensitive tasks
+- **Workflow Composition**: Modular workflows that can be combined and reused
+
+#### 11-Agent Orchestration Ecosystem
 - **Core Agents**: Orchestrator, Architect, Engineer, QA, Researcher
 - **Specialist Agents**: Security, Performance, DevOps, Data, UI/UX Engineers
 - **Code Review Agent**: Multi-dimensional analysis (security, performance, style, testing)
 - **Memory-Augmented Context**: Intelligent context preparation for enhanced performance
 - **Parallel Execution**: Up to 5 concurrent agents with git worktree isolation
-
-### LangGraph Workflow Integration
-- **State Management**: Advanced workflow orchestration with persistent state
-- **Conditional Routing**: Intelligent task routing based on memory patterns
-- **Agent Coordination**: Seamless messaging and task handoff between agents
-- **Performance Monitoring**: Real-time metrics and health monitoring
 
 ### Continuous Learning Engine
 - **Pattern Recognition**: Automatic identification of successful patterns
@@ -68,7 +71,7 @@ Claude PM Framework revolutionizes AI-assisted development through intelligent m
 
 ### Directory Structure
 ```
-Claude-PM/
+claude-multiagent-pm/
 ├── .git/                           # Dedicated PM git repository
 ├── README.md                      # This file (updated for v3.1.0)
 ├── claude_pm/                     # Core framework implementation
@@ -107,10 +110,10 @@ Claude-PM/
 - **Universal Compatibility**: Works across all Claude instances and projects
 
 ### 42-Ticket Enhancement System
-**Systematic Claude Max + mem0AI integration**:
-- **MEM-001 to MEM-006**: Core memory integration (COMPLETED)
-- **LGR-001 to LGR-006**: LangGraph workflow integration
-- **Phase 1 Progress**: 83% complete (106/127 story points)
+**Systematic Claude Max + mem0AI + LangGraph dual integration**:
+- **MEM-001 to MEM-006**: Core memory integration ✅ COMPLETED (Phase 1)
+- **LGR-001 to LGR-003**: LangGraph workflow integration ✅ COMPLETED (Phase 1)
+- **Phase 1 Progress**: 83% complete - dual foundation established
 - **Completion Tracking**: Individual status reports for each major ticket
 
 ### Memory-Augmented Development
@@ -142,10 +145,10 @@ patterns = memory.get_pattern_memories("authentication")
 curl http://localhost:8002/health
 
 # View current framework status
-cat /Users/masa/Projects/Claude-PM/trackdown/CURRENT-STATUS.md
+cat /Users/masa/Projects/claude-multiagent-pm/trackdown/CURRENT-STATUS.md
 
 # Check Phase 1 progress (83% complete)
-grep -A20 "Phase 1 Progress" /Users/masa/Projects/Claude-PM/trackdown/BACKLOG.md
+grep -A20 "Phase 1 Progress" /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md
 ```
 
 ### 11-Agent Ecosystem Usage
@@ -193,11 +196,13 @@ All projects in `/Users/masa/Projects/managed/` automatically have:
 
 ## 📊 Current Status & Metrics
 
-### Phase 1 Progress
+### Phase 1 Progress - Dual Foundation Complete
 - **83% Complete**: 106/127 story points delivered
-- **Major MEM Tickets**: MEM-001 through MEM-006 completed
+- **Memory Integration**: MEM-001 through MEM-006 completed
+- **Workflow Orchestration**: LGR-001 through LGR-003 completed  
 - **Zero-Config Achievement**: Universal memory access without manual setup
-- **11-Agent Ecosystem**: Memory-augmented multi-agent architecture operational
+- **Advanced Workflows**: LangGraph state management and routing operational
+- **11-Agent Ecosystem**: Memory-augmented multi-agent architecture with workflow orchestration
 
 ### Infrastructure Metrics
 - **Memory Service**: localhost:8002 with automatic service discovery
@@ -206,24 +211,25 @@ All projects in `/Users/masa/Projects/managed/` automatically have:
 - **Reliability**: Production-validated across diverse project architectures
 
 ### Next Phase Targets
-- **LGR Tickets**: LangGraph workflow integration (LGR-001 through LGR-006)
-- **Continuous Learning**: Enhanced pattern recognition and team knowledge amplification
-- **Advanced Orchestration**: Enterprise workflow patterns and optimization
+- **Remaining LGR Tickets**: Human-in-the-loop and CLI integration (LGR-004 through LGR-006)
+- **Advanced Features**: Workflow composition and monitoring dashboards
+- **Enterprise Patterns**: Advanced routing strategies and performance optimization
 
 ---
 
 **Repository Created**: 2025-07-05  
-**Framework Version**: v3.1.0 (Zero-Configuration Memzero AI)  
-**Phase 1 Status**: 83% Complete (106/127 story points)  
+**Framework Version**: v3.1.0 (Dual Foundation: Memzero AI + LangGraph)  
+**Phase 1 Status**: 83% Complete - Dual Foundation Operational  
 **Memory Integration**: ✅ Zero-Configuration Universal Access  
+**Workflow Orchestration**: ✅ LangGraph State Management & Routing  
 **Agent Ecosystem**: ✅ 11-Agent Memory-Augmented Architecture  
-**Maintenance**: Active development with continuous learning engine
+**Maintenance**: Active development with continuous learning and workflow orchestration
 
 ## 🎯 Getting Started
 
 1. **Verify Memory Service**: `curl http://localhost:8002/health`
-2. **Check Current Status**: Review `/Users/masa/Projects/Claude-PM/trackdown/CURRENT-STATUS.md`
-3. **Explore Documentation**: Start with `/Users/masa/Projects/Claude-PM/docs/CLAUDE_PM_MEMORY_README.md`
+2. **Check Current Status**: Review `/Users/masa/Projects/claude-multiagent-pm/trackdown/CURRENT-STATUS.md`
+3. **Explore Documentation**: Start with `/Users/masa/Projects/claude-multiagent-pm/docs/CLAUDE_PM_MEMORY_README.md`
 4. **Try Zero-Config Memory**: Use factory functions from `config.memory_config`
 5. **Review Completed Features**: Check MEM-001 through MEM-006 status reports
 

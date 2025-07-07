@@ -1,5 +1,5 @@
 [Unit]
-Description=Claude PM Framework Health Monitor
+Description=Claude Multiagent PM Framework Health Monitor
 After=network.target
 StartLimitIntervalSec=0
 
@@ -8,11 +8,11 @@ Type=simple
 Restart=always
 RestartSec=1
 User=masa
-WorkingDirectory=/Users/masa/Projects/Claude-PM
+WorkingDirectory=/Users/masa/Projects/claude-multiagent-pm
 ExecStart=/usr/local/bin/node scripts/automated-health-monitor.js monitor --interval=5 --threshold=60
-StandardOutput=append:/Users/masa/Projects/Claude-PM/logs/health-monitor-systemd.log
-StandardError=append:/Users/masa/Projects/Claude-PM/logs/health-monitor-systemd-error.log
-SyslogIdentifier=claude-pm-health-monitor
+StandardOutput=append:/Users/masa/Projects/claude-multiagent-pm/logs/health-monitor-systemd.log
+StandardError=append:/Users/masa/Projects/claude-multiagent-pm/logs/health-monitor-systemd-error.log
+SyslogIdentifier=claude-multiagent-pm-health-monitor
 KillMode=mixed
 KillSignal=SIGINT
 TimeoutStopSec=30

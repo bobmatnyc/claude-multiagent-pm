@@ -138,8 +138,10 @@ class ClaudePMHealthMonitor:
     
     def __init__(self, config: Optional[Dict] = None):
         """Initialize the health monitor with configuration."""
-        self.base_path = Path.home() / "Projects"
-        self.claude_pm_path = self.base_path / "Claude-PM"
+        # Use environment variable or default paths
+        claude_pm_root = os.getenv("CLAUDE_PM_ROOT", str(Path.home() / "Projects" / "Claude-PM"))
+        self.claude_pm_path = Path(claude_pm_root)
+        self.base_path = self.claude_pm_path.parent
         self.managed_path = self.base_path / "managed"
         self.services_path = Path.home() / "Services"
         

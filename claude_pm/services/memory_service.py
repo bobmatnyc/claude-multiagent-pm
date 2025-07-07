@@ -665,3 +665,56 @@ class ClaudePMMemory:
             tags or ["error", "solution"],
             {"error": error, "solution": solution}
         )
+
+
+# Create a simple service wrapper class for compatibility with the service manager
+class MemoryService(BaseService):
+    """
+    Service wrapper for ClaudePMMemory to integrate with Claude PM Framework service manager.
+    """
+    
+    def __init__(self, config: Optional[Dict] = None):
+        """Initialize memory service."""
+        super().__init__("memory_service", config)
+        
+        # Initialize the core memory client
+        mem_config = ClaudePMConfig(
+            host=self.get_config("mem0ai_host", "localhost"),
+            port=self.get_config("mem0ai_port", 8002),
+            timeout=self.get_config("mem0ai_timeout", 30)
+        )
+        self.client = ClaudePMMemory(mem_config)
+    
+    async def _initialize(self) -> None:
+        """Initialize the memory service."""
+        self.logger.info("Initializing Memory Service...")
+        await self.client.initialize()
+        self.logger.info("Memory Service initialized")
+    
+    async def _cleanup(self) -> None:
+        """Cleanup memory service."""
+        self.logger.info("Cleaning up Memory Service...")
+        await self.client.close()
+        self.logger.info("Memory Service cleanup completed")
+    
+    async def _health_check(self) -> Dict[str, bool]:
+        """Perform memory service health checks."""
+        checks = {}
+        
+        try:
+            # Check if client is initialized
+            checks["client_initialized"] = self.client._session is not None
+            
+            # Check connection to mem0AI service
+            checks["mem0ai_connection"] = await self.client.is_connected()
+            
+        except Exception as e:
+            self.logger.error(f"Memory service health check failed: {e}")
+            checks["health_check_error"] = False
+        
+        return checks
+
+
+def get_memory_service(config: Optional[Dict] = None) -> MemoryService:
+    """Factory function to create a MemoryService instance."""
+    return MemoryService(config)

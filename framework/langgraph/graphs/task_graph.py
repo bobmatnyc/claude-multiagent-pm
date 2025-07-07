@@ -10,8 +10,65 @@ import time
 from typing import Dict, Any, Literal, Optional, List
 from datetime import datetime
 
-from langgraph.graph import StateGraph, START, END
-from langgraph.graph.message import add_messages
+# Mock imports for demo purposes - replace with real LangGraph when available
+try:
+    from langgraph.graph import StateGraph, START, END
+    from langgraph.graph.message import add_messages
+    LANGGRAPH_AVAILABLE = True
+except ImportError:
+    # Mock implementations for demonstration
+    class StateGraph:
+        def __init__(self, state_type):
+            self.state_type = state_type
+            self.nodes = {}
+            self.edges = {}
+            
+        def add_node(self, name, func):
+            self.nodes[name] = func
+            
+        def add_edge(self, from_node, to_node):
+            if from_node not in self.edges:
+                self.edges[from_node] = []
+            self.edges[from_node].append(to_node)
+            
+        def add_conditional_edges(self, from_node, condition_func, routing):
+            # Mock implementation
+            pass
+            
+        def compile(self):
+            return MockCompiledGraph(self)
+    
+    class MockCompiledGraph:
+        def __init__(self, graph):
+            self.graph = graph
+            
+        async def ainvoke(self, state, config=None):
+            # Simple mock execution that simulates workflow completion
+            # Execute nodes in a simple sequence for demo
+            current_state = state
+            
+            # Simulate orchestrator -> engineer -> qa flow
+            if "orchestrator" in self.graph.nodes:
+                result = await self.graph.nodes["orchestrator"](current_state)
+                current_state.update(result)
+                
+            if "engineer" in self.graph.nodes:
+                result = await self.graph.nodes["engineer"](current_state)
+                current_state.update(result)
+                
+            if "qa" in self.graph.nodes:
+                result = await self.graph.nodes["qa"](current_state)
+                current_state.update(result)
+                
+            if "memory_store" in self.graph.nodes:
+                result = await self.graph.nodes["memory_store"](current_state)
+                current_state.update(result)
+            
+            return current_state
+    
+    START = "START"
+    END = "END"
+    LANGGRAPH_AVAILABLE = False
 
 from ..states.base import TaskState, create_task_state, TaskComplexity, WorkflowStatus
 from ..utils.checkpointing import create_checkpointer

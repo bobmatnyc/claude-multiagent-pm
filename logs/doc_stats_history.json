@@ -1,0 +1,50 @@
+[
+  {
+    "timestamp": "2025-07-07T15:41:47.290667",
+    "stats": {
+      "total_tickets": 136,
+      "completed_tickets": 61,
+      "in_progress_tickets": 0,
+      "pending_tickets": 75,
+      "blocked_tickets": 0,
+      "completion_percentage": 44.85294117647059,
+      "total_story_points": 724,
+      "completed_story_points": 334,
+      "phase_1_completion": 75.0,
+      "inconsistencies_found": [],
+      "last_update": "2025-07-07 15:41:47"
+    }
+  },
+  {
+    "timestamp": "2025-07-07T17:56:09.373937",
+    "stats": {
+      "total_tickets": 136,
+      "completed_tickets": 61,
+      "in_progress_tickets": 0,
+      "pending_tickets": 75,
+      "blocked_tickets": 0,
+      "completion_percentage": 44.85294117647059,
+      "total_story_points": 724,
+      "completed_story_points": 334,
+      "phase_1_completion": 75.0,
+      "inconsistencies_found": [],
+      "last_update": "2025-07-07 17:56:09"
+    }
+  },
+  {
+    "timestamp": "2025-07-07T17:59:19.402329",
+    "stats": {
+      "total_tickets": 136,
+      "completed_tickets": 61,
+      "in_progress_tickets": 0,
+      "pending_tickets": 75,
+      "blocked_tickets": 0,
+      "completion_percentage": 44.85294117647059,
+      "total_story_points": 724,
+      "completed_story_points": 334,
+      "phase_1_completion": 75.0,
+      "inconsistencies_found": [],
+      "last_update": "2025-07-07 17:59:19"
+    }
+  }
+]

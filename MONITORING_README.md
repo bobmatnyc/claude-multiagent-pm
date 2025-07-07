@@ -2,22 +2,22 @@
 
 ## Quick Start
 
-The Claude PM Framework includes a comprehensive automated health monitoring system that tracks project health, service availability, framework compliance, and generates intelligent alerts.
+The Claude Multi-Agent PM Framework includes a comprehensive automated health monitoring system that tracks project health, service availability, framework compliance, and generates intelligent alerts.
 
 ### Basic Usage
 
 ```bash
 # Run single health check
-npm run monitor:once
+claude-multiagent-pm health check
 
 # Start continuous monitoring 
-npm run monitor:health
+claude-multiagent-pm health monitor
 
 # Check current status
-npm run monitor:status
+claude-multiagent-pm health status
 
 # View recent alerts
-npm run monitor:alerts
+claude-multiagent-pm health alerts
 
 # Setup monitoring system
 npm run monitor:setup

@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """
-Claude PM Framework - Main CLI Entry Point
+Claude Multi-Agent Project Management Framework - Main CLI Entry Point
 
-Provides unified command-line interface for all Claude PM operations
+Provides unified command-line interface for all Claude Multi-Agent PM operations
 including health monitoring, service management, project operations,
 and framework utilities.
 """
 
 import asyncio
 import sys
+import json
+import uuid
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -18,6 +21,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from .core.service_manager import ServiceManager
+from .core.config import Config
 from .services.health_monitor import HealthMonitorService
 from .services.memory_service import MemoryService
 from .services.project_service import ProjectService
@@ -25,15 +29,29 @@ from .scripts.service_manager import ClaudePMServiceManager
 
 console = Console()
 
+def get_framework_config():
+    """Get framework configuration with dynamic path resolution."""
+    return Config()
+
+def get_claude_pm_path():
+    """Get the Claude PM framework path from configuration."""
+    config = get_framework_config()
+    return Path(config.get("claude_pm_path"))
+
+def get_managed_path():
+    """Get the managed projects path from configuration."""
+    config = get_framework_config()
+    return Path(config.get("managed_path"))
+
 
 @click.group()
-@click.version_option(version="3.0.0", prog_name="Claude PM Framework")
+@click.version_option(version="3.0.0", prog_name="Claude Multi-Agent PM Framework")
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.option('--config', '-c', type=click.Path(exists=True), help='Configuration file path')
 @click.pass_context
 def cli(ctx, verbose, config):
     """
-    Claude PM Framework - Multi-Agent Orchestration for AI-driven Project Management
+    Claude Multi-Agent Project Management Framework - Multi-Agent Orchestration for AI-driven Project Management
     
     A comprehensive framework for managing AI-enhanced development projects with
     integrated memory management, health monitoring, and multi-agent coordination.
@@ -43,7 +61,7 @@ def cli(ctx, verbose, config):
     ctx.obj['config'] = config
     
     if verbose:
-        console.print("[dim]Claude PM Framework v3.0.0 - Python Edition[/dim]")
+        console.print("[dim]Claude Multi-Agent PM Framework v3.0.0 - Python Edition[/dim]")
 
 
 # Health Monitoring Commands
@@ -565,7 +583,7 @@ def productivity(period, format):
                 if mem0ai.is_connected():
                     # Count total memories across projects
                     total_memories = 0
-                    managed_path = Path.home() / "Projects" / "managed"
+                    managed_path = get_managed_path()
                     if managed_path.exists():
                         for project_dir in managed_path.iterdir():
                             if project_dir.is_dir():
@@ -859,7 +877,7 @@ def status():
 [bold]Deployment Environment:[/bold] Development
 [bold]Framework Version:[/bold] 3.0.0
 [bold]Python Version:[/bold] {sys.version.split()[0]}
-[bold]Base Path:[/bold] {Path.home() / 'Projects' / 'Claude-PM'}
+[bold]Base Path:[/bold] {get_claude_pm_path()}
 """
         console.print(Panel(deployment_info.strip(), title="Deployment Information"))
     
@@ -938,7 +956,7 @@ def environment(env):
         
         if env_data['status'] == 'Not configured':
             console.print(f"\n[yellow]⚠️ Environment '{env}' requires configuration[/yellow]")
-            console.print("Use 'claude-pm deploy start' to configure this environment")
+            console.print("Use 'claude-multiagent-pm deploy start' to configure this environment")
     else:
         console.print(f"[red]Environment '{env}' not found[/red]")
         console.print(f"Available environments: {', '.join(environments.keys())}")
@@ -956,7 +974,7 @@ def tickets():
 def sprint(sprint):
     """Show current sprint progress."""
     try:
-        backlog_path = Path.home() / "Projects" / "Claude-PM" / "trackdown" / "BACKLOG.md"
+        backlog_path = get_claude_pm_path() / "trackdown" / "BACKLOG.md"
         
         if not backlog_path.exists():
             console.print("[red]❌ TrackDown BACKLOG.md not found[/red]")
@@ -1042,7 +1060,7 @@ def sprint(sprint):
 def list(priority, status):
     """List priority tickets and status."""
     try:
-        backlog_path = Path.home() / "Projects" / "Claude-PM" / "trackdown" / "BACKLOG.md"
+        backlog_path = get_claude_pm_path() / "trackdown" / "BACKLOG.md"
         
         if not backlog_path.exists():
             console.print("[red]❌ TrackDown BACKLOG.md not found[/red]")
@@ -1127,7 +1145,7 @@ def list(priority, status):
 def completion():
     """Display ticket completion rates."""
     try:
-        backlog_path = Path.home() / "Projects" / "Claude-PM" / "trackdown" / "BACKLOG.md"
+        backlog_path = get_claude_pm_path() / "trackdown" / "BACKLOG.md"
         
         if not backlog_path.exists():
             console.print("[red]❌ TrackDown BACKLOG.md not found[/red]")
@@ -1216,7 +1234,7 @@ def completion():
 def create(ticket_id, title, priority, points):
     """Create new tickets with templates."""
     try:
-        tickets_dir = Path.home() / "Projects" / "Claude-PM" / "trackdown" / "issues"
+        tickets_dir = get_claude_pm_path() / "trackdown" / "issues"
         tickets_dir.mkdir(exist_ok=True)
         
         ticket_file = tickets_dir / f"{ticket_id}.md"
@@ -1274,7 +1292,7 @@ created_at: {datetime.now().isoformat()}
         console.print(f"File: {ticket_file}")
         
         # Add to backlog
-        backlog_path = Path.home() / "Projects" / "Claude-PM" / "trackdown" / "BACKLOG.md"
+        backlog_path = get_claude_pm_path() / "trackdown" / "BACKLOG.md"
         if backlog_path.exists():
             with open(backlog_path, 'r') as f:
                 backlog_content = f.read()
@@ -1672,123 +1690,293 @@ def history():
 
 
 @workflows.command()
-@click.argument('workflow_name')
 @click.argument('task_description')
-@click.option('--complexity', '-c', type=click.Choice(['simple', 'medium', 'complex']), default='medium')
-@click.option('--priority', '-p', type=click.Choice(['low', 'medium', 'high', 'critical']), default='medium')
-def start(workflow_name, task_description, complexity, priority):
-    """Start workflow execution."""
-    console.print(f"[bold blue]🚀 Starting Workflow: {workflow_name}[/bold blue]\n")
-    
-    # Validate workflow
-    valid_workflows = ['TaskWorkflow', 'ProjectWorkflow', 'CodeReviewWorkflow', 'DeploymentWorkflow', 'AnalysisWorkflow']
-    
-    if workflow_name not in valid_workflows:
-        console.print(f"[red]❌ Invalid workflow: {workflow_name}[/red]")
-        console.print(f"Available workflows: {', '.join(valid_workflows)}")
-        return
-    
-    # Workflow configuration
-    workflow_config = {
-        "name": workflow_name,
-        "task": task_description,
-        "complexity": complexity,
-        "priority": priority,
-        "started_at": datetime.now().isoformat(),
-        "estimated_duration": {
-            "simple": "30-60 min",
-            "medium": "1-2 hours", 
-            "complex": "3-6 hours"
-        }.get(complexity, "unknown")
-    }
-    
-    # Display workflow info
-    config_text = f"""
-[bold]Workflow:[/bold] {workflow_config['name']}
-[bold]Task:[/bold] {workflow_config['task']}
-[bold]Complexity:[/bold] {workflow_config['complexity'].title()}
-[bold]Priority:[/bold] {workflow_config['priority'].title()}
-[bold]Estimated Duration:[/bold] {workflow_config['estimated_duration']}
-[bold]Started:[/bold] {workflow_config['started_at']}
+@click.option('--complexity', '-c', type=click.Choice(['simple', 'standard', 'complex']), default='standard')
+@click.option('--project-id', '-p', help='Project ID for context')
+@click.option('--user-id', '-u', help='User ID for tracking', default='claude_pm_user')
+@click.option('--context', '-ctx', help='Additional context as JSON string')
+def start(task_description, complexity, project_id, user_id, context):
+    """Start real LangGraph workflow execution."""
+    async def run():
+        try:
+            console.print(f"[bold blue]🚀 Starting LangGraph Task Execution[/bold blue]\n")
+            
+            # Parse context if provided
+            task_context = {}
+            if context:
+                try:
+                    import json
+                    task_context = json.loads(context)
+                except json.JSONDecodeError:
+                    console.print("[yellow]⚠️ Invalid JSON context, proceeding without additional context[/yellow]")
+            
+            # Add complexity to context
+            task_context['complexity'] = complexity
+            
+            # Display task info
+            config_text = f"""
+[bold]Task:[/bold] {task_description}
+[bold]Complexity:[/bold] {complexity.title()}
+[bold]User ID:[/bold] {user_id}
+[bold]Project ID:[/bold] {project_id or 'N/A'}
+[bold]Started:[/bold] {datetime.now().isoformat()}
 """
-    console.print(Panel(config_text.strip(), title="Workflow Configuration"))
+            console.print(Panel(config_text.strip(), title="LangGraph Task Configuration"))
+            
+            console.print("\n[bold blue]🔧 Initializing LangGraph workflow...[/bold blue]")
+            
+            # Import TaskWorkflowGraph
+            try:
+                import sys
+                import os
+                framework_path = Path(__file__).parent.parent / "framework"
+                sys.path.insert(0, str(framework_path))
+                
+                from langgraph.graphs.task_graph import TaskWorkflowGraph
+                
+                # Initialize memory client if available
+                memory_client = None
+                try:
+                    from ..integrations.mem0ai_integration import create_mem0ai_integration
+                    async with create_mem0ai_integration() as mem0ai:
+                        if mem0ai.is_connected():
+                            memory_client = mem0ai
+                            console.print("  ✅ Memory integration connected")
+                        else:
+                            console.print("  ⚠️ Memory integration unavailable")
+                except Exception as e:
+                    console.print(f"  ⚠️ Memory integration error: {e}")
+                
+                # Create TaskWorkflowGraph instance
+                task_graph = TaskWorkflowGraph(memory_client=memory_client)
+                console.print("  ✅ TaskWorkflowGraph initialized")
+                
+                # Execute the workflow
+                console.print("\n[bold blue]🚀 Starting workflow execution...[/bold blue]")
+                console.print("  📝 Analyzing task complexity...")
+                console.print("  🤖 Routing to appropriate agents...")
+                console.print("  💾 Managing workflow state...")
+                
+                # Start the actual execution
+                final_state = await task_graph.execute(
+                    task_description=task_description,
+                    context=task_context,
+                    user_id=user_id,
+                    project_id=project_id
+                )
+                
+                # Display results
+                console.print(f"\n[bold green]✅ Workflow completed successfully![/bold green]")
+                
+                # Show execution summary
+                workflow_id = final_state.get('id', 'unknown')
+                status = final_state.get('status', 'unknown')
+                messages = final_state.get('messages', [])
+                results = final_state.get('results', {})
+                errors = final_state.get('errors', [])
+                
+                summary_text = f"""
+[bold]Workflow ID:[/bold] {workflow_id}
+[bold]Final Status:[/bold] {status}
+[bold]Messages:[/bold] {len(messages)} agent interactions
+[bold]Results:[/bold] {len(results)} components
+[bold]Errors:[/bold] {len(errors)} issues
+"""
+                console.print(Panel(summary_text.strip(), title="Execution Summary"))
+                
+                # Show key results
+                if results:
+                    console.print("\n[bold blue]📋 Key Results:[/bold blue]")
+                    for key, value in results.items():
+                        if isinstance(value, dict):
+                            console.print(f"  • {key}: {value.get('status', 'completed')}")
+                        else:
+                            console.print(f"  • {key}: {str(value)[:50]}...")
+                
+                # Show any errors
+                if errors:
+                    console.print("\n[bold yellow]⚠️ Issues Encountered:[/bold yellow]")
+                    for error in errors[-3:]:  # Show last 3 errors
+                        console.print(f"  • {error.get('type', 'error')}: {error.get('message', 'unknown')}")
+                
+                # Show final agent messages
+                if messages:
+                    console.print("\n[bold blue]💬 Final Agent Messages:[/bold blue]")
+                    recent_messages = messages[-3:]  # Show last 3 messages
+                    for msg in recent_messages:
+                        agent_id = msg.get('agent_id', 'unknown')
+                        content = msg.get('content', '')
+                        console.print(f"  • {agent_id}: {content}")
+                
+                console.print(f"\n[bold green]🎉 Task '{task_description}' completed with LangGraph![/bold green]")
+                console.print(f"Use 'claude-multiagent-pm workflows status --workflow-id={workflow_id}' to view details")
+                
+            except ImportError as e:
+                console.print(f"[red]❌ LangGraph integration not available: {e}[/red]")
+                console.print("Please ensure LangGraph dependencies are installed")
+            except Exception as e:
+                console.print(f"[red]❌ Workflow execution failed: {e}[/red]")
+                console.print("Check logs for detailed error information")
+                
+        except Exception as e:
+            console.print(f"[red]❌ Failed to start workflow: {e}[/red]")
     
-    # Simulate workflow startup
-    console.print("\n[bold blue]Initializing workflow...[/bold blue]")
-    
-    import time
-    startup_steps = [
-        "🔧 Loading workflow graph",
-        "🤖 Allocating agents",
-        "💾 Initializing state management", 
-        "🔗 Setting up agent communication",
-        "🚀 Starting execution"
-    ]
-    
-    for step in startup_steps:
-        console.print(f"  {step}")
-        time.sleep(0.5)
-    
-    console.print(f"\n[green]✅ Workflow '{workflow_name}' started successfully![/green]")
-    console.print("Use 'claude-pm workflows status' to monitor progress")
+    asyncio.run(run())
 
 
 @workflows.command()
 @click.option('--workflow-id', '-w', help='Specific workflow ID to monitor')
-def status():
-    """Show workflow execution status."""
-    console.print("[bold blue]📊 Workflow Status[/bold blue]\n")
-    
-    # Simulated running workflows
-    running_workflows = [
-        {
-            "id": "wf-001",
-            "name": "TaskWorkflow", 
-            "task": "M01-008 CLI Implementation",
-            "progress": 65,
-            "current_agent": "Engineer",
-            "state": "code_implementation",
-            "started": "2025-07-07 10:00",
-            "estimated_completion": "2025-07-07 12:30"
-        }
-    ]
-    
-    if workflow_id:
-        running_workflows = [w for w in running_workflows if w["id"] == workflow_id]
-    
-    if not running_workflows:
-        console.print("[yellow]No running workflows found[/yellow]")
-        return
-    
-    for workflow in running_workflows:
-        # Progress bar
-        progress = workflow["progress"]
-        progress_bar = "█" * int(progress / 10) + "░" * (10 - int(progress / 10))
-        
-        workflow_text = f"""
-[bold]ID:[/bold] {workflow['id']}
-[bold]Workflow:[/bold] {workflow['name']}
-[bold]Task:[/bold] {workflow['task']}
+def status(workflow_id):
+    """Show real-time workflow execution status."""
+    async def run():
+        try:
+            console.print("[bold blue]📊 LangGraph Workflow Status[/bold blue]\n")
+            
+            # Check for active workflows by reading metrics files
+            try:
+                import sys
+                framework_path = Path(__file__).parent.parent / "framework"
+                sys.path.insert(0, str(framework_path))
+                
+                from langgraph.utils.metrics import get_metrics_collector
+                
+                # Try to load metrics from the default location
+                metrics_file = framework_path / "langgraph" / "logs" / "langgraph_metrics.json"
+                
+                if metrics_file.exists():
+                    with open(metrics_file, 'r') as f:
+                        metrics_data = json.load(f)
+                    
+                    active_workflows = metrics_data.get('active_workflows', {})
+                    completed_workflows = metrics_data.get('completed_workflows', {})
+                    
+                    if workflow_id:
+                        # Show specific workflow
+                        workflow_found = False
+                        
+                        # Check active workflows
+                        if workflow_id in active_workflows:
+                            workflow = active_workflows[workflow_id]
+                            workflow_found = True
+                            
+                            # Calculate progress based on completed agents
+                            total_agents = len(workflow.get('agents', ['orchestrator', 'engineer', 'qa']))
+                            completed_agents = len(workflow.get('completed_agents', []))
+                            progress = int((completed_agents / total_agents) * 100) if total_agents > 0 else 0
+                            
+                            progress_bar = "█" * int(progress / 10) + "░" * (10 - int(progress / 10))
+                            
+                            workflow_text = f"""
+[bold]Workflow ID:[/bold] {workflow_id}
+[bold]Status:[/bold] [yellow]Running[/yellow]
+[bold]Task:[/bold] {workflow.get('task_description', 'Unknown')}
 [bold]Progress:[/bold] {progress}% {progress_bar}
-[bold]Current Agent:[/bold] {workflow['current_agent']}
-[bold]State:[/bold] {workflow['state'].replace('_', ' ').title()}
-[bold]Started:[/bold] {workflow['started']}
-[bold]ETA:[/bold] {workflow['estimated_completion']}
+[bold]Current Agent:[/bold] {workflow.get('current_agent', 'Unknown')}
+[bold]Started:[/bold] {workflow.get('start_time', 'Unknown')}
+[bold]Agent Executions:[/bold] {workflow.get('total_executions', 0)}
+[bold]Total Cost:[/bold] ${workflow.get('total_cost', 0.0):.3f}
+[bold]Token Usage:[/bold] {workflow.get('total_tokens', 0)}
 """
-        console.print(Panel(workflow_text.strip(), title=f"Workflow Status: {workflow['name']}"))
+                            console.print(Panel(workflow_text.strip(), title="Active Workflow"))
+                            
+                            # Show agent execution history
+                            if 'agent_executions' in workflow:
+                                console.print("\n[bold blue]🤖 Agent Execution History:[/bold blue]")
+                                executions = workflow['agent_executions'][-5:]  # Last 5 executions
+                                for exec_data in executions:
+                                    timestamp = exec_data.get('timestamp', 'Unknown')
+                                    agent = exec_data.get('agent', 'Unknown')
+                                    duration = exec_data.get('duration_ms', 0)
+                                    console.print(f"  • [{timestamp}] {agent}: {duration}ms")
+                        
+                        # Check completed workflows
+                        elif workflow_id in completed_workflows:
+                            workflow = completed_workflows[workflow_id]
+                            workflow_found = True
+                            
+                            workflow_text = f"""
+[bold]Workflow ID:[/bold] {workflow_id}
+[bold]Status:[/bold] [green]Completed[/green]
+[bold]Task:[/bold] {workflow.get('task_description', 'Unknown')}
+[bold]Started:[/bold] {workflow.get('start_time', 'Unknown')}
+[bold]Completed:[/bold] {workflow.get('end_time', 'Unknown')}
+[bold]Duration:[/bold] {workflow.get('total_duration_ms', 0)}ms
+[bold]Total Cost:[/bold] ${workflow.get('total_cost', 0.0):.3f}
+[bold]Token Usage:[/bold] {workflow.get('total_tokens', 0)}
+[bold]Final Status:[/bold] {workflow.get('final_status', 'Unknown')}
+"""
+                            console.print(Panel(workflow_text.strip(), title="Completed Workflow"))
+                        
+                        if not workflow_found:
+                            console.print(f"[yellow]Workflow '{workflow_id}' not found[/yellow]")
+                    
+                    else:
+                        # Show all active workflows
+                        if active_workflows:
+                            console.print("[bold green]Active Workflows:[/bold green]")
+                            
+                            table = Table(title="Running LangGraph Workflows")
+                            table.add_column("Workflow ID", style="cyan")
+                            table.add_column("Task", style="yellow")
+                            table.add_column("Current Agent", style="green")
+                            table.add_column("Progress", style="magenta")
+                            table.add_column("Cost", style="blue")
+                            
+                            for wf_id, workflow in active_workflows.items():
+                                total_agents = len(workflow.get('agents', ['orchestrator', 'engineer', 'qa']))
+                                completed_agents = len(workflow.get('completed_agents', []))
+                                progress = int((completed_agents / total_agents) * 100) if total_agents > 0 else 0
+                                
+                                table.add_row(
+                                    wf_id[:12] + "..." if len(wf_id) > 15 else wf_id,
+                                    workflow.get('task_description', 'Unknown')[:30] + "..." if len(workflow.get('task_description', '')) > 33 else workflow.get('task_description', 'Unknown'),
+                                    workflow.get('current_agent', 'Unknown'),
+                                    f"{progress}%",
+                                    f"${workflow.get('total_cost', 0.0):.3f}"
+                                )
+                            
+                            console.print(table)
+                        else:
+                            console.print("[yellow]No active workflows found[/yellow]")
+                        
+                        # Show recently completed workflows
+                        if completed_workflows:
+                            console.print(f"\n[bold blue]Recently Completed:[/bold blue] {len(completed_workflows)} workflows")
+                            try:
+                                recent_completions = list(completed_workflows.items())[-3:]  # Last 3
+                                for wf_id, workflow in recent_completions:
+                                    status_color = "green" if workflow.get('final_status') == 'completed' else "red"
+                                    end_time = workflow.get('end_time', '')[:19] if workflow.get('end_time') else ''  # Truncate timestamp
+                                    console.print(f"  • [{end_time}] {wf_id[:16]}...: [{status_color}]{workflow.get('final_status', 'unknown')}[/{status_color}]")
+                            except Exception as e:
+                                console.print(f"  • Error displaying completed workflows: {e}")
+                        
+                        # Show overall metrics
+                        total_workflows = len(active_workflows) + len(completed_workflows)
+                        total_cost = sum(w.get('total_cost', 0) for w in list(active_workflows.values()) + list(completed_workflows.values()))
+                        total_tokens = sum(w.get('total_tokens', 0) for w in list(active_workflows.values()) + list(completed_workflows.values()))
+                        
+                        metrics_text = f"""
+[bold]Total Workflows:[/bold] {total_workflows}
+[bold]Active:[/bold] {len(active_workflows)}
+[bold]Completed:[/bold] {len(completed_workflows)}
+[bold]Total Cost:[/bold] ${total_cost:.3f}
+[bold]Total Tokens:[/bold] {total_tokens:,}
+"""
+                        console.print(Panel(metrics_text.strip(), title="LangGraph Metrics"))
+                
+                else:
+                    console.print("[yellow]No workflow metrics found. Run a workflow first.[/yellow]")
+                    console.print("Use 'claude-multiagent-pm workflows start \"<task>\"' to execute a task")
+                
+            except Exception as e:
+                console.print(f"[red]❌ Error reading workflow status: {e}[/red]")
+                console.print("LangGraph integration may not be properly configured")
+                
+        except Exception as e:
+            console.print(f"[red]❌ Failed to get workflow status: {e}[/red]")
     
-    # Workflow metrics
-    console.print("\n[bold blue]Current Metrics:[/bold blue]")
-    metrics = [
-        "Agents Active: 1/5",
-        "Memory Usage: 145MB",
-        "State Checkpoints: 12", 
-        "API Calls: 47",
-        "Token Usage: 15.2K"
-    ]
-    
-    for metric in metrics:
-        console.print(f"  • {metric}")
+    asyncio.run(run())
 
 
 @workflows.command()
@@ -1881,7 +2069,7 @@ def info():
     from . import __version__
     
     info_text = f"""
-[bold]Claude PM Framework[/bold]
+[bold]Claude Multi-Agent Project Management Framework[/bold]
 Version: {__version__}
 Python Edition: [green]✅ Active[/green]
 
@@ -1891,9 +2079,9 @@ Python: {sys.version.split()[0]}
 Architecture: {platform.machine()}
 
 [bold]Framework Paths:[/bold]
-Base Path: {Path.home() / 'Projects'}
-Claude PM: {Path.home() / 'Projects' / 'Claude-PM'}
-Managed Projects: {Path.home() / 'Projects' / 'managed'}
+Base Path: {get_framework_config().get('base_path')}
+Claude Multi-Agent PM: {get_claude_pm_path()}
+Managed Projects: {get_managed_path()}
 
 [bold]Services:[/bold]
 Health Monitor: Python-based health monitoring
@@ -1901,7 +2089,7 @@ Memory Service: mem0AI integration (port 8002)
 Project Service: Framework compliance monitoring
 """
     
-    console.print(Panel(info_text.strip(), title="Claude PM Framework Information"))
+    console.print(Panel(info_text.strip(), title="Claude Multi-Agent PM Framework Information"))
 
 
 @util.command()
@@ -1921,15 +2109,15 @@ npm run lint → make lint
 make setup-dev → Complete development setup
 make install-ai → Install AI dependencies
 make type-check → Run type checking
-claude-pm service start → Start all services
-claude-pm project list → List all projects
-claude-pm memory search → Search project memories
+claude-multiagent-pm service start → Start all services
+claude-multiagent-pm project list → List all projects
+claude-multiagent-pm memory search → Search project memories
 
 [bold yellow]Development workflow:[/bold yellow]
 1. source .venv/bin/activate (activate virtual environment)
 2. make install-dev (install dependencies)
-3. claude-pm service start (start services)
-4. claude-pm health check (verify health)
+3. claude-multiagent-pm service start (start services)
+4. claude-multiagent-pm health check (verify health)
 5. make test (run tests)
 
 [bold yellow]Build system:[/bold yellow]
@@ -1948,7 +2136,7 @@ def doctor():
     import subprocess
     import shutil
     
-    console.print("[bold blue]🏥 Claude PM Framework Doctor[/bold blue]\n")
+    console.print("[bold blue]🏥 Claude Multi-Agent PM Framework Doctor[/bold blue]\n")
     
     checks = []
     
@@ -1969,11 +2157,11 @@ def doctor():
     
     # Directory structure check
     base_path = Path.home() / "Projects"
-    claude_pm_path = base_path / "Claude-PM"
+    claude_pm_path = base_path / "claude-multiagent-pm"
     managed_path = base_path / "managed"
     
     checks.append(("Base directory", base_path.exists(), f"Create {base_path}"))
-    checks.append(("Claude PM directory", claude_pm_path.exists(), f"Create {claude_pm_path}"))
+    checks.append(("Claude Multi-Agent PM directory", claude_pm_path.exists(), f"Create {claude_pm_path}"))
     checks.append(("Managed directory", managed_path.exists(), f"Create {managed_path}"))
     
     # mem0AI service check
@@ -2000,14 +2188,14 @@ def doctor():
     console.print(table)
     
     if all_passed:
-        console.print("\n[bold green]✅ All checks passed! Claude PM Framework is ready.[/bold green]")
+        console.print("\n[bold green]✅ All checks passed! Claude Multi-Agent PM Framework is ready.[/bold green]")
     else:
         console.print("\n[bold yellow]⚠️ Some checks failed. Please address the issues above.[/bold yellow]")
-        console.print("Run 'claude-pm util migrate' for migration assistance.")
+        console.print("Run 'claude-multiagent-pm util migrate' for migration assistance.")
 
 
 def main():
-    """Main entry point for the Claude PM CLI."""
+    """Main entry point for the Claude Multi-Agent PM CLI."""
     try:
         cli()
     except KeyboardInterrupt:

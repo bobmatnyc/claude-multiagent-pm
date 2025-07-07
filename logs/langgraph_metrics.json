@@ -1,92 +1,55 @@
 {
-  "timestamp": "2025-07-07T14:39:59.925807+00:00",
+  "timestamp": "2025-07-07T21:51:08.557832+00:00",
   "summary": {
     "total_workflows": 1,
-    "avg_duration": 0.42899203300476074,
-    "avg_tokens": 550.0,
-    "avg_cost": 0.038,
+    "avg_duration": 0.3095247745513916,
+    "avg_tokens": 400.0,
+    "avg_cost": 0.028,
     "success_rate": 100.0,
-    "total_tokens": 550,
-    "total_cost": 0.038,
-    "total_duration": 0.42899203300476074
+    "total_tokens": 400,
+    "total_cost": 0.028,
+    "total_duration": 0.3095247745513916
   },
   "agent_performance": {
-    "memory_init": {
-      "total_executions": 1,
-      "total_tokens": 0,
-      "total_cost": 0.0,
-      "total_duration": 0.42899203300476074,
-      "workflows": 1,
-      "avg_executions_per_workflow": 1.0,
-      "avg_duration_per_workflow": 0.42899203300476074
-    },
     "orchestrator": {
       "total_executions": 1,
       "total_tokens": 0,
       "total_cost": 0.0,
-      "total_duration": 0.42899203300476074,
+      "total_duration": 0.3095247745513916,
       "workflows": 1,
       "avg_executions_per_workflow": 1.0,
-      "avg_duration_per_workflow": 0.42899203300476074
-    },
-    "architect": {
-      "total_executions": 1,
-      "total_tokens": 0,
-      "total_cost": 0.0,
-      "total_duration": 0.42899203300476074,
-      "workflows": 1,
-      "avg_executions_per_workflow": 1.0,
-      "avg_duration_per_workflow": 0.42899203300476074
+      "avg_duration_per_workflow": 0.3095247745513916
     },
     "engineer": {
       "total_executions": 1,
       "total_tokens": 0,
       "total_cost": 0.0,
-      "total_duration": 0.42899203300476074,
+      "total_duration": 0.3095247745513916,
       "workflows": 1,
       "avg_executions_per_workflow": 1.0,
-      "avg_duration_per_workflow": 0.42899203300476074
+      "avg_duration_per_workflow": 0.3095247745513916
     },
     "qa": {
       "total_executions": 1,
       "total_tokens": 0,
       "total_cost": 0.0,
-      "total_duration": 0.42899203300476074,
+      "total_duration": 0.3095247745513916,
       "workflows": 1,
       "avg_executions_per_workflow": 1.0,
-      "avg_duration_per_workflow": 0.42899203300476074
+      "avg_duration_per_workflow": 0.3095247745513916
     }
   },
-  "completed_workflows": [
-    {
-      "workflow_id": "task_1751899199496",
+  "active_workflows": {},
+  "completed_workflows": {
+    "task_1751925068248": {
+      "task_description": "Task execution (ID: task_175...)",
       "workflow_type": "task",
-      "start_time": 1751899199.4967868,
-      "end_time": 1751899199.9257789,
-      "total_tokens": 550,
-      "total_cost_usd": 0.038,
-      "agent_executions": {
-        "memory_init": 1,
-        "orchestrator": 1,
-        "architect": 1,
-        "engineer": 1,
-        "qa": 1
-      },
-      "state_transitions": [],
-      "errors": [],
-      "human_interventions": 0,
-      "memory_operations": {},
-      "duration_seconds": 0.42899203300476074,
-      "tokens_per_second": 1282.0750915761096,
-      "cost_per_token": 6.90909090909091e-05,
-      "agent_utilization": {
-        "memory_init": 20.0,
-        "orchestrator": 20.0,
-        "architect": 20.0,
-        "engineer": 20.0,
-        "qa": 20.0
-      }
+      "start_time": "2025-07-07T17:51:08.248247",
+      "end_time": "2025-07-07T17:51:08.557772",
+      "total_duration_ms": 309,
+      "total_cost": 0.028,
+      "total_tokens": 400,
+      "final_status": "completed"
     }
-  ],
-  "active_workflows": []
+  }
 }

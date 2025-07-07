@@ -1,0 +1,13 @@
+{
+  "total_tickets": 136,
+  "completed_tickets": 62,
+  "in_progress_tickets": 0,
+  "pending_tickets": 74,
+  "blocked_tickets": 0,
+  "completion_percentage": 45.588235294117645,
+  "total_story_points": 724,
+  "completed_story_points": 339,
+  "phase_1_completion": 75.0,
+  "inconsistencies_found": [],
+  "last_update": "2025-07-07 18:00:00"
+}

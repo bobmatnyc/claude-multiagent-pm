@@ -7,12 +7,17 @@ for intelligent project memory management and context preservation.
 
 import asyncio
 import aiohttp
+import ssl
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 from dataclasses import dataclass
 
 from ..core.logging_config import get_logger
+from .security import (
+    SecurityConfig, Mem0AIAuthenticator, create_security_config,
+    validate_security_configuration, mask_api_key
+)
 
 logger = get_logger(__name__)
 
@@ -26,6 +31,7 @@ class Mem0AIConfig:
     max_retries: int = 3
     retry_delay: float = 1.0
     api_key: Optional[str] = None
+    security_config: Optional[SecurityConfig] = None
 
 
 class Mem0AIIntegration:
@@ -42,9 +48,40 @@ class Mem0AIIntegration:
     def __init__(self, config: Optional[Mem0AIConfig] = None):
         """Initialize mem0AI integration."""
         self.config = config or Mem0AIConfig()
-        self.base_url = f"http://{self.config.host}:{self.config.port}"
+        
+        # Initialize security configuration
+        if not self.config.security_config:
+            self.config.security_config = create_security_config()
+        
+        # Update API key from security config if not set
+        if not self.config.api_key and self.config.security_config.api_key:
+            self.config.api_key = self.config.security_config.api_key
+        
+        # Create authenticator
+        self.authenticator = Mem0AIAuthenticator(self.config.security_config)
+        
+        # Determine protocol based on TLS configuration
+        protocol = "https" if self.config.security_config.use_tls else "http"
+        self.base_url = f"{protocol}://{self.config.host}:{self.config.port}"
+        
         self._session: Optional[aiohttp.ClientSession] = None
         self._connected = False
+        self._authenticated = False
+        
+        # Log security configuration (safely)
+        if self.config.api_key:
+            logger.info(f"mem0AI integration initialized with authentication: {mask_api_key(self.config.api_key)}")
+        else:
+            logger.warning("mem0AI integration initialized without authentication")
+        
+        # Validate security configuration
+        validation = validate_security_configuration(self.config.security_config)
+        if not validation["valid"]:
+            logger.error(f"Security configuration errors: {validation['errors']}")
+        if validation["warnings"]:
+            logger.warning(f"Security configuration warnings: {validation['warnings']}")
+        if validation["recommendations"]:
+            logger.info(f"Security recommendations: {validation['recommendations']}")
         
         # Memory categories for Claude PM
         self.categories = {
@@ -66,20 +103,34 @@ class Mem0AIIntegration:
         await self.disconnect()
     
     async def connect(self) -> bool:
-        """Connect to mem0AI service."""
+        """Connect to mem0AI service with secure authentication."""
         try:
             timeout = aiohttp.ClientTimeout(total=self.config.timeout)
-            headers = {}
             
-            if self.config.api_key:
-                headers["Authorization"] = f"Bearer {self.config.api_key}"
+            # Create SSL context if needed
+            ssl_context = self.authenticator.create_ssl_context()
+            
+            # Create session with security configuration
+            connector = aiohttp.TCPConnector(ssl=ssl_context) if ssl_context else None
             
             self._session = aiohttp.ClientSession(
                 timeout=timeout,
-                headers=headers
+                connector=connector
             )
             
-            # Test connection
+            # Validate authentication if API key is configured
+            if self.config.api_key:
+                if await self.authenticator.validate_authentication(self._session, self.base_url):
+                    self._authenticated = True
+                    logger.info(f"Authenticated connection to mem0AI service at {self.base_url}")
+                else:
+                    logger.error("Authentication failed for mem0AI service")
+                    await self.disconnect()
+                    return False
+            else:
+                logger.warning("Connecting to mem0AI service without authentication")
+            
+            # Test basic connectivity
             if await self._health_check():
                 self._connected = True
                 logger.info(f"Connected to mem0AI service at {self.base_url}")
@@ -101,6 +152,7 @@ class Mem0AIIntegration:
             self._session = None
         
         self._connected = False
+        self._authenticated = False
         logger.info("Disconnected from mem0AI service")
     
     async def _health_check(self) -> bool:
@@ -109,7 +161,15 @@ class Mem0AIIntegration:
             if not self._session:
                 return False
             
-            async with self._session.get(f"{self.base_url}/health") as response:
+            # Include auth headers if authenticated
+            headers = {}
+            if self._authenticated and self.config.api_key:
+                try:
+                    headers = self.authenticator.create_auth_headers()
+                except Exception as e:
+                    logger.debug(f"Failed to create auth headers for health check: {e}")
+            
+            async with self._session.get(f"{self.base_url}/health", headers=headers) as response:
                 return response.status == 200
                 
         except Exception as e:
@@ -119,6 +179,36 @@ class Mem0AIIntegration:
     def is_connected(self) -> bool:
         """Check if connected to mem0AI service."""
         return self._connected and self._session is not None
+    
+    def is_authenticated(self) -> bool:
+        """Check if authenticated with mem0AI service."""
+        return self._authenticated and self.authenticator.is_authenticated()
+    
+    def get_security_status(self) -> Dict[str, Any]:
+        """Get detailed security and authentication status."""
+        return {
+            "connected": self.is_connected(),
+            "authenticated": self.is_authenticated(),
+            "base_url": self.base_url,
+            "tls_enabled": self.config.security_config.use_tls,
+            "api_key_configured": bool(self.config.api_key),
+            "authenticator_status": self.authenticator.get_auth_status()
+        }
+    
+    async def _create_secure_request_headers(self, request_body: Optional[str] = None) -> Dict[str, str]:
+        """Create headers for secure API requests."""
+        headers = {"Content-Type": "application/json"}
+        
+        # Add authentication headers if available
+        if self.config.api_key:
+            try:
+                auth_headers = self.authenticator.create_auth_headers(request_body)
+                headers.update(auth_headers)
+            except Exception as e:
+                logger.error(f"Failed to create authentication headers: {e}")
+                raise
+        
+        return headers
     
     async def _retry_request(self, request_func, *args, **kwargs):
         """Retry a request with exponential backoff."""
@@ -159,7 +249,8 @@ class Mem0AIIntegration:
             }
             
             async def make_request():
-                async with self._session.post(f"{self.base_url}/spaces", json=data) as response:
+                headers = await self._create_secure_request_headers()
+                async with self._session.post(f"{self.base_url}/spaces", json=data, headers=headers) as response:
                     if response.status in [200, 201, 409]:  # 409 = already exists
                         logger.info(f"Project memory space created/verified: {project_name}")
                         return True
@@ -559,13 +650,49 @@ def create_mem0ai_integration(
     host: str = "localhost",
     port: int = 8002,
     timeout: int = 30,
-    api_key: Optional[str] = None
+    api_key: Optional[str] = None,
+    use_tls: bool = False,
+    verify_ssl: bool = True
 ) -> Mem0AIIntegration:
     """Create a mem0AI integration with specified configuration."""
+    # Create security configuration
+    security_config = create_security_config()
+    
+    # Override with provided parameters
+    if api_key:
+        security_config.api_key = api_key
+    if use_tls is not None:
+        security_config.use_tls = use_tls
+    if verify_ssl is not None:
+        security_config.verify_ssl = verify_ssl
+    
     config = Mem0AIConfig(
         host=host,
         port=port,
         timeout=timeout,
-        api_key=api_key
+        api_key=api_key,
+        security_config=security_config
     )
     return Mem0AIIntegration(config)
+
+
+def create_secure_mem0ai_integration(
+    host: str = "localhost",
+    port: int = 8002,
+    api_key: str = None,
+    use_tls: bool = True,
+    verify_ssl: bool = True,
+    timeout: int = 30
+) -> Mem0AIIntegration:
+    """Create a secure mem0AI integration with TLS and authentication."""
+    if not api_key:
+        raise ValueError("API key is required for secure integration")
+    
+    return create_mem0ai_integration(
+        host=host,
+        port=port,
+        timeout=timeout,
+        api_key=api_key,
+        use_tls=use_tls,
+        verify_ssl=verify_ssl
+    )

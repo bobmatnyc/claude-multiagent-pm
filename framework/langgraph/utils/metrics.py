@@ -292,12 +292,49 @@ class MetricsCollector:
     def _export_metrics(self) -> None:
         """Export metrics to configured file."""
         try:
+            # Create CLI-compatible format
+            active_workflows_dict = {}
+            for workflow_id, metrics in self.active_workflows.items():
+                active_workflows_dict[workflow_id] = {
+                    "task_description": f"Task execution (ID: {workflow_id[:8]}...)",
+                    "workflow_type": metrics.workflow_type,
+                    "start_time": datetime.fromtimestamp(metrics.start_time).isoformat(),
+                    "current_agent": self._get_current_agent(metrics),
+                    "agents": ["orchestrator", "engineer", "qa"],  # Default agent list
+                    "completed_agents": self._get_completed_agents(metrics),
+                    "total_executions": sum(metrics.agent_executions.values()),
+                    "total_cost": metrics.total_cost_usd,
+                    "total_tokens": metrics.total_tokens,
+                    "agent_executions": [
+                        {
+                            "timestamp": datetime.fromtimestamp(transition.get("timestamp", time.time())).isoformat(),
+                            "agent": transition.get("agent", "unknown"),
+                            "duration_ms": 100  # Placeholder duration
+                        }
+                        for transition in metrics.state_transitions
+                    ]
+                }
+            
+            completed_workflows_dict = {}
+            for metrics in self.completed_workflows[-10:]:  # Last 10 completed
+                workflow_id = metrics.workflow_id
+                completed_workflows_dict[workflow_id] = {
+                    "task_description": f"Task execution (ID: {workflow_id[:8]}...)",
+                    "workflow_type": metrics.workflow_type,
+                    "start_time": datetime.fromtimestamp(metrics.start_time).isoformat(),
+                    "end_time": datetime.fromtimestamp(metrics.end_time).isoformat() if metrics.end_time else None,
+                    "total_duration_ms": int(metrics.duration_seconds * 1000),
+                    "total_cost": metrics.total_cost_usd,
+                    "total_tokens": metrics.total_tokens,
+                    "final_status": "completed" if not metrics.errors else "failed"
+                }
+            
             export_data = {
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "summary": self.get_summary_stats(),
                 "agent_performance": self.get_agent_performance(),
-                "completed_workflows": [w.to_dict() for w in self.completed_workflows],
-                "active_workflows": [w.to_dict() for w in self.active_workflows.values()]
+                "active_workflows": active_workflows_dict,
+                "completed_workflows": completed_workflows_dict
             }
             
             with open(self.export_file, 'w') as f:
@@ -307,6 +344,21 @@ class MetricsCollector:
             
         except Exception as e:
             logger.error(f"Failed to export metrics: {e}")
+    
+    def _get_current_agent(self, metrics: WorkflowMetrics) -> str:
+        """Determine current agent from state transitions."""
+        if metrics.state_transitions:
+            return metrics.state_transitions[-1].get("agent", "unknown")
+        return "orchestrator"  # Default starting agent
+    
+    def _get_completed_agents(self, metrics: WorkflowMetrics) -> List[str]:
+        """Get list of agents that have completed execution."""
+        completed = []
+        for transition in metrics.state_transitions:
+            agent = transition.get("agent")
+            if agent and agent not in completed:
+                completed.append(agent)
+        return completed
     
     def export_to_file(self, file_path: str) -> None:
         """Export metrics to a specific file."""

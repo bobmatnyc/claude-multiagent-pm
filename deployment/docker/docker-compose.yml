@@ -1,0 +1,226 @@
+# Claude Multiagent PM Framework - Docker Compose Configuration
+# CLAUDE_PM_ROOT Container Support (M01-039)
+# =================================================
+
+version: '3.8'
+
+services:
+  # Claude Multiagent PM Main Service
+  claude-multiagent-pm:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile
+      target: development
+      args:
+        - BUILD_DATE=${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
+        - VCS_REF=${VCS_REF:-$(git rev-parse --short HEAD)}
+        - CLAUDE_PM_VERSION=${CLAUDE_PM_VERSION:-3.0.0}
+    image: claude-multiagent-pm:development
+    container_name: claude-multiagent-pm-main
+    restart: unless-stopped
+    environment:
+      # Framework Paths (M01-039)
+      - CLAUDE_PM_ROOT=/app/claude-multiagent-pm
+      - CLAUDE_PM_DATA_PATH=/app/data
+      - CLAUDE_PM_LOGS_PATH=/app/logs
+      - CLAUDE_PM_CONFIG_PATH=/app/config
+      
+      # Environment Settings
+      - ENVIRONMENT=docker
+      - DEBUG=true
+      - VERBOSE=true
+      
+      # Logging
+      - CLAUDE_PM_LOG_LEVEL=INFO
+      - CLAUDE_PM_LOG_TO_STDOUT=true
+      - CLAUDE_PM_LOG_JSON_FORMAT=true
+      
+      # Service Configuration
+      - CLAUDE_PM_ENABLE_HEALTH_MONITORING=true
+      - CLAUDE_PM_HEALTH_CHECK_INTERVAL=30
+      - CLAUDE_PM_ENABLE_METRICS=true
+      - CLAUDE_PM_METRICS_INTERVAL=60
+      
+      # Network Configuration
+      - CLAUDE_PM_DASHBOARD_PORT=7001
+      - CLAUDE_PM_API_PORT=8001
+      
+      # mem0AI Integration
+      - MEM0AI_HOST=mem0ai-service
+      - MEM0AI_PORT=8002
+      - MEM0AI_TIMEOUT=30
+      - MEM0AI_USE_TLS=false
+      - MEM0AI_VERIFY_SSL=false
+      
+      # Container Features
+      - CLAUDE_PM_CONTAINER=true
+      - CLAUDE_PM_EXPERIMENTAL_FEATURES=true
+      - CLAUDE_PM_LANGGRAPH_ENABLED=true
+      - CLAUDE_PM_MULTI_AGENT_PARALLEL=true
+      
+      # Resource Limits
+      - CLAUDE_PM_MAX_WORKERS=2
+      - CLAUDE_PM_MEMORY_LIMIT=512MB
+      - CLAUDE_PM_TASK_TIMEOUT=300
+      
+    ports:
+      - "8001:8001"  # API Port
+      - "7001:7001"  # Dashboard Port
+      
+    volumes:
+      # Persistent data storage
+      - claude-multiagent-pm-data:/app/data
+      - claude-multiagent-pm-logs:/app/logs
+      - claude-multiagent-pm-config:/app/config
+      
+      # Development: Mount source code for hot reload
+      - ../../:/app/claude-multiagent-pm:ro
+      
+    networks:
+      - claude-multiagent-pm-network
+      
+    depends_on:
+      - mem0ai-service
+      
+    healthcheck:
+      test: ["CMD", "/entrypoint.sh", "health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+      
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # mem0AI Service
+  mem0ai-service:
+    image: mem0ai/mem0ai:latest
+    container_name: claude-multiagent-pm-mem0ai
+    restart: unless-stopped
+    environment:
+      - MEM0AI_PORT=8002
+      - MEM0AI_HOST=0.0.0.0
+      - MEM0AI_LOG_LEVEL=INFO
+      
+    ports:
+      - "8002:8002"
+      
+    volumes:
+      - mem0ai-data:/app/data
+      
+    networks:
+      - claude-multiagent-pm-network
+      
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8002/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+      
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+  # Health Monitor Service (Optional)
+  health-monitor:
+    image: claude-multiagent-pm:development
+    container_name: claude-multiagent-pm-health-monitor
+    restart: unless-stopped
+    command: ["python", "-m", "claude_pm.cli", "health", "monitor", "--interval=60"]
+    environment:
+      # Inherit from main service but with specific role
+      - CLAUDE_PM_ROOT=/app/claude-multiagent-pm
+      - CLAUDE_PM_LOGS_PATH=/app/logs
+      - ENVIRONMENT=docker
+      - CLAUDE_PM_LOG_LEVEL=INFO
+      - CLAUDE_PM_ROLE=health_monitor
+      
+    volumes:
+      - claude-multiagent-pm-logs:/app/logs
+      - claude-multiagent-pm-config:/app/config:ro
+      
+    networks:
+      - claude-multiagent-pm-network
+      
+    depends_on:
+      - claude-multiagent-pm
+      
+    # Resource limits (lightweight)
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.1'
+        reservations:
+          memory: 64M
+          cpus: '0.05'
+
+# Production override service (commented by default)
+  # claude-multiagent-pm-prod:
+  #   extends: claude-multiagent-pm
+  #   build:
+  #     target: production
+  #   image: claude-multiagent-pm:production
+  #   environment:
+  #     - ENVIRONMENT=production
+  #     - DEBUG=false
+  #     - VERBOSE=false
+  #     - CLAUDE_PM_LOG_LEVEL=WARNING
+  #     - CLAUDE_PM_EXPERIMENTAL_FEATURES=false
+  #   volumes:
+  #     # Production: no source code mount
+  #     - claude-multiagent-pm-data:/app/data
+  #     - claude-multiagent-pm-logs:/app/logs
+  #     - claude-multiagent-pm-config:/app/config
+
+# Named volumes for persistent storage
+volumes:
+  claude-multiagent-pm-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/data
+      
+  claude-multiagent-pm-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/logs
+      
+  claude-multiagent-pm-config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/config
+      
+  mem0ai-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/mem0ai-data
+
+# Custom network for service communication
+networks:
+  claude-multiagent-pm-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

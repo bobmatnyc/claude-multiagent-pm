@@ -30,7 +30,7 @@ class Config:
         self, 
         config: Optional[Dict[str, Any]] = None,
         config_file: Optional[Union[str, Path]] = None,
-        env_prefix: str = "CLAUDE_PM_"
+        env_prefix: str = "CLAUDE_MULTIAGENT_PM_"
     ):
         """
         Initialize configuration.
@@ -51,8 +51,9 @@ class Config:
         if config_file:
             self.load_file(config_file)
         
-        # Load from environment variables
+        # Load from environment variables (new and legacy prefixes)
         self._load_env_vars()
+        self._load_legacy_env_vars()
         
         # Apply defaults
         self._apply_defaults()
@@ -94,6 +95,29 @@ class Config:
                 
                 logger.debug(f"Loaded env var: {key} -> {config_key}")
     
+    def _load_legacy_env_vars(self) -> None:
+        """Load configuration from legacy CLAUDE_PM_ environment variables for backward compatibility."""
+        legacy_prefix = "CLAUDE_PM_"
+        loaded_legacy_vars = []
+        
+        for key, value in os.environ.items():
+            if key.startswith(legacy_prefix):
+                config_key = key[len(legacy_prefix):].lower()
+                
+                # Only load if not already set by new environment variables
+                if config_key not in self._config:
+                    converted_value = self._convert_env_value(value)
+                    self._config[config_key] = converted_value
+                    loaded_legacy_vars.append(key)
+                    logger.debug(f"Loaded legacy env var: {key} -> {config_key}")
+        
+        # Warn about legacy variables in use
+        if loaded_legacy_vars:
+            logger.warning(
+                f"Using legacy CLAUDE_PM_ environment variables: {', '.join(loaded_legacy_vars)}. "
+                "Please migrate to CLAUDE_MULTIAGENT_PM_ prefix for future compatibility."
+            )
+    
     def _convert_env_value(self, value: str) -> Union[str, int, float, bool]:
         """Convert environment variable string to appropriate type."""
         # Boolean conversion
@@ -116,6 +140,30 @@ class Config:
     
     def _apply_defaults(self) -> None:
         """Apply default configuration values."""
+        # Get CLAUDE_MULTIAGENT_PM_ROOT (new) or CLAUDE_PM_ROOT (backward compatibility)
+        claude_multiagent_pm_root = os.getenv("CLAUDE_MULTIAGENT_PM_ROOT")
+        claude_pm_root = os.getenv("CLAUDE_PM_ROOT")  # Backward compatibility
+        
+        # Prioritize new variable name, fall back to old for compatibility
+        project_root = claude_multiagent_pm_root or claude_pm_root
+        
+        if project_root:
+            # Use custom root directory
+            claude_pm_path = project_root
+            base_path = str(Path(project_root).parent)
+            managed_path = str(Path(project_root).parent / "managed")
+            
+            # Log which environment variable was used
+            if claude_multiagent_pm_root:
+                logger.debug("Using CLAUDE_MULTIAGENT_PM_ROOT environment variable")
+            else:
+                logger.warning("Using deprecated CLAUDE_PM_ROOT environment variable. Please migrate to CLAUDE_MULTIAGENT_PM_ROOT")
+        else:
+            # Use default paths
+            base_path = str(Path.home() / "Projects")
+            claude_pm_path = str(Path.home() / "Projects" / "claude-multiagent-pm")
+            managed_path = str(Path.home() / "Projects" / "managed")
+        
         defaults = {
             # Logging
             "log_level": "INFO",
@@ -133,10 +181,10 @@ class Config:
             "graceful_shutdown_timeout": 30,
             "startup_timeout": 60,
             
-            # Claude PM specific
-            "base_path": str(Path.home() / "Projects"),
-            "claude_pm_path": str(Path.home() / "Projects" / "Claude-PM"),
-            "managed_path": str(Path.home() / "Projects" / "managed"),
+            # Claude PM specific - dynamic path resolution
+            "base_path": base_path,
+            "claude_pm_path": claude_pm_path,
+            "managed_path": managed_path,
             
             # mem0AI integration
             "mem0ai_host": "localhost",

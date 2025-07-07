@@ -1,0 +1,3 @@
+# Claude PM Documentation Synchronization
+# Run every 10 minutes
+*/10 * * * * python3 /Users/masa/Projects/claude-multiagent-pm/scripts/automated_doc_sync.py --once >> /Users/masa/Projects/claude-multiagent-pm/logs/cron_doc_sync.log 2>&1

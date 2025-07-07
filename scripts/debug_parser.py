@@ -15,7 +15,9 @@ from github_sync import TicketParser
 
 def debug_section_parsing():
     """Debug the section parsing logic"""
-    backlog_path = "/Users/masa/Projects/Claude-PM/trackdown/BACKLOG.md"
+    import os
+    claude_pm_root = os.getenv("CLAUDE_PM_ROOT", "/Users/masa/Projects/Claude-PM")
+    backlog_path = f"{claude_pm_root}/trackdown/BACKLOG.md"
     
     with open(backlog_path, 'r', encoding='utf-8') as f:
         content = f.read()

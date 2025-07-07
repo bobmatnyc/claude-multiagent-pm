@@ -807,9 +807,12 @@ class ClaudePMGitHubSync:
     """Main synchronization manager"""
     
     def __init__(self, client: GitHubAPIClient, repository: str, 
-                 backlog_path: str = "/Users/masa/Projects/Claude-PM/trackdown/BACKLOG.md"):
+                 backlog_path: str = None):
         self.client = client
         self.repository = repository
+        if backlog_path is None:
+            claude_pm_root = os.getenv("CLAUDE_PM_ROOT", "/Users/masa/Projects/Claude-PM")
+            backlog_path = f"{claude_pm_root}/trackdown/BACKLOG.md"
         self.backlog_path = backlog_path
         
         # Initialize managers
@@ -819,7 +822,8 @@ class ClaudePMGitHubSync:
         
         # Sync tracking
         self.sync_records: Dict[str, SyncRecord] = {}
-        self.sync_log_path = "/Users/masa/Projects/Claude-PM/sync/github_sync_log.json"
+        claude_pm_root = os.getenv("CLAUDE_PM_ROOT", "/Users/masa/Projects/Claude-PM")
+        self.sync_log_path = f"{claude_pm_root}/sync/github_sync_log.json"
         self.logger = logging.getLogger(f"{__name__}.ClaudePMGitHubSync")
         
         # Ensure sync directory exists
@@ -1082,7 +1086,8 @@ class ClaudePMGitHubSync:
     def _create_backup(self) -> str:
         """Create backup before sync operation"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_dir = Path("/Users/masa/Projects/Claude-PM/backups")
+        claude_pm_root = os.getenv("CLAUDE_PM_ROOT", "/Users/masa/Projects/Claude-PM")
+        backup_dir = Path(f"{claude_pm_root}/backups")
         backup_dir.mkdir(parents=True, exist_ok=True)
         
         backup_file = backup_dir / f"github_sync_backup_{self.repository.replace('/', '_')}_{timestamp}.json"
@@ -1112,8 +1117,11 @@ class TokenManager:
     """Manage GitHub API tokens securely"""
     
     @staticmethod
-    def load_token_from_env(env_file_path: str = "/Users/masa/Projects/Claude-PM/.env") -> Optional[str]:
+    def load_token_from_env(env_file_path: str = None) -> Optional[str]:
         """Load GitHub token from .env file"""
+        if env_file_path is None:
+            claude_pm_root = os.getenv("CLAUDE_PM_ROOT", "/Users/masa/Projects/Claude-PM")
+            env_file_path = f"{claude_pm_root}/.env"
         try:
             if Path(env_file_path).exists():
                 with open(env_file_path, 'r') as f:
@@ -1145,7 +1153,8 @@ def setup_logging(verbose: bool = False):
     log_level = logging.DEBUG if verbose else logging.INFO
     
     # Create logs directory
-    log_dir = Path("/Users/masa/Projects/Claude-PM/logs")
+    claude_pm_root = os.getenv("CLAUDE_PM_ROOT", "/Users/masa/Projects/Claude-PM")
+    log_dir = Path(f"{claude_pm_root}/logs")
     log_dir.mkdir(parents=True, exist_ok=True)
     
     # Configure logging
@@ -1193,7 +1202,7 @@ Examples:
     parser.add_argument("--verbose", action="store_true", 
                        help="Enable verbose logging")
     parser.add_argument("--backlog-path", 
-                       default="/Users/masa/Projects/Claude-PM/trackdown/BACKLOG.md",
+                       default=f"{os.getenv('CLAUDE_PM_ROOT', '/Users/masa/Projects/Claude-PM')}/trackdown/BACKLOG.md",
                        help="Path to BACKLOG.md file")
     
     args = parser.parse_args()

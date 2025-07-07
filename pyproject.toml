@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "claude-pm-framework"
+name = "claude-multiagent-pm"
 version = "3.1.0"
-description = "Multi-Agent Orchestration Framework for AI-driven project management"
+description = "Claude Multi-Agent Project Management Framework for AI-driven orchestration"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
@@ -127,20 +127,20 @@ ai = [
 ]
 
 all = [
-    "claude-pm-framework[dev,production,ai]"
+    "claude-multiagent-pm[dev,production,ai]"
 ]
 
 [project.urls]
-Homepage = "https://github.com/bobmatnyc/claude-pm"
-Documentation = "https://github.com/bobmatnyc/claude-pm#readme"
-Repository = "https://github.com/bobmatnyc/claude-pm.git"
-"Bug Reports" = "https://github.com/bobmatnyc/claude-pm/issues"
-Changelog = "https://github.com/bobmatnyc/claude-pm/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/masa/claude-multiagent-pm"
+Documentation = "https://github.com/masa/claude-multiagent-pm#readme"
+Repository = "https://github.com/masa/claude-multiagent-pm.git"
+"Bug Reports" = "https://github.com/masa/claude-multiagent-pm/issues"
+Changelog = "https://github.com/masa/claude-multiagent-pm/blob/main/CHANGELOG.md"
 
 [project.scripts]
-claude-pm = "claude_pm.cli:main"
-claude-pm-health = "claude_pm.scripts.health_monitor:main"
-claude-pm-service = "claude_pm.scripts.service_manager:main"
+claude-multiagent-pm = "claude_pm.cli:main"
+claude-multiagent-pm-health = "claude_pm.scripts.health_monitor:main"
+claude-multiagent-pm-service = "claude_pm.scripts.service_manager:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -307,10 +307,10 @@ per-file-ignores = [
 
 # Documentation with MkDocs
 [tool.mkdocs]
-site_name = "Claude PM Framework"
-site_description = "Multi-Agent Orchestration Framework for AI-driven project management"
-site_url = "https://github.com/bobmatnyc/claude-pm"
-repo_url = "https://github.com/bobmatnyc/claude-pm"
+site_name = "Claude Multi-Agent PM Framework"
+site_description = "Claude Multi-Agent Project Management Framework for AI-driven orchestration"
+site_url = "https://github.com/masa/claude-multiagent-pm"
+repo_url = "https://github.com/masa/claude-multiagent-pm"
 edit_uri = "edit/main/docs/"
 
 # Development and build tools

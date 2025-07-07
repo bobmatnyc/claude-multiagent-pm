@@ -1,10 +1,10 @@
 module.exports = {
   apps: [
     {
-      name: 'claude-pm-health-monitor',
+      name: 'claude-multiagent-pm-health-monitor',
       script: 'scripts/automated-health-monitor.js',
       args: 'monitor --interval=5 --threshold=60',
-      cwd: '/Users/masa/Projects/Claude-PM',
+      cwd: '/Users/masa/Projects/claude-multiagent-pm',
       instances: 1,
       autorestart: true,
       watch: false,

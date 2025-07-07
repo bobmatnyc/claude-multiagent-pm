@@ -1,13 +1,13 @@
-# Claude PM Configuration - {PROJECT_NAME}
+# Claude Multi-Agent PM Configuration - {PROJECT_NAME}
 
-This file provides guidance to Claude Code (claude.ai/code) when working with the {PROJECT_NAME} project within the Claude PM framework.
+This file provides guidance to Claude Code (claude.ai/code) when working with the {PROJECT_NAME} project within the Claude Multi-Agent PM framework.
 
 ## 🧠 MANDATORY BEHAVIORAL CHECKLIST
 
-**INTERNALIZE THESE RESPONSES - CLAUDE PM FRAMEWORK:**
+**INTERNALIZE THESE RESPONSES - CLAUDE MULTI-AGENT PM FRAMEWORK:**
 
-□ **Task management = Claude PM TrackDown** (`~/Projects/Claude-PM/trackdown/BACKLOG.md`)
-□ **Framework questions = Claude PM** (`~/Projects/Claude-PM/framework/CLAUDE.md`)
+□ **Task management = Claude Multi-Agent PM TrackDown** (`~/Projects/claude-multiagent-pm/trackdown/BACKLOG.md`)
+□ **Framework questions = Claude Multi-Agent PM** (`~/Projects/claude-multiagent-pm/framework/CLAUDE.md`)
 □ **Workflow questions = /docs/WORKFLOW.md**
 □ **Project specs = /docs/PROJECT.md**
 □ **Technical details = /docs/TOOLCHAIN.md**
@@ -15,8 +15,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 ### 🎯 IMMEDIATE RESPONSE PATTERNS
 
 When user asks:
-- "What's on the backlog?" → "Check `~/Projects/Claude-PM/trackdown/BACKLOG.md` for current tasks"
-- "What tasks remain?" → "Check `~/Projects/Claude-PM/trackdown/` directory for remaining work"  
+- "What's on the backlog?" → "Check `~/Projects/claude-multiagent-pm/trackdown/BACKLOG.md` for current tasks"
+- "What tasks remain?" → "Check `~/Projects/claude-multiagent-pm/trackdown/` directory for remaining work"  
 - "What's the workflow?" → "See /docs/WORKFLOW.md for workflow processes"
 
 ### ❌ COMMON ERRORS TO AVOID

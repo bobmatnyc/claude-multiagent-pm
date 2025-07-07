@@ -1,0 +1,26 @@
+{'timestamp': '2025-07-07T15:51:02.059296', 'event_type': 'auth_success', 'service_host': 'localhost:8002', 'details': {'status_code': 200}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T15:51:02.060105', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T15:51:02.060155', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T15:51:02.060190', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T15:51:02.060679', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T15:51:02.060710', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T15:51:02.060740', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T15:51:02.060767', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T15:51:02.060794', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T15:51:02.060821', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T15:51:02.076375', 'event_type': 'auth_failure', 'service_host': 'http://localhost:8002', 'details': {'failure_count': 1, 'error': 'No API key available for authentication'}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T15:51:02.082417', 'event_type': 'auth_failure', 'service_host': 'http://localhost:8002', 'details': {'failure_count': 1, 'error': 'No API key available for authentication'}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T15:51:02.093224', 'event_type': 'auth_failure', 'service_host': 'http://localhost:8002', 'details': {'failure_count': 1, 'error': 'No API key available for authentication'}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T18:04:51.044956', 'event_type': 'auth_success', 'service_host': 'localhost:8002', 'details': {'status_code': 200}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T18:04:51.045738', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T18:04:51.045783', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T18:04:51.045817', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T18:04:51.046316', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T18:04:51.046349', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T18:04:51.046378', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T18:04:51.046408', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T18:04:51.046434', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T18:04:51.046460', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T18:04:51.053173', 'event_type': 'auth_failure', 'service_host': 'http://localhost:8002', 'details': {'failure_count': 1, 'error': "'coroutine' object does not support the asynchronous context manager protocol"}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T18:04:51.064408', 'event_type': 'auth_failure', 'service_host': 'http://localhost:8002', 'details': {'failure_count': 1, 'error': "'coroutine' object does not support the asynchronous context manager protocol"}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T18:04:51.070189', 'event_type': 'auth_failure', 'service_host': 'http://localhost:8002', 'details': {'failure_count': 1, 'error': 'No API key available for authentication'}, 'ip_address': None, 'user_agent': None}

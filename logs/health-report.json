@@ -60,6 +60,28 @@
       "last_check": "2025-07-07T03:13:21.348Z",
       "status": "down",
       "error": "Port not listening"
+    },
+    "documentation_sync": {
+      "service": "documentation_sync",
+      "status": "healthy",
+      "timestamp": "2025-07-07T17:56:09.374226",
+      "details": {
+        "backlog_file": "/Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md",
+        "ticketing_file": "/Users/masa/Projects/claude-multiagent-pm/docs/TICKETING_SYSTEM.md",
+        "tickets_parsed": 136,
+        "inconsistencies": []
+      },
+      "metrics": {
+        "total_tickets": 136,
+        "completed_tickets": 61,
+        "completion_percentage": 44.85294117647059,
+        "phase_1_completion": 75.0,
+        "total_story_points": 724,
+        "completed_story_points": 334,
+        "inconsistencies_count": 0,
+        "last_sync": "2025-07-07 17:56:09"
+      },
+      "alerts": []
     }
   },
   "projects": {
@@ -1008,5 +1030,7 @@
       "message": "1 project(s) have critical issues requiring immediate attention",
       "data": null
     }
-  ]
+  ],
+  "last_updated": "2025-07-07T17:56:09.376327",
+  "overall_status": "healthy"
 }

@@ -1,0 +1,325 @@
+# Claude Multiagent PM Framework - Production Docker Compose
+# CLAUDE_PM_ROOT Production Container Support (M01-039)
+# =====================================================
+
+version: '3.8'
+
+services:
+  # Claude Multiagent PM Production Service
+  claude-multiagent-pm:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile
+      target: production
+      args:
+        - BUILD_DATE=${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
+        - VCS_REF=${VCS_REF:-$(git rev-parse --short HEAD)}
+        - CLAUDE_PM_VERSION=${CLAUDE_PM_VERSION:-3.0.0}
+    image: claude-multiagent-pm:production
+    container_name: claude-multiagent-pm-prod
+    restart: always
+    environment:
+      # Framework Paths (M01-039) - Production
+      - CLAUDE_PM_ROOT=/app/claude-multiagent-pm
+      - CLAUDE_PM_DATA_PATH=/app/data
+      - CLAUDE_PM_LOGS_PATH=/app/logs
+      - CLAUDE_PM_CONFIG_PATH=/app/config
+      
+      # Environment Settings - Production
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - VERBOSE=false
+      
+      # Logging - Production
+      - CLAUDE_PM_LOG_LEVEL=WARNING
+      - CLAUDE_PM_LOG_TO_STDOUT=true
+      - CLAUDE_PM_LOG_JSON_FORMAT=true
+      
+      # Service Configuration - Production
+      - CLAUDE_PM_ENABLE_HEALTH_MONITORING=true
+      - CLAUDE_PM_HEALTH_CHECK_INTERVAL=60
+      - CLAUDE_PM_ENABLE_METRICS=true
+      - CLAUDE_PM_METRICS_INTERVAL=300
+      
+      # Network Configuration - Production
+      - CLAUDE_PM_DASHBOARD_PORT=7003
+      - CLAUDE_PM_API_PORT=8003
+      
+      # mem0AI Integration - Production
+      - MEM0AI_HOST=mem0ai-service
+      - MEM0AI_PORT=8002
+      - MEM0AI_TIMEOUT=60
+      - MEM0AI_USE_TLS=true
+      - MEM0AI_VERIFY_SSL=true
+      - MEM0AI_API_KEY=${MEM0AI_API_KEY}
+      
+      # Container Features - Production
+      - CLAUDE_PM_CONTAINER=true
+      - CLAUDE_PM_EXPERIMENTAL_FEATURES=false
+      - CLAUDE_PM_LANGGRAPH_ENABLED=true
+      - CLAUDE_PM_MULTI_AGENT_PARALLEL=true
+      
+      # Resource Configuration - Production
+      - CLAUDE_PM_MAX_WORKERS=8
+      - CLAUDE_PM_MEMORY_LIMIT=2GB
+      - CLAUDE_PM_TASK_TIMEOUT=600
+      
+      # Security - Production
+      - CLAUDE_PM_SECURITY_MODE=production
+      - CLAUDE_PM_CORS_ENABLED=false
+      - CLAUDE_PM_SESSION_SECRET=${CLAUDE_PM_SESSION_SECRET}
+      - CLAUDE_PM_SESSION_TIMEOUT=7200
+      
+      # Monitoring & Alerting - Production
+      - CLAUDE_PM_EMAIL_ALERTS=true
+      - CLAUDE_PM_SMTP_HOST=${CLAUDE_PM_SMTP_HOST}
+      - CLAUDE_PM_SMTP_PORT=${CLAUDE_PM_SMTP_PORT:-587}
+      - CLAUDE_PM_SMTP_USER=${CLAUDE_PM_SMTP_USER}
+      - CLAUDE_PM_SMTP_PASS=${CLAUDE_PM_SMTP_PASS}
+      - CLAUDE_PM_EMAIL_FROM=${CLAUDE_PM_EMAIL_FROM}
+      - CLAUDE_PM_EMAIL_TO=${CLAUDE_PM_EMAIL_TO}
+      
+      - CLAUDE_PM_SLACK_ALERTS=true
+      - CLAUDE_PM_SLACK_WEBHOOK=${CLAUDE_PM_SLACK_WEBHOOK}
+      
+      # Performance & Scaling - Production
+      - CLAUDE_PM_RATE_LIMIT_ENABLED=true
+      - CLAUDE_PM_RATE_LIMIT_REQUESTS=1000
+      - CLAUDE_PM_RATE_LIMIT_WINDOW=3600
+      - CLAUDE_PM_CACHE_ENABLED=true
+      - CLAUDE_PM_CACHE_TTL=300
+      - CLAUDE_PM_MAX_CONNECTIONS=100
+      - CLAUDE_PM_CONNECTION_TIMEOUT=30
+      
+      # Backup & Recovery - Production
+      - CLAUDE_PM_BACKUP_ENABLED=true
+      - CLAUDE_PM_BACKUP_INTERVAL=86400
+      - CLAUDE_PM_BACKUP_RETENTION=30
+      - CLAUDE_PM_BACKUP_PATH=/app/backups
+      
+    ports:
+      - "8003:8003"  # API Port (Production)
+      - "7003:7003"  # Dashboard Port (Production)
+      
+    volumes:
+      # Production persistent storage
+      - /opt/claude-multiagent-pm/data:/app/data
+      - /opt/claude-multiagent-pm/logs:/app/logs
+      - /opt/claude-multiagent-pm/config:/app/config
+      - /opt/claude-multiagent-pm/backups:/app/backups
+      
+      # SSL certificates (if using HTTPS)
+      - /etc/ssl/claude-multiagent-pm:/app/ssl:ro
+      
+    networks:
+      - claude-multiagent-pm-production
+      
+    depends_on:
+      - mem0ai-service
+      - redis-cache
+      
+    healthcheck:
+      test: ["CMD", "/entrypoint.sh", "health"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
+      
+    # Production resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '1.0'
+      restart_policy:
+        condition: any
+        delay: 10s
+        max_attempts: 5
+        window: 120s
+
+  # mem0AI Production Service
+  mem0ai-service:
+    image: mem0ai/mem0ai:latest
+    container_name: claude-multiagent-pm-mem0ai-prod
+    restart: always
+    environment:
+      - MEM0AI_PORT=8002
+      - MEM0AI_HOST=0.0.0.0
+      - MEM0AI_LOG_LEVEL=WARNING
+      - MEM0AI_API_KEY=${MEM0AI_API_KEY}
+      - MEM0AI_PRODUCTION_MODE=true
+      
+    ports:
+      - "127.0.0.1:8002:8002"  # Bind only to localhost
+      
+    volumes:
+      - /opt/claude-multiagent-pm/mem0ai-data:/app/data
+      
+    networks:
+      - claude-multiagent-pm-production
+      
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8002/health || exit 1"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+      
+    # Production resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '1.0'
+
+  # Redis Cache (Production)
+  redis-cache:
+    image: redis:7-alpine
+    container_name: claude-multiagent-pm-redis-prod
+    restart: always
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      
+    volumes:
+      - /opt/claude-multiagent-pm/redis-data:/data
+      
+    networks:
+      - claude-multiagent-pm-production
+      
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+      
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # Health Monitor (Production)
+  health-monitor:
+    image: claude-multiagent-pm:production
+    container_name: claude-multiagent-pm-health-monitor-prod
+    restart: always
+    command: ["python", "-m", "claude_pm.cli", "health", "monitor", "--interval=300"]
+    environment:
+      - CLAUDE_PM_ROOT=/app/claude-multiagent-pm
+      - CLAUDE_PM_LOGS_PATH=/app/logs
+      - ENVIRONMENT=production
+      - CLAUDE_PM_LOG_LEVEL=WARNING
+      - CLAUDE_PM_ROLE=health_monitor
+      - CLAUDE_PM_EMAIL_ALERTS=true
+      - CLAUDE_PM_SLACK_ALERTS=true
+      
+    volumes:
+      - /opt/claude-multiagent-pm/logs:/app/logs
+      - /opt/claude-multiagent-pm/config:/app/config:ro
+      
+    networks:
+      - claude-multiagent-pm-production
+      
+    depends_on:
+      - claude-multiagent-pm
+      
+    # Lightweight resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.2'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+
+  # Backup Service (Production)
+  backup-service:
+    image: claude-multiagent-pm:production
+    container_name: claude-multiagent-pm-backup-prod
+    restart: always
+    command: ["python", "-m", "claude_pm.cli", "service", "backup", "--schedule=daily"]
+    environment:
+      - CLAUDE_PM_ROOT=/app/claude-multiagent-pm
+      - CLAUDE_PM_BACKUP_PATH=/app/backups
+      - ENVIRONMENT=production
+      - CLAUDE_PM_LOG_LEVEL=INFO
+      - CLAUDE_PM_ROLE=backup_service
+      
+      # S3 backup configuration (optional)
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - CLAUDE_PM_S3_BUCKET=${CLAUDE_PM_S3_BUCKET}
+      - CLAUDE_PM_S3_REGION=${CLAUDE_PM_S3_REGION:-us-west-2}
+      
+    volumes:
+      - /opt/claude-multiagent-pm/data:/app/data:ro
+      - /opt/claude-multiagent-pm/backups:/app/backups
+      - /opt/claude-multiagent-pm/logs:/app/logs
+      
+    networks:
+      - claude-multiagent-pm-production
+      
+    depends_on:
+      - claude-multiagent-pm
+      
+    # Backup service resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # Load Balancer (Production with multiple instances)
+  nginx-lb:
+    image: nginx:alpine
+    container_name: claude-multiagent-pm-nginx-prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+      
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/ssl/claude-multiagent-pm:/etc/ssl/claude-multiagent-pm:ro
+      
+    networks:
+      - claude-multiagent-pm-production
+      
+    depends_on:
+      - claude-multiagent-pm
+      
+    # Lightweight resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+
+# Production network with custom subnet
+networks:
+  claude-multiagent-pm-production:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
+    driver_opts:
+      com.docker.network.bridge.name: claude-multiagent-pm-prod

@@ -1,4 +1,4 @@
-# Claude PM - Multi-Subprocess Orchestration Framework
+# Claude Multi-Agent PM - Multi-Subprocess Orchestration Framework
 
 ## 🚨 ABSOLUTE REQUIREMENT: EXPLICIT PERMISSION FOR ANY DEVIATIONS
 
@@ -18,16 +18,16 @@
 3. Request explicit permission for any deviation
 4. Document any approved changes in this framework
 
-## 🚨 CRITICAL: Claude PM vs Claude Code Role Separation
+## 🚨 CRITICAL: Claude Multi-Agent PM vs Claude Code Role Separation
 
-**THIS CONFIGURATION APPLIES ONLY TO CLAUDE PM - THE PROJECT MANAGEMENT ORCHESTRATOR**
+**THIS CONFIGURATION APPLIES ONLY TO CLAUDE MULTI-AGENT PM - THE PROJECT MANAGEMENT ORCHESTRATOR**
 
-**Claude PM Role**: Project management orchestration, subprocess coordination, business communication
+**Claude Multi-Agent PM Role**: Project management orchestration, subprocess coordination, business communication
 **Claude Code Role**: Individual project development work through supervised subprocesses
 
 ### Role Boundaries
-- **Claude PM**: Reads and understands this entire document
-- **Claude Code Subprocesses**: Receive only filtered, relevant instructions from Claude PM
+- **Claude Multi-Agent PM**: Reads and understands this entire document
+- **Claude Code Subprocesses**: Receive only filtered, relevant instructions from Claude Multi-Agent PM
 - **Business Interface**: Claude PM communicates directly with business owner, CTO, and chief architect
 - **Project Isolation**: Individual projects never see PM-level concerns or other project details
 

@@ -1,13 +1,13 @@
 """
-Claude PM Framework - Python Package
+Claude Multi-Agent Project Management Framework - Python Package
 
 A comprehensive project management framework for AI-driven development
 with integrated memory management and multi-agent orchestration.
 """
 
 __version__ = "3.1.0"
-__title__ = "Claude PM Framework"
-__description__ = "Multi-Agent Orchestration Framework for AI-driven project management"
+__title__ = "Claude Multi-Agent PM Framework"
+__description__ = "Claude Multi-Agent Project Management Framework for AI-driven orchestration"
 __author__ = "Robert (Masa) Matsuoka"
 __email__ = "masa@matsuoka.com"
 __license__ = "MIT"
