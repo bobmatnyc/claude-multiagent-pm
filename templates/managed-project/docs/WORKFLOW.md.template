@@ -1,0 +1,424 @@
+# Development Workflow - {{PROJECT_TITLE}}
+
+**Project**: {{PROJECT_NAME}}  
+**Type**: {{PROJECT_TYPE}}  
+**Status**: Ready for Implementation
+
+## 🎯 Workflow Overview
+
+This document describes the complete development workflow for implementing {{PROJECT_TITLE}}, including task management, progress tracking, quality assurance, and integration processes.
+
+## 📋 TrackDown Task Management
+
+**IMPORTANT**: This project uses LOCAL task management only.
+
+- **Backlog Location**: `../trackdown/BACKLOG.md`
+- **Issues Directory**: `../trackdown/issues/`
+- **Scripts Directory**: `../trackdown/scripts/`
+- **Templates Directory**: `../trackdown/templates/`
+
+**DO NOT** look for tasks in any external repositories. All project tasks are tracked locally in the trackdown/ directory.
+
+### TrackDown Structure
+
+The project uses a comprehensive TrackDown system for implementation tracking:
+
+```
+../trackdown/
+├── BACKLOG.md                     # Main implementation backlog
+├── MILESTONES.md                  # Phase milestone tracking
+├── issues/                       # Individual task tracking
+│   ├── {{PROJECT_PREFIX}}-000-implementation-handoff.md  # First ticket (handoff)
+│   └── [task-specific-issues.md]
+├── templates/                    # Task and milestone templates
+│   ├── implementation-task-template.md
+│   └── phase-milestone-template.md
+└── scripts/                     # Automation and tracking tools
+    └── update-progress.py        # Progress tracking automation
+```
+
+### Task Management Process
+
+**1. Implementation Handoff**
+```bash
+# First step: Complete handoff process
+# Ticket: {{PROJECT_PREFIX}}-000-implementation-handoff.md
+# Read all documentation, set up environment, validate understanding
+```
+
+**2. Phase-Based Development**
+```bash
+# Follow systematic phase structure:
+# Phase 1: Core Infrastructure
+# Phase 2: Feature Implementation
+# Phase 3: Production Polish
+```
+
+**3. Task Tracking Commands**
+```bash
+# Track progress automatically
+cd ../trackdown/scripts
+python update-progress.py report          # Generate progress report
+python update-progress.py complete {{PROJECT_PREFIX}}-001 # Mark task completed
+python update-progress.py list-pending    # Show pending tasks
+python update-progress.py stats          # Show progress statistics
+```
+
+### Task Creation Process
+
+**Creating New Tasks**:
+1. Use template: `../trackdown/templates/implementation-task-template.md`
+2. Follow naming convention: `{{PROJECT_PREFIX}}-XXX-task-description.md`
+3. Place in: `../trackdown/issues/{{PROJECT_PREFIX}}-XXX-task-description.md`
+4. Update backlog: Add to `../trackdown/BACKLOG.md`
+
+**Task Template Usage**:
+```bash
+# Copy template for new task
+cp ../trackdown/templates/implementation-task-template.md \
+   ../trackdown/issues/{{PROJECT_PREFIX}}-007-feature-implementation.md
+
+# Customize with specific requirements
+# Update BACKLOG.md with new task reference
+```
+
+## 🔄 Development Workflow
+
+### Daily Development Cycle
+
+**1. Morning Setup**
+```bash
+# Start of day routine
+git pull origin main
+{{ACTIVATE_ENV_COMMAND}}
+
+# Check current progress
+cd ../trackdown/scripts
+python update-progress.py stats
+python update-progress.py list-pending
+```
+
+**2. Implementation Cycle**
+```bash
+# Select next task from pending list
+# Create feature branch
+git checkout -b feature/{{PROJECT_PREFIX}}-XXX-task-name
+
+# Test-driven development
+# 1. Write tests first
+{{TEST_COMMAND}}  # Should fail
+
+# 2. Implement to make tests pass
+# ... implement feature
+
+# 3. Validate implementation
+{{TEST_COMMAND}}  # Should pass
+```
+
+**3. Quality Assurance**
+```bash
+# Code quality checks (required before commit)
+{{FORMAT_COMMAND}}           # Code formatting
+{{LINT_COMMAND}}             # Linting
+{{TYPE_CHECK_COMMAND}}       # Type checking
+{{TEST_COMMAND}}             # All tests must pass
+```
+
+**4. Progress Update**
+```bash
+# Mark task completed
+cd ../trackdown/scripts
+python update-progress.py complete {{PROJECT_PREFIX}}-XXX
+
+# Commit and push
+git add .
+git commit -m "feat: implement {{PROJECT_PREFIX}}-XXX - task description"
+git push origin feature/{{PROJECT_PREFIX}}-XXX-task-name
+```
+
+### Weekly Workflow
+
+**Monday - Phase Planning**
+```bash
+# Review phase objectives
+cat ../trackdown/MILESTONES.md
+
+# Plan week's tasks
+python ../trackdown/scripts/update-progress.py list-pending | head -10
+
+# Update phase milestone status if needed
+# Edit: ../trackdown/templates/phase-milestone-template.md
+```
+
+**Wednesday - Mid-week Review**
+```bash
+# Progress check
+python ../trackdown/scripts/update-progress.py report
+
+# Identify blockers or issues
+# Update task status as needed
+```
+
+**Friday - Phase Completion**
+```bash
+# Final progress report
+python ../trackdown/scripts/update-progress.py report
+
+# Phase gate validation (if applicable)
+# Update milestone completion status
+# Prepare for next phase
+```
+
+## 🧪 Testing Workflow
+
+### Test-Driven Development Process
+
+**1. Write Tests First**
+```{{LANGUAGE_EXTENSION}}
+# Example: tests/unit/core/test_component.py
+def test_component_creation():
+    """Test Component creation and validation."""
+    component = Component(
+        id="test-123",
+        name="test.component", 
+        config={"key": "value"}
+    )
+    assert component.id == "test-123"
+    assert component.name == "test.component"
+```
+
+**2. Run Failing Test**
+```bash
+{{TEST_SPECIFIC_COMMAND}} -v
+# Should fail initially
+```
+
+**3. Implement Feature**
+```{{LANGUAGE_EXTENSION}}
+# src/{{PROJECT_NAME}}/core/component.py
+{{IMPLEMENTATION_EXAMPLE}}
+```
+
+**4. Validate Implementation**
+```bash
+{{TEST_SPECIFIC_COMMAND}} -v
+# Should pass now
+```
+
+### Testing Standards
+
+**Coverage Requirements**:
+- **Unit Tests**: 95%+ coverage for each module
+- **Integration Tests**: End-to-end workflow coverage
+- **Performance Tests**: Benchmark critical components
+- **Regression Tests**: Prevent performance degradation
+
+**Testing Commands**:
+```bash
+# Run specific test categories
+{{TEST_UNIT_COMMAND}}             # Unit tests
+{{TEST_INTEGRATION_COMMAND}}      # Integration tests  
+{{TEST_PERFORMANCE_COMMAND}}      # Performance benchmarks
+
+# Coverage reporting
+{{COVERAGE_COMMAND}}
+{{COVERAGE_REPORT_COMMAND}}
+
+# Continuous testing during development
+{{TEST_WATCH_COMMAND}}           # Watch mode
+```
+
+## 📊 Progress Tracking
+
+### Automated Progress Tracking
+
+**Progress Report Generation**:
+```bash
+# Generate comprehensive progress report
+cd ../trackdown/scripts
+python update-progress.py report
+
+# View current statistics
+python update-progress.py stats
+```
+
+**Progress Report Output**:
+```
+# {{PROJECT_TITLE}} - Implementation Progress Report
+Generated: {{CREATION_DATE}}
+
+## Overall Progress: 25.0% (5/20 tasks)
+
+### ✅ Documentation Phase: 100.0% (3/3)
+  ✅ DOC-001: README.md project overview
+  ✅ DOC-002: DEVELOPMENT.md implementation guide
+  ...
+
+### 🔄 Phase 1: Core Infrastructure: 40.0% (2/5)
+  ✅ {{PROJECT_PREFIX}}-001: Development environment setup
+  ✅ {{PROJECT_PREFIX}}-002: Core component implementation
+  ⬜ {{PROJECT_PREFIX}}-003: Configuration system
+  ...
+```
+
+### Manual Progress Updates
+
+**Task Status Updates**:
+```bash
+# Mark task completed
+python update-progress.py complete {{PROJECT_PREFIX}}-003
+
+# Mark task as pending (if needed)
+python update-progress.py pending {{PROJECT_PREFIX}}-003
+
+# List all pending tasks
+python update-progress.py list-pending
+```
+
+## 🚀 Performance Workflow
+
+### Continuous Performance Monitoring
+
+**Performance Testing Schedule**:
+- **Daily**: Run basic performance tests during development
+- **Weekly**: Comprehensive performance validation
+- **Phase Completion**: Full performance gate validation
+
+**Performance Testing Commands**:
+```bash
+# Basic performance tests
+{{PERF_TEST_COMMAND}} -v
+
+# Component-specific benchmarks
+{{PERF_BENCHMARK_COMMAND}} -v
+
+# Full benchmark suite
+{{PERF_FULL_COMMAND}}
+```
+
+**Performance Target Validation**:
+```{{LANGUAGE_EXTENSION}}
+# Example performance test
+{{PERF_TEST_EXAMPLE}}
+```
+
+## 🔗 Integration Workflow
+
+### Configuration Management
+
+**Development Configuration**:
+```{{CONFIG_FORMAT}}
+{{DEV_CONFIG_EXAMPLE}}
+```
+
+**Production Configuration**:
+```{{CONFIG_FORMAT}}
+{{PROD_CONFIG_EXAMPLE}}
+```
+
+### Git Workflow Integration
+
+**Branch Strategy**:
+```bash
+# Feature branches for each task
+git checkout -b feature/{{PROJECT_PREFIX}}-XXX-task-name
+
+# Implementation and testing
+# ... development work
+
+# Code review and merge
+git checkout main
+git merge feature/{{PROJECT_PREFIX}}-XXX-task-name
+git branch -d feature/{{PROJECT_PREFIX}}-XXX-task-name
+```
+
+**Commit Standards**:
+```bash
+# Conventional commit format
+git commit -m "feat: implement core component - {{PROJECT_PREFIX}}-002"
+git commit -m "test: add performance benchmarks - {{PROJECT_PREFIX}}-007"  
+git commit -m "docs: update API documentation - {{PROJECT_PREFIX}}-015"
+git commit -m "fix: resolve memory leak in component - {{PROJECT_PREFIX}}-008"
+```
+
+## 📝 Documentation Workflow
+
+### Documentation Standards
+
+**Code Documentation**:
+```{{LANGUAGE_EXTENSION}}
+{{DOC_EXAMPLE}}
+```
+
+**Documentation Updates**:
+- **API Changes**: Update docstrings and API documentation
+- **New Features**: Add examples and usage guides
+- **Configuration**: Update CLAUDE.md and configuration docs
+- **Performance**: Update benchmarks and performance guides
+
+### Documentation Generation
+
+**API Documentation**:
+```bash
+# Generate API documentation
+{{DOC_BUILD_COMMAND}}
+
+# Serve documentation locally
+{{DOC_SERVE_COMMAND}}
+{{DOC_OPEN_COMMAND}}
+```
+
+## 🔒 Quality Assurance Workflow
+
+### Code Quality Gates
+
+**Pre-commit Validation**:
+```bash
+# Automatic quality checks (via pre-commit hooks)
+{{PRE_COMMIT_CHECKS}}
+```
+
+**Manual Quality Validation**:
+```bash
+# Full quality check before major commits
+{{QUALITY_COMMANDS}}
+```
+
+### Security and Performance Reviews
+
+**Security Checklist**:
+- [ ] Input validation for all parameters
+- [ ] Secure handling of sensitive data
+- [ ] Access controls and authorization
+- [ ] Resource usage limits
+
+**Performance Review**:
+- [ ] All performance targets met
+- [ ] Memory usage within limits
+- [ ] No performance regressions
+- [ ] Benchmarks passing consistently
+
+## 🎯 Success Criteria
+
+### Phase Completion Criteria
+
+**Each Phase Must**:
+- [ ] All tasks completed and tested
+- [ ] 95%+ test coverage maintained
+- [ ] Performance targets met
+- [ ] Code quality standards passed
+- [ ] Integration working with previous phases
+- [ ] Documentation updated
+
+### Project Completion Criteria
+
+**Final Success**:
+- [ ] All phases completed successfully
+- [ ] Complete system operational
+- [ ] Performance targets achieved
+- [ ] Production-ready package distribution
+- [ ] Comprehensive documentation
+
+---
+
+**Workflow Ready**: This workflow provides systematic guidance for implementing {{PROJECT_TITLE}} with proper task management, quality assurance, and progress tracking throughout the development process.

@@ -1,0 +1,96 @@
+{
+  "name": "@claudepm/framework",
+  "version": "2.0.0",
+  "description": "Claude PM - Multi-Subprocess Orchestration Framework for AI-driven project management",
+  "main": "framework/CLAUDE.md",
+  "keywords": [
+    "claude",
+    "project-management",
+    "ai-orchestration",
+    "subprocess-coordination",
+    "development-framework",
+    "automation",
+    "trackdown",
+    "task-management",
+    "best-practices",
+    "tdd",
+    "api-first"
+  ],
+  "author": {
+    "name": "Robert (Masa) Matsuoka", 
+    "email": "masa@matsuoka.com",
+    "url": "https://github.com/matsuoka"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bobmatnyc/claude-pm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bobmatnyc/claude-pm/issues"
+  },
+  "homepage": "https://github.com/bobmatnyc/claude-pm#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "scripts": {
+    "health-check": "./trackdown/scripts/health-check.sh",
+    "version": "echo $npm_package_version",
+    "validate": "node scripts/validate-framework.js",
+    "release": "standard-version",
+    "release:major": "standard-version --release-as major",
+    "release:minor": "standard-version --release-as minor", 
+    "release:patch": "standard-version --release-as patch"
+  },
+  "files": [
+    "framework/",
+    "trackdown/templates/",
+    "docs/",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "devDependencies": {
+    "standard-version": "^9.5.0"
+  },
+  "standard-version": {
+    "types": [
+      {
+        "type": "feat",
+        "section": "Features"
+      },
+      {
+        "type": "fix", 
+        "section": "Bug Fixes"
+      },
+      {
+        "type": "docs",
+        "section": "Documentation"
+      },
+      {
+        "type": "framework",
+        "section": "Framework"
+      },
+      {
+        "type": "chore",
+        "hidden": true
+      },
+      {
+        "type": "style",
+        "hidden": true
+      },
+      {
+        "type": "refactor",
+        "section": "Code Refactoring"
+      },
+      {
+        "type": "perf",
+        "section": "Performance Improvements"
+      },
+      {
+        "type": "test",
+        "hidden": true
+      }
+    ]
+  }
+}

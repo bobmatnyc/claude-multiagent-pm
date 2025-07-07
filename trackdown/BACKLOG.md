@@ -20,6 +20,22 @@ milestone_active: M01_Foundation
 - [ ] **[M01-008]** Create functional slash command implementations
 - [x] **[M01-009]** Migrate git-portfolio-manager to Claude-PM framework
 - [x] **[M01-019]** Migrate git-portfolio-manager to ~/Projects/managed/ subdirectory
+- [x] **[M01-020]** Create Claude PM Portfolio Manager as new managed project
+- [x] **[M01-021]** Implement Basic Portfolio Dashboard Functionality
+- [x] **[M01-022]** Migrate mem0ai OSS project to Claude PM managed projects
+- [x] **[M01-023]** Migrate matsuoka-com to Claude PM managed projects
+- [x] **[M01-024]** Migrate ai-power-rankings to Claude PM managed projects
+- [x] **[M01-025]** Migrate scraper-engine to Claude PM managed projects
+- [x] **[M01-026]** Migrate ai-power-rankings-data to Claude PM managed projects
+- [x] **[M01-027]** Migrate hot-flash to Claude PM managed projects
+- [x] **[M01-028]** Migrate eva-monorepo to Claude PM managed projects
+- [x] **[M01-029]** Test deployment and verify all services run and are stable
+- [x] **[M01-030]** Comprehensive documentation review and standardization across all managed projects
+- [x] **[M01-031]** Setup CI/CD Pipeline for Claude PM Portfolio Manager
+- [x] **[M01-032]** Migrate ai-code-review to managed project following established procedures
+- [x] **[M01-034]** Setup py-mcp-ipc Documentation Structure for Implementation Handoff
+- [x] **[M01-035]** Create Managed Project Template to Standardize New Project Setup
+- [ ] **[M01-036]** Comprehensive Status Report of All Managed Projects
 
 ### Sprint Goals
 - ✅ Basic framework structure established
@@ -36,6 +52,7 @@ milestone_active: M01_Foundation
 - [ ] **[M01-012]** Deploy mcp-desktop-gateway service mesh
 - [ ] **[M01-013]** Implement zen-mcp-server base infrastructure
 - [ ] **[M01-014]** Create eva-agent framework coordination
+- [ ] **[M01-033]** Comprehensive documentation review for consistency and clarity across framework
 - [ ] **[M01-015]** Establish scraper-engine data collection patterns
 - [ ] **[M01-016]** Optimize ai-power-rankings performance tracking
 - [ ] **[M01-017]** Enhance matsuoka-com deployment pipeline
@@ -96,6 +113,7 @@ milestone_active: M01_Foundation
 - [x] **[M01-003]** Set up MCP integration configuration (2025-07-05)
 - [x] **[M01-004]** Classify and organize existing projects into milestones (2025-07-05)
 - [x] **[M01-005]** Create TrackDown project management system (2025-07-05)
+- [x] **[M01-032]** Migrate ai-code-review to managed project following established procedures (2025-07-06)
 
 ## 🚫 Blocked Items
 
