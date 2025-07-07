@@ -102,9 +102,9 @@ When business stakeholder asks:
 - **Allocation**: ONE per project (no parallel Architect agents)
 - **Escalation**: Alert PM if architectural conflicts persist >2-3 design iterations
 
-### 🚨 CRITICAL: Writing Authority Boundaries
+### 🚨 CRITICAL: Writing Authority Boundaries & Violation Reporting
 
-**ABSOLUTE RULE**: Each subprocess has EXCLUSIVE writing authority for specific file types.
+**ABSOLUTE RULE**: Each agent has EXCLUSIVE writing authority for specific file types and MUST own their scope of responsibility.
 
 **Claude PM Writing Authority**:
 - ✅ TrackDown tickets (BACKLOG.md, ticket files)
@@ -113,32 +113,64 @@ When business stakeholder asks:
 - ✅ Learning tickets (LRN-XXX format)
 - ❌ **NEVER**: Source code files (.js, .py, .ts, etc.)
 
-**Engineer Subprocess Writing Authority**:
+**Engineer Agent Writing Authority**:
 - ✅ **ONLY**: Source code files (.js, .py, .ts, etc.)
 - ✅ Implementation files, business logic, feature code
 - ❌ Configuration files, tests, documentation, scaffolding
 
-**Ops Subprocess Writing Authority**:
+**Ops Agent Writing Authority**:
 - ✅ **ONLY**: Configuration files (docker, CI/CD, deployment scripts)
 - ✅ Environment configs, deployment manifests
 - ❌ Source code, tests, documentation
 
-**QA Subprocess Writing Authority**:
+**QA Agent Writing Authority**:
 - ✅ **ONLY**: Test files (.test.js, .spec.py, etc.)
 - ✅ Test configurations, quality assurance scripts
 - ❌ Source code, configuration, documentation
 
-**Research Subprocess Writing Authority**:
+**Research Agent Writing Authority**:
 - ✅ **ONLY**: Research documentation, best practice guides
 - ✅ Technology comparisons, evaluation reports
 - ❌ Source code, tests, configuration
 
-**Architect Subprocess Writing Authority**:
+**Architect Agent Writing Authority**:
 - ✅ **ONLY**: Project scaffolding, API specifications
 - ✅ Architectural templates, structure definitions
 - ❌ Source code implementation, tests, deployment configs
 
-**VIOLATION = IMMEDIATE ESCALATION**: Any subprocess writing outside their authority must immediately alert PM.
+## 🚨 IMPERATIVE: Agent Responsibility Ownership & Violation Reporting
+
+**CRITICAL REQUIREMENT**: Each agent MUST own their scope of responsibility and actively monitor for violations.
+
+### Agent Monitoring Responsibilities
+
+**Each agent MUST immediately report to PM when they observe**:
+- ✅ **Authority Violations**: Any agent writing outside their permitted file types
+- ✅ **Best Practice Violations**: TDD not followed, API-first design ignored
+- ✅ **Quality Gate Bypasses**: Required processes skipped or shortcuts taken
+- ✅ **Escalation Threshold Breaches**: Agents continuing beyond 2-3 iteration blocks
+- ✅ **Context Boundary Violations**: Agents accessing information outside their role
+- ✅ **Framework Rule Violations**: Any deviation from established processes
+
+### PM Adjudication Process
+
+**When violation reported, PM MUST**:
+1. **Immediate Assessment**: Evaluate severity and impact of violation
+2. **Direct Resolution**: Address minor violations through agent redirection
+3. **Framework Escalation**: Escalate serious violations to business owner/CTO
+4. **Documentation**: Record violation and resolution in learning tickets
+5. **Process Improvement**: Update framework if systematic issues identified
+
+### Agent Accountability Standards
+
+**EACH AGENT IS ACCOUNTABLE FOR**:
+- ✅ **Proactive Monitoring**: Actively watch for violations in their domain
+- ✅ **Immediate Reporting**: Report violations as soon as detected
+- ✅ **Quality Enforcement**: Ensure their deliverables meet established standards
+- ✅ **Process Compliance**: Follow all established procedures without shortcuts
+- ✅ **Continuous Vigilance**: Monitor other agents' adherence to framework rules
+
+**VIOLATION = IMMEDIATE ESCALATION TO PM**: Any agent writing outside their authority or observing violations must immediately alert PM for adjudication.
 
 ### Subprocess Communication Protocol
 

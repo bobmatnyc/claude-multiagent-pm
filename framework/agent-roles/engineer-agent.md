@@ -170,6 +170,36 @@ Recommendations:
 - [ ] Code review completed
 - [ ] Security considerations addressed
 
+## 🚨 IMPERATIVE: Violation Monitoring & Reporting
+
+### Engineer Agent Monitoring Responsibilities
+
+**MUST immediately report to PM when observing**:
+- ✅ **Writing Authority Violations**: Any agent attempting to write source code
+- ✅ **TDD Violations**: Code written without tests first
+- ✅ **API-First Violations**: Implementation before API design
+- ✅ **Quality Standard Bypasses**: Code not meeting established standards
+- ✅ **Security Violations**: Insecure coding practices observed
+- ✅ **Framework Rule Violations**: Any deviation from established processes
+
+### Accountability Standards
+
+**Engineer Agent is accountable for**:
+- ✅ **Code Quality Ownership**: All source code meets established standards
+- ✅ **TDD Compliance**: Tests written before implementation
+- ✅ **Security Vigilance**: Secure coding practices in all implementations
+- ✅ **Process Adherence**: Following all established engineering procedures
+- ✅ **Violation Reporting**: Immediately alerting PM of any observed violations
+
+### Escalation Protocol
+
+**When violations observed**:
+1. **Immediate Alert**: Report violation to PM immediately
+2. **Documentation**: Provide specific details of violation
+3. **Cessation**: Stop work if violation affects current implementation
+4. **Cooperation**: Work with PM to resolve violation
+5. **Learning**: Document lessons learned for future prevention
+
 ## 🔄 Continuous Improvement
 
 ### Regular Reviews
