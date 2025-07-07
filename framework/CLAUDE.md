@@ -53,6 +53,101 @@ When business stakeholder asks:
 
 ## 🏗️ Multi-Subprocess Orchestration Model
 
+### 1. Agent Isolation Through Git Worktrees
+
+The foundation of parallel AI development rests on git worktrees, which create physically separate directories for each agent while sharing the same repository history. This approach eliminates file conflicts and enables multiple AI instances to work simultaneously without interference.
+
+**MANDATORY REQUIREMENT**: When using multiple agents on the same project, each agent MUST work in a separate git worktree to prevent conflicts and ensure isolation.
+
+#### Git Worktree Setup Protocol
+
+**For multiple agents on same project**:
+```bash
+# Main project directory (PM coordination)
+cd ~/Projects/managed/[project-name]
+
+# Create worktree for Engineer agent
+git worktree add ../[project-name]-engineer-01 main
+
+# Create worktree for QA agent  
+git worktree add ../[project-name]-qa main
+
+# Create worktree for Ops agent
+git worktree add ../[project-name]-ops main
+
+# Create worktree for Research agent
+git worktree add ../[project-name]-research main
+
+# Create worktree for Architect agent
+git worktree add ../[project-name]-architect main
+```
+
+**Agent Assignment**:
+- **Engineer Agent Context**: Works in `~/Projects/managed/[project-name]-engineer-01/`
+- **QA Agent Context**: Works in `~/Projects/managed/[project-name]-qa/`
+- **Ops Agent Context**: Works in `~/Projects/managed/[project-name]-ops/`
+- **Research Agent Context**: Works in `~/Projects/managed/[project-name]-research/`
+- **Architect Agent Context**: Works in `~/Projects/managed/[project-name]-architect/`
+
+**Benefits**:
+- ✅ **File Conflict Prevention**: Each agent modifies files in isolated directories
+- ✅ **Parallel Development**: Multiple agents can work simultaneously without interference
+- ✅ **Shared History**: All agents share the same repository history and branches
+- ✅ **Clean Merges**: Changes can be reviewed and merged systematically
+- ✅ **Agent Accountability**: Clear ownership of changes by agent type
+
+#### Worktree Management
+
+**Creating Agent Worktrees**:
+```bash
+# PM creates worktree before assigning agent
+git worktree add ../[project]-[agent-type] [branch-name]
+
+# Assign agent to work in that specific directory
+# Agent receives filtered context pointing to their worktree
+```
+
+**Agent Work Protocol**:
+```bash
+# Agent works in assigned worktree
+cd ~/Projects/managed/[project-name]-[agent-type]/
+
+# Agent creates branch for their work
+git checkout -b feature/[agent-type]-[task-description]
+
+# Agent commits changes in their isolated environment
+git add [files-within-agent-authority]
+git commit -m "[agent-type]: implement X - refs PROJ-XXX"
+
+# Agent pushes their branch
+git push origin feature/[agent-type]-[task-description]
+```
+
+**Integration Protocol**:
+```bash
+# PM coordinates integration from main project directory
+cd ~/Projects/managed/[project-name]/
+
+# Pull agent changes into main working directory
+git fetch origin
+git merge origin/feature/[agent-type]-[task-description]
+
+# Run integration tests and quality gates
+npm test && npm run lint
+
+# Merge to main branch if all checks pass
+git push origin main
+```
+
+**Cleanup After Task Completion**:
+```bash
+# Remove agent worktree after successful integration
+git worktree remove ../[project-name]-[agent-type]
+
+# Clean up remote branch
+git push origin --delete feature/[agent-type]-[task-description]
+```
+
 ### Core Architecture
 
 **Claude PM (Orchestrator)**:
@@ -71,6 +166,8 @@ When business stakeholder asks:
 **AGENT ALLOCATION RULES**:
 - **Engineer Agents**: Can assign MULTIPLE engineers per project if tasks are parallelizable
 - **All Other Agents**: ONLY ONE per project at a time (Ops, QA, Research, Architect)
+- **Worktree Isolation**: When using multiple agents, each MUST work in separate git worktrees
+- **Directory Assignment**: Each agent receives a unique working directory via worktree
 
 #### 1. Engineer Agent (ONLY agent that writes code)
 - **Detailed Role Definition**: [Engineer Agent Documentation](agent-roles/engineer-agent.md)
@@ -174,12 +271,15 @@ When business stakeholder asks:
 
 ### Subprocess Communication Protocol
 
-**PM → Subprocess**:
+**PM → Subprocess** (with worktree isolation):
 ```
 Context: [Filtered project info specific to role]
+Working Directory: ~/Projects/managed/[project-name]-[agent-type]/
 Task: [Specific work assignment]
 Standards: [Relevant Claude Code best practices]
 Previous Learning: [Related findings from past work]
+Writing Authority: [Specific file types this agent can modify]
+Git Branch: feature/[agent-type]-[task-description]
 Escalation: Alert PM if blocked >2-3 iterations
 ```
 
@@ -398,11 +498,13 @@ PM provides each subprocess only what they need:
 5. Coordinate cross-project dependencies
 
 ### Subprocess Coordination
-1. Assign tasks with filtered context
-2. Monitor progress and provide guidance
-3. Capture learnings and update tickets
-4. Coordinate between subprocesses when needed
-5. Escalate to business stakeholders when required
+1. **Setup Worktrees**: Create isolated working directories for each agent
+2. **Assign Tasks**: Provide filtered context with specific worktree directory
+3. **Monitor Progress**: Track agent work in their isolated environments
+4. **Coordinate Integration**: Merge agent changes through controlled integration
+5. **Capture Learnings**: Update tickets with agent findings and outcomes
+6. **Escalate Issues**: Route blockers to business stakeholders when required
+7. **Cleanup Worktrees**: Remove agent directories after successful integration
 
 ### Evening Review (PM)
 1. Update all ticket statuses
