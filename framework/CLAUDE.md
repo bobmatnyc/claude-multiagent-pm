@@ -418,9 +418,39 @@ PM provides each subprocess only what they need:
 
 ---
 
-**Framework Version**: v2.0.0-subprocess-orchestration  
-**Target Implementation**: Q1 2025  
-**Repository**: ~/Projects/Claude-PM/  
+## 📍 CURRENT STATE SUMMARY (for resuming work)
+
+### Active Work Items
+- **git-portfolio-manager TD-002**: Testing infrastructure improvements using incremental approach
+  - Status: IN_PROGRESS, stable at 27/27 tests passing, ready for Phase 1 implementation
+  - Location: `/Users/masa/Projects/managed/git-portfolio-manager/trackdown/BACKLOG.md`
+  - Next: Implement TD-002 Phase 1 (5 tests) with QA agent supervision
+  
+- **Claude PM Framework**: v3.0.0 multi-subprocess orchestration model complete
+  - Status: Published to GitHub as public repository
+  - Location: `https://github.com/bobmatnyc/claude-pm`
+  - Version: v3.0.0 with semantic versioning and npm package structure
+
+### Framework Implementation Status
+- **Level 1**: Basic subprocess orchestration ✅ (COMPLETED)
+- **Level 2**: Automated subprocess coordination (M01 target - PENDING)
+- **Level 3**: Intelligent subprocess routing (M02 target)
+- **Level 4**: Self-optimizing subprocess ecosystem (M03 target)
+
+### Key Learnings Captured
+- **TD-002 Lesson**: Over-engineering 250 tests caused 176 failures, use incremental approach (5-10 tests per phase)
+- **Memory Service**: mem0ai-mcp running on port 8002, needs OpenAI API key configuration
+- **Context Separation**: Projects operate independently with no PM framework awareness
+
+### Next Session Priority Actions
+1. **Continue TD-002 Implementation**: Assign QA agent to implement Phase 1 (5 tests) with close supervision
+2. **Complete M01-036**: Finish comprehensive status report of all managed projects
+3. **mem0ai Integration**: Configure OpenAI API key for memory service functionality
+
+---
+
+**Framework Version**: v3.0.0 (published to GitHub)  
+**Repository**: https://github.com/bobmatnyc/claude-pm  
 **Last Updated**: 2025-07-07  
 
 **CRITICAL REMINDER**: This document is ONLY for Claude PM orchestration. Claude Code subprocesses receive filtered, role-specific instructions only.
