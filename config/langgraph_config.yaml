@@ -1,0 +1,69 @@
+# LangGraph Configuration for Claude PM Framework
+# This file configures the LangGraph integration for state-based workflow orchestration
+
+langgraph:
+  # Checkpointing configuration
+  checkpointer:
+    type: "sqlite"  # or "postgres", "memory"
+    path: ".claude-pm/checkpoints.db"
+    
+  # Model routing rules
+  models:
+    orchestrator: "claude-3-5-sonnet-20241022"
+    architect: "claude-3-5-sonnet-20241022"
+    engineer: "claude-3-5-sonnet-20241022"
+    qa: "claude-3-5-sonnet-20241022"
+    researcher: "claude-3-5-sonnet-20241022"
+    code_review: "claude-3-5-sonnet-20241022"
+    
+  # Workflow configurations
+  workflows:
+    task:
+      max_iterations: 5
+      timeout_seconds: 300
+      parallel_agents: 3
+      
+    project:
+      checkpoint_frequency: "after_each_milestone"
+      max_concurrent_tasks: 5
+      
+  # Cost management (even with Claude Max)
+  cost_tracking:
+    track_token_usage: true
+    alert_threshold: 1000000  # 1M tokens
+    daily_limit: 10000000    # 10M tokens
+    
+  # Human approval settings
+  human_approval:
+    required_for:
+      - "complex_tasks"
+      - "security_changes"
+      - "database_migrations"
+    notification_channels:
+      - "cli"
+      - "file"
+    timeout_minutes: 60
+
+# Directory structure for LangGraph workflows
+directories:
+  langgraph_root: "framework/langgraph"
+  states: "framework/langgraph/states"
+  nodes: "framework/langgraph/nodes"
+  graphs: "framework/langgraph/graphs"
+  routers: "framework/langgraph/routers"
+  utils: "framework/langgraph/utils"
+
+# State persistence settings
+persistence:
+  enabled: true
+  backend: "sqlite"
+  database_path: ".claude-pm/checkpoints.db"
+  retention_days: 30
+  cleanup_interval_hours: 24
+
+# Monitoring and metrics
+monitoring:
+  enabled: true
+  metrics_collection: true
+  export_format: "json"
+  metrics_file: "logs/langgraph_metrics.json"

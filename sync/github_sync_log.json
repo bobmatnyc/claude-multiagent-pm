@@ -1,0 +1,769 @@
+{
+  "last_sync": "2025-07-07T11:37:13.176416",
+  "repository": "bobmatnyc/claude-pm",
+  "sync_records": {
+    "M01-001": {
+      "ticket_id": "M01-001",
+      "github_issue_number": 1,
+      "last_sync": "2025-07-07T11:31:40.879441",
+      "checksum": "002926a57dedfea510ab686aea4d5a22",
+      "github_issue_id": "I_kwDOPIEMDM6_TGAC"
+    },
+    "M01-002": {
+      "ticket_id": "M01-002",
+      "github_issue_number": 2,
+      "last_sync": "2025-07-07T11:31:41.533334",
+      "checksum": "083a5e0b1b28894eedb76f880a336ba7",
+      "github_issue_id": "I_kwDOPIEMDM6_TGAn"
+    },
+    "M01-003": {
+      "ticket_id": "M01-003",
+      "github_issue_number": 3,
+      "last_sync": "2025-07-07T11:31:42.234330",
+      "checksum": "3aa05b4abc605459cdffa11586acf43a",
+      "github_issue_id": "I_kwDOPIEMDM6_TGA-"
+    },
+    "M01-004": {
+      "ticket_id": "M01-004",
+      "github_issue_number": 4,
+      "last_sync": "2025-07-07T11:31:42.923507",
+      "checksum": "421a1a82c17550d14ff5ed1411d44773",
+      "github_issue_id": "I_kwDOPIEMDM6_TGBY"
+    },
+    "M01-005": {
+      "ticket_id": "M01-005",
+      "github_issue_number": 5,
+      "last_sync": "2025-07-07T11:31:43.627130",
+      "checksum": "46d9df43d5dffe77984d2cbd97c6981f",
+      "github_issue_id": "I_kwDOPIEMDM6_TGB4"
+    },
+    "M01-006": {
+      "ticket_id": "M01-006",
+      "github_issue_number": 6,
+      "last_sync": "2025-07-07T11:31:44.362624",
+      "checksum": "5fd53209cbbfe03d49b201b0808d18f7",
+      "github_issue_id": "I_kwDOPIEMDM6_TGCY"
+    },
+    "M01-007": {
+      "ticket_id": "M01-007",
+      "github_issue_number": 7,
+      "last_sync": "2025-07-07T11:31:45.158592",
+      "checksum": "d9397353dd0a7f96820157c548f775ac",
+      "github_issue_id": "I_kwDOPIEMDM6_TGCz"
+    },
+    "M01-008": {
+      "ticket_id": "M01-008",
+      "github_issue_number": 8,
+      "last_sync": "2025-07-07T11:31:45.831732",
+      "checksum": "c9cf9249d4636c33ceade6bd04ba1ccc",
+      "github_issue_id": "I_kwDOPIEMDM6_TGDa"
+    },
+    "M01-009": {
+      "ticket_id": "M01-009",
+      "github_issue_number": 9,
+      "last_sync": "2025-07-07T11:31:46.615644",
+      "checksum": "6fecbcd9ed7ccf21b5f7507daaa684c8",
+      "github_issue_id": "I_kwDOPIEMDM6_TGD-"
+    },
+    "M01-019": {
+      "ticket_id": "M01-019",
+      "github_issue_number": 10,
+      "last_sync": "2025-07-07T11:31:47.332859",
+      "checksum": "bb8c67b3e92305c05165041b7a29da4b",
+      "github_issue_id": "I_kwDOPIEMDM6_TGEW"
+    },
+    "M01-020": {
+      "ticket_id": "M01-020",
+      "github_issue_number": 11,
+      "last_sync": "2025-07-07T11:31:48.102513",
+      "checksum": "763e1ca24f7b676631d205196a485d8c",
+      "github_issue_id": "I_kwDOPIEMDM6_TGEw"
+    },
+    "M01-021": {
+      "ticket_id": "M01-021",
+      "github_issue_number": 12,
+      "last_sync": "2025-07-07T11:31:48.806066",
+      "checksum": "6db9c09e0e9e90e7395affcd30a6588b",
+      "github_issue_id": "I_kwDOPIEMDM6_TGFU"
+    },
+    "M01-022": {
+      "ticket_id": "M01-022",
+      "github_issue_number": 13,
+      "last_sync": "2025-07-07T11:31:49.523832",
+      "checksum": "c277eaf223f021d8372155089583d5d5",
+      "github_issue_id": "I_kwDOPIEMDM6_TGF9"
+    },
+    "M01-023": {
+      "ticket_id": "M01-023",
+      "github_issue_number": 14,
+      "last_sync": "2025-07-07T11:31:50.278383",
+      "checksum": "52522d4b6de75a12764fe8dc9561ea49",
+      "github_issue_id": "I_kwDOPIEMDM6_TGGh"
+    },
+    "M01-024": {
+      "ticket_id": "M01-024",
+      "github_issue_number": 15,
+      "last_sync": "2025-07-07T11:31:50.957851",
+      "checksum": "27b8b1e86684ad90465abe4a17587a8d",
+      "github_issue_id": "I_kwDOPIEMDM6_TGHJ"
+    },
+    "M01-025": {
+      "ticket_id": "M01-025",
+      "github_issue_number": 16,
+      "last_sync": "2025-07-07T11:31:51.699081",
+      "checksum": "7f29fa417da1d797718c992280e0e09f",
+      "github_issue_id": "I_kwDOPIEMDM6_TGH0"
+    },
+    "M01-026": {
+      "ticket_id": "M01-026",
+      "github_issue_number": 17,
+      "last_sync": "2025-07-07T11:31:52.482858",
+      "checksum": "5fadb02288520d40f8d336c30aac4a74",
+      "github_issue_id": "I_kwDOPIEMDM6_TGIV"
+    },
+    "M01-027": {
+      "ticket_id": "M01-027",
+      "github_issue_number": 18,
+      "last_sync": "2025-07-07T11:31:53.203839",
+      "checksum": "ceff0cf200f7cfa9397bac0165e34bd7",
+      "github_issue_id": "I_kwDOPIEMDM6_TGI3"
+    },
+    "M01-028": {
+      "ticket_id": "M01-028",
+      "github_issue_number": 19,
+      "last_sync": "2025-07-07T11:31:53.890899",
+      "checksum": "140d8f1c0206faa4889ee6bb48460eef",
+      "github_issue_id": "I_kwDOPIEMDM6_TGJd"
+    },
+    "M01-029": {
+      "ticket_id": "M01-029",
+      "github_issue_number": 20,
+      "last_sync": "2025-07-07T11:31:54.686372",
+      "checksum": "d9944411c511ac1c73be2c5a9e80c74c",
+      "github_issue_id": "I_kwDOPIEMDM6_TGJ_"
+    },
+    "M01-030": {
+      "ticket_id": "M01-030",
+      "github_issue_number": 21,
+      "last_sync": "2025-07-07T11:32:46.460547",
+      "checksum": "d95532661f86f82430cf999e69b28253",
+      "github_issue_id": "I_kwDOPIEMDM6_TGuu"
+    },
+    "M01-031": {
+      "ticket_id": "M01-031",
+      "github_issue_number": 22,
+      "last_sync": "2025-07-07T11:32:47.136958",
+      "checksum": "52c2f4d6a6e0ad6571c7f05119af1466",
+      "github_issue_id": "I_kwDOPIEMDM6_TGvI"
+    },
+    "M01-032": {
+      "ticket_id": "M01-032",
+      "github_issue_number": 23,
+      "last_sync": "2025-07-07T11:32:47.822932",
+      "checksum": "8dcf1416467a296fb7b40f25d0051ac9",
+      "github_issue_id": "I_kwDOPIEMDM6_TGvu"
+    },
+    "M01-034": {
+      "ticket_id": "M01-034",
+      "github_issue_number": 24,
+      "last_sync": "2025-07-07T11:32:48.538595",
+      "checksum": "8189e3071d6765dc040100799b90076e",
+      "github_issue_id": "I_kwDOPIEMDM6_TGwQ"
+    },
+    "M01-035": {
+      "ticket_id": "M01-035",
+      "github_issue_number": 25,
+      "last_sync": "2025-07-07T11:32:49.479370",
+      "checksum": "d44941f966fa4b769a7e882d6e66f6d8",
+      "github_issue_id": "I_kwDOPIEMDM6_TGw2"
+    },
+    "M01-036": {
+      "ticket_id": "M01-036",
+      "github_issue_number": 26,
+      "last_sync": "2025-07-07T11:32:50.153676",
+      "checksum": "03301b11c85eddfccee48d9c155221c6",
+      "github_issue_id": "I_kwDOPIEMDM6_TGxX"
+    },
+    "M01-010": {
+      "ticket_id": "M01-010",
+      "github_issue_number": 27,
+      "last_sync": "2025-07-07T11:32:50.912424",
+      "checksum": "facdb205d40d09d75bb16abd2e01dcad",
+      "github_issue_id": "I_kwDOPIEMDM6_TGx3"
+    },
+    "M01-011": {
+      "ticket_id": "M01-011",
+      "github_issue_number": 28,
+      "last_sync": "2025-07-07T11:32:51.642767",
+      "checksum": "f7c1dc97c19e47a0bdecf867064ab420",
+      "github_issue_id": "I_kwDOPIEMDM6_TGyO"
+    },
+    "M01-012": {
+      "ticket_id": "M01-012",
+      "github_issue_number": 29,
+      "last_sync": "2025-07-07T11:32:52.338274",
+      "checksum": "b815ab9470233eef0990ac4ccf6d1562",
+      "github_issue_id": "I_kwDOPIEMDM6_TGyr"
+    },
+    "M01-013": {
+      "ticket_id": "M01-013",
+      "github_issue_number": 30,
+      "last_sync": "2025-07-07T11:32:53.154012",
+      "checksum": "07d14653bc44879b64279aa19f083066",
+      "github_issue_id": "I_kwDOPIEMDM6_TGzL"
+    },
+    "M01-014": {
+      "ticket_id": "M01-014",
+      "github_issue_number": 31,
+      "last_sync": "2025-07-07T11:32:53.870250",
+      "checksum": "ef082935951d75ca75a658c667de7277",
+      "github_issue_id": "I_kwDOPIEMDM6_TGzu"
+    },
+    "M01-033": {
+      "ticket_id": "M01-033",
+      "github_issue_number": 32,
+      "last_sync": "2025-07-07T11:32:54.631630",
+      "checksum": "fb62a64108fbd247f34850b0b1e047b8",
+      "github_issue_id": "I_kwDOPIEMDM6_TG0G"
+    },
+    "M01-015": {
+      "ticket_id": "M01-015",
+      "github_issue_number": 33,
+      "last_sync": "2025-07-07T11:32:55.431596",
+      "checksum": "d240ad9940bd84cc279bfc1e4c24d55d",
+      "github_issue_id": "I_kwDOPIEMDM6_TG0o"
+    },
+    "M01-016": {
+      "ticket_id": "M01-016",
+      "github_issue_number": 34,
+      "last_sync": "2025-07-07T11:32:56.295441",
+      "checksum": "0aa4e61a8798d56b5f53488487d83835",
+      "github_issue_id": "I_kwDOPIEMDM6_TG1S"
+    },
+    "M01-017": {
+      "ticket_id": "M01-017",
+      "github_issue_number": 35,
+      "last_sync": "2025-07-07T11:32:57.005538",
+      "checksum": "8a795f40c404ce65517791952626c532",
+      "github_issue_id": "I_kwDOPIEMDM6_TG11"
+    },
+    "M01-018": {
+      "ticket_id": "M01-018",
+      "github_issue_number": 36,
+      "last_sync": "2025-07-07T11:32:57.814918",
+      "checksum": "82d5cc22b3a2f46d95fc34fe6b636750",
+      "github_issue_id": "I_kwDOPIEMDM6_TG2d"
+    },
+    "M02-001": {
+      "ticket_id": "M02-001",
+      "github_issue_number": 37,
+      "last_sync": "2025-07-07T11:32:58.543541",
+      "checksum": "2611b19372dac5d7b9f7bd4f359eddcb",
+      "github_issue_id": "I_kwDOPIEMDM6_TG3C"
+    },
+    "M02-002": {
+      "ticket_id": "M02-002",
+      "github_issue_number": 2,
+      "last_sync": "2025-07-07T11:33:00.210592",
+      "checksum": "269e53dce8a5f05450e01a63fa081320",
+      "github_issue_id": "I_kwDOPIEMDM6_TGAn"
+    },
+    "M02-003": {
+      "ticket_id": "M02-003",
+      "github_issue_number": 38,
+      "last_sync": "2025-07-07T11:33:00.878667",
+      "checksum": "07bc64be75ad068d12acbd80d1e7c15f",
+      "github_issue_id": "I_kwDOPIEMDM6_TG4r"
+    },
+    "M02-004": {
+      "ticket_id": "M02-004",
+      "github_issue_number": 39,
+      "last_sync": "2025-07-07T11:33:01.685956",
+      "checksum": "131f1c48bc7f71c7dea06643733e4cf8",
+      "github_issue_id": "I_kwDOPIEMDM6_TG5D"
+    },
+    "M02-005": {
+      "ticket_id": "M02-005",
+      "github_issue_number": 40,
+      "last_sync": "2025-07-07T11:33:02.363970",
+      "checksum": "e3653916339c05c9c2fcf5031e878507",
+      "github_issue_id": "I_kwDOPIEMDM6_TG5m"
+    },
+    "M02-006": {
+      "ticket_id": "M02-006",
+      "github_issue_number": 41,
+      "last_sync": "2025-07-07T11:33:52.274301",
+      "checksum": "4ba7dd2f892d0a1c5252aabf8e5214e7",
+      "github_issue_id": "I_kwDOPIEMDM6_THcT"
+    },
+    "M02-007": {
+      "ticket_id": "M02-007",
+      "github_issue_number": 42,
+      "last_sync": "2025-07-07T11:33:52.979849",
+      "checksum": "6f85015c83752780221da0cb0abd5052",
+      "github_issue_id": "I_kwDOPIEMDM6_THcs"
+    },
+    "M02-008": {
+      "ticket_id": "M02-008",
+      "github_issue_number": 43,
+      "last_sync": "2025-07-07T11:33:53.712063",
+      "checksum": "a2006af60b5152696fb185813265e122",
+      "github_issue_id": "I_kwDOPIEMDM6_THdL"
+    },
+    "M02-009": {
+      "ticket_id": "M02-009",
+      "github_issue_number": 44,
+      "last_sync": "2025-07-07T11:33:54.545515",
+      "checksum": "1755a98b9707a116b06f6bf9a3cbadf4",
+      "github_issue_id": "I_kwDOPIEMDM6_THd1"
+    },
+    "M02-010": {
+      "ticket_id": "M02-010",
+      "github_issue_number": 45,
+      "last_sync": "2025-07-07T11:33:55.246937",
+      "checksum": "834ff5be711b92a0df577c6347cf4300",
+      "github_issue_id": "I_kwDOPIEMDM6_THeQ"
+    },
+    "M02-011": {
+      "ticket_id": "M02-011",
+      "github_issue_number": 46,
+      "last_sync": "2025-07-07T11:33:55.993437",
+      "checksum": "19abc913306d683404ec41dfce49887f",
+      "github_issue_id": "I_kwDOPIEMDM6_THeq"
+    },
+    "M02-012": {
+      "ticket_id": "M02-012",
+      "github_issue_number": 47,
+      "last_sync": "2025-07-07T11:33:56.704205",
+      "checksum": "466c705c061e32afc58ccb51da1612bc",
+      "github_issue_id": "I_kwDOPIEMDM6_THfB"
+    },
+    "M02-013": {
+      "ticket_id": "M02-013",
+      "github_issue_number": 48,
+      "last_sync": "2025-07-07T11:33:57.562214",
+      "checksum": "5e9292dc8100046882c41854a88f1f6b",
+      "github_issue_id": "I_kwDOPIEMDM6_THf4"
+    },
+    "M02-014": {
+      "ticket_id": "M02-014",
+      "github_issue_number": 49,
+      "last_sync": "2025-07-07T11:33:58.232766",
+      "checksum": "387e1ce6cdaf998a2098cee74bec0d0b",
+      "github_issue_id": "I_kwDOPIEMDM6_THgP"
+    },
+    "M02-015": {
+      "ticket_id": "M02-015",
+      "github_issue_number": 50,
+      "last_sync": "2025-07-07T11:33:58.974960",
+      "checksum": "3ac9ec132f728bd8dca31e783af50bc3",
+      "github_issue_id": "I_kwDOPIEMDM6_THgy"
+    },
+    "M02-016": {
+      "ticket_id": "M02-016",
+      "github_issue_number": 51,
+      "last_sync": "2025-07-07T11:33:59.700843",
+      "checksum": "d8fecc598350dbb6a161abfe359a465c",
+      "github_issue_id": "I_kwDOPIEMDM6_THhm"
+    },
+    "M02-017": {
+      "ticket_id": "M02-017",
+      "github_issue_number": 52,
+      "last_sync": "2025-07-07T11:34:00.444099",
+      "checksum": "9632e639bd9e9332a0b8550f9ac5a15a",
+      "github_issue_id": "I_kwDOPIEMDM6_THiF"
+    },
+    "M02-018": {
+      "ticket_id": "M02-018",
+      "github_issue_number": 53,
+      "last_sync": "2025-07-07T11:34:01.219423",
+      "checksum": "d106b8e9458f6c8d1d8d828cf4cfd2fd",
+      "github_issue_id": "I_kwDOPIEMDM6_THir"
+    },
+    "M03-001": {
+      "ticket_id": "M03-001",
+      "github_issue_number": 54,
+      "last_sync": "2025-07-07T11:34:01.859311",
+      "checksum": "34f36f7ad5f0dd53ffac5f85be08410f",
+      "github_issue_id": "I_kwDOPIEMDM6_THjR"
+    },
+    "M03-002": {
+      "ticket_id": "M03-002",
+      "github_issue_number": 55,
+      "last_sync": "2025-07-07T11:34:02.705357",
+      "checksum": "09617ededbaa02431ac4b1f77c20a96d",
+      "github_issue_id": "I_kwDOPIEMDM6_THj2"
+    },
+    "M03-003": {
+      "ticket_id": "M03-003",
+      "github_issue_number": 56,
+      "last_sync": "2025-07-07T11:34:03.455501",
+      "checksum": "144a6a0753e299fd7156d5afefa2585d",
+      "github_issue_id": "I_kwDOPIEMDM6_THkS"
+    },
+    "M03-004": {
+      "ticket_id": "M03-004",
+      "github_issue_number": 57,
+      "last_sync": "2025-07-07T11:34:04.157320",
+      "checksum": "b2d28db4df0efab67fa38e2e5de0cb95",
+      "github_issue_id": "I_kwDOPIEMDM6_THk6"
+    },
+    "M03-005": {
+      "ticket_id": "M03-005",
+      "github_issue_number": 58,
+      "last_sync": "2025-07-07T11:34:05.002693",
+      "checksum": "4e17f2215ae4afeaeb6649de1a97a738",
+      "github_issue_id": "I_kwDOPIEMDM6_THlZ"
+    },
+    "M03-006": {
+      "ticket_id": "M03-006",
+      "github_issue_number": 59,
+      "last_sync": "2025-07-07T11:34:05.819445",
+      "checksum": "083ec494552b43aba244d28c54dfbca3",
+      "github_issue_id": "I_kwDOPIEMDM6_THmC"
+    },
+    "M03-007": {
+      "ticket_id": "M03-007",
+      "github_issue_number": 60,
+      "last_sync": "2025-07-07T11:34:06.492088",
+      "checksum": "e689fe2f26b21ad6a667e35266966141",
+      "github_issue_id": "I_kwDOPIEMDM6_THmn"
+    },
+    "M03-008": {
+      "ticket_id": "M03-008",
+      "github_issue_number": 61,
+      "last_sync": "2025-07-07T11:34:07.264606",
+      "checksum": "ea7f762a88320182112deaf6d6a73f90",
+      "github_issue_id": "I_kwDOPIEMDM6_THnJ"
+    },
+    "M03-009": {
+      "ticket_id": "M03-009",
+      "github_issue_number": 62,
+      "last_sync": "2025-07-07T11:34:58.027767",
+      "checksum": "a8e29381ce226139d0166f0a9a034cff",
+      "github_issue_id": "I_kwDOPIEMDM6_TIJy"
+    },
+    "M03-010": {
+      "ticket_id": "M03-010",
+      "github_issue_number": 63,
+      "last_sync": "2025-07-07T11:34:58.740271",
+      "checksum": "4cb29af6c0df8f793a85deb02b4f8d28",
+      "github_issue_id": "I_kwDOPIEMDM6_TIKH"
+    },
+    "M03-011": {
+      "ticket_id": "M03-011",
+      "github_issue_number": 64,
+      "last_sync": "2025-07-07T11:34:59.442349",
+      "checksum": "a2cd0ad1882db67621ed155a74932853",
+      "github_issue_id": "I_kwDOPIEMDM6_TIKq"
+    },
+    "M03-012": {
+      "ticket_id": "M03-012",
+      "github_issue_number": 65,
+      "last_sync": "2025-07-07T11:35:00.140334",
+      "checksum": "29ff1b027d47eec29d390762a7c93fc6",
+      "github_issue_id": "I_kwDOPIEMDM6_TILN"
+    },
+    "FEP-001": {
+      "ticket_id": "FEP-001",
+      "github_issue_number": 66,
+      "last_sync": "2025-07-07T11:35:00.965655",
+      "checksum": "a1a62201e9ddf41729157b419d230487",
+      "github_issue_id": "I_kwDOPIEMDM6_TIL1"
+    },
+    "FEP-002": {
+      "ticket_id": "FEP-002",
+      "github_issue_number": 67,
+      "last_sync": "2025-07-07T11:35:01.653977",
+      "checksum": "c7e73837db1d088b6a33dfcbb3dde748",
+      "github_issue_id": "I_kwDOPIEMDM6_TIMT"
+    },
+    "FEP-003": {
+      "ticket_id": "FEP-003",
+      "github_issue_number": 68,
+      "last_sync": "2025-07-07T11:35:02.405350",
+      "checksum": "cc5a86703b2925ab6c02eaa96823361b",
+      "github_issue_id": "I_kwDOPIEMDM6_TIMw"
+    },
+    "FEP-004": {
+      "ticket_id": "FEP-004",
+      "github_issue_number": 69,
+      "last_sync": "2025-07-07T11:35:03.081265",
+      "checksum": "d1eafca7804ce69c24fbeac8172bde07",
+      "github_issue_id": "I_kwDOPIEMDM6_TINX"
+    },
+    "FEP-005": {
+      "ticket_id": "FEP-005",
+      "github_issue_number": 70,
+      "last_sync": "2025-07-07T11:35:03.844360",
+      "checksum": "014c10c2f357d276b6590ebbd45cba7f",
+      "github_issue_id": "I_kwDOPIEMDM6_TIOB"
+    },
+    "FEP-006": {
+      "ticket_id": "FEP-006",
+      "github_issue_number": 71,
+      "last_sync": "2025-07-07T11:35:04.623902",
+      "checksum": "f87a7fd258251160018465329f09017b",
+      "github_issue_id": "I_kwDOPIEMDM6_TIOo"
+    },
+    "FEP-007": {
+      "ticket_id": "FEP-007",
+      "github_issue_number": 72,
+      "last_sync": "2025-07-07T11:35:05.362802",
+      "checksum": "94932ab05c23096cf497c32f34813ed3",
+      "github_issue_id": "I_kwDOPIEMDM6_TIPQ"
+    },
+    "FEP-008": {
+      "ticket_id": "FEP-008",
+      "github_issue_number": 73,
+      "last_sync": "2025-07-07T11:35:06.119035",
+      "checksum": "7190e9cfb55f88a00280d2e442bfa3c8",
+      "github_issue_id": "I_kwDOPIEMDM6_TIPy"
+    },
+    "FEP-009": {
+      "ticket_id": "FEP-009",
+      "github_issue_number": 74,
+      "last_sync": "2025-07-07T11:35:06.773995",
+      "checksum": "67aa4125081e89c608ceb7e35a16c45f",
+      "github_issue_id": "I_kwDOPIEMDM6_TIQO"
+    },
+    "FEP-010": {
+      "ticket_id": "FEP-010",
+      "github_issue_number": 75,
+      "last_sync": "2025-07-07T11:35:07.580768",
+      "checksum": "902c3227261539318733d41886429746",
+      "github_issue_id": "I_kwDOPIEMDM6_TIQr"
+    },
+    "FEP-011": {
+      "ticket_id": "FEP-011",
+      "github_issue_number": 76,
+      "last_sync": "2025-07-07T11:35:08.316052",
+      "checksum": "cb830ace5f467cad6f5767fdb9459ae5",
+      "github_issue_id": "I_kwDOPIEMDM6_TIRN"
+    },
+    "FEP-012": {
+      "ticket_id": "FEP-012",
+      "github_issue_number": 77,
+      "last_sync": "2025-07-07T11:35:09.190794",
+      "checksum": "3665ca6db8abdfc13709ab5476484942",
+      "github_issue_id": "I_kwDOPIEMDM6_TIRx"
+    },
+    "CPT-001": {
+      "ticket_id": "CPT-001",
+      "github_issue_number": 78,
+      "last_sync": "2025-07-07T11:35:09.870413",
+      "checksum": "3852c604ee74e0014390f23c7dfade99",
+      "github_issue_id": "I_kwDOPIEMDM6_TISZ"
+    },
+    "CPT-002": {
+      "ticket_id": "CPT-002",
+      "github_issue_number": 79,
+      "last_sync": "2025-07-07T11:35:10.794320",
+      "checksum": "4257ddc10f5a968e806a1e17616826d5",
+      "github_issue_id": "I_kwDOPIEMDM6_TITK"
+    },
+    "CPT-003": {
+      "ticket_id": "CPT-003",
+      "github_issue_number": 80,
+      "last_sync": "2025-07-07T11:35:11.426561",
+      "checksum": "1a0484d7fe4da28348c08944d55aa516",
+      "github_issue_id": "I_kwDOPIEMDM6_TITt"
+    },
+    "CPT-004": {
+      "ticket_id": "CPT-004",
+      "github_issue_number": 81,
+      "last_sync": "2025-07-07T11:35:12.092639",
+      "checksum": "fa185407d18344ddb99c9640bde14680",
+      "github_issue_id": "I_kwDOPIEMDM6_TIUV"
+    },
+    "CPT-005": {
+      "ticket_id": "CPT-005",
+      "github_issue_number": 82,
+      "last_sync": "2025-07-07T11:35:12.779696",
+      "checksum": "e02b5701aa0e3d7fc610cfd898d1d71c",
+      "github_issue_id": "I_kwDOPIEMDM6_TIU5"
+    },
+    "INT-001": {
+      "ticket_id": "INT-001",
+      "github_issue_number": 83,
+      "last_sync": "2025-07-07T11:36:04.642750",
+      "checksum": "73ccb67926b6b04a090fc6bab04a89a5",
+      "github_issue_id": "I_kwDOPIEMDM6_TI7u"
+    },
+    "INT-002": {
+      "ticket_id": "INT-002",
+      "github_issue_number": 84,
+      "last_sync": "2025-07-07T11:36:05.374056",
+      "checksum": "416cbd5b671c30f160e548253bc7f1fc",
+      "github_issue_id": "I_kwDOPIEMDM6_TI8T"
+    },
+    "INT-003": {
+      "ticket_id": "INT-003",
+      "github_issue_number": 85,
+      "last_sync": "2025-07-07T11:36:06.183237",
+      "checksum": "4c8386116cd76a5a80b309c106a1a9f0",
+      "github_issue_id": "I_kwDOPIEMDM6_TI81"
+    },
+    "INT-004": {
+      "ticket_id": "INT-004",
+      "github_issue_number": 86,
+      "last_sync": "2025-07-07T11:36:07.065639",
+      "checksum": "67a84ab5ec8dfa2b352a499b4853c929",
+      "github_issue_id": "I_kwDOPIEMDM6_TI9p"
+    },
+    "INT-005": {
+      "ticket_id": "INT-005",
+      "github_issue_number": 87,
+      "last_sync": "2025-07-07T11:36:07.764151",
+      "checksum": "8c274ecf5364f72c9cc1cdf884e65d4c",
+      "github_issue_id": "I_kwDOPIEMDM6_TI-B"
+    },
+    "INT-006": {
+      "ticket_id": "INT-006",
+      "github_issue_number": 88,
+      "last_sync": "2025-07-07T11:36:08.467869",
+      "checksum": "e82bf9c3832e4f1f032219313ffa6eb1",
+      "github_issue_id": "I_kwDOPIEMDM6_TI-b"
+    },
+    "INT-007": {
+      "ticket_id": "INT-007",
+      "github_issue_number": 89,
+      "last_sync": "2025-07-07T11:36:09.328645",
+      "checksum": "b01d3299d2c3bf58fb7b0656ebab621d",
+      "github_issue_id": "I_kwDOPIEMDM6_TI-5"
+    },
+    "INT-008": {
+      "ticket_id": "INT-008",
+      "github_issue_number": 90,
+      "last_sync": "2025-07-07T11:36:10.026524",
+      "checksum": "1bfb8dea696f608525c05e493c699686",
+      "github_issue_id": "I_kwDOPIEMDM6_TI_k"
+    },
+    "INT-009": {
+      "ticket_id": "INT-009",
+      "github_issue_number": 91,
+      "last_sync": "2025-07-07T11:36:10.883684",
+      "checksum": "5e2fdaa2125f532d17040c572fb3a361",
+      "github_issue_id": "I_kwDOPIEMDM6_TJAS"
+    },
+    "INT-010": {
+      "ticket_id": "INT-010",
+      "github_issue_number": 92,
+      "last_sync": "2025-07-07T11:36:11.940743",
+      "checksum": "55110cf63c849b46ca2edb3e99987af5",
+      "github_issue_id": "I_kwDOPIEMDM6_TJA6"
+    },
+    "INT-011": {
+      "ticket_id": "INT-011",
+      "github_issue_number": 93,
+      "last_sync": "2025-07-07T11:36:12.761807",
+      "checksum": "55ac38eb3c0cc8907f7efdc067253156",
+      "github_issue_id": "I_kwDOPIEMDM6_TJBq"
+    },
+    "INT-012": {
+      "ticket_id": "INT-012",
+      "github_issue_number": 94,
+      "last_sync": "2025-07-07T11:36:13.559720",
+      "checksum": "92f44317dbdf578e9849d7f4ebc25cf8",
+      "github_issue_id": "I_kwDOPIEMDM6_TJCP"
+    },
+    "INT-013": {
+      "ticket_id": "INT-013",
+      "github_issue_number": 95,
+      "last_sync": "2025-07-07T11:36:14.316222",
+      "checksum": "fb47514d5041376e3a8ea27e20a80db1",
+      "github_issue_id": "I_kwDOPIEMDM6_TJC2"
+    },
+    "INF-001": {
+      "ticket_id": "INF-001",
+      "github_issue_number": 96,
+      "last_sync": "2025-07-07T11:36:14.948005",
+      "checksum": "37d3a0d1284cd49ee691ce559d80bf17",
+      "github_issue_id": "I_kwDOPIEMDM6_TJDU"
+    },
+    "INF-002": {
+      "ticket_id": "INF-002",
+      "github_issue_number": 97,
+      "last_sync": "2025-07-07T11:36:15.628992",
+      "checksum": "920a500cc60c52d08c72d37bbea14aea",
+      "github_issue_id": "I_kwDOPIEMDM6_TJD1"
+    },
+    "INF-003": {
+      "ticket_id": "INF-003",
+      "github_issue_number": 98,
+      "last_sync": "2025-07-07T11:36:16.323174",
+      "checksum": "75ed9f764c3791e1fae87a39b13066c4",
+      "github_issue_id": "I_kwDOPIEMDM6_TJEX"
+    },
+    "INF-004": {
+      "ticket_id": "INF-004",
+      "github_issue_number": 99,
+      "last_sync": "2025-07-07T11:36:17.147965",
+      "checksum": "ee89b9979ea048732b7e8eaad5eb42ec",
+      "github_issue_id": "I_kwDOPIEMDM6_TJE5"
+    },
+    "INF-005": {
+      "ticket_id": "INF-005",
+      "github_issue_number": 100,
+      "last_sync": "2025-07-07T11:36:17.942932",
+      "checksum": "f057aaad1f05dfa4c4058bc8733bc325",
+      "github_issue_id": "I_kwDOPIEMDM6_TJFb"
+    },
+    "INF-006": {
+      "ticket_id": "INF-006",
+      "github_issue_number": 101,
+      "last_sync": "2025-07-07T11:36:18.713102",
+      "checksum": "cca7a04d3b0809bab245cab2f568bf96",
+      "github_issue_id": "I_kwDOPIEMDM6_TJGD"
+    },
+    "INF-007": {
+      "ticket_id": "INF-007",
+      "github_issue_number": 102,
+      "last_sync": "2025-07-07T11:36:19.418259",
+      "checksum": "e54594305a64b501d89784cf9853e3c3",
+      "github_issue_id": "I_kwDOPIEMDM6_TJGe"
+    },
+    "INF-008": {
+      "ticket_id": "INF-008",
+      "github_issue_number": 103,
+      "last_sync": "2025-07-07T11:36:20.228587",
+      "checksum": "35ccd678e3ce1bb5248a56b7fa084348",
+      "github_issue_id": "I_kwDOPIEMDM6_TJHJ"
+    },
+    "INF-009": {
+      "ticket_id": "INF-009",
+      "github_issue_number": 104,
+      "last_sync": "2025-07-07T11:37:10.103466",
+      "checksum": "321305aa16cff6b0e042097c92a6ee32",
+      "github_issue_id": "I_kwDOPIEMDM6_TJrN"
+    },
+    "INF-010": {
+      "ticket_id": "INF-010",
+      "github_issue_number": 105,
+      "last_sync": "2025-07-07T11:37:10.950967",
+      "checksum": "490471f6e3b89c7486fdb52195966a43",
+      "github_issue_id": "I_kwDOPIEMDM6_TJr0"
+    },
+    "INF-011": {
+      "ticket_id": "INF-011",
+      "github_issue_number": 106,
+      "last_sync": "2025-07-07T11:37:11.770577",
+      "checksum": "5e8dcf67a26707f25e72d68bd314126f",
+      "github_issue_id": "I_kwDOPIEMDM6_TJse"
+    },
+    "INF-012": {
+      "ticket_id": "INF-012",
+      "github_issue_number": 107,
+      "last_sync": "2025-07-07T11:37:12.450777",
+      "checksum": "a6fde3716700283459ef3a8e27b526a6",
+      "github_issue_id": "I_kwDOPIEMDM6_TJtA"
+    },
+    "INF-013": {
+      "ticket_id": "INF-013",
+      "github_issue_number": 108,
+      "last_sync": "2025-07-07T11:37:13.176182",
+      "checksum": "695fbd4f74cf1c9a1a5c0a5cc66a40b0",
+      "github_issue_id": "I_kwDOPIEMDM6_TJte"
+    }
+  }
+}

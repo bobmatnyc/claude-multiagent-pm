@@ -1,0 +1,5 @@
+# Agent worktrees
+.worktrees/
+
+# Environment variables (secrets)
+.env

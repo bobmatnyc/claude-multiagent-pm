@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "claude-pm-framework"
-version = "3.0.0"
+version = "3.1.0"
 description = "Multi-Agent Orchestration Framework for AI-driven project management"
 readme = "README.md"
 license = {text = "MIT"}
@@ -112,6 +112,7 @@ ai = [
     # AI and ML libraries
     "mem0ai>=0.1.0",
     "langgraph>=0.1.0",
+    "langgraph-checkpoint-sqlite>=1.0.0",
     "langchain>=0.1.0",
     "openai>=1.0.0",
     "anthropic>=0.7.0",
@@ -325,39 +326,4 @@ universal = false
 generate-hashes = true
 allow-unsafe = true
 
-# Pre-commit hooks configuration
-[tool.pre-commit]
-repos = [
-    {
-        repo = "https://github.com/pre-commit/pre-commit-hooks",
-        rev = "v4.4.0",
-        hooks = [
-            "trailing-whitespace",
-            "end-of-file-fixer", 
-            "check-yaml",
-            "check-json",
-            "check-merge-conflict",
-            "check-added-large-files"
-        ]
-    },
-    {
-        repo = "https://github.com/psf/black",
-        rev = "23.9.1", 
-        hooks = ["black"]
-    },
-    {
-        repo = "https://github.com/pycqa/isort",
-        rev = "5.12.0",
-        hooks = ["isort"]
-    },
-    {
-        repo = "https://github.com/pycqa/flake8",
-        rev = "6.1.0",
-        hooks = ["flake8"]
-    },
-    {
-        repo = "https://github.com/pre-commit/mirrors-mypy",
-        rev = "v1.6.1",
-        hooks = ["mypy"]
-    }
-]
+# Pre-commit hooks configuration is moved to .pre-commit-config.yaml

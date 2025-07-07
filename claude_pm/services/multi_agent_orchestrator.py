@@ -22,7 +22,17 @@ from pathlib import Path
 framework_path = Path(__file__).parent.parent.parent / "framework" / "multi-agent"
 sys.path.insert(0, str(framework_path))
 
-from git_worktree_manager import GitWorktreeManager, WorktreeContext
+# Import with corrected module name
+import importlib.util
+spec = importlib.util.spec_from_file_location(
+    "git_worktree_manager", 
+    framework_path / "git-worktree-manager.py"
+)
+git_worktree_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(git_worktree_module)
+
+GitWorktreeManager = git_worktree_module.GitWorktreeManager
+WorktreeContext = git_worktree_module.WorktreeContext
 
 logger = get_logger(__name__)
 

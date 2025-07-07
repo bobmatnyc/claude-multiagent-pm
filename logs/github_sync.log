@@ -1,0 +1,726 @@
+2025-07-07 11:28:49,575 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: priority-critical
+2025-07-07 11:28:49,749 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: priority-high
+2025-07-07 11:28:49,921 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: priority-medium
+2025-07-07 11:28:50,072 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: priority-low
+2025-07-07 11:28:50,233 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: type-memory
+2025-07-07 11:28:50,362 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: type-langgraph
+2025-07-07 11:28:50,513 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: type-epic
+2025-07-07 11:28:50,643 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: type-integration
+2025-07-07 11:28:50,799 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: type-infrastructure
+2025-07-07 11:28:51,020 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: type-cross-project
+2025-07-07 11:28:51,162 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: milestone-foundation
+2025-07-07 11:28:51,357 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: milestone-automation
+2025-07-07 11:28:51,511 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: milestone-orchestration
+2025-07-07 11:28:51,655 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: epic-fep-001
+2025-07-07 11:28:51,803 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: epic-fep-002
+2025-07-07 11:28:51,998 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: epic-fep-003
+2025-07-07 11:28:52,248 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: epic-fep-004
+2025-07-07 11:28:52,403 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: epic-fep-007
+2025-07-07 11:28:52,575 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: epic-fep-008
+2025-07-07 11:28:52,726 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: epic-fep-009
+2025-07-07 11:28:52,974 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: epic-fep-010
+2025-07-07 11:28:53,102 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: epic-fep-011
+2025-07-07 11:28:53,247 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: status-blocked
+2025-07-07 11:28:53,389 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: status-completed
+2025-07-07 11:28:53,569 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:508 - Created label: claude-pm-sync
+2025-07-07 11:28:53,569 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:513 - Label management complete: 25 created, 0 updated
+2025-07-07 11:28:53,835 - github_sync.GitHubMilestoneManager - INFO - ensure_claude_pm_milestones:596 - Created milestone: M01 Foundation
+2025-07-07 11:28:53,989 - github_sync.GitHubMilestoneManager - INFO - ensure_claude_pm_milestones:596 - Created milestone: M02 Automation
+2025-07-07 11:28:54,300 - github_sync.GitHubMilestoneManager - INFO - ensure_claude_pm_milestones:596 - Created milestone: M03 Orchestration
+2025-07-07 11:28:54,300 - github_sync.GitHubMilestoneManager - INFO - ensure_claude_pm_milestones:598 - Milestone management complete: 3 created
+2025-07-07 11:29:03,553 - github_sync - INFO - log_event:226 - [SYNC_START] Starting sync: bobmatnyc/claude-pm (to-github)
+2025-07-07 11:29:03,553 - github_sync.ClaudePMGitHubSync - INFO - full_sync:812 - Starting Claude PM <-> GitHub sync (dry_run=True)...
+2025-07-07 11:29:03,553 - github_sync.ClaudePMGitHubSync - INFO - _load_sync_records:1040 - No existing sync records found
+2025-07-07 11:29:03,553 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:865 - Syncing Claude PM tickets to GitHub...
+2025-07-07 11:29:03,555 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:869 - Found 109 tickets to sync
+2025-07-07 11:29:03,729 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 29 requests remaining
+2025-07-07 11:29:03,729 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:03,729 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-001
+2025-07-07 11:29:03,885 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 28 requests remaining
+2025-07-07 11:29:03,885 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:03,885 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-002
+2025-07-07 11:29:04,024 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 27 requests remaining
+2025-07-07 11:29:04,024 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:04,024 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-003
+2025-07-07 11:29:04,244 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 26 requests remaining
+2025-07-07 11:29:04,244 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:04,244 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-004
+2025-07-07 11:29:04,383 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 25 requests remaining
+2025-07-07 11:29:04,383 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:04,384 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-005
+2025-07-07 11:29:04,543 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 24 requests remaining
+2025-07-07 11:29:04,543 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:04,543 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-006
+2025-07-07 11:29:04,675 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 23 requests remaining
+2025-07-07 11:29:04,675 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:04,675 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-007
+2025-07-07 11:29:04,840 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 22 requests remaining
+2025-07-07 11:29:04,840 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:04,840 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-008
+2025-07-07 11:29:04,969 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 21 requests remaining
+2025-07-07 11:29:04,969 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:04,969 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-009
+2025-07-07 11:29:05,083 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 20 requests remaining
+2025-07-07 11:29:05,083 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:05,083 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-019
+2025-07-07 11:29:05,196 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 19 requests remaining
+2025-07-07 11:29:05,196 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:05,196 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-020
+2025-07-07 11:29:05,327 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 18 requests remaining
+2025-07-07 11:29:05,327 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:05,327 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-021
+2025-07-07 11:29:05,564 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 17 requests remaining
+2025-07-07 11:29:05,564 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:05,564 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-022
+2025-07-07 11:29:05,714 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 16 requests remaining
+2025-07-07 11:29:05,714 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:05,714 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-023
+2025-07-07 11:29:05,841 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 15 requests remaining
+2025-07-07 11:29:05,841 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:05,841 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-024
+2025-07-07 11:29:06,026 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 14 requests remaining
+2025-07-07 11:29:06,026 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:06,026 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-025
+2025-07-07 11:29:06,139 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 13 requests remaining
+2025-07-07 11:29:06,139 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:06,139 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-026
+2025-07-07 11:29:06,300 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 12 requests remaining
+2025-07-07 11:29:06,300 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:06,300 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-027
+2025-07-07 11:29:06,499 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 11 requests remaining
+2025-07-07 11:29:06,499 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:06,499 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-028
+2025-07-07 11:29:06,664 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 10 requests remaining
+2025-07-07 11:29:06,664 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:06,664 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-029
+2025-07-07 11:29:06,790 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 9 requests remaining
+2025-07-07 11:29:06,790 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:30:03
+2025-07-07 11:29:06,790 - github_sync.GitHubAPIClient - ERROR - _check_rate_limit:128 - Rate limit critical: waiting 62 seconds
+2025-07-07 11:30:08,805 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-030
+2025-07-07 11:30:09,058 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 29 requests remaining
+2025-07-07 11:30:09,058 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:09,058 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-031
+2025-07-07 11:30:09,193 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 28 requests remaining
+2025-07-07 11:30:09,193 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:09,193 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-032
+2025-07-07 11:30:09,355 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 27 requests remaining
+2025-07-07 11:30:09,355 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:09,355 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-034
+2025-07-07 11:30:09,543 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 26 requests remaining
+2025-07-07 11:30:09,543 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:09,543 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-035
+2025-07-07 11:30:09,654 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 25 requests remaining
+2025-07-07 11:30:09,654 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:09,654 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-036
+2025-07-07 11:30:09,805 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 24 requests remaining
+2025-07-07 11:30:09,805 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:09,805 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-010
+2025-07-07 11:30:09,908 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 23 requests remaining
+2025-07-07 11:30:09,908 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:09,908 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-011
+2025-07-07 11:30:10,089 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 22 requests remaining
+2025-07-07 11:30:10,089 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:10,089 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-012
+2025-07-07 11:30:10,247 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 21 requests remaining
+2025-07-07 11:30:10,247 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:10,247 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-013
+2025-07-07 11:30:10,411 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 20 requests remaining
+2025-07-07 11:30:10,411 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:10,411 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-014
+2025-07-07 11:30:10,535 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 19 requests remaining
+2025-07-07 11:30:10,535 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:10,535 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-033
+2025-07-07 11:30:10,688 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 18 requests remaining
+2025-07-07 11:30:10,688 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:10,688 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-015
+2025-07-07 11:30:10,829 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 17 requests remaining
+2025-07-07 11:30:10,829 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:10,829 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-016
+2025-07-07 11:30:10,987 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 16 requests remaining
+2025-07-07 11:30:10,987 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:10,987 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-017
+2025-07-07 11:30:11,149 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 15 requests remaining
+2025-07-07 11:30:11,149 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:11,149 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M01-018
+2025-07-07 11:30:11,300 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 14 requests remaining
+2025-07-07 11:30:11,301 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:11,301 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M02-001
+2025-07-07 11:30:11,483 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 13 requests remaining
+2025-07-07 11:30:11,483 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:11,483 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M02-002
+2025-07-07 11:30:11,641 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 12 requests remaining
+2025-07-07 11:30:11,641 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:11,641 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M02-003
+2025-07-07 11:30:11,748 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 11 requests remaining
+2025-07-07 11:30:11,748 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:11,748 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M02-004
+2025-07-07 11:30:11,898 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 10 requests remaining
+2025-07-07 11:30:11,899 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:11,899 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:913 - DRY RUN: Would create new issue for M02-005
+2025-07-07 11:30:12,028 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 9 requests remaining
+2025-07-07 11:30:12,028 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:31:09
+2025-07-07 11:30:12,028 - github_sync.GitHubAPIClient - ERROR - _check_rate_limit:128 - Rate limit critical: waiting 62 seconds
+2025-07-07 11:31:37,090 - github_sync - INFO - log_event:226 - [SYNC_START] Starting sync: bobmatnyc/claude-pm (to-github)
+2025-07-07 11:31:37,090 - github_sync.ClaudePMGitHubSync - INFO - full_sync:812 - Starting Claude PM <-> GitHub sync (dry_run=False)...
+2025-07-07 11:31:37,184 - github_sync.ClaudePMGitHubSync - INFO - _create_backup:1084 - Created backup: /Users/masa/Projects/Claude-PM/backups/github_sync_backup_bobmatnyc_claude-pm_20250707_113137.json
+2025-07-07 11:31:40,038 - github_sync.GitHubLabelManager - INFO - ensure_claude_pm_labels:513 - Label management complete: 0 created, 22 updated
+2025-07-07 11:31:40,115 - github_sync.GitHubMilestoneManager - INFO - ensure_claude_pm_milestones:598 - Milestone management complete: 0 created
+2025-07-07 11:31:40,115 - github_sync.ClaudePMGitHubSync - INFO - _load_sync_records:1040 - No existing sync records found
+2025-07-07 11:31:40,115 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:865 - Syncing Claude PM tickets to GitHub...
+2025-07-07 11:31:40,119 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:869 - Found 109 tickets to sync
+2025-07-07 11:31:40,259 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 29 requests remaining
+2025-07-07 11:31:40,259 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:40,879 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #1 for M01-001
+2025-07-07 11:31:41,016 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 28 requests remaining
+2025-07-07 11:31:41,016 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:41,533 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #2 for M01-002
+2025-07-07 11:31:41,663 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 27 requests remaining
+2025-07-07 11:31:41,663 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:42,234 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #3 for M01-003
+2025-07-07 11:31:42,365 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 26 requests remaining
+2025-07-07 11:31:42,365 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:42,923 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #4 for M01-004
+2025-07-07 11:31:43,036 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 25 requests remaining
+2025-07-07 11:31:43,036 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:43,627 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #5 for M01-005
+2025-07-07 11:31:43,773 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 24 requests remaining
+2025-07-07 11:31:43,774 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:44,362 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #6 for M01-006
+2025-07-07 11:31:44,510 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 23 requests remaining
+2025-07-07 11:31:44,511 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:45,158 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #7 for M01-007
+2025-07-07 11:31:45,282 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 22 requests remaining
+2025-07-07 11:31:45,282 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:45,831 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #8 for M01-008
+2025-07-07 11:31:45,993 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 21 requests remaining
+2025-07-07 11:31:45,993 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:46,615 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #9 for M01-009
+2025-07-07 11:31:46,798 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 20 requests remaining
+2025-07-07 11:31:46,798 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:47,332 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #10 for M01-019
+2025-07-07 11:31:47,471 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 19 requests remaining
+2025-07-07 11:31:47,471 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:48,102 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #11 for M01-020
+2025-07-07 11:31:48,240 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 18 requests remaining
+2025-07-07 11:31:48,240 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:48,806 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #12 for M01-021
+2025-07-07 11:31:48,939 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 17 requests remaining
+2025-07-07 11:31:48,939 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:49,523 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #13 for M01-022
+2025-07-07 11:31:49,641 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 16 requests remaining
+2025-07-07 11:31:49,641 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:50,278 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #14 for M01-023
+2025-07-07 11:31:50,405 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 15 requests remaining
+2025-07-07 11:31:50,405 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:50,957 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #15 for M01-024
+2025-07-07 11:31:51,092 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 14 requests remaining
+2025-07-07 11:31:51,092 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:51,699 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #16 for M01-025
+2025-07-07 11:31:51,870 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 13 requests remaining
+2025-07-07 11:31:51,870 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:52,482 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #17 for M01-026
+2025-07-07 11:31:52,632 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 12 requests remaining
+2025-07-07 11:31:52,632 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:53,203 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #18 for M01-027
+2025-07-07 11:31:53,337 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 11 requests remaining
+2025-07-07 11:31:53,337 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:53,890 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #19 for M01-028
+2025-07-07 11:31:54,040 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 10 requests remaining
+2025-07-07 11:31:54,040 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:54,686 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #20 for M01-029
+2025-07-07 11:31:54,822 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 9 requests remaining
+2025-07-07 11:31:54,822 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:32:40
+2025-07-07 11:31:54,822 - github_sync.GitHubAPIClient - ERROR - _check_rate_limit:128 - Rate limit critical: waiting 51 seconds
+2025-07-07 11:32:46,460 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #21 for M01-030
+2025-07-07 11:32:46,591 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 29 requests remaining
+2025-07-07 11:32:46,591 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:47,136 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #22 for M01-031
+2025-07-07 11:32:47,282 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 28 requests remaining
+2025-07-07 11:32:47,282 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:47,822 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #23 for M01-032
+2025-07-07 11:32:47,990 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 27 requests remaining
+2025-07-07 11:32:47,990 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:48,538 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #24 for M01-034
+2025-07-07 11:32:48,688 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 26 requests remaining
+2025-07-07 11:32:48,688 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:49,479 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #25 for M01-035
+2025-07-07 11:32:49,596 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 25 requests remaining
+2025-07-07 11:32:49,596 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:50,153 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #26 for M01-036
+2025-07-07 11:32:50,339 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 24 requests remaining
+2025-07-07 11:32:50,339 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:50,912 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #27 for M01-010
+2025-07-07 11:32:51,089 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 23 requests remaining
+2025-07-07 11:32:51,089 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:51,642 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #28 for M01-011
+2025-07-07 11:32:51,799 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 22 requests remaining
+2025-07-07 11:32:51,799 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:52,338 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #29 for M01-012
+2025-07-07 11:32:52,545 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 21 requests remaining
+2025-07-07 11:32:52,545 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:53,154 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #30 for M01-013
+2025-07-07 11:32:53,350 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 20 requests remaining
+2025-07-07 11:32:53,350 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:53,870 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #31 for M01-014
+2025-07-07 11:32:54,050 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 19 requests remaining
+2025-07-07 11:32:54,050 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:54,631 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #32 for M01-033
+2025-07-07 11:32:54,751 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 18 requests remaining
+2025-07-07 11:32:54,751 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:55,431 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #33 for M01-015
+2025-07-07 11:32:55,656 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 17 requests remaining
+2025-07-07 11:32:55,656 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:56,295 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #34 for M01-016
+2025-07-07 11:32:56,417 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 16 requests remaining
+2025-07-07 11:32:56,417 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:57,005 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #35 for M01-017
+2025-07-07 11:32:57,202 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 15 requests remaining
+2025-07-07 11:32:57,202 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:57,814 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #36 for M01-018
+2025-07-07 11:32:57,924 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 14 requests remaining
+2025-07-07 11:32:57,927 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:32:58,543 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #37 for M02-001
+2025-07-07 11:32:58,798 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 13 requests remaining
+2025-07-07 11:32:58,798 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:33:00,210 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:903 - Updated issue #2 for M02-002
+2025-07-07 11:33:00,343 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 12 requests remaining
+2025-07-07 11:33:00,343 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:33:00,878 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #38 for M02-003
+2025-07-07 11:33:01,033 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 11 requests remaining
+2025-07-07 11:33:01,033 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:33:01,685 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #39 for M02-004
+2025-07-07 11:33:01,816 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 10 requests remaining
+2025-07-07 11:33:01,816 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:33:02,363 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #40 for M02-005
+2025-07-07 11:33:02,591 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 9 requests remaining
+2025-07-07 11:33:02,591 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:33:46
+2025-07-07 11:33:02,591 - github_sync.GitHubAPIClient - ERROR - _check_rate_limit:128 - Rate limit critical: waiting 49 seconds
+2025-07-07 11:33:52,274 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #41 for M02-006
+2025-07-07 11:33:52,432 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 29 requests remaining
+2025-07-07 11:33:52,432 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:33:52,979 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #42 for M02-007
+2025-07-07 11:33:53,103 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 28 requests remaining
+2025-07-07 11:33:53,103 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:33:53,712 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #43 for M02-008
+2025-07-07 11:33:53,911 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 27 requests remaining
+2025-07-07 11:33:53,911 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:33:54,545 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #44 for M02-009
+2025-07-07 11:33:54,721 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 26 requests remaining
+2025-07-07 11:33:54,721 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:33:55,247 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #45 for M02-010
+2025-07-07 11:33:55,392 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 25 requests remaining
+2025-07-07 11:33:55,392 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:33:55,993 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #46 for M02-011
+2025-07-07 11:33:56,130 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 24 requests remaining
+2025-07-07 11:33:56,130 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:33:56,704 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #47 for M02-012
+2025-07-07 11:33:56,839 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 23 requests remaining
+2025-07-07 11:33:56,839 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:33:57,562 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #48 for M02-013
+2025-07-07 11:33:57,680 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 22 requests remaining
+2025-07-07 11:33:57,680 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:33:58,232 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #49 for M02-014
+2025-07-07 11:33:58,367 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 21 requests remaining
+2025-07-07 11:33:58,367 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:33:58,974 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #50 for M02-015
+2025-07-07 11:33:59,120 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 20 requests remaining
+2025-07-07 11:33:59,120 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:33:59,700 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #51 for M02-016
+2025-07-07 11:33:59,819 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 19 requests remaining
+2025-07-07 11:33:59,819 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:34:00,444 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #52 for M02-017
+2025-07-07 11:34:00,598 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 18 requests remaining
+2025-07-07 11:34:00,598 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:34:01,219 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #53 for M02-018
+2025-07-07 11:34:01,348 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 17 requests remaining
+2025-07-07 11:34:01,348 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:34:01,859 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #54 for M03-001
+2025-07-07 11:34:02,034 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 16 requests remaining
+2025-07-07 11:34:02,034 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:34:02,705 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #55 for M03-002
+2025-07-07 11:34:02,851 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 15 requests remaining
+2025-07-07 11:34:02,851 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:34:03,455 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #56 for M03-003
+2025-07-07 11:34:03,591 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 14 requests remaining
+2025-07-07 11:34:03,591 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:34:04,157 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #57 for M03-004
+2025-07-07 11:34:04,334 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 13 requests remaining
+2025-07-07 11:34:04,334 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:34:05,002 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #58 for M03-005
+2025-07-07 11:34:05,169 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 12 requests remaining
+2025-07-07 11:34:05,169 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:34:05,819 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #59 for M03-006
+2025-07-07 11:34:05,957 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 11 requests remaining
+2025-07-07 11:34:05,957 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:34:06,492 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #60 for M03-007
+2025-07-07 11:34:06,608 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 10 requests remaining
+2025-07-07 11:34:06,608 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:34:07,264 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #61 for M03-008
+2025-07-07 11:34:07,417 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 9 requests remaining
+2025-07-07 11:34:07,417 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:34:52
+2025-07-07 11:34:07,417 - github_sync.GitHubAPIClient - ERROR - _check_rate_limit:128 - Rate limit critical: waiting 50 seconds
+2025-07-07 11:34:58,027 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #62 for M03-009
+2025-07-07 11:34:58,144 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 29 requests remaining
+2025-07-07 11:34:58,144 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:34:58,740 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #63 for M03-010
+2025-07-07 11:34:58,891 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 28 requests remaining
+2025-07-07 11:34:58,891 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:34:59,442 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #64 for M03-011
+2025-07-07 11:34:59,587 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 27 requests remaining
+2025-07-07 11:34:59,587 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:00,140 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #65 for M03-012
+2025-07-07 11:35:00,316 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 26 requests remaining
+2025-07-07 11:35:00,316 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:00,965 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #66 for FEP-001
+2025-07-07 11:35:01,087 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 25 requests remaining
+2025-07-07 11:35:01,087 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:01,654 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #67 for FEP-002
+2025-07-07 11:35:01,799 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 24 requests remaining
+2025-07-07 11:35:01,799 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:02,405 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #68 for FEP-003
+2025-07-07 11:35:02,550 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 23 requests remaining
+2025-07-07 11:35:02,550 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:03,081 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #69 for FEP-004
+2025-07-07 11:35:03,240 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 22 requests remaining
+2025-07-07 11:35:03,240 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:03,844 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #70 for FEP-005
+2025-07-07 11:35:04,002 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 21 requests remaining
+2025-07-07 11:35:04,002 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:04,623 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #71 for FEP-006
+2025-07-07 11:35:04,802 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 20 requests remaining
+2025-07-07 11:35:04,802 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:05,362 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #72 for FEP-007
+2025-07-07 11:35:05,491 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 19 requests remaining
+2025-07-07 11:35:05,491 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:06,119 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #73 for FEP-008
+2025-07-07 11:35:06,247 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 18 requests remaining
+2025-07-07 11:35:06,247 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:06,774 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #74 for FEP-009
+2025-07-07 11:35:06,970 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 17 requests remaining
+2025-07-07 11:35:06,971 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:07,580 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #75 for FEP-010
+2025-07-07 11:35:07,701 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 16 requests remaining
+2025-07-07 11:35:07,701 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:08,316 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #76 for FEP-011
+2025-07-07 11:35:08,447 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 15 requests remaining
+2025-07-07 11:35:08,447 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:09,190 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #77 for FEP-012
+2025-07-07 11:35:09,337 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 14 requests remaining
+2025-07-07 11:35:09,337 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:09,870 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #78 for CPT-001
+2025-07-07 11:35:10,045 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 13 requests remaining
+2025-07-07 11:35:10,045 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:10,794 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #79 for CPT-002
+2025-07-07 11:35:10,935 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 12 requests remaining
+2025-07-07 11:35:10,936 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:11,426 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #80 for CPT-003
+2025-07-07 11:35:11,558 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 11 requests remaining
+2025-07-07 11:35:11,558 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:12,092 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #81 for CPT-004
+2025-07-07 11:35:12,232 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 10 requests remaining
+2025-07-07 11:35:12,232 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:12,779 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #82 for CPT-005
+2025-07-07 11:35:12,934 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 9 requests remaining
+2025-07-07 11:35:12,934 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:35:58
+2025-07-07 11:35:12,934 - github_sync.GitHubAPIClient - ERROR - _check_rate_limit:128 - Rate limit critical: waiting 51 seconds
+2025-07-07 11:36:04,642 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #83 for INT-001
+2025-07-07 11:36:04,766 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 29 requests remaining
+2025-07-07 11:36:04,766 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:05,374 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #84 for INT-002
+2025-07-07 11:36:05,484 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 28 requests remaining
+2025-07-07 11:36:05,484 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:06,183 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #85 for INT-003
+2025-07-07 11:36:06,450 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 27 requests remaining
+2025-07-07 11:36:06,450 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:07,065 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #86 for INT-004
+2025-07-07 11:36:07,201 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 26 requests remaining
+2025-07-07 11:36:07,201 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:07,764 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #87 for INT-005
+2025-07-07 11:36:07,877 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 25 requests remaining
+2025-07-07 11:36:07,877 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:08,467 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #88 for INT-006
+2025-07-07 11:36:08,703 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 24 requests remaining
+2025-07-07 11:36:08,703 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:09,328 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #89 for INT-007
+2025-07-07 11:36:09,507 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 23 requests remaining
+2025-07-07 11:36:09,507 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:10,026 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #90 for INT-008
+2025-07-07 11:36:10,158 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 22 requests remaining
+2025-07-07 11:36:10,158 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:10,883 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #91 for INT-009
+2025-07-07 11:36:11,034 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 21 requests remaining
+2025-07-07 11:36:11,034 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:11,940 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #92 for INT-010
+2025-07-07 11:36:12,073 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 20 requests remaining
+2025-07-07 11:36:12,073 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:12,761 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #93 for INT-011
+2025-07-07 11:36:12,937 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 19 requests remaining
+2025-07-07 11:36:12,937 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:13,559 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #94 for INT-012
+2025-07-07 11:36:13,783 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 18 requests remaining
+2025-07-07 11:36:13,783 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:14,316 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #95 for INT-013
+2025-07-07 11:36:14,450 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 17 requests remaining
+2025-07-07 11:36:14,451 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:14,948 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #96 for INF-001
+2025-07-07 11:36:15,088 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 16 requests remaining
+2025-07-07 11:36:15,089 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:15,629 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #97 for INF-002
+2025-07-07 11:36:15,760 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 15 requests remaining
+2025-07-07 11:36:15,760 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:16,323 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #98 for INF-003
+2025-07-07 11:36:16,552 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 14 requests remaining
+2025-07-07 11:36:16,552 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:17,147 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #99 for INF-004
+2025-07-07 11:36:17,320 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 13 requests remaining
+2025-07-07 11:36:17,320 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:17,942 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #100 for INF-005
+2025-07-07 11:36:18,174 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 12 requests remaining
+2025-07-07 11:36:18,174 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:18,713 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #101 for INF-006
+2025-07-07 11:36:18,829 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 11 requests remaining
+2025-07-07 11:36:18,829 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:19,418 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #102 for INF-007
+2025-07-07 11:36:19,554 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 10 requests remaining
+2025-07-07 11:36:19,554 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:20,228 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #103 for INF-008
+2025-07-07 11:36:20,378 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 9 requests remaining
+2025-07-07 11:36:20,378 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:37:04
+2025-07-07 11:36:20,378 - github_sync.GitHubAPIClient - ERROR - _check_rate_limit:128 - Rate limit critical: waiting 49 seconds
+2025-07-07 11:37:10,103 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #104 for INF-009
+2025-07-07 11:37:10,298 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 29 requests remaining
+2025-07-07 11:37:10,298 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:38:10
+2025-07-07 11:37:10,950 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #105 for INF-010
+2025-07-07 11:37:11,119 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 28 requests remaining
+2025-07-07 11:37:11,119 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:38:10
+2025-07-07 11:37:11,770 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #106 for INF-011
+2025-07-07 11:37:11,934 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 27 requests remaining
+2025-07-07 11:37:11,934 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:38:10
+2025-07-07 11:37:12,450 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #107 for INF-012
+2025-07-07 11:37:12,577 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 26 requests remaining
+2025-07-07 11:37:12,578 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:38:10
+2025-07-07 11:37:13,176 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:924 - Created issue #108 for INF-013
+2025-07-07 11:37:13,176 - github_sync.ClaudePMGitHubSync - INFO - _sync_claude_pm_to_github:942 - Claude PM -> GitHub sync complete: {'synced': 109, 'created': 108, 'updated': 1, 'skipped': 0, 'errors': 0, 'total_tickets': 109}
+2025-07-07 11:37:13,177 - github_sync.ClaudePMGitHubSync - INFO - _save_sync_records:1060 - Saved 109 sync records
+2025-07-07 11:37:13,177 - github_sync.ClaudePMGitHubSync - INFO - full_sync:850 - Sync completed successfully
+2025-07-07 11:37:13,178 - github_sync - INFO - log_event:226 - [SYNC_COMPLETE] Sync completed: bobmatnyc/claude-pm in 336.09s
+2025-07-07 11:37:20,990 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 25 requests remaining
+2025-07-07 11:37:20,990 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:38:10
+2025-07-07 11:37:21,714 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 24 requests remaining
+2025-07-07 11:37:21,714 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:38:10
+2025-07-07 11:37:49,511 - github_sync - INFO - generate_sync_report:487 - Sync report generated: /Users/masa/Projects/Claude-PM/logs/sync_report_20250707_113749.md
+2025-07-07 11:51:33,805 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 29 requests remaining
+2025-07-07 11:51:33,806 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:52:33
+2025-07-07 11:51:34,310 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:123 - Rate limit warning: 28 requests remaining
+2025-07-07 11:51:34,310 - github_sync.GitHubAPIClient - WARNING - _check_rate_limit:124 - Rate limit resets at: 2025-07-07 11:52:33
+2025-07-07 11:54:51,383 - __main__ - INFO - Starting sync: bobmatnyc/claude-pm (to-github)
+2025-07-07 11:54:51,383 - __main__ - INFO - DRY RUN MODE - No changes will be made
+2025-07-07 11:54:51,383 - __main__.ClaudePMGitHubSync - INFO - Starting Claude PM <-> GitHub sync (dry_run=True)...
+2025-07-07 11:54:51,384 - __main__.ClaudePMGitHubSync - INFO - Loaded 109 sync records
+2025-07-07 11:54:51,384 - __main__.ClaudePMGitHubSync - INFO - Syncing Claude PM tickets to GitHub...
+2025-07-07 11:54:51,386 - __main__.ClaudePMGitHubSync - INFO - Found 109 tickets to sync
+2025-07-07 11:54:51,700 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 29 requests remaining
+2025-07-07 11:54:51,700 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:51,828 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 28 requests remaining
+2025-07-07 11:54:51,828 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:51,828 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would create new issue for M01-002
+2025-07-07 11:54:52,010 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 27 requests remaining
+2025-07-07 11:54:52,010 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:52,239 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 26 requests remaining
+2025-07-07 11:54:52,239 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:52,449 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 25 requests remaining
+2025-07-07 11:54:52,449 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:52,613 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 24 requests remaining
+2025-07-07 11:54:52,613 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:52,856 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 23 requests remaining
+2025-07-07 11:54:52,856 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:53,054 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 22 requests remaining
+2025-07-07 11:54:53,054 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:53,282 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 21 requests remaining
+2025-07-07 11:54:53,282 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:53,475 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 20 requests remaining
+2025-07-07 11:54:53,475 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:53,730 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 19 requests remaining
+2025-07-07 11:54:53,731 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:53,937 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 18 requests remaining
+2025-07-07 11:54:53,937 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:54,144 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 17 requests remaining
+2025-07-07 11:54:54,144 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:54,411 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 16 requests remaining
+2025-07-07 11:54:54,411 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:54,583 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 15 requests remaining
+2025-07-07 11:54:54,583 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:54,797 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 14 requests remaining
+2025-07-07 11:54:54,797 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:54,992 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 13 requests remaining
+2025-07-07 11:54:54,992 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:55,153 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 12 requests remaining
+2025-07-07 11:54:55,153 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:55,382 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 11 requests remaining
+2025-07-07 11:54:55,382 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:55,566 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 10 requests remaining
+2025-07-07 11:54:55,566 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:55,866 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 9 requests remaining
+2025-07-07 11:54:55,866 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:55:51
+2025-07-07 11:54:55,866 - __main__.GitHubAPIClient - ERROR - Rate limit critical: waiting 61 seconds
+2025-07-07 11:55:57,125 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 29 requests remaining
+2025-07-07 11:55:57,125 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:55:57,309 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 28 requests remaining
+2025-07-07 11:55:57,309 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:55:57,469 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 27 requests remaining
+2025-07-07 11:55:57,469 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:55:57,759 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 26 requests remaining
+2025-07-07 11:55:57,759 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:55:57,957 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 25 requests remaining
+2025-07-07 11:55:57,958 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:55:58,209 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 24 requests remaining
+2025-07-07 11:55:58,209 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:55:58,445 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 23 requests remaining
+2025-07-07 11:55:58,445 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:55:58,610 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 22 requests remaining
+2025-07-07 11:55:58,610 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:55:58,826 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 21 requests remaining
+2025-07-07 11:55:58,827 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:55:59,049 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 20 requests remaining
+2025-07-07 11:55:59,049 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:55:59,317 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 19 requests remaining
+2025-07-07 11:55:59,317 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:55:59,520 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 18 requests remaining
+2025-07-07 11:55:59,520 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:55:59,819 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 17 requests remaining
+2025-07-07 11:55:59,819 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:56:00,007 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 16 requests remaining
+2025-07-07 11:56:00,007 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:56:00,175 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 15 requests remaining
+2025-07-07 11:56:00,175 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:56:00,390 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 14 requests remaining
+2025-07-07 11:56:00,390 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:56:00,606 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 13 requests remaining
+2025-07-07 11:56:00,606 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:56:00,809 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 12 requests remaining
+2025-07-07 11:56:00,809 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:56:01,018 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 11 requests remaining
+2025-07-07 11:56:01,018 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:56:01,192 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 10 requests remaining
+2025-07-07 11:56:01,192 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:56:01,421 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 9 requests remaining
+2025-07-07 11:56:01,421 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 11:56:57
+2025-07-07 11:56:01,421 - __main__.GitHubAPIClient - ERROR - Rate limit critical: waiting 61 seconds
+2025-07-07 12:01:11,955 - __main__ - INFO - Starting sync: bobmatnyc/claude-pm (to-github)
+2025-07-07 12:01:11,955 - __main__ - INFO - DRY RUN MODE - No changes will be made
+2025-07-07 12:01:11,955 - __main__.ClaudePMGitHubSync - INFO - Starting Claude PM <-> GitHub sync (dry_run=True)...
+2025-07-07 12:01:11,956 - __main__.ClaudePMGitHubSync - INFO - Loaded 109 sync records
+2025-07-07 12:01:11,956 - __main__.ClaudePMGitHubSync - INFO - Syncing Claude PM tickets to GitHub...
+2025-07-07 12:01:11,959 - __main__.ClaudePMGitHubSync - INFO - Found 121 tickets to sync
+2025-07-07 12:01:12,188 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 29 requests remaining
+2025-07-07 12:01:12,188 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:12,189 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #1 for M01-001
+2025-07-07 12:01:12,322 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 28 requests remaining
+2025-07-07 12:01:12,323 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:12,323 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would create new issue for M01-002
+2025-07-07 12:01:12,483 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 27 requests remaining
+2025-07-07 12:01:12,483 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:12,483 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #3 for M01-003
+2025-07-07 12:01:12,736 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 26 requests remaining
+2025-07-07 12:01:12,736 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:12,737 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #4 for M01-004
+2025-07-07 12:01:12,930 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 25 requests remaining
+2025-07-07 12:01:12,930 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:12,930 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #5 for M01-005
+2025-07-07 12:01:13,152 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 24 requests remaining
+2025-07-07 12:01:13,152 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:13,152 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #6 for M01-006
+2025-07-07 12:01:13,434 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 23 requests remaining
+2025-07-07 12:01:13,434 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:13,434 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #7 for M01-007
+2025-07-07 12:01:13,653 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 22 requests remaining
+2025-07-07 12:01:13,654 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:13,654 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #8 for M01-008
+2025-07-07 12:01:13,886 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 21 requests remaining
+2025-07-07 12:01:13,886 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:13,886 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #9 for M01-009
+2025-07-07 12:01:14,171 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 20 requests remaining
+2025-07-07 12:01:14,171 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:14,171 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #10 for M01-019
+2025-07-07 12:01:14,478 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 19 requests remaining
+2025-07-07 12:01:14,479 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:14,479 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #11 for M01-020
+2025-07-07 12:01:14,656 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 18 requests remaining
+2025-07-07 12:01:14,656 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:14,656 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #12 for M01-021
+2025-07-07 12:01:14,893 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 17 requests remaining
+2025-07-07 12:01:14,893 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:14,893 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #13 for M01-022
+2025-07-07 12:01:15,104 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 16 requests remaining
+2025-07-07 12:01:15,104 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:15,104 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #14 for M01-023
+2025-07-07 12:01:15,242 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 15 requests remaining
+2025-07-07 12:01:15,242 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:15,242 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #15 for M01-024
+2025-07-07 12:01:15,420 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 14 requests remaining
+2025-07-07 12:01:15,420 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:15,420 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #16 for M01-025
+2025-07-07 12:01:15,632 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 13 requests remaining
+2025-07-07 12:01:15,632 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:15,632 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #17 for M01-026
+2025-07-07 12:01:15,810 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 12 requests remaining
+2025-07-07 12:01:15,810 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:15,811 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #18 for M01-027
+2025-07-07 12:01:15,964 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 11 requests remaining
+2025-07-07 12:01:15,964 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:15,964 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #19 for M01-028
+2025-07-07 12:01:16,272 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 10 requests remaining
+2025-07-07 12:01:16,273 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:16,273 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #20 for M01-029
+2025-07-07 12:01:16,460 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 9 requests remaining
+2025-07-07 12:01:16,460 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:02:12
+2025-07-07 12:01:16,460 - __main__.GitHubAPIClient - ERROR - Rate limit critical: waiting 61 seconds
+2025-07-07 12:02:17,464 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #21 for M01-030
+2025-07-07 12:02:17,723 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 29 requests remaining
+2025-07-07 12:02:17,723 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:17,723 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #22 for M01-031
+2025-07-07 12:02:17,891 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 28 requests remaining
+2025-07-07 12:02:17,891 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:17,891 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #23 for M01-032
+2025-07-07 12:02:18,082 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 27 requests remaining
+2025-07-07 12:02:18,082 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:18,083 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #24 for M01-034
+2025-07-07 12:02:18,285 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 26 requests remaining
+2025-07-07 12:02:18,285 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:18,285 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #25 for M01-035
+2025-07-07 12:02:18,500 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 25 requests remaining
+2025-07-07 12:02:18,500 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:18,500 - __main__.ClaudePMGitHubSync - INFO - DRY RUN: Would update issue #26 for M01-036
+2025-07-07 12:02:18,673 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 24 requests remaining
+2025-07-07 12:02:18,674 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:18,928 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 23 requests remaining
+2025-07-07 12:02:18,928 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:19,116 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 22 requests remaining
+2025-07-07 12:02:19,116 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:19,335 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 21 requests remaining
+2025-07-07 12:02:19,335 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:19,524 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 20 requests remaining
+2025-07-07 12:02:19,524 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:19,752 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 19 requests remaining
+2025-07-07 12:02:19,752 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:19,907 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 18 requests remaining
+2025-07-07 12:02:19,907 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:20,078 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 17 requests remaining
+2025-07-07 12:02:20,079 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:20,285 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 16 requests remaining
+2025-07-07 12:02:20,285 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:20,473 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 15 requests remaining
+2025-07-07 12:02:20,473 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:20,656 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 14 requests remaining
+2025-07-07 12:02:20,656 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:20,854 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 13 requests remaining
+2025-07-07 12:02:20,854 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:21,119 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 12 requests remaining
+2025-07-07 12:02:21,119 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:21,323 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 11 requests remaining
+2025-07-07 12:02:21,323 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:21,517 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 10 requests remaining
+2025-07-07 12:02:21,517 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:21,692 - __main__.GitHubAPIClient - WARNING - Rate limit warning: 9 requests remaining
+2025-07-07 12:02:21,692 - __main__.GitHubAPIClient - WARNING - Rate limit resets at: 2025-07-07 12:03:17
+2025-07-07 12:02:21,692 - __main__.GitHubAPIClient - ERROR - Rate limit critical: waiting 61 seconds
