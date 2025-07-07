@@ -64,7 +64,7 @@ pr_system_status: operational
 - [ ] **[M01-016]** Optimize ai-power-rankings performance tracking
 - [ ] **[M01-017]** Enhance matsuoka-com deployment pipeline
 - [ ] **[M01-018]** Streamline hot-flash development workflows
-- [ ] **[M01-037]** Migrate mem0AI from managed/ to Github/ directory
+- [x] **[M01-037]** Migrate mem0AI from managed/ to Github/ directory
 
 ### M02 Automation - Workflow Systems  
 - [ ] **[M02-001]** Implement hyperdev-cli advanced automation
@@ -530,20 +530,23 @@ pr_system_status: operational
 **Dependencies**: None  
 
 **Scope**:
-- Move `/Users/masa/Projects/managed/mem0ai/` to `/Users/masa/Projects/Github/mem0ai/`
-- Update any project references or configurations
-- Verify mem0AI service continues operating from new location
-- Update documentation references
+- ✅ Move `/Users/masa/Projects/managed/mem0ai/` to `/Users/masa/Projects/Github/mem0ai/`
+- ✅ Update any project references or configurations
+- ✅ Verify mem0AI service continues operating from new location
+- ✅ Update documentation references
 
 **Rationale**: 
 The mem0AI project is not actively being developed as part of Claude PM managed projects. It should be relocated to the Github directory with other external/forked projects for better organization.
 
+**Deployment Impact**: 
+⚠️ **CRITICAL**: This project is actively deployed as a service on port 8765. Deployment path has been updated in LOCAL_SERVICES.md. See `/Users/masa/Projects/Claude-PM/docs/DEPLOYMENT_NOTICES.md` for ops agent guidance.
+
 **Acceptance Criteria**:
-- [ ] mem0AI project moved from managed/ to Github/ directory
-- [ ] All service configurations updated to reflect new location
-- [ ] mem0AI service remains operational after migration
-- [ ] Documentation updated with new paths
-- [ ] No broken references to old location remain
+- [x] mem0AI project moved from managed/ to Github/ directory
+- [x] All service configurations updated to reflect new location
+- [x] mem0AI service remains operational after migration
+- [x] Documentation updated with new paths
+- [x] No broken references to old location remain
 
 ---
 

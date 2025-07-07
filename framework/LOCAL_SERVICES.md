@@ -126,7 +126,7 @@ type: ai-service
 project: mem0ai
 health_check: http://localhost:8765/health
 dependencies: ["postgresql"]
-start_command: "cd ~/Projects/managed/mem0ai && uvicorn main:app --host 0.0.0.0 --port 8765 --reload"
+start_command: "cd ~/Projects/Github/mem0ai && uvicorn main:app --host 0.0.0.0 --port 8765 --reload"
 ```
 
 ### 4. Database Services (Docker)
@@ -307,7 +307,7 @@ pm2 start claude-pm-ecosystem.config.js
 echo "🐍 Starting Python services..."
 
 # Mem0AI Service
-cd /Users/masa/Projects/managed/mem0ai
+cd /Users/masa/Projects/Github/mem0ai
 if [ -f ".venv/bin/activate" ]; then
     source .venv/bin/activate
     nohup uvicorn main:app --host 0.0.0.0 --port 8765 --reload > ~/Services/logs/mem0ai.log 2>&1 &

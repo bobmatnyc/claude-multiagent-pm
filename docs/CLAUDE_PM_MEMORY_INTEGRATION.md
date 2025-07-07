@@ -1,10 +1,10 @@
-# ClaudePMMemory Integration Guide
+# Claude PM Memory Integration Guide v3.1.0
 
-This guide provides comprehensive documentation for integrating and using the ClaudePMMemory class in the Claude PM Framework.
+This guide provides comprehensive documentation for using the zero-configuration memory integration in Claude PM Framework v3.1.0.
 
 ## Overview
 
-ClaudePMMemory is the primary interface between Claude PM Framework and the mem0AI service, providing intelligent memory management capabilities for project management workflows.
+Claude PM Memory v3.1.0 delivers zero-configuration universal memory access that eliminates setup complexity while providing enterprise-grade memory management. The system automatically discovers and connects to memory services, making memory integration seamless across all agents and projects.
 
 ## Table of Contents
 
@@ -18,16 +18,17 @@ ClaudePMMemory is the primary interface between Claude PM Framework and the mem0
 
 ## Quick Start
 
-### Basic Usage
+### Zero-Configuration Memory Access
 
 ```python
-import asyncio
-from claude_pm.services.claude_pm_memory import (
-    ClaudePMMemory, MemoryCategory, claude_pm_memory_context
-)
+# Zero-configuration memory access - no setup required
+from config.memory_config import create_claude_pm_memory
 
-# Using async context manager (recommended)
-async def basic_usage():
+# Automatic service discovery and connection
+memory = create_claude_pm_memory()
+
+# Instant memory operations - no configuration needed
+async def zero_config_usage():
     async with claude_pm_memory_context() as memory:
         # Create a project memory space
         response = await memory.create_project_memory_space("my_project")

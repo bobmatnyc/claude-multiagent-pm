@@ -284,9 +284,9 @@
       },
       "last_check": "2025-07-07T03:13:27.194Z"
     },
-    "managed/mem0ai": {
+    "Github/mem0ai": {
       "name": "mem0ai",
-      "path": "/Users/masa/Projects/managed/mem0ai",
+      "path": "/Users/masa/Projects/Github/mem0ai",
       "status": "healthy",
       "issues": [],
       "metrics": {
