@@ -5,6 +5,7 @@ Manages parallel execution of up to 5 concurrent agents with coordination and re
 
 import asyncio
 import threading
+import os
 from typing import Dict, List, Optional, Callable, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
