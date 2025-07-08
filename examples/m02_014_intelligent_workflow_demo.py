@@ -25,7 +25,7 @@ from claude_pm.services.workflow_selection_engine import (
     WorkflowType, RoutingStrategy, WorkflowSelectionRequest
 )
 from claude_pm.services.intelligent_task_planner import TaskComplexity
-from config.memory_config import create_memory_service
+from claude_pm.core.memory_config import create_memory_service
 
 
 class IntelligentWorkflowDemo:

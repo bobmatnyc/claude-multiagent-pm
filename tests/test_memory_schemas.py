@@ -7,13 +7,13 @@ import pytest
 from datetime import datetime
 from typing import Dict, Any
 
-from memory_schemas import (
+from schemas.memory_schemas import (
     MemoryCategory, MemoryPriority, ProjectMemorySchema, PatternMemorySchema,
     TeamMemorySchema, ErrorMemorySchema, MemoryTagSchema, MemoryRelationSchema,
     get_schema_for_category, validate_memory_schema
 )
-from memory_manager import ClaudePMMemoryManager, create_memory_manager
-from schema_migration import SchemaValidator, create_schema_validator
+from schemas.memory_manager import ClaudePMMemoryManager, create_memory_manager
+from schemas.schema_migration import SchemaValidator, create_schema_validator
 
 
 class TestMemorySchemas:

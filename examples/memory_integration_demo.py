@@ -28,7 +28,7 @@ from claude_pm.services.claude_pm_memory import (
     ClaudePMMemory, MemoryCategory, claude_pm_memory_context, 
     create_claude_pm_memory, ClaudePMConfig
 )
-from config.memory_config import create_development_memory, get_environment_info
+from claude_pm.core.memory_config import create_development_memory, get_environment_info
 
 
 class MemoryIntegrationDemo:
@@ -724,7 +724,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     if args.config_info:
-        from config.memory_config import print_environment_info
+        from claude_pm.core.memory_config import print_environment_info
         print_environment_info()
     elif args.quick:
         asyncio.run(run_quick_demo())
