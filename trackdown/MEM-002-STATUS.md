@@ -53,7 +53,7 @@
 
 **File Structure Created**:
 ```
-/Users/masa/Projects/Claude-PM/schemas/
+/Users/masa/Projects/claude-multiagent-pm/schemas/
 ├── memory-schemas.py           # Core schema definitions (4 categories)
 ├── memory-manager.py           # Memory management system
 ├── schema-migration.py         # Validation and migration framework

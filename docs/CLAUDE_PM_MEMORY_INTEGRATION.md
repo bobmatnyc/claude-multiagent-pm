@@ -1,10 +1,10 @@
-# Claude PM Memory Integration Guide v3.1.0
+# Claude PM Memory Integration Guide v4.0.0
 
-This guide provides comprehensive documentation for using the zero-configuration memory integration in Claude PM Framework v3.1.0.
+This guide provides comprehensive documentation for using the zero-configuration memory integration in Claude PM Framework v4.0.0.
 
 ## Overview
 
-Claude PM Memory v3.1.0 delivers zero-configuration universal memory access that eliminates setup complexity while providing enterprise-grade memory management. The system automatically discovers and connects to memory services, making memory integration seamless across all agents and projects.
+Claude PM Memory v4.0.0 delivers zero-configuration universal memory access that eliminates setup complexity while providing enterprise-grade memory management. The system automatically discovers and connects to memory services, making memory integration seamless across all agents and projects.
 
 ## Table of Contents
 

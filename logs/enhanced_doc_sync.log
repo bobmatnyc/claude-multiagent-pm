@@ -1,0 +1,136 @@
+2025-07-07 20:33:35,917 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-07 20:33:35,917 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-07 20:33:35,919 - EnhancedDocSync - INFO - Parsed 75 tickets from progressive structure
+2025-07-07 20:33:35,919 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-07 20:33:36,044 - EnhancedDocSync - INFO - Found 176 path reference issues
+2025-07-07 20:33:36,046 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-07 20:33:36,046 - EnhancedDocSync - INFO - Files validated: 20
+2025-07-07 20:33:36,046 - EnhancedDocSync - INFO - Links checked: 8
+2025-07-07 20:33:36,046 - EnhancedDocSync - INFO - Validation issues: 176
+2025-07-07 20:33:36,046 - EnhancedDocSync - INFO - Broken links: 8
+2025-07-07 20:33:36,046 - EnhancedDocSync - INFO - Path errors: 168
+2025-07-07 20:33:36,046 - EnhancedDocSync - INFO - Inconsistencies: 6
+2025-07-07 20:33:36,046 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (8):
+2025-07-07 20:33:36,046 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:390 - Broken link: [Quick Start Guide](INDEX.md#quick-start) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#quick-start
+2025-07-07 20:33:36,046 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:391 - Broken link: [Agent Ecosystem Documentation](INDEX.md#agent-ecosystem) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#agent-ecosystem
+2025-07-07 20:33:36,046 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:393 - Broken link: [Development Setup](INDEX.md#development--contribution) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#development--contribution
+2025-07-07 20:33:36,046 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/QUICK_START.md:468 - Broken link: [Performance Guide](INDEX.md#performance-optimization) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#performance-optimization
+2025-07-07 20:33:36,046 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG-SUMMARY.md:68 - Broken link: [Health Dashboard](../scripts/health-check.sh) -> /Users/masa/Projects/claude-multiagent-pm/scripts/health-check.sh
+2025-07-07 20:33:36,046 - EnhancedDocSync - WARNING -   ... and 3 more
+2025-07-07 20:33:36,046 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250707_203336.md
+2025-07-07 20:33:36,049 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-07 20:33:36,049 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-07 20:35:59,149 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-07 20:35:59,149 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-07 20:35:59,151 - EnhancedDocSync - INFO - Parsed 75 tickets from progressive structure
+2025-07-07 20:35:59,151 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-07 20:35:59,272 - EnhancedDocSync - INFO - Found 176 path reference issues
+2025-07-07 20:35:59,273 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-07 20:35:59,274 - EnhancedDocSync - INFO - Files validated: 20
+2025-07-07 20:35:59,274 - EnhancedDocSync - INFO - Links checked: 8
+2025-07-07 20:35:59,274 - EnhancedDocSync - INFO - Validation issues: 176
+2025-07-07 20:35:59,274 - EnhancedDocSync - INFO - Broken links: 8
+2025-07-07 20:35:59,274 - EnhancedDocSync - INFO - Path errors: 168
+2025-07-07 20:35:59,274 - EnhancedDocSync - INFO - Inconsistencies: 6
+2025-07-07 20:35:59,274 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (8):
+2025-07-07 20:35:59,274 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:390 - Broken link: [Quick Start Guide](INDEX.md#quick-start) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#quick-start
+2025-07-07 20:35:59,274 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:391 - Broken link: [Agent Ecosystem Documentation](INDEX.md#agent-ecosystem) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#agent-ecosystem
+2025-07-07 20:35:59,274 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:393 - Broken link: [Development Setup](INDEX.md#development--contribution) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#development--contribution
+2025-07-07 20:35:59,274 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/QUICK_START.md:468 - Broken link: [Performance Guide](INDEX.md#performance-optimization) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#performance-optimization
+2025-07-07 20:35:59,274 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG-SUMMARY.md:68 - Broken link: [Health Dashboard](../scripts/health-check.sh) -> /Users/masa/Projects/claude-multiagent-pm/scripts/health-check.sh
+2025-07-07 20:35:59,274 - EnhancedDocSync - WARNING -   ... and 3 more
+2025-07-07 20:35:59,276 - EnhancedDocSync - INFO - Updated TICKETING_SYSTEM.md with enhanced statistics
+2025-07-07 20:35:59,276 - EnhancedDocSync - INFO - Integrated documentation health with monitoring system
+2025-07-07 20:35:59,276 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250707_203559.md
+2025-07-07 20:35:59,279 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-07 20:35:59,279 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-07 20:35:59,279 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-07 20:35:59,279 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-07 20:35:59,280 - EnhancedDocSync - INFO - Parsed 75 tickets from progressive structure
+2025-07-07 20:35:59,280 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-07 20:35:59,352 - EnhancedDocSync - INFO - Found 176 path reference issues
+2025-07-07 20:35:59,352 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-07 20:35:59,352 - EnhancedDocSync - INFO - Files validated: 20
+2025-07-07 20:35:59,352 - EnhancedDocSync - INFO - Links checked: 8
+2025-07-07 20:35:59,352 - EnhancedDocSync - INFO - Validation issues: 176
+2025-07-07 20:35:59,352 - EnhancedDocSync - INFO - Broken links: 8
+2025-07-07 20:35:59,352 - EnhancedDocSync - INFO - Path errors: 168
+2025-07-07 20:35:59,352 - EnhancedDocSync - INFO - Inconsistencies: 1
+2025-07-07 20:35:59,352 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (8):
+2025-07-07 20:35:59,352 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:390 - Broken link: [Quick Start Guide](INDEX.md#quick-start) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#quick-start
+2025-07-07 20:35:59,352 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:391 - Broken link: [Agent Ecosystem Documentation](INDEX.md#agent-ecosystem) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#agent-ecosystem
+2025-07-07 20:35:59,352 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:393 - Broken link: [Development Setup](INDEX.md#development--contribution) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#development--contribution
+2025-07-07 20:35:59,352 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/QUICK_START.md:468 - Broken link: [Performance Guide](INDEX.md#performance-optimization) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#performance-optimization
+2025-07-07 20:35:59,352 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG-SUMMARY.md:68 - Broken link: [Health Dashboard](../scripts/health-check.sh) -> /Users/masa/Projects/claude-multiagent-pm/scripts/health-check.sh
+2025-07-07 20:35:59,352 - EnhancedDocSync - WARNING -   ... and 3 more
+2025-07-07 20:35:59,353 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250707_203559.md
+2025-07-07 20:35:59,355 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-07 20:35:59,355 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-07 20:38:05,854 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-07 20:38:05,854 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-07 20:38:05,856 - EnhancedDocSync - INFO - Parsed 75 tickets from progressive structure
+2025-07-07 20:38:05,856 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-07 20:38:05,985 - EnhancedDocSync - INFO - Found 176 path reference issues
+2025-07-07 20:38:05,987 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-07 20:38:05,987 - EnhancedDocSync - INFO - Files validated: 20
+2025-07-07 20:38:05,987 - EnhancedDocSync - INFO - Links checked: 8
+2025-07-07 20:38:05,987 - EnhancedDocSync - INFO - Validation issues: 176
+2025-07-07 20:38:05,987 - EnhancedDocSync - INFO - Broken links: 8
+2025-07-07 20:38:05,987 - EnhancedDocSync - INFO - Path errors: 168
+2025-07-07 20:38:05,987 - EnhancedDocSync - INFO - Inconsistencies: 1
+2025-07-07 20:38:05,987 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (8):
+2025-07-07 20:38:05,987 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:390 - Broken link: [Quick Start Guide](INDEX.md#quick-start) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#quick-start
+2025-07-07 20:38:05,987 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:391 - Broken link: [Agent Ecosystem Documentation](INDEX.md#agent-ecosystem) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#agent-ecosystem
+2025-07-07 20:38:05,987 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:393 - Broken link: [Development Setup](INDEX.md#development--contribution) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#development--contribution
+2025-07-07 20:38:05,987 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/QUICK_START.md:468 - Broken link: [Performance Guide](INDEX.md#performance-optimization) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#performance-optimization
+2025-07-07 20:38:05,987 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG-SUMMARY.md:68 - Broken link: [Health Dashboard](../scripts/health-check.sh) -> /Users/masa/Projects/claude-multiagent-pm/scripts/health-check.sh
+2025-07-07 20:38:05,987 - EnhancedDocSync - WARNING -   ... and 3 more
+2025-07-07 20:38:05,989 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250707_203805.md
+2025-07-07 20:38:05,992 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-07 20:38:05,992 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-07 20:39:50,972 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-07 20:39:50,974 - EnhancedDocSync - INFO - Parsed 75 tickets from progressive structure
+2025-07-07 23:55:38,357 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-07 23:55:38,357 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-07 23:55:38,358 - EnhancedDocSync - INFO - Parsed 74 tickets from progressive structure
+2025-07-07 23:55:38,358 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-07 23:55:38,419 - EnhancedDocSync - INFO - Found 164 path reference issues
+2025-07-07 23:55:38,420 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-07 23:55:38,420 - EnhancedDocSync - INFO - Files validated: 20
+2025-07-07 23:55:38,420 - EnhancedDocSync - INFO - Links checked: 7
+2025-07-07 23:55:38,420 - EnhancedDocSync - INFO - Validation issues: 164
+2025-07-07 23:55:38,420 - EnhancedDocSync - INFO - Broken links: 7
+2025-07-07 23:55:38,420 - EnhancedDocSync - INFO - Path errors: 157
+2025-07-07 23:55:38,420 - EnhancedDocSync - INFO - Inconsistencies: 2
+2025-07-07 23:55:38,420 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (7):
+2025-07-07 23:55:38,420 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:390 - Broken link: [Quick Start Guide](INDEX.md#quick-start) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#quick-start
+2025-07-07 23:55:38,420 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:391 - Broken link: [Agent Ecosystem Documentation](INDEX.md#agent-ecosystem) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#agent-ecosystem
+2025-07-07 23:55:38,420 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:393 - Broken link: [Development Setup](INDEX.md#development--contribution) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#development--contribution
+2025-07-07 23:55:38,420 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/QUICK_START.md:468 - Broken link: [Performance Guide](INDEX.md#performance-optimization) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#performance-optimization
+2025-07-07 23:55:38,420 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG-SUMMARY.md:68 - Broken link: [Health Dashboard](../scripts/health-check.sh) -> /Users/masa/Projects/claude-multiagent-pm/scripts/health-check.sh
+2025-07-07 23:55:38,420 - EnhancedDocSync - WARNING -   ... and 2 more
+2025-07-07 23:55:38,420 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250707_235538.md
+2025-07-07 23:55:38,422 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-07 23:55:38,422 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-07 23:56:14,697 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-07 23:56:14,697 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-07 23:56:14,699 - EnhancedDocSync - INFO - Parsed 74 tickets from progressive structure
+2025-07-07 23:56:14,699 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-07 23:56:14,762 - EnhancedDocSync - INFO - Found 164 path reference issues
+2025-07-07 23:56:14,763 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-07 23:56:14,763 - EnhancedDocSync - INFO - Files validated: 20
+2025-07-07 23:56:14,763 - EnhancedDocSync - INFO - Links checked: 7
+2025-07-07 23:56:14,763 - EnhancedDocSync - INFO - Validation issues: 164
+2025-07-07 23:56:14,764 - EnhancedDocSync - INFO - Broken links: 7
+2025-07-07 23:56:14,764 - EnhancedDocSync - INFO - Path errors: 157
+2025-07-07 23:56:14,764 - EnhancedDocSync - INFO - Inconsistencies: 2
+2025-07-07 23:56:14,764 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (7):
+2025-07-07 23:56:14,764 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:390 - Broken link: [Quick Start Guide](INDEX.md#quick-start) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#quick-start
+2025-07-07 23:56:14,764 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:391 - Broken link: [Agent Ecosystem Documentation](INDEX.md#agent-ecosystem) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#agent-ecosystem
+2025-07-07 23:56:14,764 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md:393 - Broken link: [Development Setup](INDEX.md#development--contribution) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#development--contribution
+2025-07-07 23:56:14,764 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/QUICK_START.md:468 - Broken link: [Performance Guide](INDEX.md#performance-optimization) -> /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md#performance-optimization
+2025-07-07 23:56:14,764 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG-SUMMARY.md:68 - Broken link: [Health Dashboard](../scripts/health-check.sh) -> /Users/masa/Projects/claude-multiagent-pm/scripts/health-check.sh
+2025-07-07 23:56:14,764 - EnhancedDocSync - WARNING -   ... and 2 more
+2025-07-07 23:56:14,764 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250707_235614.md
+2025-07-07 23:56:14,767 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-07 23:56:14,767 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully

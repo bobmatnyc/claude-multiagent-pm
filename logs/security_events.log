@@ -24,3 +24,29 @@
 {'timestamp': '2025-07-07T18:04:51.053173', 'event_type': 'auth_failure', 'service_host': 'http://localhost:8002', 'details': {'failure_count': 1, 'error': "'coroutine' object does not support the asynchronous context manager protocol"}, 'ip_address': None, 'user_agent': None}
 {'timestamp': '2025-07-07T18:04:51.064408', 'event_type': 'auth_failure', 'service_host': 'http://localhost:8002', 'details': {'failure_count': 1, 'error': "'coroutine' object does not support the asynchronous context manager protocol"}, 'ip_address': None, 'user_agent': None}
 {'timestamp': '2025-07-07T18:04:51.070189', 'event_type': 'auth_failure', 'service_host': 'http://localhost:8002', 'details': {'failure_count': 1, 'error': 'No API key available for authentication'}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:43:27.043157', 'event_type': 'auth_success', 'service_host': 'localhost:8002', 'details': {'status_code': 200}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:43:27.043891', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:43:27.043935', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:43:27.043973', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:43:27.044446', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:43:27.044478', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:43:27.044508', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:43:27.044537', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:43:27.044564', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:43:27.044592', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:43:27.050933', 'event_type': 'auth_failure', 'service_host': 'http://localhost:8002', 'details': {'failure_count': 1, 'error': "'coroutine' object does not support the asynchronous context manager protocol"}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:43:27.057244', 'event_type': 'auth_failure', 'service_host': 'http://localhost:8002', 'details': {'failure_count': 1, 'error': "'coroutine' object does not support the asynchronous context manager protocol"}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:43:27.062506', 'event_type': 'auth_failure', 'service_host': 'http://localhost:8002', 'details': {'failure_count': 1, 'error': 'No API key available for authentication'}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:44:03.942247', 'event_type': 'auth_success', 'service_host': 'localhost:8002', 'details': {'status_code': 200}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:44:03.942879', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:44:03.942917', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:44:03.942950', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:44:03.943394', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:44:03.943425', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:44:03.943490', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:44:03.943517', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:44:03.943543', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:44:03.943568', 'event_type': 'auth_failure', 'service_host': 'localhost:8002', 'details': {}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:44:03.950052', 'event_type': 'auth_failure', 'service_host': 'http://localhost:8002', 'details': {'failure_count': 1, 'error': "'coroutine' object does not support the asynchronous context manager protocol"}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:44:03.952223', 'event_type': 'auth_failure', 'service_host': 'http://localhost:8002', 'details': {'failure_count': 1, 'error': "'coroutine' object does not support the asynchronous context manager protocol"}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-07T23:44:03.957677', 'event_type': 'auth_failure', 'service_host': 'http://localhost:8002', 'details': {'failure_count': 1, 'error': 'No API key available for authentication'}, 'ip_address': None, 'user_agent': None}

@@ -13,17 +13,17 @@
 #### 1. Agent Ecosystem Definitions ✅ (3 points)
 **Status**: COMPLETE  
 **Deliverables**:
-- **Security Agent**: `/Users/masa/Projects/Claude-PM/framework/agent-roles/security-agent.md`
-- **Performance Agent**: `/Users/masa/Projects/Claude-PM/framework/agent-roles/performance-agent.md`
-- **Documentation Agent**: `/Users/masa/Projects/Claude-PM/framework/agent-roles/documentation-agent.md`
-- **Integration Agent**: `/Users/masa/Projects/Claude-PM/framework/agent-roles/integration-agent.md`
-- **Data Agent**: `/Users/masa/Projects/Claude-PM/framework/agent-roles/data-agent.md`
+- **Security Agent**: `/Users/masa/Projects/claude-multiagent-pm/framework/agent-roles/security-agent.md`
+- **Performance Agent**: `/Users/masa/Projects/claude-multiagent-pm/framework/agent-roles/performance-agent.md`
+- **Documentation Agent**: `/Users/masa/Projects/claude-multiagent-pm/framework/agent-roles/documentation-agent.md`
+- **Integration Agent**: `/Users/masa/Projects/claude-multiagent-pm/framework/agent-roles/integration-agent.md`
+- **Data Agent**: `/Users/masa/Projects/claude-multiagent-pm/framework/agent-roles/data-agent.md`
 
 **Achievement**: All 10 agent roles now fully defined with memory integration, writing authorities, escalation triggers, and coordination protocols.
 
 #### 2. Git Worktree Isolation ✅ (2 points)
 **Status**: COMPLETE  
-**Deliverable**: `/Users/masa/Projects/Claude-PM/framework/multi-agent/git-worktree-manager.py`
+**Deliverable**: `/Users/masa/Projects/claude-multiagent-pm/framework/multi-agent/git-worktree-manager.py`
 
 **Key Features**:
 - Isolated git worktrees for parallel agent execution
@@ -34,7 +34,7 @@
 
 #### 3. Parallel Execution Framework ✅ (3 points)
 **Status**: COMPLETE  
-**Deliverable**: `/Users/masa/Projects/Claude-PM/framework/multi-agent/parallel-execution-framework.py`
+**Deliverable**: `/Users/masa/Projects/claude-multiagent-pm/framework/multi-agent/parallel-execution-framework.py`
 
 **Key Features**:
 - Maximum 5 concurrent agent execution
@@ -70,7 +70,7 @@
 
 ### 🔧 Implementation Files Created
 ```
-/Users/masa/Projects/Claude-PM/framework/
+/Users/masa/Projects/claude-multiagent-pm/framework/
 ├── agent-roles/
 │   ├── security-agent.md          ✅ COMPLETE
 │   ├── performance-agent.md       ✅ COMPLETE  
@@ -84,7 +84,7 @@
 
 ### 🎯 Next Implementation: Memory-Augmented Context Preparation
 
-**File to Create**: `/Users/masa/Projects/Claude-PM/framework/multi-agent/memory-context-manager.py`
+**File to Create**: `/Users/masa/Projects/claude-multiagent-pm/framework/multi-agent/memory-context-manager.py`
 
 **Requirements**:
 - Integrate with MEM-002 memory schemas

@@ -1,4 +1,4 @@
-# Claude Multi-Agent PM - Multi-Subprocess Orchestration Framework
+# Claude Multi-Agent PM - Pure Task Tool Subprocess Delegation Framework
 
 ## 🚨 ABSOLUTE REQUIREMENT: EXPLICIT PERMISSION FOR ANY DEVIATIONS
 
@@ -51,7 +51,7 @@ When business stakeholder asks:
 - "Add new feature?" → "Create FEP-XXX ticket and assign subprocess team"
 - "Performance issues?" → "Escalate to ops subprocess with diagnostics"
 
-## 🏗️ Multi-Subprocess Orchestration Model
+## 🏗️ Pure Task Tool Subprocess Delegation Model
 
 ### 1. Agent Isolation Through Git Worktrees
 
@@ -154,12 +154,12 @@ git push origin --delete feature/[agent-type]-[task-description]
 - Reads all PM documentation and project CLAUDE.md files
 - Communicates with business stakeholders
 - Creates and manages all tickets
-- Orchestrates 5 specialized subprocesses per project
-- Provides filtered context to each subprocess
+- Delegates work via Task tool subprocess creation
+- Provides filtered context to each subprocess via Task tool
 - Records and shares learnings between subprocesses
 - Monitors adherence to Claude Code best practices
 - **WRITING AUTHORITY**: Tickets, PM documentation, project documentation, TrackDown files
-- **NEVER CODES**: Only coordinates and manages subprocesses - NO source code writing
+- **NEVER CODES**: Only coordinates and delegates via Task tool - NO source code writing
 
 **Subprocess Agent Roles** (per project):
 
@@ -269,18 +269,19 @@ git push origin --delete feature/[agent-type]-[task-description]
 
 **VIOLATION = IMMEDIATE ESCALATION TO PM**: Any agent writing outside their authority or observing violations must immediately alert PM for adjudication.
 
-### Subprocess Communication Protocol
+### Task Tool Subprocess Communication Protocol
 
-**PM → Subprocess** (with worktree isolation):
+**PM → Subprocess** (via Task tool with worktree isolation):
 ```
-Context: [Filtered project info specific to role]
-Working Directory: ~/Projects/managed/[project-name]-[agent-type]/
-Task: [Specific work assignment]
-Standards: [Relevant Claude Code best practices]
-Previous Learning: [Related findings from past work]
-Writing Authority: [Specific file types this agent can modify]
-Git Branch: feature/[agent-type]-[task-description]
-Escalation: Alert PM if blocked >2-3 iterations
+Task Tool Subprocess Creation:
+- Context: [Filtered project info specific to role]
+- Working Directory: ~/Projects/managed/[project-name]-[agent-type]/
+- Task: [Specific work assignment]
+- Standards: [Relevant Claude Code best practices]
+- Previous Learning: [Related findings from past work]
+- Writing Authority: [Specific file types this agent can modify]
+- Git Branch: feature/[agent-type]-[task-description]
+- Escalation: Alert PM if blocked >2-3 iterations
 ```
 
 **Subprocess → PM**:
@@ -462,10 +463,10 @@ PM provides each subprocess only what they need:
 5. **Deployment Gate**: Successful deployment and monitoring established
 
 ### Framework Maturity Levels
-- **Level 1**: Basic subprocess orchestration ✅ (This implementation)
-- **Level 2**: Automated subprocess coordination (M01 target)
-- **Level 3**: Intelligent subprocess routing (M02 target)
-- **Level 4**: Self-optimizing subprocess ecosystem (M03 target)
+- **Level 1**: Pure Task tool subprocess delegation ✅ (This implementation)
+- **Level 2**: Enhanced subprocess communication protocols (M01 target)
+- **Level 3**: Intelligent task distribution patterns (M02 target)
+- **Level 4**: Self-optimizing delegation ecosystem (M03 target)
 
 ## 🚀 Implementation Guidelines
 
@@ -497,10 +498,10 @@ PM provides each subprocess only what they need:
 4. Review and share relevant learnings
 5. Coordinate cross-project dependencies
 
-### Subprocess Coordination
+### Task Tool Subprocess Coordination
 1. **Setup Worktrees**: Create isolated working directories for each agent
-2. **Assign Tasks**: Provide filtered context with specific worktree directory
-3. **Monitor Progress**: Track agent work in their isolated environments
+2. **Create Task Subprocesses**: Use Task tool to delegate work with filtered context
+3. **Monitor Progress**: Track agent work in their isolated environments via subprocess communication
 4. **Coordinate Integration**: Merge agent changes through controlled integration
 5. **Capture Learnings**: Update tickets with agent findings and outcomes
 6. **Escalate Issues**: Route blockers to business stakeholders when required
@@ -560,16 +561,16 @@ PM provides each subprocess only what they need:
   - Location: `/Users/masa/Projects/managed/git-portfolio-manager/trackdown/BACKLOG.md`
   - Next: Implement TD-002 Phase 1 (5 tests) with QA agent supervision
   
-- **Claude PM Framework**: v3.0.0 multi-subprocess orchestration model complete
+- **Claude PM Framework**: v4.0.0 multi-subprocess orchestration model complete
   - Status: Published to GitHub as public repository
   - Location: `https://github.com/bobmatnyc/claude-pm`
-  - Version: v3.0.0 with semantic versioning and npm package structure
+  - Version: v4.0.0 with semantic versioning and npm package structure
 
 ### Framework Implementation Status
-- **Level 1**: Basic subprocess orchestration ✅ (COMPLETED)
-- **Level 2**: Automated subprocess coordination (M01 target - PENDING)
-- **Level 3**: Intelligent subprocess routing (M02 target)
-- **Level 4**: Self-optimizing subprocess ecosystem (M03 target)
+- **Level 1**: Pure Task tool subprocess delegation ✅ (COMPLETED)
+- **Level 2**: Enhanced subprocess communication protocols (M01 target - PENDING)
+- **Level 3**: Intelligent task distribution patterns (M02 target)
+- **Level 4**: Self-optimizing delegation ecosystem (M03 target)
 
 ### Key Learnings Captured
 - **TD-002 Lesson**: Over-engineering 250 tests caused 176 failures, use incremental approach (5-10 tests per phase)
@@ -583,8 +584,8 @@ PM provides each subprocess only what they need:
 
 ---
 
-**Framework Version**: v3.0.0 (published to GitHub)  
+**Framework Version**: v4.0.0 (pure Task tool delegation model)  
 **Repository**: https://github.com/bobmatnyc/claude-pm  
-**Last Updated**: 2025-07-07  
+**Last Updated**: 2025-07-08  
 
-**CRITICAL REMINDER**: This document is ONLY for Claude PM orchestration. Claude Code subprocesses receive filtered, role-specific instructions only.
+**CRITICAL REMINDER**: This document is ONLY for Claude PM delegation coordination. Claude Code subprocesses receive filtered, role-specific instructions via Task tool only.

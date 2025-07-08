@@ -1,0 +1,39 @@
+{
+  "claude_pm_root": "/Users/masa/Projects/claude-multiagent-pm",
+  "notifications_enabled": true,
+  "notification_methods": [
+    "file",
+    "log"
+  ],
+  "email_enabled": false,
+  "email_recipients": [],
+  "slack_enabled": false,
+  "slack_webhook_url": "",
+  "sync_interval": 300,
+  "validation_interval": 180,
+  "notification_check_interval": 600,
+  "force_sync_interval": 3600,
+  "health_check_interval": 900,
+  "significant_change_threshold": 5.0,
+  "notification_cooldown": 3600,
+  "alert_on_inconsistencies": true,
+  "health_monitoring_enabled": true,
+  "strict_validation": true,
+  "auto_fix_inconsistencies": false,
+  "log_level": "INFO",
+  "max_log_files": 10,
+  "max_report_files": 50,
+  "validation_rules": {
+    "check_internal_links": true,
+    "validate_path_references": true,
+    "cross_file_consistency": true,
+    "progressive_structure_compliance": true,
+    "health_integration": true
+  },
+  "severity_thresholds": {
+    "critical": 0,
+    "high": 3,
+    "medium": 10,
+    "low": 25
+  }
+}

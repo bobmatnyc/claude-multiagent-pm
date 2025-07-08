@@ -122,3 +122,31 @@
 2025-07-07 18:00:00,967 - DocSync - INFO - Updated TICKETING_SYSTEM.md with current statistics
 2025-07-07 18:00:00,967 - DocSync - INFO - Documentation synchronization completed successfully
 2025-07-07 18:00:00,968 - DocSync - INFO - Status report: /Users/masa/Projects/claude-multiagent-pm/logs/doc_sync_report_20250707_180000.md
+2025-07-07 18:30:46,814 - DocSync - INFO - Starting documentation synchronization...
+2025-07-07 18:30:46,815 - DocSync - INFO - Parsing tickets from /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md
+2025-07-07 18:30:46,816 - DocSync - INFO - Parsed 136 tickets from BACKLOG.md
+2025-07-07 18:30:46,819 - DocSync - INFO - Generated status report: /Users/masa/Projects/claude-multiagent-pm/logs/doc_sync_report_20250707_183046.md
+2025-07-07 18:30:46,819 - DocSync - INFO - Documentation synchronization completed successfully
+2025-07-07 18:30:46,819 - DocSync - INFO - Status report: /Users/masa/Projects/claude-multiagent-pm/logs/doc_sync_report_20250707_183046.md
+2025-07-07 18:39:54,985 - DocSync - INFO - Starting documentation synchronization...
+2025-07-07 18:39:54,985 - DocSync - INFO - Parsing tickets from /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md
+2025-07-07 18:39:54,987 - DocSync - INFO - Parsed 136 tickets from BACKLOG.md
+2025-07-07 18:39:54,989 - DocSync - WARNING - Found 1 inconsistencies:
+2025-07-07 18:39:54,989 - DocSync - WARNING -   - M02-012: BACKLOG.md shows completed but TICKETING_SYSTEM.md shows pending
+2025-07-07 18:39:54,989 - DocSync - INFO - Generated status report: /Users/masa/Projects/claude-multiagent-pm/logs/doc_sync_report_20250707_183954.md
+2025-07-07 18:39:54,992 - DocSync - INFO - Updated TICKETING_SYSTEM.md with current statistics
+2025-07-07 18:39:54,992 - DocSync - INFO - Documentation synchronization completed successfully
+2025-07-07 18:39:54,992 - DocSync - INFO - Status report: /Users/masa/Projects/claude-multiagent-pm/logs/doc_sync_report_20250707_183954.md
+2025-07-07 19:04:39,594 - DocSync - INFO - Starting documentation synchronization...
+2025-07-07 19:04:39,595 - DocSync - INFO - Parsing tickets from /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md
+2025-07-07 19:04:39,596 - DocSync - INFO - Parsed 136 tickets from BACKLOG.md
+2025-07-07 19:04:39,598 - DocSync - WARNING - Found 2 inconsistencies:
+2025-07-07 19:04:39,598 - DocSync - WARNING -   - M02-013: BACKLOG.md shows completed but TICKETING_SYSTEM.md shows pending
+2025-07-07 19:04:39,598 - DocSync - WARNING -   - M02-014: BACKLOG.md shows completed but TICKETING_SYSTEM.md shows pending
+2025-07-07 19:04:39,599 - DocSync - INFO - Generated status report: /Users/masa/Projects/claude-multiagent-pm/logs/doc_sync_report_20250707_190439.md
+2025-07-07 19:04:39,599 - DocSync - INFO - Documentation synchronization completed successfully
+2025-07-07 19:04:39,599 - DocSync - INFO - Status report: /Users/masa/Projects/claude-multiagent-pm/logs/doc_sync_report_20250707_190439.md
+2025-07-07 20:30:29,921 - DocSync - INFO - Starting documentation synchronization...
+2025-07-07 20:30:29,921 - DocSync - INFO - Parsing tickets from /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md
+2025-07-07 20:30:29,922 - DocSync - INFO - Parsed 0 tickets from BACKLOG.md
+2025-07-07 20:30:29,922 - DocSync - ERROR - Error during documentation synchronization: division by zero

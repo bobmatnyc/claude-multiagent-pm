@@ -1,8 +1,8 @@
-# Claude PM Memory v3.1.0 - Zero-Configuration Universal Access
+# Claude PM Memory v4.0.0 - Zero-Configuration Universal Access
 
 ## Overview
 
-Claude PM Memory delivers zero-configuration universal memory access for the Claude PM Framework's memory-augmented project management system. Version 3.1.0 eliminates setup complexity with automatic service discovery while providing enterprise-grade memory management across all agents and projects.
+Claude PM Memory delivers zero-configuration universal memory access for the Claude PM Framework's memory-augmented project management system. Version 4.0.0 eliminates setup complexity with automatic service discovery while providing enterprise-grade memory management across all agents and projects.
 
 ## ✅ Deliverables Completed
 

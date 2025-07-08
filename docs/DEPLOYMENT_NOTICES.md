@@ -28,8 +28,8 @@ uvicorn main:app --host 0.0.0.0 --port 8765 --reload
 ```
 
 ### Files Updated:
-- ✅ `/Users/masa/Projects/Claude-PM/framework/LOCAL_SERVICES.md` - Updated deployment scripts
-- ✅ `/Users/masa/Projects/Claude-PM/logs/health-report.json` - Updated monitoring paths
+- ✅ `/Users/masa/Projects/claude-multiagent-pm/framework/LOCAL_SERVICES.md` - Updated deployment scripts
+- ✅ `/Users/masa/Projects/claude-multiagent-pm/logs/health-report.json` - Updated monitoring paths
 
 ### Verification Steps:
 1. ✅ Virtual environment intact at new location
@@ -45,4 +45,4 @@ uvicorn main:app --host 0.0.0.0 --port 8765 --reload
 
 ---
 
-*For questions, reference M01-037 in `/Users/masa/Projects/Claude-PM/trackdown/BACKLOG.md`*
+*For questions, reference M01-037 in `/Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md`*

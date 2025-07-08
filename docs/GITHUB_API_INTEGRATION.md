@@ -750,7 +750,7 @@ class SyncRecord:
 
 class ClaudePMGitHubSync:
     def __init__(self, client: GitHubAPIClient, repository: str, 
-                 backlog_path: str = "/Users/masa/Projects/Claude-PM/trackdown/BACKLOG.md"):
+                 backlog_path: str = "/Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md"):
         self.client = client
         self.repository = repository
         self.backlog_path = backlog_path
@@ -760,7 +760,7 @@ class ClaudePMGitHubSync:
         
         # Sync tracking
         self.sync_records: Dict[str, SyncRecord] = {}
-        self.sync_log_path = "/Users/masa/Projects/Claude-PM/sync/github_sync_log.json"
+        self.sync_log_path = "/Users/masa/Projects/claude-multiagent-pm/sync/github_sync_log.json"
     
     def full_sync(self, direction: SyncDirection = SyncDirection.CLAUDE_PM_TO_GITHUB) -> Dict[str, Any]:
         """Perform full synchronization"""
@@ -1076,7 +1076,7 @@ class SyncConflictError(GitHubSyncError):
     pass
 
 class SyncMonitor:
-    def __init__(self, log_path: str = "/Users/masa/Projects/Claude-PM/logs/github_sync.log"):
+    def __init__(self, log_path: str = "/Users/masa/Projects/claude-multiagent-pm/logs/github_sync.log"):
         self.log_path = Path(log_path)
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
         
@@ -1150,7 +1150,7 @@ def sync_with_monitoring():
 
 ```python
 class SyncBackupManager:
-    def __init__(self, backup_path: str = "/Users/masa/Projects/Claude-PM/backups"):
+    def __init__(self, backup_path: str = "/Users/masa/Projects/claude-multiagent-pm/backups"):
         self.backup_path = Path(backup_path)
         self.backup_path.mkdir(parents=True, exist_ok=True)
     

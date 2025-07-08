@@ -1,6 +1,6 @@
 {
   "name": "@claude-multiagent-pm/framework",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Claude Multiagent PM - Multi-Subprocess Orchestration Framework for AI-driven project management",
   "main": "framework/CLAUDE.md",
   "keywords": [

@@ -371,7 +371,7 @@ logging.getLogger("claude_pm.integrations.mem0ai_integration").setLevel(logging.
 
 ### Version Compatibility
 
-- **Claude PM Framework**: 3.0.0+
+- **Claude PM Framework**: 4.0.0+
 - **mem0AI Service**: Any version with authentication support
 - **Python**: 3.8+
 - **aiohttp**: 3.8+

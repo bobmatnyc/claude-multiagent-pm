@@ -13,7 +13,7 @@ All 114 GitHub Issues in the `bobmatnyc/claude-pm` repository contained links po
 
 **Problematic Format:**
 ```
-*Backlog location: `/Users/masa/Projects/Claude-PM/trackdown/BACKLOG.md`*
+*Backlog location: `/Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md`*
 ```
 
 **Fixed Format:**
@@ -34,19 +34,19 @@ All 114 GitHub Issues in the `bobmatnyc/claude-pm` repository contained links po
 All issues from #1 to #114 were successfully processed. The 3 skipped issues likely already had the correct format or didn't contain backlog location references.
 
 ### Changes Made
-- **Pattern Replaced:** `/Users/masa/Projects/Claude-PM/([^\s]*)`
+- **Pattern Replaced:** `/Users/masa/Projects/claude-multiagent-pm/([^\s]*)`
 - **Replacement:** `https://github.com/bobmatnyc/claude-pm/blob/main/$1`
 - **Files Affected:** `trackdown/BACKLOG.md` references
 
 ## Safety Measures Implemented
 
 ### 1. Backup Creation
-- **Backup File:** `/Users/masa/Projects/Claude-PM/backups/link_fixes/issue_backups_20250707_121315.json`
+- **Backup File:** `/Users/masa/Projects/claude-multiagent-pm/backups/link_fixes/issue_backups_20250707_121315.json`
 - **Contains:** Original content of all 111 updated issues
 - **Format:** JSON with issue number, GitHub ID, title, and body
 
 ### 2. Results Tracking
-- **Results File:** `/Users/masa/Projects/Claude-PM/backups/link_fixes/fix_results_20250707_121315.json`
+- **Results File:** `/Users/masa/Projects/claude-multiagent-pm/backups/link_fixes/fix_results_20250707_121315.json`
 - **Contains:** Detailed results for all 114 processed issues
 - **Includes:** Success status, changes made, error messages (if any)
 
@@ -78,7 +78,7 @@ https://github.com/bobmatnyc/claude-pm/blob/main/trackdown/BACKLOG.md
 ## Scripts Created
 
 ### 1. Main Fix Script
-- **File:** `/Users/masa/Projects/Claude-PM/scripts/fix_github_issue_links.py`
+- **File:** `/Users/masa/Projects/claude-multiagent-pm/scripts/fix_github_issue_links.py`
 - **Features:** 
   - Bulk update capability
   - Comprehensive error handling
@@ -88,7 +88,7 @@ https://github.com/bobmatnyc/claude-pm/blob/main/trackdown/BACKLOG.md
   - Verbose logging
 
 ### 2. Limited Test Script
-- **File:** `/Users/masa/Projects/Claude-PM/scripts/fix_github_issue_links_limited.py`
+- **File:** `/Users/masa/Projects/claude-multiagent-pm/scripts/fix_github_issue_links_limited.py`
 - **Purpose:** Safe testing with limited issues
 
 ## Recovery Process
@@ -100,7 +100,7 @@ import json
 import requests
 
 # Load backup
-with open('/Users/masa/Projects/Claude-PM/backups/link_fixes/issue_backups_20250707_121315.json', 'r') as f:
+with open('/Users/masa/Projects/claude-multiagent-pm/backups/link_fixes/issue_backups_20250707_121315.json', 'r') as f:
     backup_data = json.load(f)
 
 # Restore each issue
@@ -115,7 +115,7 @@ for backup in backup_data['backups']:
 - **Token Management:** Used existing `.env` file with proper GitHub token
 - **Minimal Permissions:** Only required repository write access
 - **No Data Loss:** All original content backed up before changes
-- **Audit Trail:** Complete log of all operations in `/Users/masa/Projects/Claude-PM/logs/github_link_fix.log`
+- **Audit Trail:** Complete log of all operations in `/Users/masa/Projects/claude-multiagent-pm/logs/github_link_fix.log`
 
 ## Conclusion
 
@@ -131,15 +131,15 @@ All 114 GitHub issues in the `bobmatnyc/claude-pm` repository now contain proper
 ## Files Created/Modified
 
 ### Scripts
-- `/Users/masa/Projects/Claude-PM/scripts/fix_github_issue_links.py` (new)
-- `/Users/masa/Projects/Claude-PM/scripts/fix_github_issue_links_limited.py` (new)
+- `/Users/masa/Projects/claude-multiagent-pm/scripts/fix_github_issue_links.py` (new)
+- `/Users/masa/Projects/claude-multiagent-pm/scripts/fix_github_issue_links_limited.py` (new)
 
 ### Backups
-- `/Users/masa/Projects/Claude-PM/backups/link_fixes/issue_backups_20250707_121315.json` (new)
-- `/Users/masa/Projects/Claude-PM/backups/link_fixes/fix_results_20250707_121315.json` (new)
+- `/Users/masa/Projects/claude-multiagent-pm/backups/link_fixes/issue_backups_20250707_121315.json` (new)
+- `/Users/masa/Projects/claude-multiagent-pm/backups/link_fixes/fix_results_20250707_121315.json` (new)
 
 ### Logs
-- `/Users/masa/Projects/Claude-PM/logs/github_link_fix.log` (new)
+- `/Users/masa/Projects/claude-multiagent-pm/logs/github_link_fix.log` (new)
 
 ### GitHub Issues
 - All 114 issues in `bobmatnyc/claude-pm` repository (modified)

@@ -31,7 +31,7 @@ grep -A50 "## 🚀 Priority Implementation Tickets" BACKLOG.md
 5. Commit changes
 
 ### For AI Assistants
-**CRITICAL**: Always reference `/Users/masa/Projects/Claude-PM/docs/TICKETING_SYSTEM.md` for complete explanation of the 42-ticket Claude Max + mem0AI enhancement system before working on any tasks.
+**CRITICAL**: Always reference `/Users/masa/Projects/claude-multiagent-pm/docs/TICKETING_SYSTEM.md` for complete explanation of the 42-ticket Claude Max + mem0AI enhancement system before working on any tasks.
 
 ## Files
 

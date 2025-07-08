@@ -8,7 +8,7 @@ This document shows example outputs from the Claude PM Framework Health Monitori
 ```bash
 $ npm run monitor:once
 
-> @claudepm/framework@3.0.0 monitor:once
+> @claudepm/framework@4.0.0 monitor:once
 > node scripts/automated-health-monitor.js once
 
 [2025-07-07T03:11:29.589Z] INFO: Starting comprehensive health check...

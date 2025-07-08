@@ -1,4 +1,0 @@
-[console_scripts]
-claude-pm = claude_pm.cli:main
-claude-pm-health = claude_pm.scripts.health_monitor:main
-claude-pm-service = claude_pm.scripts.service_manager:main

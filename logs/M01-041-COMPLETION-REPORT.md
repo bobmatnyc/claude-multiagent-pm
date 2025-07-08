@@ -85,7 +85,7 @@ Successfully implemented a comprehensive Documentation Status Synchronization Sy
 ### 📁 File Structure Created
 
 ```
-/Users/masa/Projects/Claude-PM/
+/Users/masa/Projects/claude-multiagent-pm/
 ├── scripts/
 │   ├── sync_docs.py                    # Core sync engine
 │   ├── doc_notification_system.py     # Notification system
@@ -133,7 +133,7 @@ Successfully implemented a comprehensive Documentation Status Synchronization Sy
 ### Option 1: Cron Job (Recommended for Development)
 ```bash
 python3 scripts/automated_doc_sync.py --create-cron-job
-crontab /Users/masa/Projects/Claude-PM/claude-pm-doc-sync.cron
+crontab /Users/masa/Projects/claude-multiagent-pm/claude-pm-doc-sync.cron
 ```
 
 ### Option 2: Systemd Service (Recommended for Production)

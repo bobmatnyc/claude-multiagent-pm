@@ -1,30 +1,30 @@
-# Claude Multi-Agent Project Management Framework v3.1.0 - Zero-Configuration Memory-Augmented Orchestration
+# Claude Multi-Agent Project Management Framework v4.0.0 - Pure Subprocess Delegation Model
 
-[![Version](https://img.shields.io/badge/Version-3.1.0-blue.svg)](https://github.com/masa/claude-multiagent-pm)
+[![Version](https://img.shields.io/badge/Version-4.0.0-blue.svg)](https://github.com/masa/claude-multiagent-pm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Phase 1](https://img.shields.io/badge/Phase%201-Dual%20Foundation%20Complete-brightgreen.svg)](./trackdown/CURRENT-STATUS.md)
+[![Architecture](https://img.shields.io/badge/Architecture-Pure%20Task%20Delegation-brightgreen.svg)](./trackdown/CURRENT-STATUS.md)
 [![Memory Integration](https://img.shields.io/badge/Memory-Zero%20Config-purple.svg)](./docs/CLAUDE_PM_MEMORY_README.md)
-[![LangGraph](https://img.shields.io/badge/LangGraph-Workflow%20Orchestration-blue.svg)](./docs/design/claude-pm-langgraph-design.md)
+[![Task Tools](https://img.shields.io/badge/Coordination-Task%20Tool%20Subprocess-blue.svg)](./framework/subprocess-protocols/)
 
-> **Zero-configuration dual integration: Memzero AI + LangGraph workflow orchestration**
+> **Pure subprocess delegation with memory-augmented Task tool coordination**
 
-Claude Multi-Agent Project Management Framework revolutionizes AI-assisted development through the powerful combination of intelligent memory integration and advanced workflow orchestration. The v3.1.0 release delivers Phase 1's dual foundation: zero-configuration Memzero AI integration alongside comprehensive LangGraph workflow management, creating a sophisticated memory-augmented orchestration system.
+Claude Multi-Agent Project Management Framework revolutionizes AI-assisted development through pure subprocess delegation with intelligent memory integration. The v4.0.0 release establishes a clean, reliable foundation: zero-configuration mem0AI integration alongside powerful Task tool subprocess coordination, creating a sophisticated yet simple memory-augmented delegation system.
 
 ## 🚀 Key Features
 
-### Dual Foundation Architecture
+### Pure Subprocess Delegation Architecture
 
-#### Zero-Configuration Memory Integration (Memzero AI)
+#### Zero-Configuration Memory Integration (mem0AI)
 - **Instant Memory Access**: No API keys or configuration required
 - **Universal Memory Service**: Automatic service discovery on localhost:8002
 - **Memory Categories**: Project, Pattern, Team, and Error memories with enterprise schemas
 - **Factory Functions**: Simple memory access via environment-based configuration
 
-#### Advanced Workflow Orchestration (LangGraph)
-- **State Management**: Advanced workflow orchestration with persistent state
-- **Conditional Routing**: Intelligent task routing based on complexity and cost
-- **Human-in-the-Loop**: Approval workflows for complex or sensitive tasks
-- **Workflow Composition**: Modular workflows that can be combined and reused
+#### Task Tool Subprocess Coordination
+- **Direct Delegation**: Clean subprocess creation via Task tool
+- **Isolated Contexts**: Each agent receives filtered, role-specific instructions
+- **Memory-Augmented Tasks**: Context enhancement from historical project data
+- **Systematic Communication**: Structured protocols for agent coordination
 
 #### 11-Agent Orchestration Ecosystem
 - **Core Agents**: Orchestrator, Architect, Engineer, QA, Researcher
@@ -54,7 +54,7 @@ Claude Multi-Agent Project Management Framework revolutionizes AI-assisted devel
 - **11 Specialized Agents**: Core + Specialist agents with memory integration
 - **Zero-Configuration Access**: Automatic memory service discovery and connection
 - **Git Worktree Isolation**: Parallel execution environments for concurrent agents
-- **LangGraph Orchestration**: Advanced workflow management with state persistence
+- **Task Tool Coordination**: Direct subprocess delegation with structured protocols
 - **Memory Categories**: Project, Pattern, Team, Error memories with enterprise schemas
 
 ### Memory Integration Architecture
@@ -73,7 +73,7 @@ Claude Multi-Agent Project Management Framework revolutionizes AI-assisted devel
 ```
 claude-multiagent-pm/
 ├── .git/                           # Dedicated PM git repository
-├── README.md                      # This file (updated for v3.1.0)
+├── README.md                      # This file (updated for v4.0.0)
 ├── claude_pm/                     # Core framework implementation
 │   ├── services/                  # Memory and orchestration services
 │   │   ├── mem0_context_manager.py    # Advanced context management
@@ -82,7 +82,7 @@ claude-multiagent-pm/
 │   └── agents/                    # 11-agent ecosystem implementation
 ├── config/                        # Zero-configuration setup
 │   ├── memory_config.py          # Factory functions and auto-discovery
-│   └── langgraph_config.yaml     # LangGraph workflow configuration
+│   └── task_delegation_config.py # Task tool subprocess configuration
 ├── trackdown/                     # TrackDown project management
 │   ├── BACKLOG.md                # 42 active tickets (83% Phase 1 complete)
 │   ├── CURRENT-STATUS.md          # Real-time progress tracking
@@ -110,10 +110,10 @@ claude-multiagent-pm/
 - **Universal Compatibility**: Works across all Claude instances and projects
 
 ### 42-Ticket Enhancement System
-**Systematic Claude Max + mem0AI + LangGraph dual integration**:
+**Systematic Claude Max + mem0AI integration with pure subprocess delegation**:
 - **MEM-001 to MEM-006**: Core memory integration ✅ COMPLETED (Phase 1)
-- **LGR-001 to LGR-003**: LangGraph workflow integration ✅ COMPLETED (Phase 1)
-- **Phase 1 Progress**: 83% complete - dual foundation established
+- **TSK-001 to TSK-003**: Task tool subprocess protocols ✅ COMPLETED (Phase 2)
+- **Architecture Status**: Complete - pure delegation model established
 - **Completion Tracking**: Individual status reports for each major ticket
 
 ### Memory-Augmented Development
@@ -147,8 +147,8 @@ curl http://localhost:8002/health
 # View current framework status
 cat /Users/masa/Projects/claude-multiagent-pm/trackdown/CURRENT-STATUS.md
 
-# Check Phase 1 progress (83% complete)
-grep -A20 "Phase 1 Progress" /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md
+# Check architecture status (complete)
+grep -A20 "Architecture Status" /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md
 ```
 
 ### 11-Agent Ecosystem Usage
@@ -182,9 +182,9 @@ All projects in `/Users/masa/Projects/managed/` automatically have:
 - **Cross-Project Memory**: Shared patterns and learning across all managed projects
 - **Enterprise Schemas**: 4 memory categories with validation and migration
 
-### LangGraph Orchestration
-- **Workflow Management**: Advanced state management and conditional routing
-- **Agent Coordination**: Seamless messaging between 11 specialized agents
+### Task Tool Coordination
+- **Subprocess Management**: Direct agent delegation via Task tool subprocess creation
+- **Agent Communication**: Structured protocols for 11 specialized agents
 - **Performance Monitoring**: Real-time metrics and health monitoring
 - **Parallel Execution**: Up to 5 concurrent agents with git worktree isolation
 
@@ -196,13 +196,13 @@ All projects in `/Users/masa/Projects/managed/` automatically have:
 
 ## 📊 Current Status & Metrics
 
-### Phase 1 Progress - Dual Foundation Complete
-- **83% Complete**: 106/127 story points delivered
+### Architecture Status - Pure Delegation Model Complete
+- **100% Complete**: All core architecture story points delivered
 - **Memory Integration**: MEM-001 through MEM-006 completed
-- **Workflow Orchestration**: LGR-001 through LGR-003 completed  
+- **Subprocess Coordination**: TSK-001 through TSK-003 completed  
 - **Zero-Config Achievement**: Universal memory access without manual setup
-- **Advanced Workflows**: LangGraph state management and routing operational
-- **11-Agent Ecosystem**: Memory-augmented multi-agent architecture with workflow orchestration
+- **Pure Delegation Model**: Task tool subprocess coordination operational
+- **11-Agent Ecosystem**: Memory-augmented multi-agent architecture with clean subprocess delegation
 
 ### Infrastructure Metrics
 - **Memory Service**: localhost:8002 with automatic service discovery
@@ -211,26 +211,51 @@ All projects in `/Users/masa/Projects/managed/` automatically have:
 - **Reliability**: Production-validated across diverse project architectures
 
 ### Next Phase Targets
-- **Remaining LGR Tickets**: Human-in-the-loop and CLI integration (LGR-004 through LGR-006)
-- **Advanced Features**: Workflow composition and monitoring dashboards
-- **Enterprise Patterns**: Advanced routing strategies and performance optimization
+- **Enhanced Task Protocols**: Advanced subprocess communication patterns
+- **Monitoring Integration**: Enhanced agent performance dashboards
+- **Delegation Optimization**: Advanced task distribution and load balancing
 
 ---
 
 **Repository Created**: 2025-07-05  
-**Framework Version**: v3.1.0 (Dual Foundation: Memzero AI + LangGraph)  
-**Phase 1 Status**: 83% Complete - Dual Foundation Operational  
+**Framework Version**: v4.0.0 (Pure Subprocess Delegation Model)  
+**Architecture Status**: Complete - Pure Task Tool Delegation Operational  
 **Memory Integration**: ✅ Zero-Configuration Universal Access  
-**Workflow Orchestration**: ✅ LangGraph State Management & Routing  
+**Subprocess Coordination**: ✅ Task Tool Direct Agent Delegation  
 **Agent Ecosystem**: ✅ 11-Agent Memory-Augmented Architecture  
-**Maintenance**: Active development with continuous learning and workflow orchestration
+**Maintenance**: Active development with continuous learning and subprocess delegation
 
 ## 🎯 Getting Started
 
-1. **Verify Memory Service**: `curl http://localhost:8002/health`
-2. **Check Current Status**: Review `/Users/masa/Projects/claude-multiagent-pm/trackdown/CURRENT-STATUS.md`
-3. **Explore Documentation**: Start with `/Users/masa/Projects/claude-multiagent-pm/docs/CLAUDE_PM_MEMORY_README.md`
-4. **Try Zero-Config Memory**: Use factory functions from `config.memory_config`
-5. **Review Completed Features**: Check MEM-001 through MEM-006 status reports
+### Quick Navigation
+📚 **[Complete Documentation Index](./docs/INDEX.md)** - Your starting point for all framework documentation
+
+**For immediate productivity**:
+1. **[Quick Start Guide](./docs/QUICK_START.md)** - Get productive in 15 minutes
+2. **[Framework Overview](./docs/FRAMEWORK_OVERVIEW.md)** - Understanding the architecture
+3. **[First Agent Delegation](./docs/FIRST_DELEGATION.md)** - Learn multi-agent coordination
+
+### Framework Status Check
+```bash
+# Verify Memory Service
+curl http://localhost:8002/health
+
+# Check Current Status  
+cat /Users/masa/Projects/claude-multiagent-pm/trackdown/CURRENT-STATUS.md
+
+# Review architecture status (complete)
+grep -A20 "Architecture Status" /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md
+```
+
+### Zero-Configuration Memory Access
+```python
+# Instant memory integration - no setup required
+from config.memory_config import create_claude_pm_memory
+
+memory = create_claude_pm_memory()  # Auto-discovery localhost:8002
+memory.add_project_memory("Framework exploration complete!")
+```
 
 The framework is production-ready with zero-configuration memory integration and 11-agent orchestration. All major memory infrastructure is complete and validated across 12+ managed projects.
+
+**New to the framework?** → Start with the **[Documentation Index](./docs/INDEX.md)**

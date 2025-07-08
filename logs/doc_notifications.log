@@ -20,3 +20,7 @@
 2025-07-07 17:54:04,145 - DocNotifications - INFO -   • Completed: 61 (44.9%)
 2025-07-07 17:54:04,145 - DocNotifications - INFO -   • Story Points: 334/724 (46.1%)
 2025-07-07 17:54:04,145 - DocNotifications - INFO -   • Phase 1: 75.0% complete
+2025-07-07 20:35:59,279 - DocNotifications - INFO - Checking for notification-worthy documentation changes...
+2025-07-07 20:35:59,355 - DocNotifications - INFO - Sending high notification (threshold):
+2025-07-07 20:35:59,355 - DocNotifications - INFO -   - 8 high issues (threshold: 3)
+2025-07-07 20:35:59,355 - DocNotifications - INFO -   - 168 medium issues (threshold: 10)

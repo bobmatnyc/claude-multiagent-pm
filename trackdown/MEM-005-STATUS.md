@@ -89,14 +89,14 @@ The IntelligentTaskPlanner was demonstrated with 3 test cases of varying complex
 ## 📁 Implementation Files
 
 ### Core Implementation
-- **`/Users/masa/Projects/Claude-PM/claude_pm/services/intelligent_task_planner.py`**
+- **`/Users/masa/Projects/claude-multiagent-pm/claude_pm/services/intelligent_task_planner.py`**
   - Complete IntelligentTaskPlanner with all acceptance criteria
   - Memory integration and pattern matching algorithms
   - Adaptive decomposition strategies and complexity estimation
   - Learning loop and continuous improvement metrics
 
 ### Multi-Agent Integration
-- **`/Users/masa/Projects/Claude-PM/execute_mem005_orchestrated.py`**
+- **`/Users/masa/Projects/claude-multiagent-pm/execute_mem005_orchestrated.py`**
   - Full orchestration script demonstrating proper multi-agent delegation
   - Memory-augmented context preparation for each agent
   - Coordinated execution with agent isolation and messaging

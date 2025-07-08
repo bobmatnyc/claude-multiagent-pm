@@ -45,20 +45,20 @@ MEM-004 has been successfully completed with a comprehensive memory-driven conte
 ## 🔧 Key Implementation Files
 
 ### Core Implementation
-- **`/Users/masa/Projects/Claude-PM/claude_pm/services/mem0_context_manager.py`** (1,001 lines)
+- **`/Users/masa/Projects/claude-multiagent-pm/claude_pm/services/mem0_context_manager.py`** (1,001 lines)
   - Main Mem0ContextManager class with comprehensive context preparation
   - Advanced pattern recognition and memory scoring
   - Security and access control filtering
   - Project context history integration
 
 ### Testing & Validation
-- **`/Users/masa/Projects/Claude-PM/tests/test_mem0_context_performance.py`** (374 lines)
+- **`/Users/masa/Projects/claude-multiagent-pm/tests/test_mem0_context_performance.py`** (374 lines)
   - Performance benchmarking suite
   - Context preparation performance tests
   - Concurrent load testing
 
 ### Integration Demo
-- **`/Users/masa/Projects/Claude-PM/examples/mem003_multi_agent_demo.py`** (365 lines)
+- **`/Users/masa/Projects/claude-multiagent-pm/examples/mem003_multi_agent_demo.py`** (365 lines)
   - Full integration demonstration
   - Memory-augmented context preparation examples
   - Multi-agent orchestration with context management

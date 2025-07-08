@@ -7,13 +7,13 @@ This directory contains a production-ready system for syncing Claude PM trackdow
 1. **Setup GitHub Token**
    ```bash
    # Token is already configured in .env file
-   echo "GITHUB_TOKEN=your_token_here" >> /Users/masa/Projects/Claude-PM/.env
+   echo "GITHUB_TOKEN=your_token_here" >> /Users/masa/Projects/claude-multiagent-pm/.env
    ```
 
 2. **Basic Sync Operation**
    ```bash
    # Navigate to scripts directory
-   cd /Users/masa/Projects/Claude-PM/scripts
+   cd /Users/masa/Projects/claude-multiagent-pm/scripts
    
    # Basic sync (dry run first)
    python github_sync_cli.py sync --repository bobmatnyc/your-repo --dry-run
@@ -210,25 +210,25 @@ The system processes these ticket types from BACKLOG.md:
 ### Log Files
 ```bash
 # Main sync log
-tail -f /Users/masa/Projects/Claude-PM/logs/github_sync.log
+tail -f /Users/masa/Projects/claude-multiagent-pm/logs/github_sync.log
 
 # Error-specific log
-tail -f /Users/masa/Projects/Claude-PM/logs/sync_errors.log
+tail -f /Users/masa/Projects/claude-multiagent-pm/logs/sync_errors.log
 
 # API request log
-tail -f /Users/masa/Projects/Claude-PM/logs/api_requests.log
+tail -f /Users/masa/Projects/claude-multiagent-pm/logs/api_requests.log
 
 # Structured events
-tail -f /Users/masa/Projects/Claude-PM/logs/sync_events.jsonl
+tail -f /Users/masa/Projects/claude-multiagent-pm/logs/sync_events.jsonl
 ```
 
 ### Backup Location
 ```bash
 # Automatic backups
-ls -la /Users/masa/Projects/Claude-PM/backups/
+ls -la /Users/masa/Projects/claude-multiagent-pm/backups/
 
 # Sync state tracking
-cat /Users/masa/Projects/Claude-PM/sync/github_sync_log.json
+cat /Users/masa/Projects/claude-multiagent-pm/sync/github_sync_log.json
 ```
 
 ### Health Monitoring
@@ -251,7 +251,7 @@ python github_sync_cli.py validate --repository owner/repo
 ```bash
 # If you hit rate limits, the script will automatically wait
 # Monitor with:
-grep "Rate limit" /Users/masa/Projects/Claude-PM/logs/github_sync.log
+grep "Rate limit" /Users/masa/Projects/claude-multiagent-pm/logs/github_sync.log
 ```
 
 **Authentication Errors**
@@ -268,7 +268,7 @@ curl -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/user
 python github_sync_cli.py validate --repository owner/repo
 
 # Review parsing errors
-grep "validation" /Users/masa/Projects/Claude-PM/logs/sync_errors.log
+grep "validation" /Users/masa/Projects/claude-multiagent-pm/logs/sync_errors.log
 ```
 
 **Permission Errors**
@@ -295,7 +295,7 @@ backup_manager.rollback_sync('/path/to/backup/file.json')
 **Clean Sync State**
 ```bash
 # Remove sync records to start fresh
-rm /Users/masa/Projects/Claude-PM/sync/github_sync_log.json
+rm /Users/masa/Projects/claude-multiagent-pm/sync/github_sync_log.json
 
 # Clean up GitHub issues (manual via web interface)
 # or use GitHub CLI:
@@ -364,7 +364,7 @@ jobs:
 ### Monitoring Integration
 ```bash
 # Cron job for health monitoring
-*/30 * * * * cd /Users/masa/Projects/Claude-PM/scripts && python github_sync_cli.py status >> /tmp/sync_health.log
+*/30 * * * * cd /Users/masa/Projects/claude-multiagent-pm/scripts && python github_sync_cli.py status >> /tmp/sync_health.log
 ```
 
 ### Alerting Setup

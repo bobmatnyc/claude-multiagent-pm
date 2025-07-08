@@ -1,10 +1,16 @@
-📋 Claude PM Documentation Update - 2025-07-07 17:54:04
+# Documentation Change Notification
+Timestamp: 2025-07-07T20:35:59.355514
+Priority: high
+Type: threshold
 
-🔄 Changes detected:
-  • 🧪 Test notification from documentation system
+## Changes Detected:
+- 8 high issues (threshold: 3)
+- 168 medium issues (threshold: 10)
 
-📊 Current Status:
-  • Total Tickets: 136
-  • Completed: 61 (44.9%)
-  • Story Points: 334/724 (46.1%)
-  • Phase 1: 75.0% complete
+## Current Status:
+- Completion: 94.7%
+- Total Issues: 176
+- Broken Links: 8
+- Inconsistencies: 1
+
+For detailed information, check the latest sync report in the logs directory.

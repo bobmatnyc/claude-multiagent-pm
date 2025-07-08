@@ -1,0 +1,24 @@
+[Unit]
+Description=Enhanced Claude PM Automated Documentation Synchronization Service
+After=network.target
+
+[Service]
+Type=simple
+User=masa
+WorkingDirectory=/Users/masa/Projects/claude-multiagent-pm
+ExecStart=/usr/bin/python3 /Users/masa/Projects/claude-multiagent-pm/scripts/enhanced_automated_doc_sync.py --daemon
+Restart=always
+RestartSec=30
+StandardOutput=append:/Users/masa/Projects/claude-multiagent-pm/logs/enhanced_automated_doc_sync.log
+StandardError=append:/Users/masa/Projects/claude-multiagent-pm/logs/enhanced_automated_doc_sync_error.log
+
+# Resource limits
+MemoryLimit=512M
+CPUQuota=50%
+
+# Graceful shutdown
+TimeoutStopSec=30
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target

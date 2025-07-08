@@ -133,8 +133,8 @@ The slash command implementation is complete and ready for production use. Users
 
 ## Files Modified
 
-- `/Users/masa/Projects/Claude-PM/claude_pm/cli.py` - Enhanced with all new command groups
-- `/Users/masa/Projects/Claude-PM/trackdown/BACKLOG.md` - Updated task status
+- `/Users/masa/Projects/claude-multiagent-pm/claude_pm/cli.py` - Enhanced with all new command groups
+- `/Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md` - Updated task status
 
 ## Impact
 

@@ -1,0 +1,3 @@
+#!/bin/bash
+# Enhanced Documentation Validation CLI Wrapper
+exec python3 "/Users/masa/Projects/claude-multiagent-pm/scripts/doc_validation_cli.py" "$@"

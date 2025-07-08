@@ -15,6 +15,10 @@ import json
 
 from .claude_pm_memory import ClaudePMMemory, MemoryCategory
 from ..core.logging_config import get_logger
+from ..core.enforcement import (
+    get_enforcement_engine, EnforcementEngine, Agent as EnforcementAgent,
+    Action as EnforcementAction, ActionType, AgentType as EnforcementAgentType
+)
 import sys
 from pathlib import Path
 
@@ -124,6 +128,9 @@ class MultiAgentOrchestrator:
         self.memory = memory
         self.max_parallel = max_parallel
         
+        # Initialize enforcement engine for delegation constraints
+        self.enforcement_engine = get_enforcement_engine()
+        
         # Initialize git worktree manager
         self.worktree_manager = GitWorktreeManager(
             base_repo_path=str(self.base_repo_path),
@@ -142,7 +149,7 @@ class MultiAgentOrchestrator:
         self.coordination_semaphore = asyncio.Semaphore(max_parallel)
         self.message_bus: Dict[str, List[Dict[str, Any]]] = {}
         
-        logger.info(f"MultiAgentOrchestrator initialized with {len(self.agent_definitions)} agents")
+        logger.info(f"MultiAgentOrchestrator initialized with {len(self.agent_definitions)} agents and enforcement engine")
     
     def _initialize_agent_definitions(self) -> Dict[AgentType, Dict[str, Any]]:
         """Initialize agent definitions with memory integration capabilities."""
@@ -352,6 +359,12 @@ class MultiAgentOrchestrator:
         self.active_executions[execution_id] = execution
         
         try:
+            # Validate agent authorization before execution
+            if not await self._validate_task_authorization(task, execution):
+                execution.status = AgentStatus.FAILED
+                execution.error = "Task authorization failed - delegation constraint violation"
+                return execution
+            
             # Acquire coordination semaphore for parallel execution control
             async with self.coordination_semaphore:
                 execution.start_time = datetime.now()
@@ -391,6 +404,84 @@ class MultiAgentOrchestrator:
                 del self.active_executions[execution_id]
         
         return execution
+    
+    async def _validate_task_authorization(self, task: AgentTask, execution: AgentExecution) -> bool:
+        """
+        Validate that the agent is authorized to perform the task based on delegation constraints.
+        
+        Args:
+            task: Task to validate
+            execution: Execution context
+            
+        Returns:
+            True if authorized, False otherwise
+        """
+        try:
+            # Convert orchestrator agent type to enforcement agent type
+            enforcement_agent_type = self._convert_to_enforcement_agent_type(task.agent_type)
+            
+            # Create enforcement agent
+            enforcement_agent = EnforcementAgent(
+                agent_id=execution.execution_id,
+                agent_type=enforcement_agent_type,
+                project_name=task.project_name,
+                working_directory=execution.worktree_path
+            )
+            
+            # If this is a file operation task, validate file access
+            if task.context.get("target_files"):
+                for file_path in task.context["target_files"]:
+                    action = EnforcementAction(
+                        action_type=ActionType.WRITE if "write" in task.description.lower() else ActionType.READ,
+                        resource_path=Path(file_path),
+                        agent=enforcement_agent
+                    )
+                    
+                    result = self.enforcement_engine.validate_action(enforcement_agent, action)
+                    if not result.is_valid:
+                        logger.error(f"Authorization failed for {task.agent_type.value} accessing {file_path}")
+                        for violation in result.violations:
+                            logger.error(f"  Violation: {violation.description}")
+                        return False
+            
+            # General task authorization check
+            task_resource = Path(task.project_name or "project")
+            action = EnforcementAction(
+                action_type=ActionType.EXECUTE,
+                resource_path=task_resource,
+                agent=enforcement_agent
+            )
+            
+            result = self.enforcement_engine.validate_action(enforcement_agent, action)
+            if not result.is_valid:
+                logger.error(f"Task authorization failed for {task.agent_type.value}: {task.description}")
+                return False
+            
+            logger.debug(f"Task authorization successful for {task.agent_type.value}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Authorization validation error: {e}")
+            return False
+    
+    def _convert_to_enforcement_agent_type(self, orchestrator_agent_type: AgentType) -> EnforcementAgentType:
+        """Convert orchestrator AgentType to enforcement AgentType."""
+        # Map orchestrator agent types to enforcement agent types
+        mapping = {
+            AgentType.ORCHESTRATOR: EnforcementAgentType.ORCHESTRATOR,
+            AgentType.ARCHITECT: EnforcementAgentType.ARCHITECT,
+            AgentType.ENGINEER: EnforcementAgentType.ENGINEER,
+            AgentType.QA: EnforcementAgentType.QA,
+            AgentType.RESEARCHER: EnforcementAgentType.RESEARCHER,
+            AgentType.SECURITY_ENGINEER: EnforcementAgentType.SECURITY_ENGINEER,
+            AgentType.PERFORMANCE_ENGINEER: EnforcementAgentType.PERFORMANCE_ENGINEER,
+            AgentType.DEVOPS_ENGINEER: EnforcementAgentType.DEVOPS_ENGINEER,
+            AgentType.DATA_ENGINEER: EnforcementAgentType.DATA_ENGINEER,
+            AgentType.UI_UX_ENGINEER: EnforcementAgentType.UI_UX_ENGINEER,
+            AgentType.CODE_REVIEW_ENGINEER: EnforcementAgentType.CODE_REVIEW_ENGINEER
+        }
+        
+        return mapping.get(orchestrator_agent_type, EnforcementAgentType.ENGINEER)
     
     async def _execute_agent_logic(self, execution: AgentExecution) -> Dict[str, Any]:
         """
@@ -618,7 +709,7 @@ Context: {json.dumps(execution.task.context, indent=2)}
     
     def get_orchestrator_stats(self) -> Dict[str, Any]:
         """Get comprehensive orchestrator statistics."""
-        return {
+        stats = {
             "agent_definitions": len(self.agent_definitions),
             "active_executions": len(self.active_executions),
             "queued_tasks": len(self.task_queue),
@@ -628,6 +719,16 @@ Context: {json.dumps(execution.task.context, indent=2)}
             "message_bus_size": sum(len(messages) for messages in self.message_bus.values()),
             "agent_types": [agent_type.value for agent_type in self.agent_definitions.keys()]
         }
+        
+        # Add enforcement statistics
+        try:
+            enforcement_stats = self.enforcement_engine.get_enforcement_stats()
+            stats["enforcement"] = enforcement_stats
+        except Exception as e:
+            logger.warning(f"Failed to get enforcement stats: {e}")
+            stats["enforcement"] = {"error": str(e)}
+        
+        return stats
     
     async def cleanup(self) -> None:
         """Cleanup orchestrator resources."""

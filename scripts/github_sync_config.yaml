@@ -55,9 +55,6 @@ labels:
     memory:
       color: "5319E7"
       description: "Memory/AI related task"
-    langgraph:
-      color: "1D76DB"
-      description: "LangGraph workflow task"
     epic:
       color: "8B5CF6"
       description: "Epic tracking"
@@ -109,9 +106,6 @@ labels:
     fep_010:
       color: "D4C5F9"
       description: "Continuous Learning Engine"
-    fep_011:
-      color: "E879F9"
-      description: "LangGraph State-Based Workflow Orchestration"
   
   # Status labels
   status:
@@ -150,7 +144,6 @@ ticket_mapping:
   # Epic assignments based on ticket ID prefixes
   epic_mapping:
     "MEM-": "FEP-007"
-    "LGR-": "FEP-011"
     "M01-": "FEP-001"
     "M02-": "FEP-002"
     "M03-": "FEP-004"
@@ -165,7 +158,6 @@ ticket_mapping:
     "MEM-001": "M01 Foundation"
     "MEM-002": "M01 Foundation"
     "MEM-003": "M01 Foundation"
-    "LGR-001": "M01 Foundation"
     "MEM-004": "M02 Automation"
     "MEM-005": "M02 Automation"
     "M02-": "M02 Automation"
@@ -180,7 +172,6 @@ ticket_mapping:
     "MEM-001": "CRITICAL"
     "MEM-002": "CRITICAL"
     "MEM-003": "CRITICAL"
-    "LGR-001": "CRITICAL"
     "MEM-004": "HIGH"
     "MEM-005": "HIGH"
     "M01-": "HIGH"
@@ -201,7 +192,6 @@ ticket_mapping:
       "MEM-004": 8
       "MEM-005": 8
       "MEM-006": 10
-      "LGR-001": 12
     
     default_by_prefix:
       "M01-": 3
