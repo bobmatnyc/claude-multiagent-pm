@@ -188,7 +188,7 @@ from claude_pm.services.multi_agent_orchestrator import MultiAgentOrchestrator
 #### Implementation Details
 - [Memory Integration Guide](CLAUDE_PM_MEMORY_INTEGRATION.md) - Memory-augmented agent patterns
 - [Service Architecture](services.md) - Core service implementations
-- [Memory Configuration](../config/memory_config.py) - Zero-configuration setup
+- [Memory Configuration](../claude_pm/core/memory_config.py) - Zero-configuration setup
 
 ### Health Monitoring
 > **System monitoring, alerting, and troubleshooting**
