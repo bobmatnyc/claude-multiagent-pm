@@ -2,6 +2,30 @@
 
 All notable changes to the Claude Multi-Agent Project Management Framework will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 4.2.2 (2025-07-09)
+
+### 🏛️ Framework Governance - Constitutional Design Document
+
+#### Major Governance Enhancement
+- **📋 Comprehensive Design Document** - Added authoritative design document at `docs/design/claude-multiagent-pm-design.md`
+- **⚖️ Constitutional Framework** - Established design document as constitutional authority for all PM decisions
+- **🔍 QA Validation Protocols** - Mandatory design document alignment for all framework operations
+- **📐 Scope Boundaries** - Clear definition of what IS and IS NOT in framework scope
+- **🎯 Ticket Relevance Validation** - All tickets must align with design document scope
+
+#### Framework Authority Protocols
+- **🔒 Design Document Authority** - All PM decisions must reference design document sections
+- **📋 Governance Protocols** - Established framework-level decision making processes
+- **🎯 Orchestration Capabilities** - Enhanced multi-agent coordination with constitutional backing
+- **📊 Epic/Issue Tracking** - New ai-trackdown-tools integration with cmpm dashboard development
+
+#### Technical Enhancements
+- **🚀 CMPM Dashboard** - Added slash command development tickets for portfolio manager
+- **🔧 Framework Integration** - Enhanced ai-trackdown-tools coordination capabilities
+- **📈 Version Management** - Upgraded to v4.2.2 with governance enhancements
+
+This represents a **significant governance milestone** establishing the design document as the authoritative source for all Claude PM Framework operations and decisions.
+
 ## 4.2.1 (2025-07-09)
 
 ### 🚀 New Features - ai-trackdown-tools Integration
