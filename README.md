@@ -1,6 +1,6 @@
-# Claude Multi-Agent Project Management Framework v4.0.0 - Pure Subprocess Delegation Model
+# Claude Multi-Agent Project Management Framework v4.1.0 - Pure Subprocess Delegation Model
 
-[![Version](https://img.shields.io/badge/Version-4.0.0-blue.svg)](https://github.com/masa/claude-multiagent-pm)
+[![Version](https://img.shields.io/badge/Version-4.1.0-blue.svg)](https://github.com/masa/claude-multiagent-pm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Architecture](https://img.shields.io/badge/Architecture-Pure%20Task%20Delegation-brightgreen.svg)](./trackdown/CURRENT-STATUS.md)
 [![Memory Integration](https://img.shields.io/badge/Memory-Zero%20Config-purple.svg)](./docs/CLAUDE_PM_MEMORY_README.md)
@@ -8,9 +8,29 @@
 
 > **Pure subprocess delegation with memory-augmented Task tool coordination**
 
-Claude Multi-Agent Project Management Framework revolutionizes AI-assisted development through pure subprocess delegation with intelligent memory integration. The v4.0.0 release establishes a clean, reliable foundation: zero-configuration mem0AI integration alongside powerful Task tool subprocess coordination, creating a sophisticated yet simple memory-augmented delegation system.
+Claude Multi-Agent Project Management Framework revolutionizes AI-assisted development through pure subprocess delegation with intelligent memory integration. The v4.1.0 release introduces professional CMPM slash commands, enabling real-time system monitoring and agent management alongside the established zero-configuration mem0AI integration and powerful Task tool subprocess coordination.
 
 ## 🚀 Key Features
+
+### 🎯 CMPM Slash Commands (v4.1.0)
+
+#### Professional Command Interface
+- **`/cmpm:health`** - Comprehensive system health dashboard with real-time monitoring
+- **`/cmpm:agents`** - Active agent registry overview with MCP infrastructure support
+- **CLI Wrapper** - Professional CMPM-branded command interface via `./bin/cmpm`
+- **Rich Output** - Color-coded dashboards with professional tabular data presentation
+
+#### System Health Monitoring
+- **4 Core Components** - Framework, ai-trackdown-tools, task system, and memory system monitoring
+- **Reliability Scoring** - 0-100% system reliability calculation with component status aggregation
+- **Response Time Tracking** - Sub-5-second performance metrics with timeout handling
+- **Graceful Error Handling** - Intelligent fallback for offline components
+
+#### Agent Registry Management
+- **12 Total Agents** - Complete agent discovery with status, specialization, and coordination roles
+- **MCP Integration** - Multi-agent coordination with agent discovery and monitoring
+- **Agent Categories** - Standard vs user-defined agent classification
+- **Real-time Status** - Live agent availability and capability reporting
 
 ### Pure Subprocess Delegation Architecture
 
@@ -189,6 +209,39 @@ claude-multiagent-pm-service start
 
 ## 🚀 Quick Start
 
+### 🎯 CMPM Slash Commands
+
+#### Health Dashboard
+```bash
+# Comprehensive system health dashboard
+./bin/cmpm /cmpm:health
+
+# Detailed health information with extended metrics
+./bin/cmpm /cmpm:health --detailed
+
+# JSON output for integrations and automation
+./bin/cmpm /cmpm:health --json
+```
+
+#### Agent Registry
+```bash
+# Complete agent registry overview
+./bin/cmpm /cmpm:agents
+
+# Filter agents by type (standard or user-defined)
+./bin/cmpm /cmpm:agents --filter=standard
+./bin/cmpm /cmpm:agents --filter=user_defined
+
+# JSON output for programmatic access
+./bin/cmpm /cmpm:agents --json
+```
+
+#### Command Features
+- **Professional Output** - Color-coded dashboards with tabular data
+- **Real-time Monitoring** - Live status updates with timestamp tracking
+- **Error Resilience** - Graceful degradation for offline components
+- **Performance Metrics** - Sub-5-second response times with reliability scoring
+
 ### Zero-Configuration Memory Access
 ```python
 # Instant memory access - no configuration required
@@ -298,11 +351,12 @@ All projects in `/Users/masa/Projects/managed/` automatically have:
 ---
 
 **Repository Created**: 2025-07-05  
-**Framework Version**: v4.0.0 (Pure Subprocess Delegation Model)  
+**Framework Version**: v4.1.0 (CMPM Slash Commands + Pure Subprocess Delegation Model)  
 **Architecture Status**: Complete - Pure Task Tool Delegation Operational  
 **Memory Integration**: ✅ Zero-Configuration Universal Access  
 **Subprocess Coordination**: ✅ Task Tool Direct Agent Delegation  
 **Agent Ecosystem**: ✅ 11-Agent Memory-Augmented Architecture  
+**Command Interface**: ✅ Professional CMPM Slash Commands (/cmpm:health, /cmpm:agents)  
 **Maintenance**: Active development with continuous learning and subprocess delegation
 
 ## 🎯 Getting Started
@@ -311,12 +365,17 @@ All projects in `/Users/masa/Projects/managed/` automatically have:
 📚 **[Complete Documentation Index](./docs/INDEX.md)** - Your starting point for all framework documentation
 
 **For immediate productivity**:
-1. **[Quick Start Guide](./docs/QUICK_START.md)** - Get productive in 15 minutes
-2. **[Framework Overview](./docs/FRAMEWORK_OVERVIEW.md)** - Understanding the architecture
-3. **[First Agent Delegation](./docs/FIRST_DELEGATION.md)** - Learn multi-agent coordination
+1. **[Framework Overview](./docs/FRAMEWORK_OVERVIEW.md)** - Understanding the architecture
+2. **[Memory Integration Guide](./docs/CLAUDE_MULTIAGENT_PM_MEMORY_README.md)** - Memory setup and usage
+3. **[Deployment Guide](./docs/DEPLOYMENT_GUIDE.md)** - Installation and deployment
 
 ### Framework Status Check
 ```bash
+# NEW: CMPM Slash Commands (v4.1.0)
+./bin/cmpm /cmpm:health        # Comprehensive health dashboard
+./bin/cmpm /cmpm:agents        # Agent registry overview
+./bin/cmpm help                # Command help
+
 # Comprehensive health check (NPM installation)
 claude-pm health
 

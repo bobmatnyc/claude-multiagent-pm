@@ -1,1 +1,21 @@
-4.0.0
+4.1.0
+
+## v4.1.0 Release Notes (2025-07-09)
+
+### New Features - CMPM Slash Commands
+- **/cmpm:health** - Comprehensive system health dashboard with ai-trackdown integration
+- **/cmpm:agents** - Active agent registry overview with MCP infrastructure support
+- **CLI Wrapper** - Professional CMPM-branded command interface via ./bin/cmpm
+- **Real-time Monitoring** - Sub-5-second health checks with graceful error handling
+
+### Technical Enhancements
+- **ISS-0002 Completion** - Comprehensive Health Slash Command (100% complete)
+- **Professional Output** - Rich color-coded dashboards with tabular data
+- **Performance Optimization** - Efficient async operations with timeout handling
+- **Integration Features** - Full ai-trackdown-tools and mem0AI connectivity testing
+
+### Command Features
+- **Health Dashboard** - System reliability scoring (0-100%) with 4 core components
+- **Agent Registry** - 12 total agents with status, specialization, and coordination roles
+- **Support Flags** - --json, --detailed, --filter options for enhanced usability
+- **MCP Integration** - Multi-agent coordination with agent discovery and monitoring

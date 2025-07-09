@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+"""
+CMPM (Claude Multi-Agent PM) CLI Wrapper
+========================================
+
+Provides `/cmpm:command` slash command functionality for the Claude PM Framework.
+This wrapper intercepts slash commands and routes them to the appropriate handlers.
+
+Usage:
+    cmpm /cmpm:health      # System health dashboard
+    cmpm /cmpm:agents      # Agent types and status
+    cmpm help              # Show help information
+"""
+
+import sys
+import os
+from pathlib import Path
+
+# Add the framework path to Python path
+framework_path = Path(__file__).parent.parent
+sys.path.insert(0, str(framework_path))
+
+from claude_pm.cli import main as cli_main
+from claude_pm.cmpm_commands import cmpm_health, cmpm_agents
+from rich.console import Console
+
+console = Console()
+
+
+def show_help():
+    """Show CMPM help information."""
+    help_text = """
+[bold cyan]CMPM (Claude Multi-Agent PM) Commands[/bold cyan]
+=====================================
+
+[bold green]Available Commands:[/bold green]
+  [cyan]/cmpm:health[/cyan]    - Comprehensive system health dashboard
+  [cyan]/cmpm:agents[/cyan]    - List all active agent types and status
+  [cyan]help[/cyan]           - Show this help message
+
+[bold yellow]Examples:[/bold yellow]
+  cmpm /cmpm:health --detailed
+  cmpm /cmpm:agents --filter=standard
+  cmpm /cmpm:health --json
+
+[bold blue]Framework Info:[/bold blue]
+  Version: 4.0.0
+  Integration: ai-trackdown-tools v3.0.0
+  MCP Support: Active
+    """
+    console.print(help_text)
+
+
+def main():
+    """Main entry point for CMPM CLI wrapper."""
+    if len(sys.argv) < 2:
+        show_help()
+        return
+    
+    command = sys.argv[1]
+    
+    if command == "help" or command == "--help" or command == "-h":
+        show_help()
+        return
+    
+    # Handle slash commands
+    if command.startswith("/cmpm:"):
+        command_name = command[6:]  # Remove "/cmpm:" prefix
+        
+        if command_name == "health":
+            # Remove the slash command from sys.argv and call the health command
+            sys.argv = ["cmpm:health"] + sys.argv[2:]
+            cmpm_health.main(standalone_mode=False)
+        elif command_name == "agents":
+            # Remove the slash command from sys.argv and call the agents command
+            sys.argv = ["cmpm:agents"] + sys.argv[2:]
+            cmpm_agents.main(standalone_mode=False)
+        else:
+            console.print(f"[red]Unknown CMPM command: {command}[/red]")
+            console.print("Run 'cmpm help' for available commands")
+            sys.exit(1)
+    else:
+        console.print(f"[red]Invalid command format: {command}[/red]")
+        console.print("CMPM commands must start with '/cmpm:'")
+        console.print("Run 'cmmp help' for available commands")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

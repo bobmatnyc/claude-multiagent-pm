@@ -1,8 +1,11 @@
 {
-  "name": "@claude-multiagent-pm/framework",
-  "version": "4.0.0",
-  "description": "Claude Multiagent PM - Multi-Subprocess Orchestration Framework for AI-driven project management",
-  "main": "framework/CLAUDE.md",
+  "name": "claude-multiagent-pm",
+  "version": "4.1.0",
+  "description": "Claude Multi-Agent PM Framework - Universal deployment package for AI-driven project management",
+  "main": "lib/framework/claude_pm/cli.py",
+  "bin": {
+    "claude-pm": "./bin/claude-pm"
+  },
   "keywords": [
     "claude",
     "project-management",
@@ -14,7 +17,10 @@
     "task-management",
     "best-practices",
     "tdd",
-    "api-first"
+    "api-first",
+    "npm-package",
+    "universal-deployment",
+    "cli-tool"
   ],
   "author": {
     "name": "Robert (Masa) Matsuoka",
@@ -31,9 +37,28 @@
   },
   "homepage": "https://github.com/bobmatnyc/claude-multiagent-pm#readme",
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0",
+    "python": ">=3.8.0"
   },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
   "scripts": {
+    "postinstall": "node install/postinstall.js",
+    "prepack": "node install/prepare-package.js",
+    "test": "node install/validate.js --verbose",
+    "validate-env": "node install/validate.js",
+    "install-to": "node install/install.js",
+    "deploy": "node install/deploy.js",
+    "deploy:verbose": "node install/deploy.js --verbose",
+    "deploy:dry-run": "node install/deploy.js --dry-run --verbose",
+    "validate-deployment": "node install/validate-deployment.js",
     "health-check": "./trackdown/scripts/health-check.sh",
     "monitor:health": "node scripts/automated-health-monitor.js monitor",
     "monitor:once": "node scripts/automated-health-monitor.js once",
@@ -44,13 +69,20 @@
     "monitor:background": "node scripts/automated-health-monitor.js monitor --interval=10",
     "monitor:setup": "./scripts/setup-health-monitoring.sh",
     "version": "echo $npm_package_version",
-    "validate": "node scripts/validate-framework.js",
     "release": "standard-version",
     "release:major": "standard-version --release-as major",
     "release:minor": "standard-version --release-as minor",
     "release:patch": "standard-version --release-as patch"
   },
   "files": [
+    "bin/",
+    "lib/",
+    "install/",
+    "claude_pm/",
+    "config/",
+    "requirements/",
+    "schemas/",
+    "templates/",
     "framework/",
     "trackdown/templates/",
     "docs/",
@@ -58,6 +90,9 @@
     "CHANGELOG.md",
     "LICENSE"
   ],
+  "dependencies": {},
+  "optionalDependencies": {},
+  "peerDependencies": {},
   "devDependencies": {
     "standard-version": "^9.5.0"
   },

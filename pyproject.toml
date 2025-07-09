@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "claude-multiagent-pm"
-version = "4.0.0"
+version = "4.1.0"
 description = "Claude Multi-Agent Project Management Framework for AI-driven orchestration"
 readme = "README.md"
 license = {text = "MIT"}
@@ -108,9 +108,8 @@ production = [
 ]
 
 ai = [
-    # AI and ML libraries
+    # AI and ML libraries (direct integration, no LangChain dependencies)
     "mem0ai>=0.1.0",
-    "langchain>=0.1.0",
     "openai>=1.0.0",
     "anthropic>=0.7.0",
     
@@ -270,7 +269,6 @@ show_error_codes = true
 [[tool.mypy.overrides]]
 module = [
     "mem0ai.*",
-    "langchain.*",
     "chromadb.*",
     "faiss.*"
 ]
@@ -312,7 +310,7 @@ edit_uri = "edit/main/docs/"
 # Development and build tools
 [tool.setuptools_scm]
 write_to = "claude_pm/_version.py"
-fallback_version = "4.0.0"
+fallback_version = "4.1.0"
 
 [tool.wheel]
 universal = false

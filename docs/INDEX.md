@@ -152,6 +152,11 @@ cat trackdown/CURRENT-STATUS.md    # Framework status
 
 #### Daily Operations
 ```bash
+# NEW: CMPM Slash Commands (v4.1.0)
+./bin/cmpm /cmpm:health        # Comprehensive health dashboard
+./bin/cmpm /cmpm:agents        # Agent registry overview
+./bin/cmpm help                # Command help
+
 # Framework health check
 curl http://localhost:8002/health
 
@@ -273,6 +278,7 @@ This documentation index is maintained automatically through:
 ## 🚀 Getting Started Checklist
 
 ### Immediate Actions (5 minutes)
+- [ ] NEW: Try CMPM commands: `./bin/cmpm /cmpm:health`
 - [ ] Verify memory service: `curl http://localhost:8002/health`
 - [ ] Review current status: `cat trackdown/CURRENT-STATUS.md`
 - [ ] Check Phase 1 completion: `grep -A20 "Phase 1 Progress" trackdown/BACKLOG.md`
@@ -291,8 +297,8 @@ This documentation index is maintained automatically through:
 
 ---
 
-**Last Updated**: 2025-07-08  
-**Framework Version**: v4.0.0 (Pure Task Delegation: mem0AI + Task Tools)  
+**Last Updated**: 2025-07-09  
+**Framework Version**: v4.1.0 (CMPM Slash Commands + Pure Task Delegation: mem0AI + Task Tools)  
 **Documentation Status**: Unified index with progressive disclosure navigation  
 **Maintenance**: Automated sync with framework development
 

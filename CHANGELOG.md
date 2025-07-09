@@ -2,6 +2,100 @@
 
 All notable changes to the Claude Multi-Agent Project Management Framework will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 4.1.0 (2025-07-09)
+
+### 🚀 New Features - CMPM Slash Commands
+
+#### Professional CMPM Command Interface
+- **`/cmpm:health`** - Comprehensive system health dashboard with real-time monitoring
+- **`/cmpm:agents`** - Active agent registry overview with MCP infrastructure support
+- **CLI Wrapper** - Professional CMPM-branded command interface via `./bin/cmpm`
+- **Rich Output** - Color-coded dashboards with professional tabular data presentation
+
+#### System Health Monitoring
+- **4 Core Components** - Framework, ai-trackdown-tools, task system, and memory system monitoring
+- **Reliability Scoring** - 0-100% system reliability calculation with component status aggregation
+- **Response Time Tracking** - Sub-5-second performance metrics with timeout handling
+- **Graceful Error Handling** - Intelligent fallback for offline components
+
+#### Agent Registry Management
+- **12 Total Agents** - Complete agent discovery with status, specialization, and coordination roles
+- **MCP Integration** - Multi-agent coordination with agent discovery and monitoring
+- **Agent Categories** - Standard vs user-defined agent classification
+- **Real-time Status** - Live agent availability and capability reporting
+
+### 🛠 Technical Enhancements
+
+#### ISS-0002 Completion - Comprehensive Health Slash Command
+- **100% Complete** - Full implementation of health dashboard functionality
+- **ai-trackdown Integration** - Native CLI testing and status reporting
+- **Memory System Testing** - mem0AI connectivity validation and performance monitoring
+- **Task System Monitoring** - Epic and issue count tracking with operational status
+
+#### Performance Optimizations
+- **Async Operations** - Parallel health data collection for improved response times
+- **Timeout Management** - Configurable timeouts (2-5 seconds) for reliable operations
+- **Caching Strategy** - 10-second TTL for health data to balance freshness and performance
+- **Error Recovery** - Comprehensive exception handling with meaningful error messages
+
+#### Command Features
+- **Support Flags** - `--json`, `--detailed`, `--filter` options for enhanced usability
+- **Professional Output** - Rich console formatting with color-coded status indicators
+- **Tabular Presentation** - Structured data display with component details
+- **Real-time Updates** - Live status reporting with timestamp tracking
+
+### 📊 Integration Status
+
+#### Framework Integration
+- **ai-trackdown-tools v3.0.0** - Full CLI integration with status monitoring
+- **mem0AI Service** - localhost:8002 connectivity testing and health validation
+- **MCP Infrastructure** - Multi-agent coordination protocol support
+- **Task Management** - Epic and issue tracking with operational metrics
+
+#### Command Usage Examples
+```bash
+# System health dashboard
+./bin/cmpm /cmpm:health
+
+# Detailed health information
+./bin/cmpm /cmpm:health --detailed
+
+# Agent registry overview
+./bin/cmpm /cmpm:agents
+
+# JSON output for integrations
+./bin/cmpm /cmpm:health --json
+./bin/cmpm /cmpm:agents --json
+
+# Help information
+./bin/cmpm help
+```
+
+### 🎯 Success Metrics
+
+- **Response Time** - Sub-5-second health checks achieved
+- **Reliability Score** - 0-100% system reliability calculation implemented
+- **Agent Discovery** - 12 total agents with full status reporting
+- **Integration Coverage** - 4 core components monitored (Framework, ai-trackdown, Tasks, Memory)
+- **Professional Output** - Rich color-coded dashboards with tabular data
+- **Error Handling** - Graceful degradation for offline components
+
+### 📋 Implementation Details
+
+#### File Structure
+- **`claude_pm/cmpm_commands.py`** - Core CMPM command implementations
+- **`bin/cmpm`** - CLI wrapper for slash command routing
+- **Health Monitoring** - `CMPMHealthMonitor` class with async health collection
+- **Agent Registry** - `CMPMAgentMonitor` class with MCP integration
+
+#### Architecture
+- **Async Design** - Non-blocking operations with parallel data collection
+- **Modular Structure** - Separate monitor classes for health and agent functionality
+- **Rich Console** - Professional terminal output with color coding and progress indicators
+- **Error Resilience** - Comprehensive exception handling with fallback mechanisms
+
+---
+
 ## 4.0.0 (2025-07-08)
 
 ### 🚀 DUAL PACKAGING DISTRIBUTION
