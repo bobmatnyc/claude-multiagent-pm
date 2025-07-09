@@ -1,6 +1,6 @@
-# Claude Multi-Agent Project Management Framework v4.2.1 - ai-trackdown-tools Integration
+# Claude Multi-Agent Project Management Framework v4.4.0 - Enhanced Configuration and Documentation Management
 
-[![Version](https://img.shields.io/badge/Version-4.2.1-blue.svg)](https://github.com/masa/claude-multiagent-pm)
+[![Version](https://img.shields.io/badge/Version-4.4.0-blue.svg)](https://github.com/masa/claude-multiagent-pm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Architecture](https://img.shields.io/badge/Architecture-Pure%20Task%20Delegation-brightgreen.svg)](./trackdown/CURRENT-STATUS.md)
 [![Memory Integration](https://img.shields.io/badge/Memory-Zero%20Config-purple.svg)](./docs/CLAUDE_PM_MEMORY_README.md)
@@ -8,7 +8,7 @@
 
 > **Pure subprocess delegation with memory-augmented Task tool coordination**
 
-Claude Multi-Agent Project Management Framework revolutionizes AI-assisted development through pure subprocess delegation with intelligent memory integration. The v4.2.1 release introduces comprehensive ai-trackdown-tools integration, enabling persistent ticket management, enhanced documentation, and improved multi-agent coordination alongside the established zero-configuration mem0AI integration and powerful Task tool subprocess coordination.
+Claude Multi-Agent Project Management Framework revolutionizes AI-assisted development through pure subprocess delegation with intelligent memory integration. The v4.4.0 release introduces enhanced configuration management, refined three-tier agent hierarchy, improved documentation quality, and comprehensive issue tracking capabilities alongside the established zero-configuration mem0AI integration and powerful Task tool subprocess coordination.
 
 ## 🚀 Key Features
 
@@ -404,7 +404,7 @@ All projects in `/Users/masa/Projects/managed/` automatically have:
 ---
 
 **Repository Created**: 2025-07-05  
-**Framework Version**: v4.1.0 (CMPM Slash Commands + Pure Subprocess Delegation Model)  
+**Framework Version**: v4.4.0 (Enhanced Configuration and Documentation Management)  
 **Architecture Status**: Complete - Pure Task Tool Delegation Operational  
 **Memory Integration**: ✅ Zero-Configuration Universal Access  
 **Subprocess Coordination**: ✅ Task Tool Direct Agent Delegation  
