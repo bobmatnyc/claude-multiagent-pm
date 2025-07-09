@@ -1,15 +1,15 @@
 {
-  "timestamp": "2025-07-07T20:35:59.276357",
+  "timestamp": "2025-07-09T09:29:40.673308",
   "documentation_health": {
     "validation_passed": false,
-    "total_issues": 176,
+    "total_issues": 353,
     "critical_issues": 0,
-    "broken_links": 8,
-    "path_errors": 168,
-    "inconsistencies": 6,
-    "files_validated": 20,
-    "links_checked": 8,
-    "completion_percentage": 94.66666666666667,
-    "phase_1_completion": 75.0
+    "broken_links": 29,
+    "path_errors": 320,
+    "inconsistencies": 0,
+    "files_validated": 33,
+    "links_checked": 29,
+    "completion_percentage": 0,
+    "phase_1_completion": 0
   }
 }
