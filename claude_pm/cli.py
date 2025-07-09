@@ -11,6 +11,8 @@ import asyncio
 import sys
 import json
 import uuid
+import time
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -27,8 +29,10 @@ from .services.memory_service import MemoryService
 from .services.project_service import ProjectService
 from .scripts.service_manager import ClaudePMServiceManager
 from .cli_enforcement import enforcement_cli
+from .cmpm_commands import register_cmpm_commands
 
 console = Console()
+logger = logging.getLogger(__name__)
 
 def get_framework_config():
     """Get framework configuration with dynamic path resolution."""
@@ -67,12 +71,80 @@ def cli(ctx, verbose, config):
 
 # Health Monitoring Commands
 @cli.group()
-def health():
-    """Health monitoring and system diagnostics."""
+def monitoring():
+    """Legacy health monitoring and system diagnostics."""
     pass
 
 
-@health.command()
+@cli.command()
+@click.option('--detailed', is_flag=True, help='Show detailed subsystem information')
+@click.option('--service', type=click.Choice(['memory', 'indexing', 'projects', 'all']), default='all', help='Focus on specific service')
+@click.option('--export', type=click.Choice(['json', 'yaml']), help='Export health data')
+@click.option('--report', is_flag=True, help='Generate detailed health report')
+@click.option('--verbose', '-v', is_flag=True, help='Verbose output with full diagnostics')
+@click.pass_context
+def health(ctx, detailed, service, export, report, verbose):
+    """🏥 Unified Health Dashboard - Central monitoring for all framework subsystems (M01-044)."""
+    async def run():
+        from .services.health_dashboard import HealthDashboardOrchestrator
+        from .services.project_indexer import create_project_indexer
+        from .services.project_memory_manager import create_project_memory_manager
+        from .integrations.mem0ai_integration import create_mem0ai_integration
+        from .models.health import HealthStatus, create_service_health_report
+        import time
+        
+        start_time = time.time()
+        
+        try:
+            console.print("[bold blue]🟢 Claude PM Framework Health Dashboard[/bold blue]")
+            console.print("═══════════════════════════════════════\n")
+            
+            # Initialize orchestrator with enhanced collectors for M01-044
+            orchestrator = HealthDashboardOrchestrator()
+            
+            # Add MEM-007 project indexing health monitoring
+            await _add_project_indexing_health_collector(orchestrator)
+            
+            # Get comprehensive health dashboard
+            dashboard = await orchestrator.get_health_dashboard(force_refresh=True)
+            
+            # Add managed projects portfolio health
+            managed_projects_health = await _get_managed_projects_health()
+            
+            # Display unified dashboard
+            if service == 'all':
+                _display_unified_health_dashboard(dashboard, managed_projects_health, detailed, verbose)
+            elif service == 'memory':
+                await _display_memory_service_health(verbose)
+            elif service == 'indexing':
+                await _display_indexing_service_health(verbose)
+            elif service == 'projects':
+                _display_projects_health(managed_projects_health, verbose)
+            
+            # Handle export options
+            if export:
+                await _export_health_data(dashboard, managed_projects_health, export)
+            
+            # Generate report if requested
+            if report:
+                await _generate_health_report(dashboard, managed_projects_health)
+            
+            # Performance summary
+            total_time = (time.time() - start_time) * 1000
+            cache_indicator = "💨" if dashboard.current_report.is_cache_hit else "🔄"
+            console.print(f"\n[dim]Response time: {total_time:.0f}ms {cache_indicator} | Framework v3.0.0[/dim]")
+            
+        except Exception as e:
+            console.print(f"[bold red]❌ Error generating health dashboard: {e}[/bold red]")
+            if verbose or ctx.obj.get('verbose'):
+                import traceback
+                console.print(traceback.format_exc())
+            sys.exit(1)
+    
+    asyncio.run(run())
+
+
+@monitoring.command()
 @click.option('--verbose', '-v', is_flag=True, help='Verbose output')
 @click.pass_context
 def check(ctx, verbose):
@@ -104,7 +176,171 @@ def check(ctx, verbose):
         sys.exit(1)
 
 
-@health.command()
+@monitoring.command()
+@click.option('--format', '-f', type=click.Choice(['dashboard', 'json', 'summary']), default='dashboard', help='Output format')
+@click.option('--force-refresh', is_flag=True, help='Force refresh (skip cache)')
+@click.option('--verbose', '-v', is_flag=True, help='Verbose output with detailed metrics')
+@click.pass_context
+def comprehensive(ctx, format, force_refresh, verbose):
+    """Run comprehensive health dashboard for all subsystems (M01-044)."""
+    async def run():
+        from .services.health_dashboard import HealthDashboardOrchestrator
+        from .models.health import HealthStatus
+        
+        try:
+            console.print("[bold blue]🚀 Generating comprehensive health dashboard...[/bold blue]")
+            
+            # Initialize orchestrator
+            orchestrator = HealthDashboardOrchestrator()
+            
+            # Get health dashboard
+            dashboard = await orchestrator.get_health_dashboard(force_refresh=force_refresh)
+            
+            # Display results based on format
+            if format == 'json':
+                console.print(dashboard.to_json())
+            elif format == 'summary':
+                _display_health_summary(dashboard, verbose)
+            else:  # dashboard
+                _display_health_dashboard(dashboard, verbose)
+            
+        except Exception as e:
+            console.print(f"[bold red]❌ Error generating health dashboard: {e}[/bold red]")
+            if verbose or ctx.obj.get('verbose'):
+                import traceback
+                console.print(traceback.format_exc())
+            sys.exit(1)
+    
+    asyncio.run(run())
+
+
+def _display_health_dashboard(dashboard, verbose: bool = False):
+    """Display comprehensive health dashboard."""
+    from .models.health import HealthStatus
+    
+    current = dashboard.current_report
+    
+    # Overall status panel
+    status_color = {
+        HealthStatus.HEALTHY: "green",
+        HealthStatus.DEGRADED: "yellow", 
+        HealthStatus.UNHEALTHY: "red",
+        HealthStatus.DOWN: "red",
+        HealthStatus.ERROR: "red",
+        HealthStatus.UNKNOWN: "blue"
+    }.get(current.overall_status, "white")
+    
+    cache_indicator = "💨" if current.is_cache_hit else "🔄"
+    
+    overview_text = f"""
+[bold]Overall Status:[/bold] [{status_color}]{current.overall_status.value.upper()}[/{status_color}]
+[bold]Health Score:[/bold] {current.overall_health_percentage:.1f}%
+[bold]Response Time:[/bold] {current.response_time_ms:.0f}ms {cache_indicator}
+[bold]Total Services:[/bold] {current.total_services}
+[bold]Healthy:[/bold] [green]{current.healthy_services}[/green] | [bold]Degraded:[/bold] [yellow]{current.degraded_services}[/yellow] | [bold]Unhealthy:[/bold] [red]{current.unhealthy_services}[/red] | [bold]Down:[/bold] [red]{current.down_services}[/red]
+[bold]Generated:[/bold] {current.timestamp.strftime('%Y-%m-%d %H:%M:%S')}
+"""
+    
+    console.print(Panel(overview_text.strip(), title="🏥 Health Dashboard Overview", border_style=status_color))
+    
+    # Subsystem breakdown
+    if current.subsystems:
+        subsystem_table = Table(title="Subsystem Health Breakdown")
+        subsystem_table.add_column("Subsystem", style="cyan")
+        subsystem_table.add_column("Status", style="white")
+        subsystem_table.add_column("Health %", style="green")
+        subsystem_table.add_column("Services", style="yellow")
+        subsystem_table.add_column("Avg Response", style="blue")
+        
+        for name, subsystem in current.subsystems.items():
+            status_display = f"[{status_color}]{subsystem.status.value}[/{status_color}]"
+            health_pct = f"{subsystem.health_percentage:.1f}%"
+            service_breakdown = f"{subsystem.healthy_services}/{subsystem.total_services}"
+            avg_response = f"{subsystem.avg_response_time_ms:.0f}ms" if subsystem.avg_response_time_ms else "N/A"
+            
+            subsystem_table.add_row(name, status_display, health_pct, service_breakdown, avg_response)
+        
+        console.print(subsystem_table)
+    
+    # Performance metrics
+    if dashboard.performance_metrics:
+        perf = dashboard.performance_metrics
+        cache_stats = dashboard.cache_stats
+        
+        if verbose:
+            perf_text = f"""
+[bold]Cache Hit Rate:[/bold] {perf.get('cache_hit_rate', 0):.1f}%
+[bold]Avg Service Response:[/bold] {perf.get('avg_service_response_time_ms', 0):.1f}ms
+[bold]Total Alerts:[/bold] {perf.get('total_alerts', 0)}
+[bold]Total Recommendations:[/bold] {perf.get('total_recommendations', 0)}
+[bold]Cache Requests:[/bold] {cache_stats.get('total_requests', 0)} (Hits: {cache_stats.get('hits', 0)}, Misses: {cache_stats.get('misses', 0)})
+"""
+            console.print(Panel(perf_text.strip(), title="⚡ Performance Metrics"))
+    
+    # Alerts
+    if current.alerts:
+        console.print("\n[bold red]🚨 Active Alerts:[/bold red]")
+        for alert in current.alerts[-5:]:  # Show last 5 alerts
+            level_color = {"critical": "red", "warning": "yellow", "info": "blue"}.get(alert.get("level", "info"), "white")
+            console.print(f"  [{level_color}]●[/{level_color}] {alert['message']}")
+    
+    # Recommendations
+    if current.recommendations:
+        console.print("\n[bold blue]💡 Recommendations:[/bold blue]")
+        for rec in current.recommendations[:3]:  # Show top 3 recommendations
+            console.print(f"  • {rec}")
+    
+    # Service details (if verbose)
+    if verbose and current.services:
+        service_table = Table(title="Service Details")
+        service_table.add_column("Service", style="cyan")
+        service_table.add_column("Status", style="white")
+        service_table.add_column("Message", style="white")
+        service_table.add_column("Response Time", style="blue")
+        service_table.add_column("Error", style="red")
+        
+        for service in current.services:
+            status_display = f"[{status_color}]{service.status.value}[/{status_color}]"
+            message = service.message[:50] + "..." if len(service.message) > 50 else service.message
+            response_time = f"{service.response_time_ms:.0f}ms" if service.response_time_ms else "N/A"
+            error = service.error[:30] + "..." if service.error and len(service.error) > 30 else (service.error or "")
+            
+            service_table.add_row(service.name, status_display, message, response_time, error)
+        
+        console.print(service_table)
+
+
+def _display_health_summary(dashboard, verbose: bool = False):
+    """Display concise health summary."""
+    current = dashboard.current_report
+    
+    status_symbol = {
+        "healthy": "✅",
+        "degraded": "⚠️", 
+        "unhealthy": "❌",
+        "down": "🔴",
+        "error": "💥",
+        "unknown": "❓"
+    }.get(current.overall_status.value, "❓")
+    
+    cache_indicator = "💨" if current.is_cache_hit else "🔄"
+    
+    console.print(f"{status_symbol} Overall: {current.overall_status.value.upper()} ({current.overall_health_percentage:.1f}%)")
+    console.print(f"⏱️  Response: {current.response_time_ms:.0f}ms {cache_indicator}")
+    console.print(f"🔧 Services: {current.healthy_services}/{current.total_services} healthy")
+    
+    if current.alerts:
+        console.print(f"🚨 Alerts: {len(current.alerts)}")
+    
+    if current.recommendations:
+        console.print(f"💡 Recommendations: {len(current.recommendations)}")
+    
+    if verbose:
+        console.print(f"📊 Subsystems: {len(current.subsystems)}")
+        console.print(f"🕐 Generated: {current.timestamp.strftime('%H:%M:%S')}")
+
+
+@monitoring.command()
 @click.option('--interval', '-i', default=5, help='Check interval in minutes')
 @click.option('--threshold', '-t', default=60, help='Alert threshold percentage')
 @click.pass_context
@@ -133,7 +369,7 @@ def monitor(ctx, interval, threshold):
         sys.exit(1)
 
 
-@health.command()
+@monitoring.command()
 def status():
     """Show health monitoring status."""
     import subprocess
@@ -157,7 +393,7 @@ def status():
         console.print(f"[bold red]❌ Error getting health status: {e}[/bold red]")
 
 
-@health.command()
+@monitoring.command()
 def reports():
     """List available health reports."""
     import subprocess
@@ -181,7 +417,7 @@ def reports():
         console.print(f"[bold red]❌ Error listing reports: {e}[/bold red]")
 
 
-@health.command()
+@monitoring.command()
 def alerts():
     """Show recent health alerts."""
     import subprocess
@@ -514,6 +750,380 @@ def search(project_name, query, category, limit):
 """
                 
                 console.print(Panel(memory_panel.strip(), title=f"Memory {i}"))
+    
+    asyncio.run(run())
+
+
+# Project Index Commands (MEM-007)
+@cli.group()
+def project_index():
+    """Project indexing and fast retrieval (MEM-007)."""
+    pass
+
+
+@project_index.command(name="refresh")
+@click.option('--force', '-f', is_flag=True, help='Force refresh all projects')
+@click.option('--project', '-p', help='Refresh specific project only')
+def refresh_index(force, project):
+    """Refresh project index from managed directory."""
+    async def run():
+        from .services.project_indexer import create_project_indexer
+        
+        console.print("[bold blue]🔍 Refreshing project index...[/bold blue]")
+        
+        indexer = create_project_indexer()
+        
+        try:
+            if not await indexer.initialize():
+                console.print("[red]❌ Failed to initialize project indexer[/red]")
+                return
+            
+            if project:
+                # Refresh specific project
+                console.print(f"Refreshing project: {project}")
+                # TODO: Implement single project refresh
+                console.print("[yellow]⚠️ Single project refresh not yet implemented[/yellow]")
+            else:
+                # Refresh all projects
+                results = await indexer.scan_and_index_all(force_refresh=force)
+                
+                # Display results
+                summary_text = f"""
+[bold]Projects Found:[/bold] {results['projects_found']}
+[bold]Projects Indexed:[/bold] {results['projects_indexed']}
+[bold]Projects Updated:[/bold] {results['projects_updated']}
+[bold]Projects Skipped:[/bold] {results['projects_skipped']}
+[bold]Scan Time:[/bold] {results.get('performance', {}).get('scan_time_seconds', 0):.2f}s
+"""
+                
+                console.print(Panel(summary_text.strip(), title="Index Refresh Results"))
+                
+                if results.get('errors'):
+                    console.print("\n[bold red]Errors:[/bold red]")
+                    for error in results['errors']:
+                        console.print(f"  • {error}")
+                
+                # Performance stats
+                perf = results.get('performance', {})
+                if perf:
+                    console.print(f"\n[bold blue]Performance:[/bold blue] {perf.get('projects_per_second', 0):.1f} projects/sec")
+            
+        finally:
+            await indexer.cleanup()
+    
+    asyncio.run(run())
+
+
+@project_index.command(name="info")
+@click.argument('project_name')
+@click.option('--format', '-f', type=click.Choice(['summary', 'full', 'json']), default='summary')
+def project_info(project_name, format):
+    """Get comprehensive project information."""
+    async def run():
+        from .services.project_memory_manager import create_project_memory_manager
+        
+        manager = create_project_memory_manager()
+        
+        try:
+            if not await manager.initialize():
+                console.print("[red]❌ Failed to initialize project memory manager[/red]")
+                return
+            
+            if format == 'summary':
+                # Get concise summary
+                summary = await manager.get_project_summary(project_name)
+                
+                if not summary:
+                    console.print(f"[red]❌ Project '{project_name}' not found in index[/red]")
+                    console.print("Run 'claude-multiagent-pm project-index refresh' to update index")
+                    return
+                
+                # Display summary
+                summary_text = f"""
+[bold]Type:[/bold] {summary['type']}
+[bold]Tech Stack:[/bold] {summary['tech_stack']}
+[bold]Description:[/bold] {summary['description']}
+[bold]Languages:[/bold] {', '.join(summary['main_languages'])}
+[bold]Frameworks:[/bold] {', '.join(summary['key_frameworks'])}
+[bold]Size:[/bold] {summary['size']}
+[bold]Last Updated:[/bold] {summary['last_updated']}
+[bold]Quick Facts:[/bold] {', '.join(summary['quick_facts'])}
+"""
+                
+                console.print(Panel(summary_text.strip(), title=f"Project: {project_name}"))
+                
+                # Top features
+                if summary['top_features']:
+                    console.print("\n[bold blue]Key Features:[/bold blue]")
+                    for feature in summary['top_features']:
+                        console.print(f"  • {feature}")
+                
+                # Development commands
+                if summary['development_commands']:
+                    console.print("\n[bold green]Development Commands:[/bold green]")
+                    for cmd in summary['development_commands']:
+                        console.print(f"  • {cmd}")
+            
+            elif format == 'full':
+                # Get full project info
+                project_info = await manager.get_project_info(project_name)
+                
+                if not project_info:
+                    console.print(f"[red]❌ Project '{project_name}' not found in index[/red]")
+                    return
+                
+                # Display comprehensive info
+                info_text = f"""
+[bold]Path:[/bold] {project_info['path']}
+[bold]Type:[/bold] {project_info['type']}
+[bold]Tech Stack:[/bold] {project_info['tech_stack']}
+[bold]Status:[/bold] {project_info['status']}
+[bold]Description:[/bold] {project_info['description']}
+[bold]File Count:[/bold] {project_info['file_count']}
+[bold]Size:[/bold] {project_info['size_mb']:.1f} MB
+[bold]Last Modified:[/bold] {project_info['last_modified']}
+[bold]Last Indexed:[/bold] {project_info['last_indexed']}
+"""
+                
+                console.print(Panel(info_text.strip(), title=f"Project: {project_name}"))
+                
+                # Languages and frameworks
+                if project_info.get('languages'):
+                    lang_table = Table(title="Languages & Frameworks")
+                    lang_table.add_column("Languages", style="cyan")
+                    lang_table.add_column("Frameworks", style="green")
+                    
+                    lang_table.add_row(
+                        ', '.join(project_info['languages']),
+                        ', '.join(project_info.get('frameworks', []))
+                    )
+                    console.print(lang_table)
+                
+                # Features
+                if project_info.get('features'):
+                    console.print("\n[bold blue]Features:[/bold blue]")
+                    for feature in project_info['features']:
+                        console.print(f"  • {feature}")
+                
+                # Architecture decisions
+                if project_info.get('architecture_decisions'):
+                    console.print("\n[bold yellow]Architecture Decisions:[/bold yellow]")
+                    for decision in project_info['architecture_decisions'][:5]:
+                        console.print(f"  • {decision}")
+                
+            elif format == 'json':
+                # Get project info as JSON
+                project_info = await manager.get_project_info(project_name)
+                
+                if project_info:
+                    import json
+                    console.print(json.dumps(project_info, indent=2))
+                else:
+                    console.print(f"[red]❌ Project '{project_name}' not found[/red]")
+        
+        finally:
+            await manager.cleanup()
+    
+    asyncio.run(run())
+
+
+@project_index.command(name="search")
+@click.argument('query')
+@click.option('--type', '-t', help='Filter by project type')
+@click.option('--tech', help='Filter by tech stack')
+@click.option('--limit', '-l', default=10, help='Maximum results')
+@click.option('--mode', type=click.Choice(['exact', 'fuzzy', 'semantic', 'hybrid']), default='hybrid')
+def search_projects(query, type, tech, limit, mode):
+    """Search projects by technology, features, or description."""
+    async def run():
+        from .services.project_memory_manager import create_project_memory_manager, SearchQuery, SearchMode
+        
+        manager = create_project_memory_manager()
+        
+        try:
+            if not await manager.initialize():
+                console.print("[red]❌ Failed to initialize project memory manager[/red]")
+                return
+            
+            # Build search query
+            filters = {}
+            if type:
+                filters['project_type'] = type
+            if tech:
+                filters['tech_stack'] = tech
+            
+            search_query = SearchQuery(
+                query=query,
+                mode=SearchMode(mode),
+                filters=filters,
+                limit=limit
+            )
+            
+            console.print(f"[bold blue]🔍 Searching for: '{query}'[/bold blue]")
+            
+            results = await manager.search_projects(search_query)
+            
+            if not results:
+                console.print(f"[yellow]No projects found matching: {query}[/yellow]")
+                console.print("Try a broader search or run 'claude-multiagent-pm project-index refresh' to update index")
+                return
+            
+            console.print(f"[bold green]Found {len(results)} matching projects:[/bold green]\n")
+            
+            # Display results table
+            table = Table(title="Search Results")
+            table.add_column("Project", style="cyan")
+            table.add_column("Type", style="green")
+            table.add_column("Tech Stack", style="yellow")
+            table.add_column("Score", style="magenta")
+            table.add_column("Match Reasons", style="blue")
+            
+            for result in results:
+                project_data = result.project_data
+                match_reasons = ", ".join(result.match_reasons[:2]) if result.match_reasons else "General match"
+                
+                table.add_row(
+                    project_data['name'],
+                    project_data.get('type', 'unknown'),
+                    project_data.get('tech_stack', 'unknown'),
+                    f"{result.relevance_score:.2f}",
+                    match_reasons[:50] + "..." if len(match_reasons) > 50 else match_reasons
+                )
+            
+            console.print(table)
+            
+            # Show cache performance
+            stats = manager.get_performance_stats()
+            cache_indicator = "💨 (cached)" if results[0].cache_hit else "🔄 (fresh)"
+            console.print(f"\n[dim]Response time: {stats['avg_response_time_ms']:.1f}ms {cache_indicator}[/dim]")
+        
+        finally:
+            await manager.cleanup()
+    
+    asyncio.run(run())
+
+
+@project_index.command(name="recommend")
+@click.argument('project_name')
+@click.option('--limit', '-l', default=5, help='Maximum recommendations')
+def recommend_projects(project_name, limit):
+    """Get project recommendations based on similarity."""
+    async def run():
+        from .services.project_memory_manager import create_project_memory_manager
+        
+        manager = create_project_memory_manager()
+        
+        try:
+            if not await manager.initialize():
+                console.print("[red]❌ Failed to initialize project memory manager[/red]")
+                return
+            
+            console.print(f"[bold blue]💡 Getting recommendations based on: {project_name}[/bold blue]")
+            
+            recommendations = await manager.get_project_recommendations(project_name, limit)
+            
+            if not recommendations:
+                console.print(f"[yellow]No recommendations found for: {project_name}[/yellow]")
+                console.print("Make sure the project exists in the index")
+                return
+            
+            console.print(f"[bold green]Similar projects you might find useful:[/bold green]\n")
+            
+            for i, result in enumerate(recommendations, 1):
+                project_data = result.project_data
+                
+                rec_text = f"""
+[bold]Type:[/bold] {project_data.get('type', 'unknown')}
+[bold]Tech Stack:[/bold] {project_data.get('tech_stack', 'unknown')}
+[bold]Description:[/bold] {project_data.get('description', 'No description')[:100]}...
+[bold]Why similar:[/bold] {', '.join(result.match_reasons[:2])}
+"""
+                
+                console.print(Panel(rec_text.strip(), title=f"{i}. {project_data['name']}"))
+        
+        finally:
+            await manager.cleanup()
+    
+    asyncio.run(run())
+
+
+@project_index.command(name="stats")
+def index_stats():
+    """Show project index statistics and performance metrics."""
+    async def run():
+        from .services.project_memory_manager import create_project_memory_manager
+        
+        manager = create_project_memory_manager()
+        
+        try:
+            if not await manager.initialize():
+                console.print("[red]❌ Failed to initialize project memory manager[/red]")
+                return
+            
+            stats = manager.get_performance_stats()
+            
+            # Main statistics
+            stats_text = f"""
+[bold]Total Queries:[/bold] {stats['queries_total']}
+[bold]Cache Hit Rate:[/bold] {stats['cache_hit_rate']:.1f}%
+[bold]Average Response Time:[/bold] {stats['avg_response_time_ms']:.1f}ms
+[bold]Memory Connected:[/bold] {'✅ Yes' if stats['memory_connected'] else '❌ No'}
+[bold]Cache Size:[/bold] {stats['cache_size']} queries, {stats['project_cache_size']} projects
+"""
+            
+            console.print(Panel(stats_text.strip(), title="Project Index Performance"))
+            
+            # Popular queries
+            if stats.get('popular_queries'):
+                console.print("\n[bold blue]Popular Queries:[/bold blue]")
+                for query, count in list(stats['popular_queries'].items())[:5]:
+                    console.print(f"  • '{query}' - {count} times")
+            
+            # Performance insights
+            cache_hit_rate = stats['cache_hit_rate']
+            avg_response = stats['avg_response_time_ms']
+            
+            console.print("\n[bold green]Performance Analysis:[/bold green]")
+            
+            if cache_hit_rate >= 70:
+                console.print("  ✅ Excellent cache performance")
+            elif cache_hit_rate >= 50:
+                console.print("  ⚠️ Good cache performance")
+            else:
+                console.print("  ❌ Low cache hit rate - consider warming up cache")
+            
+            if avg_response <= 50:
+                console.print("  ✅ Excellent response times")
+            elif avg_response <= 200:
+                console.print("  ⚠️ Good response times")
+            else:
+                console.print("  ❌ Slow response times - check mem0AI service")
+        
+        finally:
+            await manager.cleanup()
+    
+    asyncio.run(run())
+
+
+@project_index.command(name="clear-cache")
+@click.confirmation_option(prompt='Clear all cached project data?')
+def clear_cache():
+    """Clear project index cache."""
+    async def run():
+        from .services.project_memory_manager import create_project_memory_manager
+        
+        manager = create_project_memory_manager()
+        
+        try:
+            if not await manager.initialize():
+                console.print("[red]❌ Failed to initialize project memory manager[/red]")
+                return
+            
+            await manager.clear_cache()
+            console.print("[green]✅ Project index cache cleared[/green]")
+        
+        finally:
+            await manager.cleanup()
     
     asyncio.run(run())
 
@@ -1528,9 +2138,439 @@ def doctor():
         console.print("Run 'claude-multiagent-pm util migrate' for migration assistance.")
 
 
+# M01-044 Unified Health Dashboard Helper Functions
+
+async def _add_project_indexing_health_collector(orchestrator):
+    """Add MEM-007 project indexing health monitoring to orchestrator."""
+    from .collectors.framework_services import ProjectIndexingHealthCollector
+    
+    try:
+        # Create and add project indexing health collector
+        indexing_collector = ProjectIndexingHealthCollector(timeout_seconds=2.0)
+        orchestrator.add_collector(indexing_collector)
+    except Exception as e:
+        logger.warning(f"Could not add project indexing health collector: {e}")
+
+
+async def _get_managed_projects_health():
+    """Get health status of managed projects portfolio."""
+    from pathlib import Path
+    import os
+    
+    try:
+        managed_path = get_managed_path()
+        if not managed_path.exists():
+            return {
+                "status": "down",
+                "total_projects": 0,
+                "healthy_projects": 0,
+                "message": f"Managed directory not found: {managed_path}",
+                "projects": []
+            }
+        
+        projects = []
+        healthy_count = 0
+        
+        for project_dir in managed_path.iterdir():
+            if project_dir.is_dir() and not project_dir.name.startswith('.'):
+                try:
+                    # Check project health indicators
+                    has_git = (project_dir / ".git").exists()
+                    has_claude_md = (project_dir / "CLAUDE.md").exists()
+                    has_recent_activity = _check_recent_activity(project_dir)
+                    
+                    # Simple health assessment
+                    health_score = 0
+                    if has_git:
+                        health_score += 30
+                    if has_claude_md:
+                        health_score += 40
+                    if has_recent_activity:
+                        health_score += 30
+                    
+                    status = "healthy" if health_score >= 70 else "degraded" if health_score >= 40 else "unhealthy"
+                    if status == "healthy":
+                        healthy_count += 1
+                    
+                    projects.append({
+                        "name": project_dir.name,
+                        "status": status,
+                        "health_score": health_score,
+                        "has_git": has_git,
+                        "has_claude_md": has_claude_md,
+                        "has_recent_activity": has_recent_activity,
+                        "path": str(project_dir)
+                    })
+                    
+                except Exception as e:
+                    projects.append({
+                        "name": project_dir.name,
+                        "status": "error",
+                        "health_score": 0,
+                        "error": str(e),
+                        "path": str(project_dir)
+                    })
+        
+        total_projects = len(projects)
+        overall_status = "healthy" if healthy_count >= total_projects * 0.8 else \
+                        "degraded" if healthy_count >= total_projects * 0.5 else "unhealthy"
+        
+        return {
+            "status": overall_status,
+            "total_projects": total_projects,
+            "healthy_projects": healthy_count,
+            "degraded_projects": len([p for p in projects if p["status"] == "degraded"]),
+            "unhealthy_projects": len([p for p in projects if p["status"] in ["unhealthy", "error"]]),
+            "message": f"{healthy_count}/{total_projects} projects healthy",
+            "projects": projects
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "total_projects": 0,
+            "healthy_projects": 0,
+            "message": f"Error assessing managed projects: {e}",
+            "projects": []
+        }
+
+
+def _check_recent_activity(project_dir: Path) -> bool:
+    """Check if project has recent activity (within 30 days)."""
+    from datetime import datetime, timedelta
+    import os
+    
+    try:
+        # Check modification time of key files
+        key_files = ["CLAUDE.md", "README.md", "package.json", "pyproject.toml"]
+        thirty_days_ago = datetime.now() - timedelta(days=30)
+        
+        for file_name in key_files:
+            file_path = project_dir / file_name
+            if file_path.exists():
+                mod_time = datetime.fromtimestamp(file_path.stat().st_mtime)
+                if mod_time > thirty_days_ago:
+                    return True
+        
+        # Check git activity if available
+        git_dir = project_dir / ".git"
+        if git_dir.exists():
+            # Check .git directory modification time as proxy for recent commits
+            mod_time = datetime.fromtimestamp(git_dir.stat().st_mtime)
+            if mod_time > thirty_days_ago:
+                return True
+        
+        return False
+        
+    except Exception:
+        return False
+
+
+def _display_unified_health_dashboard(dashboard, managed_projects_health, detailed=False, verbose=False):
+    """Display the unified health dashboard combining all subsystems."""
+    from .models.health import HealthStatus
+    
+    current = dashboard.current_report
+    
+    # Framework Services Status
+    framework_status = _get_framework_services_status(current)
+    console.print(f"Framework Services:        {framework_status['indicator']} {framework_status['status']}")
+    
+    if detailed or verbose:
+        for subsystem_name, subsystem in current.subsystems.items():
+            subsystem_indicator = _get_status_indicator(subsystem.status)
+            avg_response = f" ({subsystem.avg_response_time_ms:.1f}ms)" if subsystem.avg_response_time_ms else ""
+            console.print(f"├─ {subsystem_name:18} {subsystem_indicator} {subsystem.status.value.title()}{avg_response}")
+    else:
+        # Show key services only
+        key_services = _get_key_services_summary(current)
+        for service_name, service_info in key_services.items():
+            console.print(f"├─ {service_name:18} {service_info['indicator']} {service_info['status']}")
+    
+    # Managed Projects Status
+    projects_indicator = _get_status_indicator_from_string(managed_projects_health["status"])
+    console.print(f"\nManaged Projects:          {projects_indicator} {managed_projects_health['total_projects']}/{managed_projects_health['total_projects']} MONITORED")
+    
+    # Show project breakdown
+    if detailed:
+        for project in managed_projects_health["projects"][:10]:  # Show first 10
+            proj_indicator = _get_status_indicator_from_string(project["status"])
+            console.print(f"├─ {project['name'][:18]:18} {proj_indicator} {project['status'].title()}")
+        
+        if len(managed_projects_health["projects"]) > 10:
+            remaining = len(managed_projects_health["projects"]) - 10
+            console.print(f"└─ ... and {remaining} more projects")
+    else:
+        console.print(f"├─ Healthy:               🟢 {managed_projects_health['healthy_projects']}")
+        console.print(f"├─ Degraded:              🟡 {managed_projects_health.get('degraded_projects', 0)}")
+        console.print(f"└─ Issues:                🔴 {managed_projects_health.get('unhealthy_projects', 0)}")
+    
+    # Performance Metrics
+    console.print(f"\nPerformance Metrics:")
+    perf = dashboard.performance_metrics
+    cache_hit_rate = perf.get('cache_hit_rate', 0)
+    avg_response = perf.get('avg_service_response_time_ms', 0)
+    console.print(f"├─ Cache Hit Rate:        {cache_hit_rate:.0f}% {'💨' if cache_hit_rate > 70 else '🐌' if cache_hit_rate < 30 else '⚡'}")
+    console.print(f"├─ Avg Response Time:     {avg_response:.0f}ms {'⚡' if avg_response < 100 else '🐌' if avg_response > 1000 else '✅'}")
+    console.print(f"└─ Framework Health:      {current.overall_health_percentage:.0f}%")
+    
+    # Critical Alerts
+    if current.alerts:
+        critical_alerts = [a for a in current.alerts if a.get("level") == "critical"]
+        if critical_alerts:
+            console.print(f"\n🚨 {len(critical_alerts)} Critical Alert(s):")
+            for alert in critical_alerts[:3]:  # Show first 3
+                console.print(f"  • {alert['message']}")
+    
+    # Key Recommendations
+    if current.recommendations:
+        console.print(f"\n💡 {len(current.recommendations)} Recommendation(s):")
+        for rec in current.recommendations[:2]:  # Show top 2
+            console.print(f"  • {rec}")
+
+
+async def _display_memory_service_health(verbose=False):
+    """Display detailed memory service health."""
+    try:
+        from .integrations.mem0ai_integration import create_mem0ai_integration
+        
+        console.print("[bold blue]Memory Service Health[/bold blue]")
+        console.print("─" * 40)
+        
+        async with create_mem0ai_integration() as mem0ai:
+            if mem0ai.is_connected():
+                console.print("🟢 mem0AI Service:        Connected")
+                console.print(f"🌐 Endpoint:              http://localhost:8002")
+                
+                if verbose:
+                    # Test memory operations
+                    start_time = time.time()
+                    test_response = await mem0ai.get_service_info()
+                    response_time = (time.time() - start_time) * 1000
+                    
+                    console.print(f"⏱️  Response Time:         {response_time:.1f}ms")
+                    console.print(f"📊 Service Info:          {test_response.get('status', 'Unknown')}")
+            else:
+                console.print("🔴 mem0AI Service:        Disconnected")
+                console.print("⚠️  Check service on port 8002")
+        
+    except Exception as e:
+        console.print(f"🔴 Memory Service:        Error - {e}")
+
+
+async def _display_indexing_service_health(verbose=False):
+    """Display detailed project indexing service health."""
+    try:
+        from .services.project_indexer import create_project_indexer
+        
+        console.print("[bold blue]Project Indexing Service Health (MEM-007)[/bold blue]")
+        console.print("─" * 50)
+        
+        indexer = create_project_indexer()
+        
+        if await indexer.initialize():
+            console.print("🟢 Indexer Service:       Connected")
+            
+            # Get indexer statistics
+            stats = indexer.get_indexer_statistics()
+            console.print(f"📊 Projects Indexed:      {stats['projects_indexed']}")
+            console.print(f"💾 Cache Hit Rate:        {stats['cache_hit_rate']:.1f}%")
+            console.print(f"📁 Managed Path:          {stats['managed_path']}")
+            
+            if verbose:
+                console.print(f"⏱️  Avg Index Time:       {stats.get('avg_index_time', 0):.2f}s")
+                console.print(f"✅ Success Rate:          {stats.get('success_rate', 0):.1f}%")
+            
+            await indexer.cleanup()
+        else:
+            console.print("🔴 Indexer Service:       Failed to initialize")
+            
+    except Exception as e:
+        console.print(f"🔴 Indexing Service:      Error - {e}")
+
+
+def _display_projects_health(managed_projects_health, verbose=False):
+    """Display detailed projects health."""
+    console.print("[bold blue]Managed Projects Portfolio Health[/bold blue]")
+    console.print("─" * 45)
+    
+    total = managed_projects_health["total_projects"]
+    healthy = managed_projects_health["healthy_projects"]
+    
+    console.print(f"📊 Total Projects:        {total}")
+    console.print(f"🟢 Healthy:               {healthy}")
+    console.print(f"🟡 Degraded:              {managed_projects_health.get('degraded_projects', 0)}")
+    console.print(f"🔴 Unhealthy:             {managed_projects_health.get('unhealthy_projects', 0)}")
+    
+    if verbose and managed_projects_health["projects"]:
+        console.print("\nProject Details:")
+        table = Table()
+        table.add_column("Project", style="cyan")
+        table.add_column("Status", style="white")
+        table.add_column("Health Score", style="green")
+        table.add_column("Indicators", style="yellow")
+        
+        for project in managed_projects_health["projects"]:
+            indicator = _get_status_indicator_from_string(project["status"])
+            
+            indicators = []
+            if project.get("has_git"):
+                indicators.append("Git")
+            if project.get("has_claude_md"):
+                indicators.append("CLAUDE.md")
+            if project.get("has_recent_activity"):
+                indicators.append("Recent")
+            
+            table.add_row(
+                project["name"],
+                f"{indicator} {project['status'].title()}",
+                f"{project['health_score']}%",
+                ", ".join(indicators) if indicators else "None"
+            )
+        
+        console.print(table)
+
+
+async def _export_health_data(dashboard, managed_projects_health, format_type):
+    """Export health data to specified format."""
+    export_data = {
+        "timestamp": datetime.now().isoformat(),
+        "framework_health": dashboard.to_dict(),
+        "managed_projects": managed_projects_health
+    }
+    
+    if format_type == "json":
+        import json
+        filename = f"health_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        with open(filename, 'w') as f:
+            json.dump(export_data, f, indent=2)
+        console.print(f"[green]✅ Health data exported to {filename}[/green]")
+    
+    elif format_type == "yaml":
+        try:
+            import yaml
+            filename = f"health_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.yaml"
+            with open(filename, 'w') as f:
+                yaml.dump(export_data, f, default_flow_style=False)
+            console.print(f"[green]✅ Health data exported to {filename}[/green]")
+        except ImportError:
+            console.print("[red]❌ PyYAML not installed. Install with: pip install pyyaml[/red]")
+
+
+async def _generate_health_report(dashboard, managed_projects_health):
+    """Generate comprehensive health report."""
+    current = dashboard.current_report
+    
+    report_content = f"""# Claude PM Framework Health Report
+
+Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+## Executive Summary
+
+- **Overall Health**: {current.overall_health_percentage:.1f}%
+- **Framework Status**: {current.overall_status.value.upper()}
+- **Total Services**: {current.total_services}
+- **Managed Projects**: {managed_projects_health['total_projects']}
+
+## Framework Services
+
+- Healthy: {current.healthy_services}
+- Degraded: {current.degraded_services}
+- Unhealthy: {current.unhealthy_services}
+- Down: {current.down_services}
+
+## Managed Projects Portfolio
+
+- Total: {managed_projects_health['total_projects']}
+- Healthy: {managed_projects_health['healthy_projects']}
+- Issues: {managed_projects_health.get('unhealthy_projects', 0)}
+
+## Performance Metrics
+
+- Response Time: {current.response_time_ms:.0f}ms
+- Cache Performance: {dashboard.performance_metrics.get('cache_hit_rate', 0):.1f}%
+
+## Active Alerts
+
+"""
+    
+    if current.alerts:
+        for alert in current.alerts:
+            report_content += f"- **{alert.get('level', 'info').upper()}**: {alert['message']}\n"
+    else:
+        report_content += "No active alerts.\n"
+    
+    report_content += "\n## Recommendations\n\n"
+    
+    if current.recommendations:
+        for rec in current.recommendations:
+            report_content += f"- {rec}\n"
+    else:
+        report_content += "No recommendations at this time.\n"
+    
+    filename = f"health_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+    with open(filename, 'w') as f:
+        f.write(report_content)
+    
+    console.print(f"[green]✅ Health report generated: {filename}[/green]")
+
+
+def _get_framework_services_status(current_report):
+    """Get overall framework services status."""
+    if current_report.overall_health_percentage >= 90:
+        return {"indicator": "🟢", "status": "OPERATIONAL"}
+    elif current_report.overall_health_percentage >= 70:
+        return {"indicator": "🟡", "status": "DEGRADED"}
+    else:
+        return {"indicator": "🔴", "status": "CRITICAL"}
+
+
+def _get_key_services_summary(current_report):
+    """Get summary of key services."""
+    services = {}
+    
+    # Look for key services in the report
+    for service in current_report.services:
+        if any(keyword in service.name.lower() for keyword in ['health', 'memory', 'project', 'index']):
+            services[service.name] = {
+                "indicator": _get_status_indicator(service.status),
+                "status": f"{service.status.value.title()} ({service.response_time_ms:.0f}ms)" if service.response_time_ms else service.status.value.title()
+            }
+    
+    return services
+
+
+def _get_status_indicator(status):
+    """Get status indicator emoji."""
+    from .models.health import HealthStatus
+    
+    return {
+        HealthStatus.HEALTHY: "🟢",
+        HealthStatus.DEGRADED: "🟡",
+        HealthStatus.UNHEALTHY: "🔴",
+        HealthStatus.DOWN: "🔴",
+        HealthStatus.ERROR: "💥",
+        HealthStatus.UNKNOWN: "❓"
+    }.get(status, "❓")
+
+
+def _get_status_indicator_from_string(status_str):
+    """Get status indicator from string."""
+    return {
+        "healthy": "🟢",
+        "degraded": "🟡",
+        "unhealthy": "🔴",
+        "down": "🔴",
+        "error": "💥",
+        "unknown": "❓"
+    }.get(status_str.lower(), "❓")
+
+
 def main():
     """Main entry point for the Claude Multi-Agent PM CLI."""
     try:
+        # Register CMPM slash commands
+        register_cmpm_commands(cli)
         cli()
     except KeyboardInterrupt:
         console.print("\n[bold yellow]Operation cancelled by user[/bold yellow]")

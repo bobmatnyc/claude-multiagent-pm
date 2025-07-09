@@ -1,6 +1,6 @@
 {
   "name": "claude-multiagent-pm",
-  "version": "4.1.0",
+  "version": "4.2.1",
   "description": "Claude Multi-Agent PM Framework - Universal deployment package for AI-driven project management",
   "main": "lib/framework/claude_pm/cli.py",
   "bin": {
@@ -14,7 +14,10 @@
     "development-framework",
     "automation",
     "trackdown",
+    "ai-trackdown-tools",
     "task-management",
+    "issue-tracking",
+    "pr-management",
     "best-practices",
     "tdd",
     "api-first",
@@ -51,7 +54,8 @@
   ],
   "scripts": {
     "postinstall": "node install/postinstall.js",
-    "prepack": "node install/prepare-package.js",
+    "ai-trackdown-setup": "npm install -g @bobmatnyc/ai-trackdown-tools",
+    "verify-dependencies": "aitrackdown --version && atd --version",
     "test": "node install/validate.js --verbose",
     "validate-env": "node install/validate.js",
     "install-to": "node install/install.js",
@@ -90,9 +94,9 @@
     "CHANGELOG.md",
     "LICENSE"
   ],
-  "dependencies": {},
-  "optionalDependencies": {},
-  "peerDependencies": {},
+  "dependencies": {
+    "@bobmatnyc/ai-trackdown-tools": "file:../managed/ai-trackdown-tools/bobmatnyc-ai-trackdown-tools-1.0.0.tgz"
+  },
   "devDependencies": {
     "standard-version": "^9.5.0"
   },

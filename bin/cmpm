@@ -21,7 +21,7 @@ framework_path = Path(__file__).parent.parent
 sys.path.insert(0, str(framework_path))
 
 from claude_pm.cli import main as cli_main
-from claude_pm.cmpm_commands import cmpm_health, cmpm_agents
+from claude_pm.cmpm_commands import cmpm_health, cmpm_agents, cmpm_index
 from rich.console import Console
 
 console = Console()
@@ -36,12 +36,14 @@ def show_help():
 [bold green]Available Commands:[/bold green]
   [cyan]/cmpm:health[/cyan]    - Comprehensive system health dashboard
   [cyan]/cmpm:agents[/cyan]    - List all active agent types and status
+  [cyan]/cmpm:index[/cyan]     - Generate comprehensive project discovery index
   [cyan]help[/cyan]           - Show this help message
 
 [bold yellow]Examples:[/bold yellow]
   cmpm /cmpm:health --detailed
   cmpm /cmpm:agents --filter=standard
-  cmpm /cmpm:health --json
+  cmpm /cmpm:index --verbose
+  cmpm /cmpm:index --json
 
 [bold blue]Framework Info:[/bold blue]
   Version: 4.1.0
@@ -75,6 +77,10 @@ def main():
             # Remove the slash command from sys.argv and call the agents command
             sys.argv = ["cmpm:agents"] + sys.argv[2:]
             cmpm_agents.main(standalone_mode=False)
+        elif command_name == "index":
+            # Remove the slash command from sys.argv and call the index command
+            sys.argv = ["cmpm:index"] + sys.argv[2:]
+            cmpm_index.main(standalone_mode=False)
         else:
             console.print(f"[red]Unknown CMPM command: {command}[/red]")
             console.print("Run 'cmpm help' for available commands")

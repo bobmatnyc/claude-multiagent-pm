@@ -1,0 +1,165 @@
+#!/usr/bin/env node
+
+/**
+ * Claude Multi-Agent PM Framework - Universal CLI Entry Point
+ * 
+ * This is the main entry point for the claude-pm command-line interface.
+ * It provides universal access to the Claude PM Framework regardless of
+ * installation location or platform.
+ */
+
+const fs = require('fs');
+const path = require('path');
+const { spawn } = require('child_process');
+
+const CLAUDE_PM_VERSION = require('../package.json').version;
+
+/**
+ * Get the framework installation path
+ */
+function getFrameworkPath() {
+    // First check if we're running from NPM package
+    const packagePath = path.join(__dirname, '..', 'lib', 'framework');
+    if (fs.existsSync(packagePath)) {
+        return packagePath;
+    }
+    
+    // Check for local installation
+    const localPath = path.join(process.cwd(), 'claude_pm');
+    if (fs.existsSync(localPath)) {
+        return localPath;
+    }
+    
+    // Check for global installation in user home
+    const homePath = path.join(require('os').homedir(), '.claude-pm');
+    if (fs.existsSync(homePath)) {
+        return homePath;
+    }
+    
+    console.error('❌ Claude PM Framework not found');
+    console.error('Please run: npm install -g claude-multiagent-pm');
+    process.exit(1);
+}
+
+/**
+ * Validate Python environment
+ */
+function validatePython() {
+    try {
+        const pythonResult = require('child_process').execSync('python3 --version', { encoding: 'utf8' });
+        const version = pythonResult.match(/Python (\d+)\.(\d+)/);
+        
+        if (!version || parseInt(version[1]) < 3 || (parseInt(version[1]) === 3 && parseInt(version[2]) < 8)) {
+            console.error('❌ Python 3.8+ required. Found:', pythonResult.trim());
+            process.exit(1);
+        }
+        
+        return 'python3';
+    } catch (error) {
+        try {
+            const pythonResult = require('child_process').execSync('python --version', { encoding: 'utf8' });
+            const version = pythonResult.match(/Python (\d+)\.(\d+)/);
+            
+            if (!version || parseInt(version[1]) < 3 || (parseInt(version[1]) === 3 && parseInt(version[2]) < 8)) {
+                console.error('❌ Python 3.8+ required. Found:', pythonResult.trim());
+                process.exit(1);
+            }
+            
+            return 'python';
+        } catch (error) {
+            console.error('❌ Python not found. Please install Python 3.8+');
+            process.exit(1);
+        }
+    }
+}
+
+/**
+ * Show help message
+ */
+function showHelp() {
+    console.log(`
+Claude Multi-Agent PM Framework v${CLAUDE_PM_VERSION}
+Universal CLI for AI-driven project management
+
+Usage: claude-pm [command] [options]
+
+Commands:
+  health              Health monitoring and status
+  memory              Memory management operations  
+  project             Project management operations
+  service             Service management
+  workflow            Workflow orchestration
+  enforcement         Framework enforcement
+  --version           Show version information
+  --help              Show this help message
+
+Framework Integration:
+  This CLI provides universal access to the Claude PM Framework
+  regardless of installation location or platform.
+
+Examples:
+  claude-pm health status
+  claude-pm project create my-project
+  claude-pm memory init
+  claude-pm service start all
+
+For more information, visit:
+https://github.com/bobmatnyc/claude-multiagent-pm
+`);
+}
+
+/**
+ * Main execution function
+ */
+function main() {
+    const args = process.argv.slice(2);
+    
+    // Handle special flags
+    if (args.includes('--version') || args.includes('-v')) {
+        console.log(`Claude Multi-Agent PM Framework v${CLAUDE_PM_VERSION}`);
+        process.exit(0);
+    }
+    
+    if (args.includes('--help') || args.includes('-h') || args.length === 0) {
+        showHelp();
+        process.exit(0);
+    }
+    
+    // Validate environment
+    const pythonCmd = validatePython();
+    const frameworkPath = getFrameworkPath();
+    
+    // Construct path to Python CLI
+    const cliPath = path.join(frameworkPath, 'claude_pm', 'cli.py');
+    
+    if (!fs.existsSync(cliPath)) {
+        console.error(`❌ Framework CLI not found at: ${cliPath}`);
+        process.exit(1);
+    }
+    
+    // Execute Python CLI with all arguments
+    const pythonProcess = spawn(pythonCmd, [cliPath, ...args], {
+        stdio: 'inherit',
+        env: {
+            ...process.env,
+            CLAUDE_PM_FRAMEWORK_PATH: frameworkPath,
+            CLAUDE_PM_VERSION: CLAUDE_PM_VERSION
+        }
+    });
+    
+    pythonProcess.on('close', (code) => {
+        process.exit(code);
+    });
+    
+    pythonProcess.on('error', (error) => {
+        console.error('❌ Failed to execute Claude PM Framework:', error.message);
+        process.exit(1);
+    });
+}
+
+// Execute main function
+if (require.main === module) {
+    main();
+}
+
+module.exports = { main, getFrameworkPath, validatePython };

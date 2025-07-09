@@ -1,0 +1,35 @@
+{
+  "performance_optimization": {
+    "enabled": true,
+    "target_response_time_ms": 500,
+    "warning_threshold_ms": 200,
+    "error_threshold_ms": 1000,
+    "health_check_optimizations": {
+      "cache_ttl_seconds": 30,
+      "max_parallel_collectors": 8,
+      "global_timeout_seconds": 2.0,
+      "circuit_breaker_threshold": 3,
+      "circuit_breaker_timeout": 30
+    },
+    "framework_core_optimizations": {
+      "service_timeout_seconds": 1.5,
+      "memory_manager_target_ms": 50,
+      "memory_manager_warning_ms": 200,
+      "cache_hit_rate_target": 70,
+      "cache_hit_rate_warning": 40
+    },
+    "health_thresholds": {
+      "project_health_good": 0.8,
+      "project_health_degraded": 0.5,
+      "framework_compliance_good": 90,
+      "framework_compliance_degraded": 70,
+      "service_availability_degraded": 0.5
+    }
+  },
+  "monitoring": {
+    "performance_tracking": true,
+    "response_time_alerts": true,
+    "degradation_alerts": true,
+    "optimization_suggestions": true
+  }
+}

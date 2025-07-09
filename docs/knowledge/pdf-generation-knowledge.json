@@ -1,0 +1,123 @@
+{
+  "project_name": "claude-multiagent-pm",
+  "timestamp": "2025-07-09T06:45:00.000000",
+  "knowledge_items": [
+    {
+      "id": "pdf-generation-chrome-success",
+      "category": "pattern",
+      "title": "Chrome-based PDF Generation Success Pattern",
+      "content": "#!/bin/bash\n# CMPM User Guide PDF Generation Script (Chrome-based)\n# Usage: ./generate-pdf-chrome.sh [output-filename]\n\nset -e\n\n# Configuration\nOUTPUT_FILE=\"${1:-CMPM-User-Guide-v4.1.0.pdf}\"\nHTML_FILE=\"CMPM-User-Guide-v4.1.0.html\"\nCURRENT_DIR=\"$(pwd)\"\n\necho \"🔧 Generating CMPM User Guide PDF using Chrome...\"\necho \"📝 Output file: $OUTPUT_FILE\"\n\n# Check if HTML file exists\nif [ ! -f \"$HTML_FILE\" ]; then\n    echo \"❌ HTML file not found: $HTML_FILE\"\n    echo \"💡 Run ./generate-pdf-simple.sh first to create the HTML version\"\n    exit 1\nfi\n\n# Check for Chrome\nCHROME_PATH=\"\"\nif [ -f \"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" ]; then\n    CHROME_PATH=\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\"\nelif command -v google-chrome &> /dev/null; then\n    CHROME_PATH=\"google-chrome\"\nelif command -v chromium &> /dev/null; then\n    CHROME_PATH=\"chromium\"\nelse\n    echo \"❌ Chrome/Chromium not found\"\n    echo \"💡 Please install Google Chrome or Chromium\"\n    exit 1\nfi\n\necho \"📄 Using Chrome at: $CHROME_PATH\"\necho \"🔧 Converting HTML to PDF...\"\n\n# Convert HTML to PDF using Chrome\n\"$CHROME_PATH\" \\\n    --headless \\\n    --disable-gpu \\\n    --disable-software-rasterizer \\\n    --disable-dev-shm-usage \\\n    --no-sandbox \\\n    --print-to-pdf=\"$OUTPUT_FILE\" \\\n    --print-to-pdf-no-header \\\n    --run-all-compositor-stages-before-draw \\\n    --virtual-time-budget=5000 \\\n    \"file://$CURRENT_DIR/$HTML_FILE\"\n\n# Check if PDF was created\nif [ -f \"$OUTPUT_FILE\" ]; then\n    echo \"✅ PDF generated successfully: $OUTPUT_FILE\"\n    echo \"📄 File size: $(du -h \"$OUTPUT_FILE\" | cut -f1)\"\n    echo \"📊 Guide ready for print and distribution\"\nelse\n    echo \"❌ PDF generation failed\"\n    echo \"📋 HTML version is still available at: $HTML_FILE\"\n    exit 1\nfi",
+      "tags": [
+        "pdf",
+        "chrome",
+        "headless",
+        "success",
+        "documentation",
+        "critical"
+      ],
+      "metadata": {
+        "script_name": "generate-pdf-chrome.sh",
+        "purpose": "Generate PDF using Chrome headless mode",
+        "dependencies": [
+          "Google Chrome",
+          "HTML file"
+        ],
+        "output_format": "PDF",
+        "success_metrics": {
+          "file_size": "7.8MB",
+          "quality": "professional",
+          "content_completeness": "100%",
+          "print_ready": true
+        },
+        "key_parameters": {
+          "virtual_time_budget": 5000,
+          "headless_mode": true,
+          "gpu_disabled": true,
+          "no_header": true
+        },
+        "last_updated": "2025-07-09",
+        "status": "production_ready"
+      }
+    },
+    {
+      "id": "pdf-generation-script",
+      "category": "pattern",
+      "title": "PDF Generation Script Template",
+      "content": "#!/bin/bash\n# CMPM User Guide PDF Generation Script\n# Usage: ./generate-pdf.sh [output-filename]\n\nset -e\n\n# Configuration\nOUTPUT_FILE=\"${1:-cmpm-user-guide.pdf}\"\nDOCS_DIR=\"/Users/masa/Projects/claude-multiagent-pm/docs/user-guide\"\nTEMP_DIR=\"/tmp/cmpm-guide-build\"\n\necho \"\ud83d\udd27 Generating CMPM User Guide PDF...\"\n\n# Create temporary build directory\nmkdir -p \"$TEMP_DIR\"\n\n# Concatenate all sections in order\ncat \"$DOCS_DIR/README.md\" \\\n    \"$DOCS_DIR/00-structure-navigation.md\" \\\n    \"$DOCS_DIR/01-getting-started.md\" \\\n    \"$DOCS_DIR/02-architecture-concepts.md\" \\\n    \"$DOCS_DIR/03-slash-commands-orchestration.md\" \\\n    \"$DOCS_DIR/04-directory-organization.md\" \\\n    \"$DOCS_DIR/05-custom-agents.md\" \\\n    \"$DOCS_DIR/06-advanced-features.md\" \\\n    \"$DOCS_DIR/07-troubleshooting-faq.md\" > \"$TEMP_DIR/complete-guide.md\"\n\n# Generate PDF with pandoc\npandoc \"$TEMP_DIR/complete-guide.md\" \\\n    --output \"$OUTPUT_FILE\" \\\n    --pdf-engine=xelatex \\\n    --toc \\\n    --toc-depth=3 \\\n    --number-sections \\\n    --variable geometry:margin=1in \\\n    --variable fontsize=11pt \\\n    --variable documentclass=article \\\n    --variable colorlinks=true \\\n    --variable linkcolor=blue \\\n    --variable urlcolor=blue \\\n    --variable toccolor=black \\\n    --metadata title=\"Claude Multi-Agent PM Framework User Guide\" \\\n    --metadata author=\"CMPM Framework Team\" \\\n    --metadata date=\"$(date +%Y-%m-%d)\"\n\n# Cleanup\nrm -rf \"$TEMP_DIR\"\n\necho \"\u2705 PDF generated successfully: $OUTPUT_FILE\"\necho \"\ud83d\udcc4 Guide ready for print and distribution\"",
+      "tags": [
+        "pdf",
+        "documentation",
+        "build",
+        "script",
+        "pandoc"
+      ],
+      "metadata": {
+        "script_name": "generate-pdf.sh",
+        "purpose": "Generate PDF from user guide sections",
+        "dependencies": [
+          "pandoc",
+          "xelatex"
+        ],
+        "output_format": "PDF",
+        "last_updated": "2025-07-09"
+      }
+    },
+    {
+      "id": "pdf-generation-process",
+      "category": "project",
+      "title": "PDF Generation Process Documentation",
+      "content": "PDF Generation Process Documentation\n\n## Overview\nThe PDF generation process for the Claude Multi-Agent PM Framework creates professional documentation suitable for print and distribution.\n\n## Requirements\n- pandoc: Universal document converter\n- xelatex: LaTeX engine for PDF generation\n- Properly structured markdown files in correct order\n\n## Process Flow\n1. **File Preparation**: Concatenate all user guide sections in logical order\n2. **Content Processing**: Merge markdown files into single document\n3. **PDF Generation**: Use pandoc with xelatex engine and professional formatting\n4. **Cleanup**: Remove temporary files and directories\n\n## Key Features\n- Table of Contents (TOC) with 3-level depth\n- Section numbering for easy navigation\n- Professional styling with 1-inch margins\n- Hyperlinked cross-references\n- Branded metadata (title, author, date)\n\n## File Order\n1. README.md - Introduction and overview\n2. 00-structure-navigation.md - Navigation guide\n3. 01-getting-started.md - Getting started\n4. 02-architecture-concepts.md - Architecture concepts\n5. 03-slash-commands-orchestration.md - Command orchestration\n6. 04-directory-organization.md - Directory structure\n7. 05-custom-agents.md - Custom agents\n8. 06-advanced-features.md - Advanced features\n9. 07-troubleshooting-faq.md - Troubleshooting\n\n## Output Quality\n- Professional print-ready format\n- Consistent styling throughout\n- Clear section breaks and numbering\n- Cross-referenced links and TOC",
+      "tags": [
+        "pdf",
+        "documentation",
+        "process",
+        "workflow"
+      ],
+      "metadata": {
+        "document_type": "process_documentation",
+        "purpose": "Document PDF generation workflow",
+        "scope": "User guide documentation",
+        "quality_level": "professional",
+        "last_updated": "2025-07-09"
+      }
+    },
+    {
+      "id": "pdf-generation-patterns",
+      "category": "team",
+      "title": "PDF Generation Usage Patterns",
+      "content": "PDF Generation Usage Patterns and Best Practices\n\n## Basic Usage\n```bash\n# Make script executable\nchmod +x generate-pdf.sh\n\n# Generate PDF with default name\n./generate-pdf.sh\n\n# Generate PDF with custom filename\n./generate-pdf.sh my-custom-guide.pdf\n```\n\n## Best Practices\n1. **File Organization**: Ensure all markdown files are in correct order\n2. **Content Quality**: Validate markdown syntax before generation\n3. **Dependencies**: Verify pandoc and xelatex are installed\n4. **Testing**: Test generation process before production use\n5. **Backup**: Keep backup of source files before major changes\n\n## Common Issues and Solutions\n- **Missing Dependencies**: Install pandoc and texlive-xetex\n- **File Not Found**: Verify all markdown files exist in docs directory\n- **Formatting Issues**: Check markdown syntax and fix any errors\n- **Permission Errors**: Ensure script has execute permissions\n\n## Customization Options\n- **Styling**: Modify pandoc variables for different formatting\n- **Content**: Update file list to include/exclude sections\n- **Metadata**: Customize title, author, and date fields\n- **Output**: Change output directory or filename patterns\n\n## Integration Points\n- **CI/CD**: Can be integrated into automated documentation builds\n- **Version Control**: Track changes to documentation structure\n- **Distribution**: Output suitable for sharing and printing\n- **Archival**: Generate versioned documentation snapshots\n\n## Performance Considerations\n- **File Size**: Large guides may take longer to process\n- **Memory Usage**: Complex formatting requires sufficient system memory\n- **Temporary Files**: Script cleans up temporary files automatically\n- **Parallel Processing**: Single-threaded, suitable for most use cases",
+      "tags": [
+        "pdf",
+        "usage",
+        "best-practices",
+        "patterns"
+      ],
+      "metadata": {
+        "document_type": "usage_patterns",
+        "purpose": "Document PDF generation best practices",
+        "audience": "development_team",
+        "complexity": "intermediate",
+        "last_updated": "2025-07-09"
+      }
+    },
+    {
+      "id": "pdf-generation-workflow",
+      "category": "pattern",
+      "title": "PDF Generation Workflow Template",
+      "content": "PDF Generation Workflow Template\n\n## Template Overview\nThis template provides a standardized approach to implementing PDF generation for project documentation.\n\n## Implementation Steps\n1. **Setup Dependencies**\n   - Install pandoc: `brew install pandoc` (macOS) or `apt-get install pandoc` (Ubuntu)\n   - Install LaTeX: `brew install --cask mactex` (macOS) or `apt-get install texlive-xetex` (Ubuntu)\n\n2. **Create Directory Structure**\n   ```\n   docs/\n   \u251c\u2500\u2500 user-guide/\n   \u2502   \u251c\u2500\u2500 README.md\n   \u2502   \u251c\u2500\u2500 00-navigation.md\n   \u2502   \u251c\u2500\u2500 01-getting-started.md\n   \u2502   \u251c\u2500\u2500 ...\n   \u2502   \u2514\u2500\u2500 generate-pdf.sh\n   ```\n\n3. **Configure Build Script**\n   - Adapt file paths to project structure\n   - Update metadata (title, author, organization)\n   - Customize styling variables as needed\n\n4. **Test Generation Process**\n   - Verify all source files exist\n   - Test script execution\n   - Review output quality\n   - Validate cross-references\n\n5. **Integration Options**\n   - Add to CI/CD pipeline\n   - Create documentation release process\n   - Automate versioning and distribution\n\n## Customization Variables\n- `OUTPUT_FILE`: Default output filename\n- `DOCS_DIR`: Source documentation directory\n- `TEMP_DIR`: Temporary build directory\n- Pandoc variables: geometry, fontsize, documentclass, etc.\n\n## Quality Assurance\n- Run markdown linting before generation\n- Test with different content sizes\n- Verify cross-references work correctly\n- Check output on different devices/viewers\n\n## Maintenance\n- Update script when directory structure changes\n- Review and update metadata regularly\n- Monitor for pandoc version compatibility\n- Keep backup of working configurations",
+      "tags": [
+        "pdf",
+        "workflow",
+        "template",
+        "implementation"
+      ],
+      "metadata": {
+        "document_type": "workflow_template",
+        "purpose": "Standardized PDF generation implementation",
+        "reusability": "high",
+        "complexity": "intermediate",
+        "last_updated": "2025-07-09"
+      }
+    }
+  ]
+}

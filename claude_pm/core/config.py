@@ -181,6 +181,11 @@ class Config:
             "graceful_shutdown_timeout": 30,
             "startup_timeout": 60,
             
+            # ai-trackdown-tools integration
+            "use_ai_trackdown_tools": True,
+            "ai_trackdown_tools_timeout": 30,
+            "ai_trackdown_tools_fallback_logging": True,
+            
             # Claude PM specific - dynamic path resolution
             "base_path": base_path,
             "claude_pm_path": claude_pm_path,
@@ -198,6 +203,10 @@ class Config:
             # Development
             "debug": False,
             "verbose": False,
+            
+            # Task and issue tracking
+            "enable_persistent_tracking": True,
+            "fallback_tracking_method": "logging",  # Options: "logging", "file", "disabled"
         }
         
         # Apply defaults for missing keys

@@ -1,6 +1,6 @@
-# Claude Multi-Agent Project Management Framework v4.1.0 - Pure Subprocess Delegation Model
+# Claude Multi-Agent Project Management Framework v4.2.1 - ai-trackdown-tools Integration
 
-[![Version](https://img.shields.io/badge/Version-4.1.0-blue.svg)](https://github.com/masa/claude-multiagent-pm)
+[![Version](https://img.shields.io/badge/Version-4.2.1-blue.svg)](https://github.com/masa/claude-multiagent-pm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Architecture](https://img.shields.io/badge/Architecture-Pure%20Task%20Delegation-brightgreen.svg)](./trackdown/CURRENT-STATUS.md)
 [![Memory Integration](https://img.shields.io/badge/Memory-Zero%20Config-purple.svg)](./docs/CLAUDE_PM_MEMORY_README.md)
@@ -8,7 +8,7 @@
 
 > **Pure subprocess delegation with memory-augmented Task tool coordination**
 
-Claude Multi-Agent Project Management Framework revolutionizes AI-assisted development through pure subprocess delegation with intelligent memory integration. The v4.1.0 release introduces professional CMPM slash commands, enabling real-time system monitoring and agent management alongside the established zero-configuration mem0AI integration and powerful Task tool subprocess coordination.
+Claude Multi-Agent Project Management Framework revolutionizes AI-assisted development through pure subprocess delegation with intelligent memory integration. The v4.2.1 release introduces comprehensive ai-trackdown-tools integration, enabling persistent ticket management, enhanced documentation, and improved multi-agent coordination alongside the established zero-configuration mem0AI integration and powerful Task tool subprocess coordination.
 
 ## 🚀 Key Features
 
@@ -34,14 +34,16 @@ Claude Multi-Agent Project Management Framework revolutionizes AI-assisted devel
 
 ### Pure Subprocess Delegation Architecture
 
-#### Zero-Configuration Memory Integration (mem0AI)
-- **Instant Memory Access**: No API keys or configuration required
+#### Simplified Memory Integration (mem0AI)
+- **Instant Memory Access**: Requires OpenAI API key configuration
 - **Universal Memory Service**: Automatic service discovery on localhost:8002
 - **Memory Categories**: Project, Pattern, Team, and Error memories with enterprise schemas
 - **Factory Functions**: Simple memory access via environment-based configuration
 
-#### Task Tool Subprocess Coordination
+#### Task Tool Subprocess Coordination with ai-trackdown-tools
 - **Direct Delegation**: Clean subprocess creation via Task tool
+- **Persistent Issue & PR Tracking**: Comprehensive ticket lifecycle management via ai-trackdown-tools
+- **Subprocess State Persistence**: Issues and PRs persist beyond process termination
 - **Isolated Contexts**: Each agent receives filtered, role-specific instructions
 - **Memory-Augmented Tasks**: Context enhancement from historical project data
 - **Systematic Communication**: Structured protocols for agent coordination
@@ -53,11 +55,13 @@ Claude Multi-Agent Project Management Framework revolutionizes AI-assisted devel
 - **Memory-Augmented Context**: Intelligent context preparation for enhanced performance
 - **Parallel Execution**: Up to 5 concurrent agents with git worktree isolation
 
-### Continuous Learning Engine
+### Continuous Learning Engine with Persistent Tracking
 - **Pattern Recognition**: Automatic identification of successful patterns
 - **Memory-Driven Insights**: Context enhancement from historical project data
 - **Team Knowledge Amplification**: Shared learning across all agents and projects
 - **Intelligent Task Decomposition**: Memory-guided task planning and execution
+- **Persistent Issue Tracking**: ai-trackdown-tools provides comprehensive ticket lifecycle management
+- **Multi-Agent Coordination**: Persistent state enables coordinated work across subprocess boundaries
 
 ## 📊 Proven Results
 
@@ -70,12 +74,24 @@ Claude Multi-Agent Project Management Framework revolutionizes AI-assisted devel
 
 ## 🏗️ Architecture
 
-### Memory-Augmented Agent Ecosystem
+### Memory-Augmented Agent Ecosystem with ai-trackdown-tools
 - **11 Specialized Agents**: Core + Specialist agents with memory integration
 - **Zero-Configuration Access**: Automatic memory service discovery and connection
 - **Git Worktree Isolation**: Parallel execution environments for concurrent agents
 - **Task Tool Coordination**: Direct subprocess delegation with structured protocols
+- **ai-trackdown-tools Integration**: Persistent issue and PR tracking across subprocess boundaries
 - **Memory Categories**: Project, Pattern, Team, Error memories with enterprise schemas
+
+### Why ai-trackdown-tools is Essential
+
+**Subprocess Coordination Challenge**: When agents operate in separate subprocesses, traditional in-memory state management fails. Each subprocess has its own memory space, making coordination complex.
+
+**Solution**: ai-trackdown-tools provides:
+- **Persistent State**: Issues and PRs persist beyond individual process lifetimes
+- **Cross-Process Communication**: Multiple agents can coordinate through shared ticket system
+- **Hierarchical Organization**: Epics → Issues → Tasks → PRs enable complex project management
+- **Comprehensive Tracking**: Every issue and PR is tracked with full lifecycle management
+- **Multi-Agent Coordination**: Agents can hand off work through persistent ticket assignments
 
 ### Memory Integration Architecture
 - **Universal Memory Service**: localhost:8002 with environment-based configuration
@@ -126,7 +142,7 @@ claude-multiagent-pm/
 **Universal memory access without setup complexity**:
 - **Environment-Based Config**: Automatic service discovery and connection
 - **Factory Functions**: ClaudePMMemory class with instant access
-- **No API Keys Required**: localhost:8002 service with automatic defaults
+- **OpenAI API Key Required**: localhost:8002 service with configurable defaults
 - **Universal Compatibility**: Works across all Claude instances and projects
 
 ### 42-Ticket Enhancement System
@@ -143,6 +159,27 @@ claude-multiagent-pm/
 - **Cross-Project Memory**: Shared knowledge across 12+ managed projects
 
 ## 📦 Installation & Distribution
+
+### Core Dependencies
+
+The Claude Multi-Agent PM Framework has one critical dependency for persistent tracking across subprocess boundaries:
+
+#### ai-trackdown-tools (Required)
+```bash
+# Install ai-trackdown-tools globally
+npm install -g @bobmatnyc/ai-trackdown-tools
+
+# Verify installation
+aitrackdown --version
+atd --version  # alias command
+```
+
+**Why ai-trackdown-tools is Essential**:
+- **Subprocess Persistence**: Issues and PRs persist beyond individual process lifetimes
+- **Multi-Agent Coordination**: Enables coordinated work across subprocess boundaries
+- **Hierarchical Organization**: Epic → Issue → Task → PR lifecycle management
+- **Comprehensive Tracking**: Full issue and PR lifecycle with status management
+- **Configuration Optional**: Framework can operate with or without ai-trackdown-tools
 
 ### Dual Packaging Support
 
@@ -209,6 +246,22 @@ claude-multiagent-pm-service start
 
 ## 🚀 Quick Start
 
+### Dependency Installation
+
+```bash
+# Step 1: Install ai-trackdown-tools (required for persistent tracking)
+npm install -g @bobmatnyc/ai-trackdown-tools
+
+# Step 2: Verify ai-trackdown-tools installation
+aitrackdown --version
+atd status  # Check ai-trackdown-tools functionality
+
+# Step 3: Install Claude Multi-Agent PM Framework
+npm install -g claude-multiagent-pm
+# OR
+pip install claude-multiagent-pm
+```
+
 ### 🎯 CMPM Slash Commands
 
 #### Health Dashboard
@@ -244,7 +297,7 @@ claude-multiagent-pm-service start
 
 ### Zero-Configuration Memory Access
 ```python
-# Instant memory access - no configuration required
+# Instant memory access - minimal configuration required (OpenAI API key)
 from config.memory_config import create_claude_pm_memory
 
 # Automatic service discovery and connection
@@ -368,6 +421,7 @@ All projects in `/Users/masa/Projects/managed/` automatically have:
 1. **[Framework Overview](./docs/FRAMEWORK_OVERVIEW.md)** - Understanding the architecture
 2. **[Memory Integration Guide](./docs/CLAUDE_MULTIAGENT_PM_MEMORY_README.md)** - Memory setup and usage
 3. **[Deployment Guide](./docs/DEPLOYMENT_GUIDE.md)** - Installation and deployment
+4. **[Documentation Maintenance Guide](./docs/DOCUMENTATION_MAINTENANCE_GUIDE.md)** - Keep code & docs synchronized
 
 ### Framework Status Check
 ```bash
