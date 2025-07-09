@@ -60,7 +60,7 @@ class CMPMHealthMonitor:
             
             return {
                 "status": "healthy" if health_data.overall_status.value == "healthy" else "degraded",
-                "framework_version": "4.0.0",
+                "framework_version": "4.1.0",
                 "components": health_data.subsystems,
                 "response_time": health_data.response_time_ms,
                 "last_updated": datetime.now().isoformat()
@@ -258,7 +258,7 @@ class CMPMHealthMonitor:
         total_time = time.time() - self.start_time
         
         header = Panel(
-            Text(f"CMPM Health Dashboard v4.0.0\nSystem Reliability Score: {reliability_score}%\nResponse Time: {total_time:.2f}s", 
+            Text(f"CMPM Health Dashboard v4.1.0\nSystem Reliability Score: {reliability_score}%\nResponse Time: {total_time:.2f}s", 
                  justify="center", style="bold white"),
             title="🟢 Claude Multi-Agent PM Framework",
             border_style="green" if reliability_score >= 80 else "yellow" if reliability_score >= 60 else "red"
@@ -314,7 +314,7 @@ class CMPMHealthMonitor:
         
         # System summary
         summary_text = f"""
-🚀 **Framework Status**: Claude PM Framework v4.0.0 operational
+🚀 **Framework Status**: Claude PM Framework v4.1.0 operational
 📊 **Task Management**: {task_health.get('total_items', 0)} total items managed
 🧠 **Memory Integration**: mem0AI connectivity {'active' if memory_health.get('mem0ai_connected') else 'inactive'}
 ⚡ **Performance**: {total_time:.2f}s response time | {reliability_score}% reliability
@@ -403,7 +403,7 @@ class CMPMAgentMonitor:
         available_agents = sum(1 for status in all_agent_status if isinstance(status, dict) and status.get("status") == "available")
         
         header = Panel(
-            Text(f"CMPM Agents Dashboard v4.0.0\nTotal Agents: {total_agents} | Available: {available_agents}", 
+            Text(f"CMPM Agents Dashboard v4.1.0\nTotal Agents: {total_agents} | Available: {available_agents}", 
                  justify="center", style="bold white"),
             title="🤖 Claude Multi-Agent PM Framework - Agent Registry",
             border_style="cyan"

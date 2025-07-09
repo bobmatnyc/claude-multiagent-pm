@@ -44,7 +44,7 @@ def show_help():
   cmpm /cmpm:health --json
 
 [bold blue]Framework Info:[/bold blue]
-  Version: 4.0.0
+  Version: 4.1.0
   Integration: ai-trackdown-tools v3.0.0
   MCP Support: Active
     """
