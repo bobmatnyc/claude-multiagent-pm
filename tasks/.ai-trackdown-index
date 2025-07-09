@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-07-09T04:32:01.636Z",
+  "lastUpdated": "2025-07-09T13:51:38.611Z",
   "projectPath": "/Users/masa/Projects/claude-multiagent-pm",
   "epics": {
     "undefined": {
@@ -333,6 +333,22 @@
         "ISS-0048",
         "ISS-0049",
         "ISS-0050"
+      ],
+      "completion_percentage": 0
+    },
+    "EP-0032": {
+      "id": "EP-0032",
+      "title": "CMPM Dashboard Slash Command & NPM Publishing",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0032-cmpm-dashboard-slash-command-npm-publishing.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-09T13:51:38.605Z",
+      "fileSize": 1870,
+      "assignee": "masa",
+      "issueIds": [
+        "ISS-0051",
+        "ISS-0052",
+        "ISS-0053"
       ],
       "completion_percentage": 0
     }
@@ -802,19 +818,64 @@
       "prIds": [],
       "blocked_by": [],
       "blocks": []
+    },
+    "ISS-0051": {
+      "id": "ISS-0051",
+      "title": "Implement /cmpm-dashboard slash command with headless browser launch",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0051-implement-cmpm-dashboard-slash-command-with-headless-browser-launch.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-09T13:51:23.248Z",
+      "fileSize": 791,
+      "assignee": "masa",
+      "epicId": "EP-0032",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0052": {
+      "id": "ISS-0052",
+      "title": "Publish claude-pm-portfolio-manager as @bobmatnyc/claude-pm-portfolio-manager NPM package",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0052-publish-claude-pm-portfolio-manager-as-bobmatnyc-claude-pm-portfolio-manager-npm-package.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-09T13:51:29.868Z",
+      "fileSize": 833,
+      "assignee": "masa",
+      "epicId": "EP-0032",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0053": {
+      "id": "ISS-0053",
+      "title": "Add claude-pm-portfolio-manager as framework dependency",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0053-add-claude-pm-portfolio-manager-as-framework-dependency.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-09T13:51:38.602Z",
+      "fileSize": 767,
+      "assignee": "masa",
+      "epicId": "EP-0032",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
     }
   },
   "tasks": {},
   "prs": {},
   "stats": {
-    "totalEpics": 24,
-    "totalIssues": 31,
+    "totalEpics": 25,
+    "totalIssues": 34,
     "totalTasks": 0,
     "totalPRs": 0,
     "lastFullScan": "2025-07-08T23:16:20.732Z",
-    "indexSize": 27303,
+    "indexSize": 29503,
     "performanceMetrics": {
-      "lastLoadTime": 2,
+      "lastLoadTime": 1,
       "lastUpdateTime": 2,
       "lastRebuildTime": 4
     }
