@@ -122,6 +122,71 @@ claude-multiagent-pm/
 - **Continuous Learning**: Pattern recognition and success analysis
 - **Cross-Project Memory**: Shared knowledge across 12+ managed projects
 
+## 📦 Installation & Distribution
+
+### Dual Packaging Support
+
+The Claude Multi-Agent PM Framework supports both NPM and Python packaging for maximum deployment flexibility:
+
+#### NPM Installation (Recommended for CLI usage)
+```bash
+# Global installation - provides claude-pm CLI
+npm install -g claude-multiagent-pm
+
+# Verify installation
+claude-pm --version
+
+# Quick health check
+claude-pm status
+```
+
+#### Python Installation (Recommended for development)
+```bash
+# Standard installation
+pip install claude-multiagent-pm
+
+# Development installation with all features
+pip install claude-multiagent-pm[all]
+
+# Verify installation
+claude-multiagent-pm --version
+
+# Service management
+claude-multiagent-pm-service start
+```
+
+#### Package Manager Comparison
+
+| Feature | NPM Package | Python Package |
+|---------|-------------|----------------|
+| **Primary Use Case** | CLI operations, deployment automation | Development, library integration |
+| **Installation** | `npm install -g claude-multiagent-pm` | `pip install claude-multiagent-pm` |
+| **CLI Command** | `claude-pm` | `claude-multiagent-pm` |
+| **Platform Support** | Cross-platform (Node.js >=16.0.0) | Cross-platform (Python >=3.9) |
+| **Service Management** | Via npm scripts | Via Python CLI tools |
+| **Development Mode** | `npm run dev` | `pip install -e .` |
+| **Dependencies** | Node.js ecosystem | Python ecosystem |
+
+#### Environment Requirements
+
+**NPM Package**:
+- Node.js >=16.0.0
+- Cross-platform: Darwin, Linux, Windows
+- Architecture: x64, ARM64
+
+**Python Package**:
+- Python >=3.9 (supports 3.9-3.12)
+- Operating System: OS Independent
+- Optional dependencies for AI features
+
+#### Why Dual Packaging?
+
+1. **Team Flexibility**: Choose your preferred package ecosystem
+2. **Use Case Optimization**: NPM for operations, Python for development
+3. **CI/CD Integration**: Both package managers supported
+4. **Enterprise Deployment**: Multiple distribution vectors
+5. **Developer Experience**: Use familiar tools and workflows
+
 ## 🚀 Quick Start
 
 ### Zero-Configuration Memory Access
@@ -196,6 +261,21 @@ All projects in `/Users/masa/Projects/managed/` automatically have:
 
 ## 📊 Current Status & Metrics
 
+### Recent Developments (July 2025)
+
+#### TSK-0001 Completion - Ticket Data Migration
+- **Migration Status**: ✅ COMPLETED - All ticket data successfully migrated to ai-trackdown-tools
+- **Infrastructure**: MCP infrastructure restored and operational
+- **CLI Integration**: ai-trackdown-tools CLI fixes implemented
+- **Deployment**: Framework deployed to ~/Clients with portable configuration
+- **Ticket System**: 11 epics, 6 issues, 2 tasks operational
+
+#### Infrastructure Improvements
+- **Health Monitoring**: Real-time framework health monitoring system
+- **Deployment Automation**: Portable deployment system for client environments
+- **Multi-Agent Coordination**: Enhanced subprocess coordination protocols
+- **Memory Integration**: Stable mem0AI integration with zero-configuration access
+
 ### Architecture Status - Pure Delegation Model Complete
 - **100% Complete**: All core architecture story points delivered
 - **Memory Integration**: MEM-001 through MEM-006 completed
@@ -237,14 +317,23 @@ All projects in `/Users/masa/Projects/managed/` automatically have:
 
 ### Framework Status Check
 ```bash
+# Comprehensive health check (NPM installation)
+claude-pm health
+
+# Comprehensive health check (Python installation)
+claude-multiagent-pm-health
+
+# Basic health check script
+./scripts/health-check.sh
+
 # Verify Memory Service
 curl http://localhost:8002/health
 
-# Check Current Status  
-cat /Users/masa/Projects/claude-multiagent-pm/trackdown/CURRENT-STATUS.md
+# AI-trackdown tools status
+./bin/aitrackdown status
 
-# Review architecture status (complete)
-grep -A20 "Architecture Status" /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md
+# Check framework components
+python3 -c "import claude_pm; print('✓ Framework core accessible')"
 ```
 
 ### Zero-Configuration Memory Access
