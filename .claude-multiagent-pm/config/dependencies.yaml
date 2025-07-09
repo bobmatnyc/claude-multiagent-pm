@@ -1,10 +1,10 @@
 checked_by: system-init-agent
-last_checked: '2025-07-09 14:05:56'
+last_checked: '2025-07-09 16:00:29'
 status:
   ai_trackdown_tools:
     details: CLI available (local)
     status: "\u2705 INSTALLED"
-    version: 1.0.1+build.1
+    version: 1.0.1
   claude_pm_portfolio_manager:
     details: NPM package not found
     status: "\u274C MISSING"
@@ -12,7 +12,7 @@ status:
   framework_core:
     details: Framework at /Users/masa/Projects/claude-multiagent-pm
     status: "\u2705 INSTALLED"
-    version: "4.3.0\n\n## v4.3.0 Release Notes (2025-07-09)\n\n### Major Framework\
+    version: "4.4.0\n\n## v4.4.0 Release Notes (2025-07-09)\n\n### Major Framework\
       \ Enhancement - Multi-Project Orchestrator Pattern\n\n#### New /cmpm-init Command\
       \ System\n- **`/cmpm-init` Command** - Comprehensive framework initialization\
       \ with setup, verify, and force options\n- **Multi-Project Orchestration** -\

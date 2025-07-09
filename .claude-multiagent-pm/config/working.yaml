@@ -1,6 +1,6 @@
 claude-multiagent-pm:
   framework_location: /Users/masa/Projects/claude-multiagent-pm
-  initialized_at: '2025-07-09 14:05:53'
+  initialized_at: '2025-07-09 16:00:27'
   is_project_specific: false
   mode: working-directory
   project_directory: /Users/masa/Projects/claude-multiagent-pm
@@ -13,5 +13,5 @@ logging:
   rotate_logs: true
 session:
   auto_save: true
-  session_id: working-1752084353
+  session_id: working-1752091227
   session_path: ./sessions

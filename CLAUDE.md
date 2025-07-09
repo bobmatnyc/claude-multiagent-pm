@@ -365,6 +365,34 @@ python ~/.claude/commands/cmpm-bridge.py cmcp-init --show-index
 - **System Init Agent**: Use for framework initialization and directory setup
 - **Auto-delegation**: Automatically delegate to System Init Agent if .claude-multiagent-pm missing
 
+## 🚨 MANDATORY: CONTEXT 7 RESEARCH AGENT DELEGATION
+
+**WHEN CONTEXT 7 IS DETECTED (INSTALLED), ALL RESEARCH AGENT DELEGATIONS MUST INCLUDE CONTEXT 7 INSTRUCTIONS:**
+
+### Context 7 Detection Protocol
+```bash
+# Verify Context 7 availability
+claude mcp list | grep context7
+```
+
+### Research Agent Delegation Requirements
+**If Context 7 is detected as available, ALWAYS include these instructions when delegating to Research Agents:**
+
+**"IMPORTANT: Context 7 is available - use Context 7 tools for current library documentation:**
+- **Use `resolve-library-id`** to convert library names to Context7-compatible IDs
+- **Use `get-library-docs`** to fetch current, up-to-date documentation
+- **Prioritize Context 7 documentation** over potentially outdated training data
+- **Include Context 7 findings** in your research deliverables"
+
+### Required Context 7 Integration Examples
+- **Library Research**: "Research React 18 features. Use Context 7 for current API references."
+- **API Documentation**: "Document TypeScript utilities. Use Context 7 for up-to-date type definitions."
+- **Best Practices**: "Evaluate Next.js patterns. Use Context 7 for latest documentation."
+- **Troubleshooting**: "Analyze build errors. Use Context 7 for current configuration examples."
+
+### Framework Authority
+Research agents MUST leverage Context 7 when available to ensure current, accurate documentation rather than potentially outdated information from training data.
+
 ## 🎯 SYSTEMATIC AGENT DELEGATION
 
 **CRITICAL**: All task delegation MUST follow the systematic framework outlined in:
@@ -377,7 +405,7 @@ python ~/.claude/commands/cmpm-bridge.py cmcp-init --show-index
 - **"test"** → QA Agent (testing coordination, hierarchy validation)
 - **"security"** → Security Agent (security analysis, agent precedence validation)
 - **"performance"** → Performance Agent (optimization, cross-project performance)
-- **"document"** → Research Agent (documentation, agent hierarchy docs)
+- **"document"** → Research Agent (documentation, agent hierarchy docs) **+ Context 7 for current library docs**
 - **"architecture"** → Architect Agent (system design, three-tier architecture)
 
 ### Agent Hierarchy Delegation Rules
