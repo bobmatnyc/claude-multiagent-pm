@@ -1,43 +1,104 @@
-# Claude Multi-Agent PM Framework Ticketing System v4.0.0
+# Claude Multi-Agent PM Framework Ticketing System v4.2.2
 
 ## Overview
-The Claude PM Framework uses a sophisticated progressive documentation system with 0 tickets for managing the Claude Max + mem0AI + LangGraph dual integration project. This document reflects the current system status with 0% overall completion (0/0 tickets), featuring completed zero-configuration memory integration and advanced workflow orchestration.
+The Claude PM Framework uses ai-trackdown-tools CLI for comprehensive project management with hierarchical ticket organization. This document provides complete documentation for CLI-based ticket management in the Claude Max + mem0AI enhancement project.
 
-**Documentation Status**: ⚠️ 353 validation issues found
-**Last Updated**: 2025-07-09 09:29:40
-**Phase 1 Completion**: 0%
-**Total Story Points**: 0/0
-**Links Validated**: 29 links checked across 33 files
+**AI-Trackdown-Tools Integration**: ✅ ACTIVE
+**CLI Version**: 1.0.1+build.1
+**Framework Version**: 4.2.2
+**Last Updated**: 2025-07-09
+**Package**: @bobmatnyc/ai-trackdown-tools
+**Documentation Status**: Updated for CLI usage
 
 
-## Ticketing Structure
+## AI-Trackdown-Tools CLI Integration
+
+### Hierarchical Ticket Structure
+The framework uses ai-trackdown-tools CLI for hierarchical ticket management:
+
+```
+Epics → Issues → Tasks → PRs (Pull Requests)
+```
+
+### CLI Commands Reference
+
+#### Core Commands
+- **`aitrackdown`** - Main CLI command
+- **`atd`** - Alias for aitrackdown (shorter command)
+- **`./bin/aitrackdown`** - Framework-specific CLI wrapper
+- **`./bin/atd`** - Framework-specific CLI alias
+
+#### Epic Management
+```bash
+# Create new epic
+aitrackdown epic create "User Authentication System"
+
+# List epics with progress
+aitrackdown epic list --status active --show-progress
+atd epic list --status todo,in-progress --show-progress
+
+# Show epic details with issues
+aitrackdown epic show EP-0001 --with-issues
+
+# Complete epic
+aitrackdown epic complete EP-0001 --actual-tokens 1500
+```
+
+#### Issue Management
+```bash
+# Create issue within epic
+aitrackdown issue create "Implement login form" --epic EP-0001
+
+# List issues by epic and status
+aitrackdown issue list --epic EP-0001 --status active
+atd issue list --priority high --status todo,in-progress
+
+# Complete issue
+aitrackdown issue complete ISS-0001 --actual-tokens 500
+
+# Assign issue
+aitrackdown issue assign ISS-0001 --assignee john
+```
+
+#### Task Management
+```bash
+# Create task within issue
+aitrackdown task create "Create login UI" --issue ISS-0001
+
+# List tasks
+aitrackdown task list --issue ISS-0001 --assignee john
+
+# Complete task
+aitrackdown task complete TSK-0001 --time-spent 2h
+
+# Update task status
+aitrackdown task update TSK-0001 --status active
+```
+
+#### PR Management
+```bash
+# Create PR for issue
+aitrackdown pr create "Add login functionality" --issue ISS-0001
+
+# List PRs by status
+aitrackdown pr list --status open --assignee john
+
+# Merge PR
+aitrackdown pr merge PR-0001 --delete-branch
+
+# Review PR
+aitrackdown pr review PR-0001 --approve --comment "LGTM"
+```
 
 ### Ticket ID Format
-All tickets follow specific naming conventions:
+All tickets follow ai-trackdown-tools naming conventions:
 
 ```
-[PREFIX]-[NUMBER]: [Title]
+EP-XXXX: Epic Title
+ISS-XXXX: Issue Title
+TSK-XXXX: Task Title
+PR-XXXX: Pull Request Title
 ```
-
-### Ticket Prefixes
-
-#### Milestone Tasks (Core Project Work)
-- **M01-XXX**: Foundation phase tickets (infrastructure, basic setup)
-- **M02-XXX**: Automation phase tickets (workflow systems, multi-agent coordination) 
-- **M03-XXX**: Orchestration phase tickets (advanced systems, optimization)
-
-#### Framework Epic Tasks (Cross-Project)
-- **FEP-XXX**: Framework Epic tickets spanning multiple milestones
-- **CPT-XXX**: Cross-Project Tasks affecting multiple managed projects
-- **INT-XXX**: Integration Tasks for service mesh and API connections
-- **INF-XXX**: Infrastructure Tasks for deployment, monitoring, security
-
-#### Memory Enhancement Tasks (Claude Max + mem0AI) ✅ COMPLETED
-- **MEM-001 through MEM-006**: Core memory integration tickets (All completed)
-
-#### Task Delegation Architecture ✅ COMPLETED
-- **TSK-001 through TSK-003**: Core subprocess delegation (Completed)
-- **Architecture Status**: Pure delegation model operational
 
 ### Priority Levels
 - **CRITICAL**: Must be completed for system to function
@@ -45,173 +106,299 @@ All tickets follow specific naming conventions:
 - **MEDIUM**: Standard feature development
 - **LOW**: Nice-to-have enhancements
 
-## Phase 1 Complete: All Foundation Tickets (42 Total) - 100% Complete
+## Current Project Structure
 
-### Phase 1: Dual Foundation (MEM + LGR Tickets) ✅ COMPLETED
-#### Memory Integration (6 tickets, 52 story points) ✅ COMPLETED
-1. **MEM-001**: Core mem0AI Integration Setup (8 points)   (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07) ✅ COMPLETED
-   - Zero-configuration memory service with factory functions
-   - Universal memory access across all Claude instances
-   - Status: `/Users/masa/Projects/claude-multiagent-pm/trackdown/MEM-001-STATUS.md`
+### Active Tickets (AI-Trackdown-Tools Format)
+The framework currently manages tickets using ai-trackdown-tools CLI with the following structure:
 
-2. **MEM-002**: Memory Schema Design and Implementation (5 points)   (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07) ✅ COMPLETED
-   - Enterprise JSON schemas for 4 memory categories
-   - Schema validation and migration system
-   - Status: `/Users/masa/Projects/claude-multiagent-pm/trackdown/MEM-002-STATUS.md`
-
-3. **MEM-003**: Enhanced Multi-Agent Architecture (13 points)   (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07) ✅ COMPLETED
-   - 11-agent ecosystem with memory-augmented intelligence
-   - Git worktree isolation and parallel execution
-   - Status: `/Users/masa/Projects/claude-multiagent-pm/trackdown/MEM-003-STATUS.md`
-
-4. **MEM-004**: Memory-Driven Context Management (8 points)   (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07) ✅ COMPLETED
-   - Advanced Mem0ContextManager with role-specific retrieval
-   - Pattern recognition and context filtering
-   - Status: `/Users/masa/Projects/claude-multiagent-pm/trackdown/MEM-004-STATUS.md`
-
-5. **MEM-005**: Intelligent Task Decomposition (8 points)   (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07) ✅ COMPLETED
-   - Memory-driven task planning and execution
-   - Intelligent workflow selection system
-   - Status: `/Users/masa/Projects/claude-multiagent-pm/trackdown/MEM-005-STATUS.md`
-
-6. **MEM-006**: Continuous Learning Engine (10 points)   (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07)  (2025-07-07) ✅ COMPLETED
-   - Pattern recognition and success analysis
-   - Team knowledge amplification system
-   - Status: `/Users/masa/Projects/claude-multiagent-pm/trackdown/MEM-006-STATUS.md`
-
-### Task Delegation Architecture Tickets (TSK-001 through TSK-003) ✅ COMPLETED
-- **TSK-001**: Task Tool Subprocess Infrastructure Setup ✅ COMPLETED (2025-07-07)
-- **TSK-002**: Agent Coordination Protocols ✅ COMPLETED (2025-07-07)
-- **TSK-003**: Subprocess Resource Management ✅ COMPLETED (2025-07-07)
-
-### Future Enhancement Targets (Post Phase 1)
-- **Advanced Delegation**: Enhanced subprocess coordination patterns
-- **Performance Optimization**: Advanced resource management and load balancing
-- **Enterprise Features**: Scalability and monitoring enhancements
-
-### Current Implementation Status
-- **Framework Version**: 4.0.0 (Pure Subprocess Delegation)
-- **Memory Service**: localhost:8002 with automatic service discovery
-- **Agent Ecosystem**: 11 specialized agents with memory integration
-- **Delegation Architecture**: Task tool subprocess coordination operational
-- **Managed Projects**: 12+ projects with universal memory access
-- **Production Validation**: Tested across diverse architectures  
-- **M02-012**: Parallel Agent Execution Framework  ✅ COMPLETED
-- **M02-013**: Memory-Augmented Agent Capabilities ✅ COMPLETED (2025-07-07)
-- **M02-014**: Intelligent Workflow Selection System ✅ COMPLETED (2025-07-07)
-
-### M03 Orchestration Tickets (6 new tickets)
-- **M03-007**: Continuous Learning Engine Implementation
-- **M03-008**: Pattern Recognition and Success Analysis
-- **M03-009**: Team Knowledge Amplification System
-- **M03-010**: Memory-Seeded Project Templates
-- **M03-011**: Advanced Memory Analytics and Insights
-- **M03-012**: Performance Optimization with Memory Metrics
-
-### Framework Epic Tickets (4 new)
-- **FEP-007**: Claude Max + mem0AI Enhanced Architecture        ✅ COMPLETED
-- **FEP-008**: Memory-Augmented Agent Ecosystem          ✅ COMPLETED
-- **FEP-009**: Intelligent Task Decomposition System        ✅ COMPLETED
-- **FEP-010**: Continuous Learning Engine        ✅ COMPLETED
-
-### Integration Tickets (5 new)
-- **INT-006**: mem0AI Service Integration and Configuration        ✅ COMPLETED
-- **INT-007**: Claude Max API Integration and Token Management        ✅ COMPLETED
-- **INT-008**: Memory Schema Design and Implementation        ✅ COMPLETED
-- **INT-009**: Agent Context Preparation System        ✅ COMPLETED
-- **INT-010**: Parallel Agent Coordination Protocol        ✅ COMPLETED
-
-### Infrastructure Tickets (5 new)
-- **INF-006**: Memory Storage and Retrieval Optimization
-- **INF-007**: Memory Hygiene and Retention Policies
-- **INF-008**: Agent Isolation Infrastructure (Git Worktrees)
-- **INF-009**: Memory Analytics and Monitoring Dashboard
-- **INF-010**: Backup and Recovery for Memory Systems
-
-## Key Files to Reference
-
-### Primary Documentation
-- `/Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md` - Complete ticket backlog
-- `/Users/masa/Projects/claude-multiagent-pm/docs/design/claude-pm-max-mem0.md` - Technical design document
-- `/Users/masa/Projects/claude-multiagent-pm/trackdown/MILESTONES.md` - Milestone organization
-
-### Project Structure
-- `/Users/masa/Projects/claude-multiagent-pm/trackdown/` - All ticketing and project management
-- `/Users/masa/Projects/claude-multiagent-pm/framework/` - Core framework implementation
-- `/Users/masa/Projects/managed/` - Individual managed projects
-
-## Implementation Strategy
-
-### Phase 1 Complete
-All foundation tickets completed (52 story points total):
-1. ✅ Core mem0AI integration with zero-configuration access
-2. ✅ Memory schema for projects, patterns, teams, and errors  
-3. ✅ 11-agent ecosystem with memory augmentation
-4. ✅ Parallel execution framework (max 5 concurrent agents)
-5. ✅ Intelligent task decomposition using memory patterns
-6. ✅ Continuous learning engine for pattern recognition
-7. ✅ Pure subprocess delegation architecture via Task tool
-
-### Architecture Status
-- ✅ mem0ai service operational on port 8002
-- ✅ Universal memory access across all Claude instances
-- ✅ Git worktree infrastructure for agent isolation
-- ✅ Task tool subprocess delegation architecture
-- ✅ 11-agent ecosystem with memory integration
-
-## Working with the Ticketing System
-
-### IMPORTANT: "Backlog" vs "Todo List"
-When users ask about the "backlog", they mean the **Claude PM Framework backlog** located at:
-```
-/Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md
+#### Active Epics (EP-XXXX)
+```bash
+# View active epics
+aitrackdown epic list --status active --show-progress
 ```
 
-This is NOT the same as Claude Code's todo list tool. The framework backlog contains 42 tickets for the Claude Max + mem0AI enhancement project (Phase 1 complete).
+Sample active epics:
+- **EP-0032**: CMPM Dashboard/Command NPM Publishing
+- **EP-0030**: Remove Memory Dependencies from ai-trackdown-tools
+- **EP-0029**: Multi-Agent Coordination Demo
+- **EP-0026**: Memory System Security Audit Enhancement
+- **EP-0016**: Core Framework Development
+
+#### Active Issues (ISS-XXXX)
+```bash
+# View active issues
+aitrackdown issue list --status active --priority high
+```
+
+Sample active issues:
+- **ISS-0053**: Add claude-pm-portfolio-manager as framework dependency
+- **ISS-0052**: Publish claude-pm-portfolio-manager as npm package
+- **ISS-0051**: Implement CMPM dashboard command with headless browser
+- **ISS-0049**: Delegate root directory cleanup to code cleanup agent
+- **ISS-0047**: Implement CMPM agents command for active agent registry
+
+#### Active Tasks (TSK-XXXX)
+```bash
+# View active tasks
+aitrackdown task list --status active
+```
+
+Sample active tasks:
+- **TSK-0014**: Design dashboard layout
+- **TSK-0013**: Set up JWT token generation
+- **TSK-0012**: Test task
+- **TSK-0011**: Update health monitoring config paths
+
+### Legacy Ticket References
+The framework has completed foundational work previously tracked under legacy ticket prefixes:
+
+#### Completed Foundation Work
+- **Memory Integration**: Core mem0AI integration completed
+- **Multi-Agent Architecture**: 11-agent ecosystem operational
+- **Task Delegation**: Subprocess coordination architecture complete
+- **Framework Core**: Base PM framework functionality complete
+
+#### Current Implementation Status
+- **Framework Version**: 4.2.2
+- **AI-Trackdown-Tools**: 1.0.1+build.1
+- **Memory Service**: Integrated with mem0AI
+- **Agent Ecosystem**: Multi-agent coordination operational
+- **CLI Management**: Full ai-trackdown-tools integration
+- **Deployment**: Universal deployment package available
+
+## Key Files and Directories
+
+### CLI-Based Ticket Management
+- **Tasks Directory**: `/Users/masa/Projects/claude-multiagent-pm/tasks/`
+  - `epics/` - Strategic epics (EP-XXXX)
+  - `issues/` - Implementation issues (ISS-XXXX)
+  - `tasks/` - Development tasks (TSK-XXXX)
+  - `prs/` - Pull requests (PR-XXXX)
+  - `templates/` - Standard templates
+
+### Framework Configuration
+- **Deployment Config**: `/Users/masa/Projects/claude-multiagent-pm/.claude-pm/config.json`
+- **CLI Wrappers**: `/Users/masa/Projects/claude-multiagent-pm/bin/aitrackdown`
+- **Health Checks**: `/Users/masa/Projects/claude-multiagent-pm/scripts/health-check.sh`
+- **Package Config**: `/Users/masa/Projects/claude-multiagent-pm/package.json`
+
+### Documentation
+- **This Document**: `/Users/masa/Projects/claude-multiagent-pm/docs/TICKETING_SYSTEM.md`
+- **Framework Config**: `/Users/masa/Projects/claude-multiagent-pm/CLAUDE.md`
+- **Design Documents**: `/Users/masa/Projects/claude-multiagent-pm/docs/design/`
+
+### Core Framework Structure
+```
+/Users/masa/Projects/claude-multiagent-pm/
+├── claude_pm/          # Framework core
+├── tasks/              # AI-trackdown-tools managed tickets
+├── bin/               # CLI wrappers (aitrackdown, atd)
+├── scripts/           # Health checks and utilities
+├── .claude-pm/        # Deployment configuration
+├── requirements/      # Python dependencies
+├── docs/             # Documentation
+└── package.json      # NPM package configuration
+```
+
+## Current Architecture Status
+
+### Framework Capabilities
+- ✅ AI-trackdown-tools CLI integration
+- ✅ Hierarchical ticket management (Epics → Issues → Tasks → PRs)
+- ✅ Multi-agent coordination system
+- ✅ Memory-augmented project management
+- ✅ Universal deployment package
+- ✅ Health monitoring and validation
+- ✅ GitHub Issues synchronization
+- ✅ Token tracking and analytics
+
+### Integration Status
+- ✅ @bobmatnyc/ai-trackdown-tools package integration
+- ✅ CLI command aliases (aitrackdown/atd)
+- ✅ Framework-specific CLI wrappers
+- ✅ Deployment configuration management
+- ✅ Health check automation
+- ✅ Portfolio management capabilities
+
+## Working with AI-Trackdown-Tools CLI
+
+### CRITICAL: CLI-Only Ticket Operations
+All ticket operations MUST use ai-trackdown-tools CLI - manual file creation is DEPRECATED.
+
+**REQUIRED CLI USAGE:**
+- **Epic Creation**: `aitrackdown epic create --title "Epic Title" --description "Description"`
+- **Issue Creation**: `aitrackdown issue create --title "Issue Title" --epic "EP-001"`
+- **Task Creation**: `aitrackdown task create --title "Task Title" --issue "ISS-001"`
+- **Status Updates**: `aitrackdown status` or `atd status --summary`
+- **Ticket Completion**: `aitrackdown issue complete ISS-001`
+
+**DEPRECATED - DO NOT USE:**
+- Manual tasks/ directory creation
+- Manual markdown file creation
+- Direct file system ticket management
+
+### Framework Backlog Location
+The ai-trackdown-tools manages tickets in the hierarchical structure:
+```
+/Users/masa/Projects/claude-multiagent-pm/tasks/
+├── epics/          # Strategic epics (EP-XXXX)
+├── issues/         # Implementation issues (ISS-XXXX)
+├── tasks/          # Development tasks (TSK-XXXX)
+├── prs/            # Pull requests (PR-XXXX)
+└── templates/      # Standard templates
+```
 
 ### For AI Assistants
-1. **Always check BACKLOG.md first** - Contains complete current state
-2. **Reference ticket IDs correctly** - Use exact format [PREFIX-NUMBER]  
-3. **Update ticket status** - Track progress through completion
-4. **Link related tickets** - Many tickets have dependencies
-5. **Follow priority order** - CRITICAL tickets must be completed first
+1. **Use CLI commands only** - Never create manual ticket files
+2. **Reference correct ticket IDs** - Use ai-trackdown-tools format (EP-XXXX, ISS-XXXX, etc.)
+3. **Update via CLI** - All status updates through aitrackdown commands
+4. **Check dependencies** - Use `aitrackdown epic show EP-XXXX --with-issues`
+5. **Follow CLI workflow** - Create epics → issues → tasks → PRs
 
-### Quick Commands for Backlog Review
+### Quick CLI Commands for Status Review
 ```bash
-# View current sprint status
-grep -A20 "## 🎯 Current Sprint" /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md
+# View comprehensive project status
+aitrackdown status --verbose
+atd status --summary
 
-# View priority tickets (Phase 1)
-grep -A50 "## 🚀 Priority Implementation Tickets" /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md
+# View current sprint progress
+aitrackdown status --current-sprint
 
-# View all MEM tickets
-grep "MEM-" /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md
+# List active epics with progress
+aitrackdown epic list --status active --show-progress
+
+# List high priority issues
+aitrackdown issue list --priority high --status todo,in-progress
+
+# View project backlog
+aitrackdown backlog --with-issues
 ```
 
-### Ticket Status Tracking
-- **[ ]** Pending/Not Started
-- **[x]** Completed 
-- **🔄** In Progress (use when actively working)
-- **🚫** Blocked (with blocker explanation)
+### CLI Status Tracking
+- **todo**: Pending/Not Started
+- **in-progress**: Currently being worked on
+- **blocked**: Blocked (with blocker explanation)
+- **done**: Completed
 
-### Story Points System
-- 1-3 points: Simple tasks (few hours)
-- 5-8 points: Standard tasks (1-2 days) 
-- 10-13 points: Complex tasks (3-5 days)
-- 20+ points: Epic tasks (break down further)
+### Token and Time Tracking
+- **Estimated Tokens**: Set during creation
+- **Actual Tokens**: Recorded at completion
+- **Time Spent**: Tracked per task
+- **Progress Analytics**: Built-in reporting
 
-## Integration with mem0AI Enhancement
+## AI-Trackdown-Tools vs Legacy System
 
-The ticketing system incorporates memory-driven development with pure subprocess delegation where:
-- Past successful task decompositions inform new subprocess patterns
-- Memory patterns guide delegation strategy selection
-- Continuous learning improves task coordination
-- Cross-project knowledge amplifies team effectiveness
-- Pure delegation model eliminates workflow complexity
+### Migration Complete
+The framework has fully migrated from legacy manual ticket management to ai-trackdown-tools CLI:
 
-This transforms Claude PM into an **intelligent learning system** with clean subprocess coordination that improves with every completed ticket.
+#### Before (Legacy)
+```bash
+# Manual file creation (DEPRECATED)
+touch /path/to/ticket.md
+echo "# Ticket Title" > ticket.md
+```
 
-## Repository Location
-https://github.com/bobmatnyc/claude-pm
+#### After (Current)
+```bash
+# CLI-based ticket management
+aitrackdown epic create "Epic Title" --description "Epic description"
+aitrackdown issue create "Issue Title" --epic EP-0001
+aitrackdown task create "Task Title" --issue ISS-0001
+```
 
-All 42 Phase 1 tickets have been completed and the foundation architecture is operational.
+### Key Differences
+1. **Hierarchical Structure**: Epics → Issues → Tasks → PRs
+2. **Automated ID Generation**: EP-XXXX, ISS-XXXX, TSK-XXXX, PR-XXXX
+3. **Built-in Analytics**: Token tracking, time estimation, progress reporting
+4. **GitHub Integration**: Bidirectional sync with GitHub Issues
+5. **CLI Consistency**: Standardized commands across all operations
+6. **Template System**: Automated template generation
+7. **Relationship Management**: Automatic parent-child ticket relationships
+
+### Benefits of AI-Trackdown-Tools
+- **Consistency**: Standardized ticket format across all projects
+- **Automation**: Reduced manual work for ticket creation and management
+- **Analytics**: Built-in reporting and progress tracking
+- **Integration**: GitHub Issues sync and external system integration
+- **Scalability**: Portfolio management across multiple projects
+- **AI Features**: Token tracking, context management, pattern recognition
+
+## AI-Trackdown-Tools Package Integration
+
+### Package Information
+- **Package**: @bobmatnyc/ai-trackdown-tools
+- **Version**: 1.0.1+build.1
+- **Installation**: Local development link via npm
+- **Repository**: https://github.com/bobmatnyc/ai-trackdown-tools
+
+### Framework Integration
+- **CLI Wrappers**: `./bin/aitrackdown` and `./bin/atd`
+- **Package Dependency**: File-based local package link
+- **Configuration**: `.claude-pm/config.json`
+- **Health Checks**: `./scripts/health-check.sh`
+
+### Advanced CLI Features
+
+#### AI-Specific Commands
+```bash
+# Token tracking and reporting
+aitrackdown ai track-tokens --report
+
+# Generate LLM context files
+aitrackdown ai generate-llms-txt --format detailed
+
+# Add context to tickets
+aitrackdown ai context --item-id EP-0001 --add "context/requirements"
+```
+
+#### GitHub Integration
+```bash
+# Setup GitHub sync
+aitrackdown sync setup --repository owner/repo --token ghp_xxx
+
+# Push tickets to GitHub Issues
+aitrackdown sync push --verbose
+
+# Pull GitHub Issues to local tickets
+aitrackdown sync pull --dry-run
+
+# Bidirectional sync
+aitrackdown sync bidirectional
+```
+
+#### Portfolio Management
+```bash
+# Portfolio-wide status across multiple projects
+aitrackdown portfolio --health
+
+# Export project data
+aitrackdown export --format json
+
+# Work with any project from anywhere
+aitrackdown status --project-dir ~/Projects/managed/other-project
+```
+
+### Migration from Legacy Systems
+```bash
+# Migrate from old trackdown structure
+aitrackdown migrate --dry-run --verbose
+aitrackdown migrate --backup
+
+# Migrate directory structure
+aitrackdown migrate-structure --dry-run
+```
+
+### Framework Memory Enhancement
+The ai-trackdown-tools CLI integrates with the Claude PM Framework's memory system:
+- Token usage tracking and optimization
+- Pattern recognition for successful task decomposition
+- Cross-project knowledge sharing
+- Intelligent context management
+- Continuous learning from ticket completion patterns
+
+## Repository Locations
+- **Claude PM Framework**: https://github.com/bobmatnyc/claude-multiagent-pm
+- **AI-Trackdown-Tools**: https://github.com/bobmatnyc/ai-trackdown-tools
+
+## Framework Status
+The Claude PM Framework uses ai-trackdown-tools CLI for all ticket management operations, providing hierarchical project organization with advanced analytics and AI-driven insights.
