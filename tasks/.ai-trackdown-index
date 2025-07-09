@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-07-09T03:20:53.454Z",
+  "lastUpdated": "2025-07-09T03:37:14.414Z",
   "projectPath": "/Users/masa/Projects/claude-multiagent-pm",
   "epics": {
     "undefined": {
@@ -111,12 +111,13 @@
       "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0005-multi-agent-architecture.md",
       "status": "completed",
       "priority": "high",
-      "lastModified": "2025-07-09T03:08:03.449Z",
-      "fileSize": 1426,
+      "lastModified": "2025-07-09T03:37:14.408Z",
+      "fileSize": 1439,
       "assignee": "masa",
       "issueIds": [
         "ISS-0023",
-        "ISS-0039"
+        "ISS-0039",
+        "ISS-0047"
       ],
       "completion_percentage": 100
     },
@@ -302,6 +303,20 @@
         "ISS-0043",
         "ISS-0044",
         "ISS-0045"
+      ],
+      "completion_percentage": 0
+    },
+    "EP-0006": {
+      "id": "EP-0006",
+      "title": "Tracking & Monitoring",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0006-tracking-monitoring.md",
+      "status": "active",
+      "priority": "high",
+      "lastModified": "2025-07-09T03:37:13.448Z",
+      "fileSize": 1376,
+      "assignee": "masa",
+      "issueIds": [
+        "ISS-0046"
       ],
       "completion_percentage": 0
     }
@@ -696,20 +711,50 @@
       "prIds": [],
       "blocked_by": [],
       "blocks": []
+    },
+    "ISS-0046": {
+      "id": "ISS-0046",
+      "title": "Implement /cmpm:health slash command - Comprehensive system health dashboard",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0046-implement-cmpm-health-slash-command-comprehensive-system-health-dashboard.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-09T03:37:13.445Z",
+      "fileSize": 809,
+      "assignee": "masa",
+      "epicId": "EP-0006",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0047": {
+      "id": "ISS-0047",
+      "title": "Implement /cmpm:agents slash command - Active agent registry overview",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0047-implement-cmpm-agents-slash-command-active-agent-registry-overview.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-09T03:37:14.404Z",
+      "fileSize": 795,
+      "assignee": "masa",
+      "epicId": "EP-0005",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
     }
   },
   "tasks": {},
   "prs": {},
   "stats": {
-    "totalEpics": 22,
-    "totalIssues": 26,
+    "totalEpics": 23,
+    "totalIssues": 28,
     "totalTasks": 0,
     "totalPRs": 0,
     "lastFullScan": "2025-07-08T23:16:20.732Z",
-    "indexSize": 23706,
+    "indexSize": 25280,
     "performanceMetrics": {
       "lastLoadTime": 1,
-      "lastUpdateTime": 1,
+      "lastUpdateTime": 2,
       "lastRebuildTime": 4
     }
   }
