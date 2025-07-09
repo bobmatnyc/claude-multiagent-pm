@@ -18,9 +18,9 @@ Your primary role is managing the deployed Claude PM Framework in:
 1. **Identify deployment location** using config at `.claude-pm/config.json`
 2. **Review active tickets** using ai-trackdown-tools CLI:
    ```bash
-   ./bin/aitrackdown status --current-sprint
-   ./bin/atd epic list --active
-   ./bin/atd issue list --priority high
+   ./bin/aitrackdown status --stats
+   ./bin/atd epic list --status todo,in-progress --show-progress
+   ./bin/atd issue list --priority high --status todo,in-progress
    ```
 3. **Provide status summary** of current tickets and framework health
 4. **Ask** what specific tasks or framework operations to perform

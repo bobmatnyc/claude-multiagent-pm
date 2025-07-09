@@ -3,11 +3,11 @@ issue_id: ISS-0031
 epic_id: EP-0003
 title: Test FINAL Fixed Template - Working Version
 description: Issue description
-status: planning
+status: completed
 priority: medium
 assignee: masa
 created_date: 2025-07-09T02:39:50.527Z
-updated_date: 2025-07-09T02:39:50.527Z
+updated_date: 2025-07-09T04:22:22.508Z
 estimated_tokens: 0
 actual_tokens: 0
 ai_context:
@@ -18,9 +18,27 @@ ai_context:
 sync_status: local
 related_tasks: []
 related_issues: []
-completion_percentage: 0
+completion_percentage: 100
 blocked_by: []
 blocks: []
+content: |-
+  # Issue: Test FINAL Fixed Template - Working Version
+
+  ## Description
+  Issue description
+
+  ## Tasks
+  - [ ] Task 1
+  - [ ] Task 2
+  - [ ] Task 3
+
+  ## Acceptance Criteria
+  - [ ] Criteria 1
+  - [ ] Criteria 2
+
+  ## Notes
+  Add any additional notes here.
+file_path: /Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0031-test-final-fixed-template-working-version.md
 ---
 
 # Issue: Test FINAL Fixed Template - Working Version

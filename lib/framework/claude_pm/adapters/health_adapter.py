@@ -24,7 +24,7 @@ class HealthMonitorServiceAdapter(HealthCollector):
     with the new parallel collection and dashboard orchestration.
     """
     
-    def __init__(self, health_service: Optional[HealthMonitorService] = None, timeout_seconds: float = 10.0):
+    def __init__(self, health_service: Optional[HealthMonitorService] = None, timeout_seconds: float = 2.0):
         """
         Initialize the health monitor service adapter.
         
@@ -149,10 +149,19 @@ class HealthMonitorServiceAdapter(HealthCollector):
                 healthy_projects = sum(1 for p in projects.values() if p.get("status") == "healthy")
                 total_projects = len(projects)
                 
+                # Improved project health assessment
+                health_ratio = healthy_projects / max(total_projects, 1)
+                if health_ratio > 0.8:
+                    project_status = HealthStatus.HEALTHY
+                elif health_ratio > 0.5:
+                    project_status = HealthStatus.DEGRADED
+                else:
+                    project_status = HealthStatus.UNHEALTHY
+                    
                 project_report = ServiceHealthReport(
                     name="project_health_aggregate",
-                    status=HealthStatus.HEALTHY if healthy_projects / max(total_projects, 1) > 0.7 else HealthStatus.DEGRADED,
-                    message=f"Project health: {healthy_projects}/{total_projects} healthy",
+                    status=project_status,
+                    message=f"Project health: {healthy_projects}/{total_projects} healthy ({health_ratio:.1%})",
                     timestamp=self._parse_timestamp(health_data.get("timestamp")),
                     metrics={
                         "total_projects": total_projects,
@@ -167,10 +176,19 @@ class HealthMonitorServiceAdapter(HealthCollector):
             # Parse framework section
             framework = health_data.get("framework", {})
             if framework:
+                # Improved framework compliance assessment
+                compliance = framework.get("compliance_percentage", 0)
+                if compliance > 90:
+                    framework_status = HealthStatus.HEALTHY
+                elif compliance > 70:
+                    framework_status = HealthStatus.DEGRADED
+                else:
+                    framework_status = HealthStatus.UNHEALTHY
+                    
                 framework_report = ServiceHealthReport(
                     name="framework_compliance",
-                    status=HealthStatus.HEALTHY if framework.get("compliance_percentage", 0) > 80 else HealthStatus.DEGRADED,
-                    message=f"Framework compliance: {framework.get('compliance_percentage', 0)}%",
+                    status=framework_status,
+                    message=f"Framework compliance: {compliance}%",
                     timestamp=self._parse_timestamp(framework.get("last_check")),
                     metrics=framework
                 )

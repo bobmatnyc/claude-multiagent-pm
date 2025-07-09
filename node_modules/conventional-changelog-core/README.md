@@ -1,4 +1,4 @@
-#  [![NPM version][npm-image]][npm-url] [![Build Status: Linux][travis-image]][travis-url] [![Build Status: Windows][appveyor-image]][appveyor-url] [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage Status][coveralls-image]][coveralls-url]
+#  [![NPM version][npm-image]][npm-url] [![Build Status: Linux][travis-image]][travis-url] [![Build Status: Windows][appveyor-image]][appveyor-url] [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage Status][coverage-image]][coverage-url]
 
 > [conventional-changelog](https://github.com/conventional-changelog/conventional-changelog) core
 
@@ -11,7 +11,7 @@ $ npm install --save conventional-changelog-core
 ```
 
 ```js
-var conventionalChangelogCore = require('conventional-changelog-core');
+import conventionalChangelogCore from 'conventional-changelog-core';
 
 conventionalChangelogCore()
   .pipe(process.stdout); // or any writable stream
@@ -42,7 +42,7 @@ Type: `object`
 
 ###### path
 
-Type: `string` Default: [closest package.json](https://github.com/sindresorhus/read-pkg-up).
+Type: `string` Default: [closest package.json](https://github.com/sindresorhus/read-package-up).
 
 The location of your "package.json".
 
@@ -102,7 +102,7 @@ Callback when you are done.
 
 ####### this
 
-`this` arg of through2.
+`this` arg of transform handler of a stream.
 
 ##### outputUnreleased
 
@@ -251,5 +251,5 @@ MIT
 [appveyor-url]: https://ci.appveyor.com/project/stevemao/conventional-changelog-core/branch/master
 [daviddm-image]: https://david-dm.org/conventional-changelog/conventional-changelog-core.svg?theme=shields.io
 [daviddm-url]: https://david-dm.org/conventional-changelog/conventional-changelog-core
-[coveralls-image]: https://coveralls.io/repos/conventional-changelog/conventional-changelog-core/badge.svg
-[coveralls-url]: https://coveralls.io/r/conventional-changelog/conventional-changelog-core
+[coverage-image]: https://coveralls.io/repos/github/conventional-changelog/conventional-changelog/badge.svg?branch=master
+[coverage-url]: https://coveralls.io/github/conventional-changelog/conventional-changelog?branch=master

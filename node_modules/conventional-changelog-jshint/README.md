@@ -1,8 +1,48 @@
-#  [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage Status][coveralls-image]][coveralls-url]
+# conventional-changelog-jshint
 
-> [conventional-changelog](https://github.com/ajoslin/conventional-changelog) [jshint](https://github.com/jshint/jshint) preset
+[![ESM-only package][package]][package-url]
+[![NPM version][npm]][npm-url]
+[![Node version][node]][node-url]
+[![Dependencies status][deps]][deps-url]
+[![Install size][size]][size-url]
+[![Build status][build]][build-url]
+[![Coverage status][coverage]][coverage-url]
+
+[package]: https://img.shields.io/badge/package-ESM--only-ffe536.svg
+[package-url]: https://nodejs.org/api/esm.html
+
+[npm]: https://img.shields.io/npm/v/conventional-changelog-jshint.svg
+[npm-url]: https://npmjs.com/package/conventional-changelog-jshint
+
+[node]: https://img.shields.io/node/v/conventional-changelog-jshint.svg
+[node-url]: https://nodejs.org
+
+[deps]: https://img.shields.io/librariesio/release/npm/conventional-changelog-jshint
+[deps-url]: https://libraries.io/npm/conventional-changelog-jshint/tree
+
+[size]: https://packagephobia.com/badge?p=conventional-changelog-jshint
+[size-url]: https://packagephobia.com/result?p=conventional-changelog-jshint
+
+[build]: https://img.shields.io/github/actions/workflow/status/conventional-changelog/conventional-changelog/tests.yaml?branch=master
+[build-url]: https://github.com/conventional-changelog/conventional-changelog/actions
+
+[coverage]: https://coveralls.io/repos/github/conventional-changelog/conventional-changelog/badge.svg?branch=master
+[coverage-url]: https://coveralls.io/github/conventional-changelog/conventional-changelog?branch=master
+
+[conventional-changelog](https://github.com/conventional-changelog/conventional-changelog) [jshint](https://github.com/jshint/jshint) preset.
 
 **Issues with the convention itself should be reported on the JSHint issue tracker.**
+
+## Install
+
+```bash
+# yarn
+yarn add -D conventional-changelog-jshint
+# pnpm
+pnpm add -D conventional-changelog-jshint
+# npm
+npm i -D conventional-changelog-jshint
+```
 
 ## JSHint Convention
 
@@ -79,12 +119,3 @@ Closes #77777
 ```
 
 Based on https://github.com/jshint/jshint/blob/master/CONTRIBUTING.md#commit-message-guidelines
-
-[npm-image]: https://badge.fury.io/js/conventional-changelog-jshint.svg
-[npm-url]: https://npmjs.org/package/conventional-changelog-jshint
-[travis-image]: https://travis-ci.org/stevemao/conventional-changelog-jshint.svg?branch=master
-[travis-url]: https://travis-ci.org/stevemao/conventional-changelog-jshint
-[daviddm-image]: https://david-dm.org/stevemao/conventional-changelog-jshint.svg?theme=shields.io
-[daviddm-url]: https://david-dm.org/stevemao/conventional-changelog-jshint
-[coveralls-image]: https://coveralls.io/repos/stevemao/conventional-changelog-jshint/badge.svg
-[coveralls-url]: https://coveralls.io/r/stevemao/conventional-changelog-jshint

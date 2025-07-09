@@ -29,6 +29,7 @@ from .services.memory_service import MemoryService
 from .services.project_service import ProjectService
 from .scripts.service_manager import ClaudePMServiceManager
 from .cli_enforcement import enforcement_cli
+from .cmpm_commands import register_cmpm_commands
 
 console = Console()
 logger = logging.getLogger(__name__)
@@ -2568,6 +2569,8 @@ def _get_status_indicator_from_string(status_str):
 def main():
     """Main entry point for the Claude Multi-Agent PM CLI."""
     try:
+        # Register CMPM slash commands
+        register_cmpm_commands(cli)
         cli()
     except KeyboardInterrupt:
         console.print("\n[bold yellow]Operation cancelled by user[/bold yellow]")

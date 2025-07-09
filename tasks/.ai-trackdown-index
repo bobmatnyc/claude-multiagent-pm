@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-07-09T03:37:14.414Z",
+  "lastUpdated": "2025-07-09T04:32:01.636Z",
   "projectPath": "/Users/masa/Projects/claude-multiagent-pm",
   "epics": {
     "undefined": {
@@ -317,6 +317,22 @@
       "assignee": "masa",
       "issueIds": [
         "ISS-0046"
+      ],
+      "completion_percentage": 0
+    },
+    "EP-0010": {
+      "id": "EP-0010",
+      "title": "AI Code Review Enhancement",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0010-ai-code-review-enhancement.md",
+      "status": "active",
+      "priority": "high",
+      "lastModified": "2025-07-09T04:32:01.629Z",
+      "fileSize": 1677,
+      "assignee": "masa",
+      "issueIds": [
+        "ISS-0048",
+        "ISS-0049",
+        "ISS-0050"
       ],
       "completion_percentage": 0
     }
@@ -741,19 +757,64 @@
       "prIds": [],
       "blocked_by": [],
       "blocks": []
+    },
+    "ISS-0048": {
+      "id": "ISS-0048",
+      "title": "Implement AI-Powered Code Quality Analysis",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0048-implement-ai-powered-code-quality-analysis.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-09T04:26:56.949Z",
+      "fileSize": 997,
+      "assignee": "masa",
+      "epicId": "EP-0010",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0049": {
+      "id": "ISS-0049",
+      "title": "Delegate Root Directory Cleanup to Code Cleanup Agent",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0049-delegate-root-directory-cleanup-to-code-cleanup-agent.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-09T04:27:02.552Z",
+      "fileSize": 1095,
+      "assignee": "masa",
+      "epicId": "EP-0010",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0050": {
+      "id": "ISS-0050",
+      "title": "Fix missing --summary flag in atd status command",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0050-fix-missing-summary-flag-in-atd-status-command.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-09T04:32:01.625Z",
+      "fileSize": 751,
+      "assignee": "masa",
+      "epicId": "EP-0010",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
     }
   },
   "tasks": {},
   "prs": {},
   "stats": {
-    "totalEpics": 23,
-    "totalIssues": 28,
+    "totalEpics": 24,
+    "totalIssues": 31,
     "totalTasks": 0,
     "totalPRs": 0,
     "lastFullScan": "2025-07-08T23:16:20.732Z",
-    "indexSize": 25280,
+    "indexSize": 27303,
     "performanceMetrics": {
-      "lastLoadTime": 1,
+      "lastLoadTime": 2,
       "lastUpdateTime": 2,
       "lastRebuildTime": 4
     }

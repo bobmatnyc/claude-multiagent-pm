@@ -4,11 +4,11 @@ issue_id: ISS-0028
 epic_id: EP-0003
 title: Test Task Template
 description: Task description
-status: planning
+status: completed
 priority: medium
 assignee: masa
 created_date: 2025-07-09T02:33:00.033Z
-updated_date: 2025-07-09T02:33:00.033Z
+updated_date: 2025-07-09T04:22:28.932Z
 estimated_tokens: 0
 actual_tokens: 0
 ai_context:
@@ -20,6 +20,24 @@ sync_status: local
 subtasks: []
 blocked_by: []
 blocks: []
+content: |-
+  # Task: Test Task Template
+
+  ## Description
+  Task description
+
+  ## Steps
+  1. Step 1
+  2. Step 2
+  3. Step 3
+
+  ## Acceptance Criteria
+  - [ ] Criteria 1
+  - [ ] Criteria 2
+
+  ## Notes
+  Add any additional notes here.
+file_path: /Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0008-test-task-template.md
 ---
 
 # Task: Test Task Template

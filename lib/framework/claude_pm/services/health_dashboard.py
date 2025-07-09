@@ -37,8 +37,8 @@ class HealthDashboardOrchestrator:
     def __init__(
         self,
         cache_ttl_seconds: float = 30.0,
-        max_parallel_collectors: int = 5,
-        global_timeout_seconds: float = 2.5,
+        max_parallel_collectors: int = 8,
+        global_timeout_seconds: float = 2.0,
         version: str = "3.0.0"
     ):
         """
@@ -80,6 +80,11 @@ class HealthDashboardOrchestrator:
         from ..collectors.framework_services import FrameworkServicesCollector
         framework_collector = FrameworkServicesCollector(timeout_seconds=2.0)
         self.add_collector(framework_collector)
+        
+        # AI-trackdown tools collector
+        from ..collectors.ai_trackdown_collector import AITrackdownHealthCollector
+        ai_trackdown_collector = AITrackdownHealthCollector(timeout_seconds=2.0)
+        self.add_collector(ai_trackdown_collector)
     
     def add_collector(self, collector: HealthCollector) -> None:
         """
@@ -424,11 +429,16 @@ class HealthDashboardOrchestrator:
                 f"{failed_collectors} health collectors failed"
             )
         
-        # Alert for slow response time
-        if health_report.response_time_ms > 2000:
+        # Alert for slow response time - optimized thresholds
+        if health_report.response_time_ms > 500:
             health_report.add_alert(
                 "performance",
-                f"Health collection took {health_report.response_time_ms:.0f}ms (target: <3000ms)"
+                f"Health collection took {health_report.response_time_ms:.0f}ms (target: <500ms)"
+            )
+        elif health_report.response_time_ms > 200:
+            health_report.add_alert(
+                "info",
+                f"Health collection response time: {health_report.response_time_ms:.0f}ms (good: <200ms)"
             )
         
         # Recommendations
@@ -504,8 +514,8 @@ class HealthDashboardOrchestrator:
             dashboard = await self.get_health_dashboard()
             response_time = (time.time() - start_time) * 1000
             
-            # Check if response time is acceptable
-            performance_ok = response_time < 3000  # 3 second target
+            # Check if response time is acceptable - optimized target
+            performance_ok = response_time < 500  # 500ms target for excellent performance
             
             # Check cache performance
             cache_stats = self._cache.get_stats()

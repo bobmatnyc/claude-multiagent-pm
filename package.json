@@ -1,5 +1,5 @@
 {
-  "name": "claude-multiagent-pm",
+  "name": "@bobmatnyc/claude-multiagent-pm",
   "version": "4.2.1",
   "description": "Claude Multi-Agent PM Framework - Universal deployment package for AI-driven project management",
   "main": "lib/framework/claude_pm/cli.py",
@@ -95,7 +95,7 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@bobmatnyc/ai-trackdown-tools": "file:../managed/ai-trackdown-tools/bobmatnyc-ai-trackdown-tools-1.0.0.tgz"
+    "@bobmatnyc/ai-trackdown-tools": "file:../managed/ai-trackdown-tools/bobmatnyc-ai-trackdown-tools-1.0.1.tgz"
   },
   "devDependencies": {
     "standard-version": "^9.5.0"

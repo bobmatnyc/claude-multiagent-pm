@@ -3,11 +3,11 @@ issue_id: ISS-0028
 epic_id: EP-0003
 title: Test Issue for Template Validation
 description: Issue description
-status: planning
+status: completed
 priority: medium
 assignee: masa
 created_date: 2025-07-09T02:32:39.650Z
-updated_date: 2025-07-09T02:33:00.037Z
+updated_date: 2025-07-09T04:22:28.928Z
 estimated_tokens: 0
 actual_tokens: 0
 ai_context:
@@ -19,7 +19,7 @@ sync_status: local
 related_tasks:
   - TSK-0008
 related_issues: []
-completion_percentage: 0
+completion_percentage: 100
 blocked_by: []
 blocks: []
 content: |-

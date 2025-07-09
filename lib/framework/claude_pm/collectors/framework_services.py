@@ -25,7 +25,7 @@ class FrameworkServicesCollector(HealthCollector):
     - Multi-Agent Orchestrator
     """
     
-    def __init__(self, service_manager: Optional[ServiceManager] = None, timeout_seconds: float = 3.0):
+    def __init__(self, service_manager: Optional[ServiceManager] = None, timeout_seconds: float = 1.5):
         """
         Initialize framework services collector.
         
@@ -85,7 +85,7 @@ class FrameworkServicesCollector(HealthCollector):
             elif running_services == total_services:
                 status = HealthStatus.HEALTHY
                 message = f"All {total_services} services running"
-            elif running_services > total_services * 0.7:
+            elif running_services > total_services * 0.5:
                 status = HealthStatus.DEGRADED
                 message = f"{running_services}/{total_services} services running"
             else:
@@ -385,14 +385,14 @@ class ProjectIndexingHealthCollector(HealthCollector):
                 # Get performance statistics
                 stats = manager.get_performance_stats()
                 
-                # Determine health based on performance
+                # Determine health based on performance - optimized thresholds
                 avg_response = stats.get('avg_response_time_ms', 0)
                 cache_hit_rate = stats.get('cache_hit_rate', 0)
                 
-                if avg_response <= 100 and cache_hit_rate >= 50:
+                if avg_response <= 50 and cache_hit_rate >= 70:
                     status = HealthStatus.HEALTHY
                     message = f"Memory manager optimal ({avg_response:.0f}ms avg, {cache_hit_rate:.1f}% cache)"
-                elif avg_response <= 500 and cache_hit_rate >= 30:
+                elif avg_response <= 200 and cache_hit_rate >= 40:
                     status = HealthStatus.DEGRADED
                     message = f"Memory manager acceptable ({avg_response:.0f}ms avg, {cache_hit_rate:.1f}% cache)"
                 else:

@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from .base_service import BaseService, ServiceHealth
+from ..utils.ai_trackdown_tools import get_ai_trackdown_tools
 
 
 @dataclass
@@ -230,7 +231,52 @@ class ServiceManager:
                     timestamp=datetime.now().isoformat()
                 )
         
+        # Add ai-trackdown-tools health check
+        ai_trackdown_health = self._check_ai_trackdown_tools_health()
+        health_results["ai-trackdown-tools"] = ai_trackdown_health
+        
         return health_results
+    
+    def _check_ai_trackdown_tools_health(self) -> ServiceHealth:
+        """Check ai-trackdown-tools health."""
+        try:
+            tools = get_ai_trackdown_tools()
+            
+            if not tools.is_enabled():
+                return ServiceHealth(
+                    status="disabled",
+                    message="ai-trackdown-tools is disabled in configuration",
+                    timestamp=datetime.now().isoformat()
+                )
+            
+            if not tools.is_available():
+                return ServiceHealth(
+                    status="unavailable",
+                    message=f"ai-trackdown-tools CLI not found or not working. Fallback: {tools.get_fallback_method()}",
+                    timestamp=datetime.now().isoformat()
+                )
+            
+            # Try to get status to verify it's working
+            status = tools.get_status()
+            if status:
+                return ServiceHealth(
+                    status="healthy",
+                    message="ai-trackdown-tools is operational",
+                    timestamp=datetime.now().isoformat()
+                )
+            else:
+                return ServiceHealth(
+                    status="degraded",
+                    message="ai-trackdown-tools available but status check failed",
+                    timestamp=datetime.now().isoformat()
+                )
+                
+        except Exception as e:
+            return ServiceHealth(
+                status="unhealthy",
+                message=f"ai-trackdown-tools health check error: {str(e)}",
+                timestamp=datetime.now().isoformat()
+            )
     
     def get_service_status(self) -> Dict[str, Dict]:
         """Get status of all services."""

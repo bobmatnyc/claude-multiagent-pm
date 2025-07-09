@@ -23,7 +23,7 @@ import sys
 from pathlib import Path
 
 # Add framework path to sys.path
-framework_path = Path(__file__).parent.parent.parent.parent.parent / "framework" / "multi-agent"
+framework_path = Path(__file__).parent.parent.parent / "framework" / "multi-agent"
 sys.path.insert(0, str(framework_path))
 
 # Import with corrected module name

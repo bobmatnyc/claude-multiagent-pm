@@ -24,9 +24,9 @@ content_template: |-
   {{description}}
 
   ## Tasks
-  {{#related_tasks}}
-  - [ ] {{.}}
-  {{/related_tasks}}
+  - [ ] Task 1
+  - [ ] Task 2
+  - [ ] Task 3
 
   ## Acceptance Criteria
   - [ ] Criteria 1
