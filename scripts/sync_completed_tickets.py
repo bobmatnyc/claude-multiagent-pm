@@ -42,16 +42,52 @@ def sync_completed_tickets_only(repository: str, dry_run: bool = True):
     label_manager = GitHubLabelManager(client, repository)
     milestone_manager = GitHubMilestoneManager(client, repository)
     
-    # Parse tickets from backlog
-    backlog_path = "/Users/masa/Projects/Claude-PM/trackdown/BACKLOG.md"
-    tickets = TicketParser.parse_tickets_from_backlog(backlog_path)
+    # Parse tickets from ai-trackdown-tools structure
+    framework_path = "/Users/masa/Projects/claude-multiagent-pm"
+    
+    # Try to get completed tickets from ai-trackdown-tools
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["aitrackdown", "status", "--filter", "status=done", "--export", "-"],
+            cwd=framework_path,
+            capture_output=True,
+            text=True
+        )
+        
+        if result.returncode == 0:
+            # Parse the JSON output from aitrackdown
+            import json
+            ai_trackdown_data = json.loads(result.stdout)
+            tickets = []
+            
+            # Convert ai-trackdown format to expected ticket format
+            for item in ai_trackdown_data.get('items', []):
+                if item.get('status') == 'done':
+                    # Create a ticket-like object
+                    ticket = type('Ticket', (), {
+                        'ticket_id': item.get('id', 'UNKNOWN'),
+                        'title': item.get('title', 'No Title'),
+                        'status': 'completed',
+                        'milestone': item.get('milestone', 'No Milestone'),
+                        'description': item.get('description', ''),
+                        'priority': item.get('priority', 'medium'),
+                        'assignee': item.get('assignee', 'unassigned')
+                    })()
+                    tickets.append(ticket)
+        else:
+            logger.warning(f"Failed to get completed tickets from ai-trackdown: {result.stderr}")
+            tickets = []
+    except Exception as e:
+        logger.warning(f"Error parsing ai-trackdown data: {e}")
+        tickets = []
     
     # Filter to completed tickets only
     completed_tickets = [t for t in tickets if t.status == 'completed']
     logger.info(f"Found {len(completed_tickets)} completed tickets")
     
     # Load existing sync records to avoid duplicates
-    sync_log_path = "/Users/masa/Projects/Claude-PM/sync/github_sync_log.json"
+    sync_log_path = "/Users/masa/Projects/claude-multiagent-pm/sync/github_sync_log.json"
     existing_tickets = set()
     if Path(sync_log_path).exists():
         with open(sync_log_path, 'r') as f:

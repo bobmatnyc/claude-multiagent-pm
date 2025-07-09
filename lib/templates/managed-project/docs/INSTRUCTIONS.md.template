@@ -1,0 +1,63 @@
+# Instructions - {{PROJECT_TITLE}}
+
+**Project**: {{PROJECT_NAME}}  
+**Type**: {{PROJECT_TYPE}}  
+**Status**: Ready for Implementation
+
+## Quick Start for Implementers
+
+**This project is in Documentation Phase - Ready for Implementation Handoff**
+
+### Implementation Handoff Process
+
+1. **Start Here**: Complete the handoff process in `../trackdown/issues/{{PROJECT_PREFIX}}-000-implementation-handoff.md`
+2. **Technical Design**: Review technical specifications and design documents
+3. **Implementation Plan**: Follow the implementation roadmap
+4. **Development Setup**: Set up development environment
+
+### Key Documentation Files
+
+- **[README.md](../README.md)** - Project overview and quick start
+- **[docs/PROJECT.md](PROJECT.md)** - Business context and project specifications
+- **[docs/WORKFLOW.md](WORKFLOW.md)** - Development workflow and task management
+- **[docs/TOOLCHAIN.md](TOOLCHAIN.md)** - Technology stack and development tools
+- **[CLAUDE.md](../CLAUDE.md)** - Project configuration and standards
+
+### Task Management
+
+- **TrackDown System**: All tasks tracked in `../trackdown/BACKLOG.md`
+- **First Task**: [{{PROJECT_PREFIX}}-000-implementation-handoff.md](../trackdown/issues/{{PROJECT_PREFIX}}-000-implementation-handoff.md)
+- **Progress Tracking**: Use `../trackdown/scripts/update-progress.py`
+
+### Technical Overview
+
+**{{PROJECT_TITLE}}** provides {{PROJECT_DESCRIPTION}}.
+
+Key capabilities:
+- Feature 1
+- Feature 2
+- Feature 3
+
+### Implementation Status
+
+- ✅ **Documentation Complete**: All design and planning documents ready
+- ✅ **Project Structure**: Package configuration and directory layout defined
+- ✅ **Task Management**: TrackDown system with implementation tasks
+- ⏳ **Implementation**: Ready for project coder handoff ({{PROJECT_PREFIX}}-000)
+
+### Next Steps
+
+1. Complete implementation handoff process ({{PROJECT_PREFIX}}-000)
+2. Set up development environment ({{PROJECT_PREFIX}}-001) 
+3. Begin Phase 1 implementation
+4. Follow systematic implementation roadmap
+
+### Support
+
+- **Technical Questions**: Reference design documents and specifications
+- **Implementation Guidance**: Follow detailed roadmap and development guide
+- **Task Management**: Use TrackDown system for all progress tracking
+
+---
+
+**Ready for Implementation**: All documentation complete, ready for project coder takeover.

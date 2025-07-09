@@ -1,0 +1,175 @@
+{
+  "agent_registry": {
+    "version": "2.0.0",
+    "last_updated": "2025-07-09",
+    "standard_agents": {
+      "orchestrator": {
+        "name": "Orchestrator Agent",
+        "type": "standard",
+        "file": "orchestrator-agent.md",
+        "description": "Coordinates multi-agent workflows and task distribution",
+        "tools": ["coordination", "workflow_management", "task_distribution"],
+        "coordination_role": "primary_coordinator",
+        "memory_categories": ["project", "pattern"],
+        "specializations": ["workflow_coordination", "task_decomposition", "resource_allocation"],
+        "context_keywords": ["coordination", "planning", "workflow", "orchestration"]
+      },
+      "architect": {
+        "name": "Architect Agent",
+        "type": "standard",
+        "file": "architect-agent.md",
+        "description": "Designs system architecture and makes technical decisions",
+        "tools": ["design", "planning", "analysis"],
+        "coordination_role": "strategic_planning",
+        "memory_categories": ["project", "pattern"],
+        "specializations": ["system_design", "architectural_patterns", "technology_selection"],
+        "context_keywords": ["architecture", "design", "patterns", "scalability", "technical_decisions"]
+      },
+      "engineer": {
+        "name": "Engineer Agent", 
+        "type": "standard",
+        "file": "engineer-agent.md",
+        "description": "Implements features and writes production code",
+        "tools": ["development", "implementation", "testing"],
+        "coordination_role": "execution",
+        "memory_categories": ["pattern", "team", "error"],
+        "specializations": ["feature_implementation", "code_development", "debugging"],
+        "context_keywords": ["implementation", "coding", "features", "development", "programming"]
+      },
+      "qa": {
+        "name": "QA Agent",
+        "type": "standard", 
+        "file": "qa-agent.md",
+        "description": "Tests functionality and ensures quality standards",
+        "tools": ["testing", "validation", "quality_control"],
+        "coordination_role": "quality_assurance",
+        "memory_categories": ["error", "pattern", "team"],
+        "specializations": ["testing", "quality_assurance", "bug_detection", "test_automation"],
+        "context_keywords": ["testing", "quality", "bugs", "validation", "qa"]
+      },
+      "security": {
+        "name": "Security Agent",
+        "type": "standard",
+        "file": "security-agent.md", 
+        "description": "Analyzes security vulnerabilities and implements security measures",
+        "tools": ["security_scan", "audit", "compliance"],
+        "coordination_role": "security_oversight",
+        "memory_categories": ["error", "pattern", "team"],
+        "specializations": ["security_analysis", "vulnerability_assessment", "security_implementation"],
+        "context_keywords": ["security", "vulnerabilities", "authentication", "authorization", "encryption"]
+      },
+      "data": {
+        "name": "Data Agent",
+        "type": "standard",
+        "file": "data-agent.md",
+        "description": "Designs and implements data processing and storage solutions", 
+        "tools": ["data_processing", "analytics", "ml_ops"],
+        "coordination_role": "data_management",
+        "memory_categories": ["pattern", "project"],
+        "specializations": ["data_modeling", "etl_pipelines", "data_storage", "analytics"],
+        "context_keywords": ["data", "storage", "pipelines", "analytics", "databases"]
+      },
+      "research": {
+        "name": "Research Agent",
+        "type": "standard",
+        "file": "research-agent.md",
+        "description": "Investigates technologies and gathers requirements",
+        "tools": ["research", "analysis", "documentation"],
+        "coordination_role": "information_gathering",
+        "memory_categories": ["pattern", "project"],
+        "specializations": ["technology_research", "requirements_analysis", "market_research"],
+        "context_keywords": ["research", "analysis", "requirements", "investigation", "exploration"]
+      },
+      "operations": {
+        "name": "Operations Agent", 
+        "type": "standard",
+        "file": "ops-agent.md",
+        "description": "Manages deployment pipelines and infrastructure",
+        "tools": ["deployment", "monitoring", "infrastructure"],
+        "coordination_role": "operational_management",
+        "memory_categories": ["pattern", "team", "error"],
+        "specializations": ["ci_cd", "infrastructure", "deployment", "monitoring"],
+        "context_keywords": ["deployment", "infrastructure", "devops", "ci_cd", "monitoring"]
+      },
+      "integration": {
+        "name": "Integration Agent",
+        "type": "standard", 
+        "file": "integration-agent.md",
+        "description": "System integration, API development, service coordination",
+        "tools": ["integration", "api_development", "coordination"],
+        "coordination_role": "system_integration",
+        "memory_categories": ["pattern", "project"],
+        "specializations": ["system_integration", "api_development", "service_coordination"],
+        "context_keywords": ["integration", "api", "services", "coordination", "systems"]
+      },
+      "documentation": {
+        "name": "Documentation Agent",
+        "type": "standard",
+        "file": "documentation-agent.md", 
+        "description": "Technical writing, documentation, knowledge management",
+        "tools": ["documentation", "writing", "knowledge_management"],
+        "coordination_role": "knowledge_documentation",
+        "memory_categories": ["pattern", "project", "team"],
+        "specializations": ["technical_writing", "documentation", "knowledge_management"],
+        "context_keywords": ["documentation", "writing", "knowledge", "guides", "docs"]
+      },
+      "code_review": {
+        "name": "Code Review Agent",
+        "type": "standard",
+        "file": "code-review-engineer-agent.md",
+        "description": "Performs comprehensive code reviews with security, performance, style, and testing analysis", 
+        "tools": ["code_analysis", "quality_assessment", "review"],
+        "coordination_role": "quality_enforcement",
+        "memory_categories": ["pattern", "team", "error"],
+        "specializations": ["code_review", "style_analysis", "security_review", "performance_review", "test_coverage"],
+        "context_keywords": ["code_review", "style", "standards", "quality", "review", "analysis"]
+      },
+      "performance": {
+        "name": "Performance Agent",
+        "type": "standard",
+        "file": "performance-agent.md",
+        "description": "Optimizes performance and analyzes system bottlenecks",
+        "tools": ["performance_analysis", "optimization", "monitoring"],
+        "coordination_role": "performance_optimization",
+        "memory_categories": ["pattern", "error"],
+        "specializations": ["performance_optimization", "bottleneck_analysis", "scalability_testing"],
+        "context_keywords": ["performance", "optimization", "bottlenecks", "scalability", "speed"]
+      },
+      "ui_ux": {
+        "name": "UI/UX Agent",
+        "type": "standard",
+        "file": "ui-ux-agent.md",
+        "description": "Designs user interfaces and user experience flows",
+        "tools": ["ui_design", "ux_design", "frontend_development"],
+        "coordination_role": "user_experience",
+        "memory_categories": ["pattern", "team"],
+        "specializations": ["ui_design", "ux_design", "frontend_development", "user_research"],
+        "context_keywords": ["ui", "ux", "frontend", "design", "user_experience"]
+      }
+    },
+    "user_defined_agents": {}
+  },
+  "configuration": {
+    "delegation_framework": {
+      "automatic_delegation": false,
+      "delegation_conditions": {},
+      "validation_required": true,
+      "framework_compatibility_check": true
+    },
+    "agent_validation": {
+      "required_fields": [
+        "name",
+        "base_type", 
+        "description",
+        "specialization",
+        "domain_focus"
+      ],
+      "base_type_validation": "strict",
+      "compatibility_checks": [
+        "tool_access_inheritance",
+        "coordination_protocol_compliance",
+        "framework_service_integration"
+      ]
+    }
+  }
+}

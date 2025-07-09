@@ -107,7 +107,7 @@ class HealthMonitorService(BaseService):
         try:
             # Run the health monitor script
             result = await asyncio.create_subprocess_exec(
-                "python",
+                "python3",
                 str(self.health_script),
                 "once",
                 "--verbose" if self.get_config("verbose", False) else "",
@@ -157,7 +157,7 @@ class HealthMonitorService(BaseService):
         """Test if we can run a basic health check."""
         try:
             result = await asyncio.create_subprocess_exec(
-                "python",
+                "python3",
                 str(self.health_script),
                 "--help",
                 stdout=asyncio.subprocess.PIPE,
@@ -211,7 +211,7 @@ class HealthMonitorService(BaseService):
             self.logger.info("Starting background health monitoring process...")
             
             self._monitor_process = await asyncio.create_subprocess_exec(
-                "python",
+                "python3",
                 str(self.health_script),
                 "monitor",
                 f"--interval={self.check_interval // 60}",  # Convert to minutes

@@ -288,27 +288,40 @@ env-example: ## Create example environment file
 # Claude PM Framework Environment Variables
 # Copy to .env and customize for your environment
 
-# Core settings
-CLAUDE_PM_LOG_LEVEL=INFO
-CLAUDE_PM_DEBUG=false
-CLAUDE_PM_ENABLE_ALERTING=true
+# Core settings (NEW variable names)
+CLAUDE_MULTIAGENT_PM_LOG_LEVEL=INFO
+CLAUDE_MULTIAGENT_PM_DEBUG=false
+CLAUDE_MULTIAGENT_PM_ENABLE_ALERTING=true
 
-# mem0AI integration
-CLAUDE_PM_MEM0AI_HOST=localhost
-CLAUDE_PM_MEM0AI_PORT=8002
-CLAUDE_PM_MEM0AI_TIMEOUT=30
+# mem0AI integration (NEW variable names)
+CLAUDE_MULTIAGENT_PM_MEM0AI_HOST=localhost
+CLAUDE_MULTIAGENT_PM_MEM0AI_PORT=8002
+CLAUDE_MULTIAGENT_PM_MEM0AI_TIMEOUT=30
 
 # OpenAI API (for mem0AI)
 OPENAI_API_KEY=your_openai_api_key_here
 
-# Monitoring
-CLAUDE_PM_HEALTH_CHECK_INTERVAL=30
-CLAUDE_PM_ALERT_THRESHOLD=60
+# Monitoring (NEW variable names)
+CLAUDE_MULTIAGENT_PM_HEALTH_CHECK_INTERVAL=30
+CLAUDE_MULTIAGENT_PM_ALERT_THRESHOLD=60
 
-# Paths
-CLAUDE_PM_BASE_PATH=/Users/$$USER/Projects
-CLAUDE_PM_CLAUDE_PM_PATH=/Users/$$USER/Projects/Claude-PM
-CLAUDE_PM_MANAGED_PATH=/Users/$$USER/Projects/managed
+# Paths (NEW variable names)
+CLAUDE_MULTIAGENT_PM_BASE_PATH=/Users/$$USER/Projects
+CLAUDE_MULTIAGENT_PM_CLAUDE_PM_PATH=/Users/$$USER/Projects/Claude-PM
+CLAUDE_MULTIAGENT_PM_MANAGED_PATH=/Users/$$USER/Projects/managed
+
+# Legacy support (backward compatibility - will be deprecated in v4.0)
+# CLAUDE_PM_LOG_LEVEL=INFO
+# CLAUDE_PM_DEBUG=false
+# CLAUDE_PM_ENABLE_ALERTING=true
+# CLAUDE_PM_MEM0AI_HOST=localhost
+# CLAUDE_PM_MEM0AI_PORT=8002
+# CLAUDE_PM_MEM0AI_TIMEOUT=30
+# CLAUDE_PM_HEALTH_CHECK_INTERVAL=30
+# CLAUDE_PM_ALERT_THRESHOLD=60
+# CLAUDE_PM_BASE_PATH=/Users/$$USER/Projects
+# CLAUDE_PM_CLAUDE_PM_PATH=/Users/$$USER/Projects/Claude-PM
+# CLAUDE_PM_MANAGED_PATH=/Users/$$USER/Projects/managed
 EOF
 	@echo ".env.example created"
 

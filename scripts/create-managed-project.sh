@@ -147,7 +147,7 @@ create_structure() {
     
     # Create standard directories
     mkdir -p docs
-    mkdir -p trackdown/{issues,templates,scripts}
+    mkdir -p tasks/{epics,issues,tasks,prs,templates,scripts}
     
     success "Directory structure created"
 }
@@ -194,26 +194,36 @@ copy_documentation() {
 copy_trackdown() {
     info "Setting up TrackDown task management system..."
     
-    # TrackDown files
-    process_template "$TEMPLATE_DIR/trackdown/BACKLOG.md.template" "trackdown/BACKLOG.md"
-    process_template "$TEMPLATE_DIR/trackdown/MILESTONES.md.template" "trackdown/MILESTONES.md"
+    # Initialize AI-Trackdown Tools structure
+    info "Initializing AI-Trackdown Tools..."
     
-    # Templates
-    cp "$TEMPLATE_DIR/trackdown/templates/implementation-task-template.md" "trackdown/templates/"
-    cp "$TEMPLATE_DIR/trackdown/templates/phase-milestone-template.md" "trackdown/templates/"
+    # Create tasks directory structure
+    mkdir -p "tasks/"{epics,issues,tasks,prs,templates,scripts}
+    
+    # Initialize with ai-trackdown-tools
+    if command -v aitrackdown &> /dev/null; then
+        aitrackdown init "$PROJECT_NAME" --tasks-dir tasks 2>/dev/null || true
+    fi
+    
+    # Copy templates if they exist
+    if [ -d "$TEMPLATE_DIR/trackdown/templates" ]; then
+        cp -r "$TEMPLATE_DIR/trackdown/templates/"* "tasks/templates/" 2>/dev/null || true
+    fi
     
     # Scripts
-    cp "$TEMPLATE_DIR/trackdown/scripts/update-progress.py" "trackdown/scripts/"
-    chmod +x "trackdown/scripts/update-progress.py"
+    if [ -f "$TEMPLATE_DIR/trackdown/scripts/update-progress.py" ]; then
+        cp "$TEMPLATE_DIR/trackdown/scripts/update-progress.py" "tasks/scripts/" 2>/dev/null || true
+        chmod +x "tasks/scripts/update-progress.py" 2>/dev/null || true
+    fi
     
-    success "TrackDown system configured"
+    success "AI-Trackdown Tools system configured"
 }
 
 # Create first ticket (handoff)
 create_handoff_ticket() {
     info "Creating implementation handoff ticket..."
     
-    cat > "trackdown/issues/${PROJECT_PREFIX}-000-implementation-handoff.md" << EOF
+    cat > "tasks/issues/${PROJECT_PREFIX}-000-implementation-handoff.md" << EOF
 ## **[${PROJECT_PREFIX}-000]** Implementation Handoff - Project Takeover
 
 **Type**: Implementation Handoff  
@@ -231,7 +241,7 @@ First task for project coder taking over $PROJECT_TITLE implementation. This tic
 **Handoff Context:**
 - All documentation and planning completed by template system
 - Project structure and configuration files ready for development
-- Task management system (TrackDown) operational
+- Task management system (AI-Trackdown Tools) operational
 - Ready for systematic implementation
 
 **Handoff Requirements:**
@@ -432,14 +442,16 @@ generate_summary() {
     echo "4. Begin systematic implementation"
     echo ""
     echo -e "${YELLOW}Key Files:${NC}"
-    echo "  📋 trackdown/issues/${PROJECT_PREFIX}-000-implementation-handoff.md - Start here"
+    echo "  📋 tasks/issues/${PROJECT_PREFIX}-000-implementation-handoff.md - Start here"
     echo "  📖 docs/INSTRUCTIONS.md - Implementation guide"
-    echo "  📊 trackdown/BACKLOG.md - Task tracking"
+    echo "  📊 Use 'aitrackdown status' for task tracking"
     echo "  ⚙️  CLAUDE.md - Project configuration"
     echo ""
     echo -e "${YELLOW}Task Management:${NC}"
-    echo "  python trackdown/scripts/update-progress.py stats"
-    echo "  python trackdown/scripts/update-progress.py list-pending"
+    echo "  aitrackdown status --stats"
+    echo "  aitrackdown epic list"
+    echo "  aitrackdown issue list"
+    echo "  aitrackdown task list"
     echo ""
     echo -e "${GREEN}Ready for Implementation! 🚀${NC}"
 }

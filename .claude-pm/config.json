@@ -1,0 +1,22 @@
+{
+  "version": "4.0.0",
+  "deployedAt": "2025-07-09T00:17:59.080Z",
+  "platform": "darwin",
+  "deploymentDir": "/Users/masa/Projects/claude-multiagent-pm",
+  "pythonCmd": "python3",
+  "aiTrackdownPath": "/Users/masa/.nvm/versions/node/v20.19.0/lib/node_modules/@bobmatnyc/ai-trackdown-tools/dist/index.js",
+  "paths": {
+    "framework": "/Users/masa/Projects/claude-multiagent-pm/claude_pm",
+    "templates": "/Users/masa/Projects/claude-multiagent-pm/templates",
+    "schemas": "/Users/masa/Projects/claude-multiagent-pm/schemas",
+    "tasks": "/Users/masa/Projects/claude-multiagent-pm/tasks",
+    "bin": "/Users/masa/Projects/claude-multiagent-pm/bin",
+    "config": "/Users/masa/Projects/claude-multiagent-pm/.claude-pm"
+  },
+  "features": {
+    "aiTrackdownIntegration": true,
+    "memoryIntegration": true,
+    "multiAgentSupport": true,
+    "portableDeployment": true
+  }
+}

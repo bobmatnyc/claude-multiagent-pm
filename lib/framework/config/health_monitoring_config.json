@@ -1,0 +1,15 @@
+{
+  "documentation_monitoring": {
+    "enabled": true,
+    "check_interval": 900,
+    "alert_thresholds": {
+      "critical_issues": 1,
+      "broken_links": 5,
+      "inconsistencies": 3
+    },
+    "integration_endpoints": {
+      "health_file": "/Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_health.json",
+      "stats_file": "/Users/masa/Projects/claude-multiagent-pm/logs/latest_enhanced_doc_stats.json"
+    }
+  }
+}

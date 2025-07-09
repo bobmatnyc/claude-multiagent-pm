@@ -1,21 +1,47 @@
-4.1.0
+4.2.1
 
-## v4.1.0 Release Notes (2025-07-09)
+## v4.2.1 Release Notes (2025-07-09)
 
-### New Features - CMPM Slash Commands
-- **/cmpm:health** - Comprehensive system health dashboard with ai-trackdown integration
-- **/cmpm:agents** - Active agent registry overview with MCP infrastructure support
-- **CLI Wrapper** - Professional CMPM-branded command interface via ./bin/cmpm
-- **Real-time Monitoring** - Sub-5-second health checks with graceful error handling
+### New Features - ai-trackdown-tools Integration
+- **ai-trackdown-tools Integration** - Comprehensive integration with persistent ticket management
+- **Documentation Updates** - Added ai-trackdown-tools configuration across all user guides
+- **Troubleshooting Guide** - Comprehensive troubleshooting section for ai-trackdown-tools
+- **Agent Configuration** - ai-trackdown-tools integration in custom agent configuration
+- **Framework Overview** - Enhanced architecture documentation with ai-trackdown-tools
 
 ### Technical Enhancements
-- **ISS-0002 Completion** - Comprehensive Health Slash Command (100% complete)
-- **Professional Output** - Rich color-coded dashboards with tabular data
-- **Performance Optimization** - Efficient async operations with timeout handling
-- **Integration Features** - Full ai-trackdown-tools and mem0AI connectivity testing
+- **Persistent Ticket Management** - Cross-process ticket persistence for multi-agent coordination
+- **Configuration Integration** - ai-trackdown-tools configuration in framework.yaml
+- **Fallback Mechanisms** - Graceful degradation when ai-trackdown-tools is unavailable
+- **Agent Permissions** - Granular permissions for ticket operations per agent
+- **Directory Organization** - Updated directory structure documentation
 
-### Command Features
-- **Health Dashboard** - System reliability scoring (0-100%) with 4 core components
-- **Agent Registry** - 12 total agents with status, specialization, and coordination roles
-- **Support Flags** - --json, --detailed, --filter options for enhanced usability
-- **MCP Integration** - Multi-agent coordination with agent discovery and monitoring
+### Documentation Updates
+- **docs/FRAMEWORK_OVERVIEW.md** - Added ai-trackdown-tools architecture section
+- **docs/user-guide/01-getting-started.md** - Added dependency setup instructions
+- **docs/user-guide/04-directory-organization.md** - Added configuration information
+- **docs/user-guide/05-custom-agents.md** - Added ai-trackdown-tools configuration
+- **docs/user-guide/07-troubleshooting-faq.md** - Added troubleshooting section
+- **docs/INDEX.md** - Updated with new references and command examples
+
+## v4.2.0 Release Notes (2025-07-09)
+
+### New Features - User Configuration Directory
+- **~/.claude-multiagent-pm/** - New user configuration directory structure
+- **User-Defined Agents** - Custom agent system in ~/.claude-multiagent-pm/agents/user-defined/
+- **Configuration Management** - YAML-based configuration in ~/.claude-multiagent-pm/config/
+- **Template System** - Enhanced templates in ~/.claude-multiagent-pm/templates/
+- **Training Modifications** - Agent training enhancements in ~/.claude-multiagent-pm/agents/training-modifications/
+
+### Technical Enhancements
+- **Directory Structure** - Migrated from ~/.claude-pm/ to ~/.claude-multiagent-pm/
+- **Agent Architecture** - Enhanced user-defined agent loading system
+- **Configuration Format** - YAML-based configuration for improved flexibility
+- **Template Engine** - Advanced template system for rapid development
+- **Documentation Updates** - Comprehensive documentation updates for v4.2.0
+
+### Directory Features
+- **User Directory** - ~/.claude-multiagent-pm/ for all user configurations
+- **Agent Management** - Centralized agent definitions and custom agents
+- **Configuration Hierarchy** - Structured configuration management
+- **Template Library** - Comprehensive template system for projects and agents

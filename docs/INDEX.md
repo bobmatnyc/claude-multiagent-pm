@@ -20,6 +20,7 @@ Welcome to the Claude Multi-Agent PM Framework documentation hub. This index pro
 - ✅ **Memory Integration**: Zero-configuration mem0AI integration operational
 - ✅ **Task Tool Delegation**: Pure subprocess coordination complete
 - ✅ **11-Agent Ecosystem**: Memory-augmented multi-agent architecture deployed
+- ✅ **ai-trackdown-tools Integration**: Persistent ticket management for multi-agent coordination
 - 🔄 **Active Development**: 42 tickets across 3 phases with continuous learning
 
 ## 🎯 User Journey Navigation
@@ -32,6 +33,7 @@ Welcome to the Claude Multi-Agent PM Framework documentation hub. This index pro
 2. [Quick Start Guide](#quick-start) - Zero-configuration setup
 3. [Agent Ecosystem Guide](#agent-ecosystem) - Understanding the 11 agents
 4. [Memory Integration Basics](#memory-integration) - mem0AI fundamentals
+5. [ai-trackdown-tools Integration](#ai-trackdown-tools-integration) - Persistent ticket management
 
 **Next Steps**: [First Agent Delegation](#delegation-workflows)
 
@@ -131,6 +133,40 @@ cat trackdown/CURRENT-STATUS.md    # Framework status
 - [Memory Schema Design](../schemas/memory-schemas.py) - Enterprise schemas
 - [mem0AI Security Guide](MEM0AI_SECURITY_GUIDE.md) - Security configuration
 
+### ai-trackdown-tools Integration
+> **Persistent Ticket Management**: Essential for multi-agent coordination
+
+#### Core Features
+- **Cross-Process Persistence**: Tickets survive process termination and restart
+- **Hierarchical Organization**: Epic → Issue → Task → PR relationship tracking
+- **Agent Coordination**: Structured handoff between specialized agents
+- **Fallback Mechanisms**: Graceful degradation when tools are unavailable
+
+#### Installation and Setup
+```bash
+# Install ai-trackdown-tools globally
+npm install -g @bobmatnyc/ai-trackdown-tools
+
+# Verify installation
+aitrackdown --version
+atd --version  # alias command
+
+# Test basic functionality
+aitrackdown status
+```
+
+#### Key Benefits
+- **Multi-Agent State Management**: Enables agent handoffs through persistent tickets
+- **Process-Independent Tracking**: Maintains state across subprocess boundaries
+- **Configurable Integration**: Enable/disable with fallback support
+- **Framework Integration**: Seamless integration with memory and orchestration systems
+
+#### Technical Resources
+- [User Guide: Getting Started](user-guide/01-getting-started.md#ai-trackdown-tools-essential-dependency) - Installation and setup
+- [User Guide: Custom Agents](user-guide/05-custom-agents.md) - Agent configuration
+- [User Guide: Troubleshooting](user-guide/07-troubleshooting-faq.md#ai-trackdown-tools-integration-issues) - Common issues and solutions
+- [Directory Organization](user-guide/04-directory-organization.md) - Directory structure and configuration
+
 ### LangGraph Workflows
 > **Advanced Orchestration**: State management and conditional routing
 
@@ -152,7 +188,7 @@ cat trackdown/CURRENT-STATUS.md    # Framework status
 
 #### Daily Operations
 ```bash
-# NEW: CMPM Slash Commands (v4.1.0)
+# NEW: CMPM Slash Commands (v4.2.0)
 ./bin/cmpm /cmpm:health        # Comprehensive health dashboard
 ./bin/cmpm /cmpm:agents        # Agent registry overview
 ./bin/cmpm help                # Command help
@@ -168,6 +204,28 @@ grep -A50 "🚀 Priority Implementation Tickets" trackdown/BACKLOG.md
 
 # Service status
 systemctl status claude-pm-health-monitor
+```
+
+#### ai-trackdown-tools Commands
+```bash
+# Epic management
+aitrackdown epic create --title "Strategic Goal" --description "Description"
+aitrackdown epic list --status todo,in-progress --show-progress
+aitrackdown epic status EP-001
+
+# Issue management
+aitrackdown issue create --title "Feature Implementation" --epic "EP-001"
+aitrackdown issue list --priority high
+aitrackdown issue update ISS-001 --status "IN_PROGRESS"
+
+# Task management
+aitrackdown task create --title "Implement Feature" --issue "ISS-001"
+aitrackdown task list --status todo,in-progress
+aitrackdown task complete TSK-001
+
+# Status and health
+aitrackdown status                    # Overall system status
+atd --version                         # Version information (alias)
 ```
 
 #### Memory Operations
@@ -298,7 +356,7 @@ This documentation index is maintained automatically through:
 ---
 
 **Last Updated**: 2025-07-09  
-**Framework Version**: v4.1.0 (CMPM Slash Commands + Pure Task Delegation: mem0AI + Task Tools)  
+**Framework Version**: v4.2.0 (CMPM Slash Commands + Pure Task Delegation: mem0AI + Task Tools)  
 **Documentation Status**: Unified index with progressive disclosure navigation  
 **Maintenance**: Automated sync with framework development
 

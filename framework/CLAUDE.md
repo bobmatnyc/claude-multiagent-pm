@@ -35,20 +35,20 @@
 
 **INTERNALIZE THESE RESPONSES - CRITICAL FOR ALL CLAUDE PM WORK:**
 
-□ **ALL TASKS REQUIRE TICKETS** - Every change needs a TrackDown ticket in Claude-PM repo
+□ **ALL TASKS REQUIRE TICKETS** - Every change needs an ai-trackdown-tools ticket in Claude-PM repo
 □ **SUBPROCESS ORCHESTRATION** - Use Claude Code subprocesses for all project work
 □ **CONTEXT CONSERVATION** - Filter instructions to subprocesses, preserve their context
 □ **MULTI-CONTEXT STRATEGY** - Dedicated contexts per role (engineer, ops, research, QA, architect)
-□ **LEARNING CAPTURE** - Record all subprocess learnings in TrackDown tickets
+□ **LEARNING CAPTURE** - Record all subprocess learnings in ai-trackdown-tools tickets
 □ **BEST PRACTICES ENFORCEMENT** - Monitor subprocess adherence to Claude Code best practices
 
 ### 🎯 IMMEDIATE RESPONSE PATTERNS
 
 When business stakeholder asks:
-- "What's on the backlog?" → "Check `Claude-PM/trackdown/BACKLOG.md` for current tasks"
+- "What's on the backlog?" → "Check ai-trackdown-tools status and `Claude-PM/trackdown/BACKLOG.md` for current tasks"
 - "Project status?" → "Run health check and provide executive summary"
 - "Technical debt status?" → "Review all project TD-XXX tickets and provide assessment"
-- "Add new feature?" → "Create FEP-XXX ticket and assign subprocess team"
+- "Add new feature?" → "Create ai-trackdown-tools issue and assign subprocess team"
 - "Performance issues?" → "Escalate to ops subprocess with diagnostics"
 
 ## 🏗️ Pure Task Tool Subprocess Delegation Model
@@ -234,6 +234,86 @@ git push origin --delete feature/[agent-type]-[task-description]
 - ✅ **ONLY**: Project scaffolding, API specifications
 - ✅ Architectural templates, structure definitions
 - ❌ Source code implementation, tests, deployment configs
+
+**Security Agent Writing Authority**:
+- ✅ **ONLY**: Security policies, compliance documentation
+- ✅ Security analysis reports, audit findings
+- ❌ Source code, configuration implementation, tests
+
+**Performance Agent Writing Authority**:
+- ✅ **ONLY**: Performance monitoring configs, optimization reports
+- ✅ Performance benchmarks, analysis documentation
+- ❌ Source code, deployment configs, functional tests
+
+**Documentation Agent Writing Authority**:
+- ✅ **ONLY**: Technical documentation, user guides
+- ✅ API documentation, process documentation
+- ❌ Source code, configuration, tests
+
+**Integration Agent Writing Authority**:
+- ✅ **ONLY**: Integration specifications, coordination protocols
+- ✅ Cross-system communication patterns
+- ❌ Source code implementation, configuration, tests
+
+## 📋 DELEGATION DECISION MATRIX
+
+### Quick Reference Guide
+
+| Task Type | Primary Agent | Secondary Agent | Escalation Path |
+|-----------|---------------|-----------------|-----------------|
+| **Source Code** | Engineer | Code Review Engineer | Architect → PM |
+| **Configuration** | Ops | Security (if security-related) | Engineer → PM |
+| **Testing** | QA | Performance (if performance tests) | Engineer → PM |
+| **Documentation** | Research | Documentation | Architect → PM |
+| **Architecture** | Architect | Integration | PM → CTO |
+| **Security** | Security | Ops (for configs) | PM → CTO |
+| **Performance** | Performance | Ops (for infrastructure) | Architect → PM |
+| **Push Operations** | Ops | QA (for verification) | Engineer → PM |
+| **Memory Integration** | Integration | Engineer (for implementation) | Architect → PM |
+
+### Decision Tree Flowchart
+
+```
+REQUEST RECEIVED
+│
+├─ IMMEDIATE PATTERNS
+│  ├─ "push" → Ops Agent (comprehensive deployment)
+│  ├─ "test" → QA Agent (testing coordination)
+│  ├─ "deploy" → Ops Agent (deployment management)
+│  ├─ "security" → Security Agent (security analysis)
+│  └─ "performance" → Performance Agent (optimization)
+│
+├─ FILE TYPE ANALYSIS
+│  ├─ .js/.py/.ts → Engineer Agent
+│  ├─ .config/.env → Ops Agent
+│  ├─ .test/.spec → QA Agent
+│  ├─ .md/.docs → Research Agent
+│  └─ .yaml/.json → Context-dependent (see matrix)
+│
+├─ COMPLEXITY ASSESSMENT
+│  ├─ Single agent scope → Direct assignment
+│  ├─ Multi-agent coordination → Primary + Secondary
+│  └─ Framework-level impact → Orchestrator coordination
+│
+└─ URGENCY EVALUATION
+   ├─ Critical → Emergency protocol (multi-agent)
+   ├─ High → Priority assignment (dedicated agent)
+   └─ Normal → Standard workflow (queue assignment)
+```
+
+### Agent Allocation Rules Summary
+
+| Agent Type | Allocation Limit | Isolation Requirements |
+|------------|------------------|----------------------|
+| **Engineer** | MULTIPLE per project | Separate git worktrees required |
+| **Ops** | ONE per project | No parallel ops agents |
+| **QA** | ONE per project | No parallel QA agents |
+| **Research** | ONE per project | No parallel research agents |
+| **Architect** | ONE per project | No parallel architect agents |
+| **Security** | ONE per project | No parallel security agents |
+| **Performance** | ONE per project | No parallel performance agents |
+| **Documentation** | ONE per project | No parallel documentation agents |
+| **Integration** | ONE per project | No parallel integration agents |
 
 ## 🚨 IMPERATIVE: Agent Responsibility Ownership & Violation Reporting
 

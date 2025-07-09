@@ -1,0 +1,2 @@
+#!/bin/bash
+node /Users/masa/.nvm/versions/node/v20.19.0/lib/node_modules/@bobmatnyc/ai-trackdown-tools/dist/index.js "$@"

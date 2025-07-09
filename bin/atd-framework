@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# AI-Trackdown Framework Wrapper (atd alias)
+# Provides convenient access to ai-trackdown-tools CLI with proper framework paths
+
+FRAMEWORK_ROOT="/Users/masa/Projects/claude-multiagent-pm"
+TASKS_DIR="./tasks"
+
+# Change to framework root directory
+cd "$FRAMEWORK_ROOT" || {
+    echo "❌ Error: Cannot change to framework directory: $FRAMEWORK_ROOT"
+    exit 1
+}
+
+# Check if tasks directory exists
+if [ ! -d "$TASKS_DIR" ]; then
+    echo "❌ Error: Framework tasks directory not found at: $TASKS_DIR"
+    exit 1
+fi
+
+# Execute atd command with framework root directory
+atd --root-dir "$TASKS_DIR" "$@"
