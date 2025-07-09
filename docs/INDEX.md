@@ -152,7 +152,7 @@ cat trackdown/CURRENT-STATUS.md    # Framework status
 
 #### Daily Operations
 ```bash
-# NEW: CMPM Slash Commands (v4.1.0)
+# NEW: CMPM Slash Commands (v4.2.0)
 ./bin/cmpm /cmpm:health        # Comprehensive health dashboard
 ./bin/cmpm /cmpm:agents        # Agent registry overview
 ./bin/cmpm help                # Command help
@@ -298,7 +298,7 @@ This documentation index is maintained automatically through:
 ---
 
 **Last Updated**: 2025-07-09  
-**Framework Version**: v4.1.0 (CMPM Slash Commands + Pure Task Delegation: mem0AI + Task Tools)  
+**Framework Version**: v4.2.0 (CMPM Slash Commands + Pure Task Delegation: mem0AI + Task Tools)  
 **Documentation Status**: Unified index with progressive disclosure navigation  
 **Maintenance**: Automated sync with framework development
 

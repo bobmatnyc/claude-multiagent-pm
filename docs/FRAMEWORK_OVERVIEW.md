@@ -1,13 +1,13 @@
 # Claude Multi-Agent PM Framework - Architecture Overview
 
-> **Zero-configuration memory integration with pure subprocess delegation architecture**
+> **Simplified memory integration with pure subprocess delegation architecture**
 
 ## Executive Summary
 
-The Claude Multi-Agent PM Framework v4.0.0 represents a breakthrough in AI-assisted development through intelligent memory integration (mem0AI) and pure Task tool subprocess delegation. With the architecture complete, the framework delivers production-ready zero-configuration memory integration alongside a sophisticated 11-agent ecosystem.
+The Claude Multi-Agent PM Framework v4.2.0 represents a breakthrough in AI-assisted development through intelligent memory integration (mem0AI) and pure Task tool subprocess delegation. With the architecture complete, the framework delivers production-ready simplified memory integration alongside a sophisticated 11-agent ecosystem.
 
 **Key Achievements**:
-- ✅ **Zero-Configuration Memory**: Universal access via localhost:8002 without setup complexity
+- ✅ **Simplified Memory Setup**: Universal access via localhost:8002 with minimal configuration (OpenAI API key)
 - ✅ **11-Agent Ecosystem**: Memory-augmented specialists with parallel execution capabilities  
 - ✅ **Task Tool Delegation**: Pure subprocess coordination with structured protocols
 - ✅ **Production Validation**: Deployed across 12+ managed projects with continuous learning
@@ -20,7 +20,7 @@ The framework is built on two integrated pillars that work in harmony:
 
 #### 1. Memory-Augmented Intelligence (mem0AI)
 ```
-Zero-Configuration Memory Integration
+Simplified Memory Integration
 ├── Universal Access: localhost:8002 service discovery
 ├── Memory Categories: Project, Pattern, Team, Error
 ├── Factory Functions: ClaudePMMemory class with auto-connect
@@ -39,7 +39,7 @@ Direct Subprocess Coordination
 ### System Integration Architecture
 
 ```
-Claude PM Framework v4.0.0
+Claude PM Framework v4.2.0
 ├── Memory Layer (mem0AI)
 │   ├── Universal Memory Service (localhost:8002)
 │   ├── 4 Memory Categories with Enterprise Schemas
@@ -395,6 +395,6 @@ delegation_manager = create_delegation_manager()  # Auto-configured subprocess d
 ---
 
 **Last Updated**: 2025-07-08  
-**Framework Version**: v4.0.0 (Pure Subprocess Delegation Complete)  
+**Framework Version**: v4.2.0 (Pure Subprocess Delegation Complete)  
 **Phase Status**: Phase 1 - 83% Complete (106/127 story points)  
 **Production Status**: Validated across 12+ managed projects

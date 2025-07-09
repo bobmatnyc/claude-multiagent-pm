@@ -34,8 +34,8 @@ Claude Multi-Agent Project Management Framework revolutionizes AI-assisted devel
 
 ### Pure Subprocess Delegation Architecture
 
-#### Zero-Configuration Memory Integration (mem0AI)
-- **Instant Memory Access**: No API keys or configuration required
+#### Simplified Memory Integration (mem0AI)
+- **Instant Memory Access**: Requires OpenAI API key configuration
 - **Universal Memory Service**: Automatic service discovery on localhost:8002
 - **Memory Categories**: Project, Pattern, Team, and Error memories with enterprise schemas
 - **Factory Functions**: Simple memory access via environment-based configuration
@@ -126,7 +126,7 @@ claude-multiagent-pm/
 **Universal memory access without setup complexity**:
 - **Environment-Based Config**: Automatic service discovery and connection
 - **Factory Functions**: ClaudePMMemory class with instant access
-- **No API Keys Required**: localhost:8002 service with automatic defaults
+- **OpenAI API Key Required**: localhost:8002 service with configurable defaults
 - **Universal Compatibility**: Works across all Claude instances and projects
 
 ### 42-Ticket Enhancement System
@@ -244,7 +244,7 @@ claude-multiagent-pm-service start
 
 ### Zero-Configuration Memory Access
 ```python
-# Instant memory access - no configuration required
+# Instant memory access - minimal configuration required (OpenAI API key)
 from config.memory_config import create_claude_pm_memory
 
 # Automatic service discovery and connection
@@ -368,6 +368,7 @@ All projects in `/Users/masa/Projects/managed/` automatically have:
 1. **[Framework Overview](./docs/FRAMEWORK_OVERVIEW.md)** - Understanding the architecture
 2. **[Memory Integration Guide](./docs/CLAUDE_MULTIAGENT_PM_MEMORY_README.md)** - Memory setup and usage
 3. **[Deployment Guide](./docs/DEPLOYMENT_GUIDE.md)** - Installation and deployment
+4. **[Documentation Maintenance Guide](./docs/DOCUMENTATION_MAINTENANCE_GUIDE.md)** - Keep code & docs synchronized
 
 ### Framework Status Check
 ```bash

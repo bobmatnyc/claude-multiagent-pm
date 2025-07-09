@@ -688,13 +688,13 @@ class MemoryService(BaseService):
     async def _initialize(self) -> None:
         """Initialize the memory service."""
         self.logger.info("Initializing Memory Service...")
-        await self.client.initialize()
+        await self.client.connect()
         self.logger.info("Memory Service initialized")
     
     async def _cleanup(self) -> None:
         """Cleanup memory service."""
         self.logger.info("Cleaning up Memory Service...")
-        await self.client.close()
+        await self.client.disconnect()
         self.logger.info("Memory Service cleanup completed")
     
     async def _health_check(self) -> Dict[str, bool]:
@@ -706,7 +706,7 @@ class MemoryService(BaseService):
             checks["client_initialized"] = self.client._session is not None
             
             # Check connection to mem0AI service
-            checks["mem0ai_connection"] = await self.client.is_connected()
+            checks["mem0ai_connection"] = self.client.is_connected()
             
         except Exception as e:
             self.logger.error(f"Memory service health check failed: {e}")

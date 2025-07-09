@@ -1,6 +1,6 @@
 {
   "name": "claude-multiagent-pm",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "description": "Claude Multi-Agent PM Framework - Universal deployment package for AI-driven project management",
   "main": "lib/framework/claude_pm/cli.py",
   "bin": {
@@ -51,7 +51,6 @@
   ],
   "scripts": {
     "postinstall": "node install/postinstall.js",
-    "prepack": "node install/prepare-package.js",
     "test": "node install/validate.js --verbose",
     "validate-env": "node install/validate.js",
     "install-to": "node install/install.js",

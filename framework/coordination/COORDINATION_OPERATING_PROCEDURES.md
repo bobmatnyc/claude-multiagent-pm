@@ -6,7 +6,32 @@ This document provides standard operating procedures (SOPs) for operating the mu
 
 ## 1. Standard Operating Procedures
 
-### 1.1 Daily Operations
+### 1.1 Deployment Workflow Operations
+
+#### Standardized Deployment Procedure
+The framework now includes a standardized 5-step deployment workflow that must be followed for all managed projects:
+
+1. **Ops Agent**: Local server deployment + health check
+2. **Ops Agent**: Automatic browser launch to deployment URL
+3. **QA Agent**: Screenshot capture + visual verification
+4. **QA Agent**: Deployment success documentation
+5. **Framework**: Handoff to development agents
+
+**Reference**: See `/framework/templates/DEPLOYMENT_WORKFLOW.md` for complete workflow template.
+
+#### Browser Auto-Launch Standards
+- **Command**: `open -a "Microsoft Edge" [URL]` (macOS standard)
+- **Timing**: Only after successful server health verification
+- **Coordination**: Must notify QA Agent immediately after launch
+- **Documentation**: Record browser launch timestamp and URL
+
+#### QA Screenshot Verification Requirements
+- **Timing**: Immediately after receiving browser launch notification
+- **Content**: Full-page screenshot of deployed application
+- **Verification**: Visual check for errors, UI issues, functionality
+- **Documentation**: Save screenshot evidence with timestamp and verification report
+
+### 1.2 Daily Operations
 
 #### Morning Startup Checklist
 ```bash

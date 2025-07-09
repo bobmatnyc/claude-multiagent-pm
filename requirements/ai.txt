@@ -6,12 +6,7 @@
 # Core AI integrations 
 # mem0ai>=0.1.0  # Uncomment when available
 
-# LangChain ecosystem
-langchain>=0.1.0
-langchain-openai>=0.1.0
-langchain-anthropic>=0.1.0
-
-# AI model APIs
+# AI model APIs (direct integration, no LangChain dependencies)
 openai>=1.0.0
 anthropic>=0.7.0
 

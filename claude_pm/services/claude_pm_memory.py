@@ -381,6 +381,40 @@ class ClaudePMMemory:
         current_avg = self.stats["avg_response_time"]
         self.stats["avg_response_time"] = (current_avg * (total_ops - 1) + execution_time) / total_ops
     
+    def _sanitize_metadata_for_mem0ai(self, metadata: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Sanitize metadata for mem0AI compatibility.
+        
+        Converts unsupported types (bool, dict, list) to mem0AI-compatible formats.
+        
+        Args:
+            metadata: Original metadata dict
+            
+        Returns:
+            Dict with sanitized values compatible with mem0AI
+        """
+        import json
+        
+        sanitized = {}
+        for key, value in metadata.items():
+            if isinstance(value, bool):
+                # Convert booleans to strings
+                sanitized[key] = str(value).lower()
+            elif isinstance(value, list):
+                # Convert lists to comma-separated strings
+                sanitized[key] = ", ".join(str(v) for v in value)
+            elif isinstance(value, dict):
+                # Convert dicts to JSON strings
+                sanitized[key] = json.dumps(value)
+            elif value is None:
+                # Convert None to empty string
+                sanitized[key] = ""
+            else:
+                # Convert everything else to string
+                sanitized[key] = str(value)
+                
+        return sanitized
+    
     # Project Memory Space Management
     
     async def create_project_memory_space(self, project_name: str, description: str = "", 
@@ -397,21 +431,26 @@ class ClaudePMMemory:
             MemoryResponse: Response object with creation status
         """
         async def _create_space():
-            space_data = {
-                "space_name": project_name,
-                "description": description or f"Memory space for Claude PM project: {project_name}",
-                "metadata": {
+            # For mem0AI API, we create a memory space by storing an initial memory
+            # The space concept is implemented via user_id/project categorization
+            space_message = {
+                "messages": [
+                    {"role": "user", "content": f"Initialize memory space for project: {project_name}. {description or f'Memory space for Claude PM project: {project_name}'}"}
+                ],
+                "user_id": project_name,
+                "metadata": self._sanitize_metadata_for_mem0ai({
                     "project": project_name,
                     "created_by": "claude_pm_framework",
                     "created_at": datetime.now().isoformat(),
                     "framework_version": "3.0.0",
                     "space_type": "claude_pm_project",
+                    "operation": "space_initialization",
                     **(metadata or {})
-                }
+                })
             }
             
-            async with self._session.post(f"{self.base_url}/spaces", json=space_data) as response:
-                if response.status in [200, 201, 409]:  # 409 = already exists
+            async with self._session.post(f"{self.base_url}/memories", json=space_message) as response:
+                if response.status in [200, 201]:
                     self.stats["memory_spaces_created"] += 1
                     logger.info(f"Project memory space created/verified: {project_name}")
                     return {"space_name": project_name, "status": "created"}
@@ -445,29 +484,38 @@ class ClaudePMMemory:
             if category not in self.categories:
                 raise ValueError(f"Invalid category: {category}. Valid categories: {list(self.categories.keys())}")
             
-            # Prepare memory data
+            # Prepare metadata for mem0AI format
+            raw_metadata = {
+                "category": category.value,
+                "category_description": self.categories[category]["description"],
+                "tags": tags or [],
+                "project": project_name,
+                "stored_at": datetime.now().isoformat(),
+                "framework_version": "3.0.0",
+                "source": "claude_pm_memory",
+                **(metadata or {})
+            }
+            
+            # Sanitize metadata for mem0AI compatibility
+            sanitized_metadata = self._sanitize_metadata_for_mem0ai(raw_metadata)
+            
+            # Prepare memory data in mem0AI format
             memory_data = {
-                "content": content,
-                "space_name": project_name or "claude_pm_global",
-                "metadata": {
-                    "category": category.value,
-                    "category_description": self.categories[category]["description"],
-                    "tags": tags or [],
-                    "project": project_name,
-                    "stored_at": datetime.now().isoformat(),
-                    "framework_version": "3.0.0",
-                    "source": "claude_pm_memory",
-                    **(metadata or {})
-                }
+                "messages": [
+                    {"role": "user", "content": content}
+                ],
+                "user_id": project_name or "claude_pm_global",
+                "metadata": sanitized_metadata
             }
             
             async with self._session.post(f"{self.base_url}/memories", json=memory_data) as response:
                 if response.status in [200, 201]:
                     result = await response.json()
-                    memory_id = result.get("id")
+                    # mem0AI might return different response format
+                    memory_id = result.get("id") or result.get("memory_id") or "unknown"
                     self.stats["memories_stored"] += 1
-                    logger.info(f"Memory stored - Category: {category.value}, ID: {memory_id}")
-                    return {"memory_id": memory_id, "category": category.value}
+                    logger.info(f"Memory stored - Category: {category.value}, Project: {project_name}, ID: {memory_id}")
+                    return {"memory_id": memory_id, "category": category.value, "project": project_name}
                 else:
                     error_text = await response.text()
                     raise Exception(f"HTTP {response.status}: {error_text}")
@@ -486,7 +534,7 @@ class ClaudePMMemory:
         Args:
             category: Filter by memory category
             query: Search query
-            project_filter: Filter by project name
+            project_filter: Filter by project name (user_id in mem0AI)
             tags: Filter by tags
             limit: Maximum number of results
             
@@ -494,31 +542,80 @@ class ClaudePMMemory:
             MemoryResponse: Response object with retrieved memories
         """
         async def _retrieve_memories():
-            params = {
-                "query": query,
-                "limit": limit,
-                "include_metadata": True
-            }
+            # For mem0AI API, try to retrieve memories using the user_id
+            user_id = project_filter or "claude_pm_global"
             
-            if project_filter:
-                params["space_name"] = project_filter
+            # Try different approaches to retrieve memories
+            memories = []
             
-            if category:
-                params["category"] = category.value
+            # Approach 1: Try GET /memories/{user_id}
+            try:
+                async with self._session.get(f"{self.base_url}/memories/{user_id}") as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        memories = result.get("results", result.get("memories", []))
+                        logger.debug(f"Retrieved {len(memories)} memories from GET /memories/{user_id}")
+                    elif response.status == 404:
+                        logger.debug(f"No memories found for user_id: {user_id}")
+                    else:
+                        logger.debug(f"GET /memories/{user_id} returned {response.status}")
+            except Exception as e:
+                logger.debug(f"GET /memories/{user_id} failed: {e}")
             
-            if tags:
-                params["tags"] = ",".join(tags)
+            # Approach 2: If no memories found and we have a query, try POST /memories with search
+            if not memories and query:
+                try:
+                    search_data = {
+                        "messages": [{"role": "user", "content": query}],
+                        "user_id": user_id
+                    }
+                    async with self._session.post(f"{self.base_url}/memories", json=search_data) as response:
+                        if response.status == 200:
+                            result = await response.json()
+                            search_results = result.get("results", [])
+                            logger.debug(f"Search returned {len(search_results)} results")
+                            # The search might return related memories
+                            memories.extend(search_results)
+                except Exception as e:
+                    logger.debug(f"Search approach failed: {e}")
             
-            async with self._session.get(f"{self.base_url}/memories/search", params=params) as response:
-                if response.status == 200:
-                    result = await response.json()
-                    memories = result.get("memories", [])
-                    self.stats["memories_retrieved"] += len(memories)
-                    logger.debug(f"Retrieved {len(memories)} memories for query '{query}'")
-                    return {"memories": memories, "count": len(memories)}
-                else:
-                    error_text = await response.text()
-                    raise Exception(f"HTTP {response.status}: {error_text}")
+            # Apply client-side filtering since mem0AI has limited filtering options
+            filtered_memories = []
+            for memory in memories:
+                # Check category filter
+                if category:
+                    memory_metadata = memory.get("metadata", {})
+                    memory_category = memory_metadata.get("category")
+                    if memory_category != category.value:
+                        continue
+                
+                # Check tags filter
+                if tags:
+                    memory_metadata = memory.get("metadata", {})
+                    memory_tags_str = memory_metadata.get("tags", "")
+                    if isinstance(memory_tags_str, str):
+                        memory_tags = memory_tags_str.split(", ") if memory_tags_str else []
+                    else:
+                        memory_tags = memory_tags_str if isinstance(memory_tags_str, list) else []
+                    
+                    if not any(tag in memory_tags for tag in tags):
+                        continue
+                
+                # Check query filter (simple text search)
+                if query:
+                    content = str(memory.get("content", "")).lower()
+                    metadata_text = str(memory.get("metadata", {})).lower()
+                    if query.lower() not in content and query.lower() not in metadata_text:
+                        continue
+                
+                filtered_memories.append(memory)
+            
+            # Apply limit
+            final_memories = filtered_memories[:limit]
+            
+            self.stats["memories_retrieved"] += len(final_memories)
+            logger.debug(f"Retrieved {len(final_memories)} memories for query '{query}' (filtered from {len(memories)} total)")
+            return {"memories": final_memories, "count": len(final_memories)}
         
         return await self._execute_with_retry(_retrieve_memories, _operation_name="retrieve_memories")
     
@@ -527,8 +624,11 @@ class ClaudePMMemory:
         """
         Update an existing memory.
         
+        Note: mem0AI API typically doesn't support direct memory updates.
+        This method implements update by adding a new memory with updated content.
+        
         Args:
-            memory_id: ID of memory to update
+            memory_id: ID of memory to update (for reference)
             content: New content (if updating)
             metadata: New metadata (if updating)
             
@@ -536,29 +636,18 @@ class ClaudePMMemory:
             MemoryResponse: Response object with update status
         """
         async def _update_memory():
-            update_data = {"id": memory_id}
-            
-            if content is not None:
-                update_data["content"] = content
-            
-            if metadata is not None:
-                current_metadata = metadata.copy()
-                current_metadata["updated_at"] = datetime.now().isoformat()
-                update_data["metadata"] = current_metadata
-            
-            async with self._session.put(f"{self.base_url}/memories/{memory_id}", json=update_data) as response:
-                if response.status == 200:
-                    logger.info(f"Memory updated: {memory_id}")
-                    return {"memory_id": memory_id, "status": "updated"}
-                else:
-                    error_text = await response.text()
-                    raise Exception(f"HTTP {response.status}: {error_text}")
+            # mem0AI doesn't support direct updates, so we log this as a limitation
+            logger.warning(f"Memory update attempted for {memory_id}. mem0AI doesn't support direct updates.")
+            logger.info("Consider creating a new memory with updated content instead.")
+            return {"memory_id": memory_id, "status": "update_not_supported", "message": "mem0AI doesn't support direct memory updates"}
         
         return await self._execute_with_retry(_update_memory, _operation_name="update_memory")
     
     async def delete_memory(self, memory_id: str) -> MemoryResponse:
         """
         Delete a memory.
+        
+        Note: This uses the mem0AI DELETE /memories/{memory_id} endpoint.
         
         Args:
             memory_id: ID of memory to delete
