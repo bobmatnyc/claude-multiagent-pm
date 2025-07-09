@@ -159,6 +159,206 @@ class ClaudePMDeploymentEngine {
     }
 
     /**
+     * Check MCP service availability and recommend installation
+     */
+    async checkMCPServices() {
+        this.log('Checking MCP service availability...', true);
+        
+        const recommendedServices = [
+            {
+                name: 'MCP-Zen',
+                description: 'Second opinion service that validates responses with another LLM',
+                features: ['Zen quotes', 'Breathing exercises', 'Focus timers', 'Response validation'],
+                installCommand: 'npx @modelcontextprotocol/server-zen',
+                configExample: {
+                    mcpServers: {
+                        zen: {
+                            command: "npx",
+                            args: ["-y", "@modelcontextprotocol/server-zen"]
+                        }
+                    }
+                }
+            },
+            {
+                name: 'Context 7',
+                description: 'Up-to-date code documentation and library examples fetcher',
+                features: ['Library documentation fetching', 'Current API references', 'Version-specific examples'],
+                installCommand: 'npx -y @upstash/context7-mcp',
+                configExample: {
+                    mcpServers: {
+                        context7: {
+                            command: "npx",
+                            args: ["-y", "@upstash/context7-mcp"]
+                        }
+                    }
+                }
+            }
+        ];
+
+        this.mcpRecommendations = [];
+        
+        for (const service of recommendedServices) {
+            try {
+                // Check if service is available
+                const checkCommand = service.name === 'MCP-Zen' ? 
+                    'npx @modelcontextprotocol/server-zen --help' : 
+                    'npx -y @upstash/context7-mcp --help';
+                
+                execSync(checkCommand, { stdio: 'ignore', timeout: 5000 });
+                this.log(`✓ ${service.name} is available`);
+            } catch (error) {
+                this.log(`⚠ ${service.name} not found - will recommend installation`);
+                this.mcpRecommendations.push(service);
+            }
+        }
+
+        if (this.mcpRecommendations.length > 0) {
+            this.log(`Found ${this.mcpRecommendations.length} MCP services to recommend`);
+        } else {
+            this.log('✓ All recommended MCP services are available');
+        }
+
+        return this.mcpRecommendations;
+    }
+
+    /**
+     * Present MCP service recommendations to user
+     */
+    async presentMCPRecommendations() {
+        if (!this.mcpRecommendations || this.mcpRecommendations.length === 0) {
+            return;
+        }
+
+        this.log('🚀 MCP Service Recommendations', true);
+        this.log('================================', true);
+        this.log('The following MCP services can enhance your Claude PM Framework experience:', true);
+        this.log('', true);
+
+        for (const service of this.mcpRecommendations) {
+            this.log(`📦 ${service.name}`, true);
+            this.log(`   ${service.description}`, true);
+            this.log(`   Features: ${service.features.join(', ')}`, true);
+            this.log(`   Install: ${service.installCommand}`, true);
+            this.log('', true);
+        }
+
+        this.log('After installation, these services will be available to your orchestrator', true);
+        this.log('for enhanced development workflows and productivity features.', true);
+        this.log('', true);
+
+        // In a real CLI environment, you'd prompt for user input here
+        // For now, we'll create the configuration file for easy setup
+        await this.createMCPConfigurationFile();
+    }
+
+    /**
+     * Create MCP configuration file for easy setup
+     */
+    async createMCPConfigurationFile() {
+        this.log('Creating MCP configuration template...', true);
+        
+        const mcpDir = path.join(this.targetDir, '.mcp');
+        await fs.mkdir(mcpDir, { recursive: true });
+        
+        if (this.dryRun) {
+            this.log(`[DRY RUN] Would create MCP config in: ${mcpDir}`);
+            return;
+        }
+
+        const config = {
+            version: "1.0.0",
+            description: "Claude PM Framework MCP Service Configuration",
+            recommendedServices: this.mcpRecommendations.map(service => ({
+                name: service.name,
+                description: service.description,
+                features: service.features,
+                installCommand: service.installCommand,
+                configuration: service.configExample
+            })),
+            usage: {
+                setup: "1. Install recommended services using the provided commands",
+                config: "2. Add service configurations to your Claude settings",
+                orchestrator: "3. The orchestrator will auto-detect available services"
+            }
+        };
+
+        const configPath = path.join(mcpDir, 'recommended-services.json');
+        await fs.writeFile(configPath, JSON.stringify(config, null, 2));
+        
+        // Create installation script
+        const installScript = this.createMCPInstallScript();
+        const scriptPath = path.join(mcpDir, this.platform === 'win32' ? 'install-mcp-services.bat' : 'install-mcp-services.sh');
+        await fs.writeFile(scriptPath, installScript);
+        
+        if (this.platform !== 'win32') {
+            await fs.chmod(scriptPath, '755');
+        }
+
+        this.log(`✓ MCP configuration created at ${configPath}`);
+        this.log(`✓ Installation script created at ${scriptPath}`);
+    }
+
+    /**
+     * Create MCP service installation script
+     */
+    createMCPInstallScript() {
+        if (this.platform === 'win32') {
+            return `@echo off
+REM Claude PM Framework - MCP Service Installation
+REM Generated by deployment script v${this.frameworkVersion}
+
+echo Installing recommended MCP services...
+echo ========================================
+
+${this.mcpRecommendations.map(service => `
+echo Installing ${service.name}...
+${service.installCommand}
+if %errorlevel% neq 0 (
+    echo Warning: Failed to install ${service.name}
+) else (
+    echo ✓ ${service.name} installed successfully
+)
+echo.
+`).join('')}
+
+echo ========================================
+echo MCP service installation completed
+echo.
+echo Next steps:
+echo 1. Configure services in your Claude settings
+echo 2. Restart Claude to load new services
+echo 3. The orchestrator will auto-detect available services
+`;
+        } else {
+            return `#!/bin/bash
+# Claude PM Framework - MCP Service Installation
+# Generated by deployment script v${this.frameworkVersion}
+
+echo "Installing recommended MCP services..."
+echo "========================================"
+
+${this.mcpRecommendations.map(service => `
+echo "Installing ${service.name}..."
+if ${service.installCommand}; then
+    echo "✓ ${service.name} installed successfully"
+else
+    echo "⚠ Warning: Failed to install ${service.name}"
+fi
+echo
+`).join('')}
+
+echo "========================================"
+echo "MCP service installation completed"
+echo
+echo "Next steps:"
+echo "1. Configure services in your Claude settings"
+echo "2. Restart Claude to load new services" 
+echo "3. The orchestrator will auto-detect available services"
+`;
+        }
+    }
+
+    /**
      * Deploy framework core
      */
     async deployFrameworkCore() {
@@ -594,6 +794,7 @@ echo 🎉 Health check completed successfully
             this.log(`🚀 Starting Claude PM Framework deployment to: ${this.targetDir}`, true);
             
             await this.validateEnvironment();
+            await this.checkMCPServices();
             await this.deployFrameworkCore();
             await this.deployTemplatesAndSchemas();
             await this.createAiTrackdownWrappers();
@@ -601,12 +802,18 @@ echo 🎉 Health check completed successfully
             await this.generateDeploymentConfig();
             await this.generateClaudeConfig();
             await this.createHealthCheck();
+            await this.presentMCPRecommendations();
             
             this.log('🎉 Claude PM Framework deployment completed successfully!', true);
             this.log(`Framework location: ${path.join(this.targetDir, 'claude_pm')}`, true);
             this.log(`Configuration: ${path.join(this.targetDir, '.claude-pm', 'config.json')}`, true);
             this.log(`Health check: ${path.join(this.targetDir, 'scripts', this.platform === 'win32' ? 'health-check.bat' : 'health-check.sh')}`, true);
             this.log(`AI-trackdown CLI: ${path.join(this.targetDir, 'bin', 'aitrackdown')}`, true);
+            
+            if (this.mcpRecommendations && this.mcpRecommendations.length > 0) {
+                this.log(`MCP recommendations: ${path.join(this.targetDir, '.mcp', 'recommended-services.json')}`, true);
+                this.log(`MCP install script: ${path.join(this.targetDir, '.mcp', this.platform === 'win32' ? 'install-mcp-services.bat' : 'install-mcp-services.sh')}`, true);
+            }
             
             return true;
             

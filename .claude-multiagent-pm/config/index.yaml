@@ -1,0 +1,61 @@
+cli_integration:
+  ai_trackdown_tools:
+    commands:
+    - aitrackdown
+    - atd
+    config_detection:
+    - .ai-trackdown/
+    - tasks/
+    data_collection:
+      epics: epic list --json
+      issues: issue list --json
+      stats: status --stats --json
+      tasks: task list --json
+    enabled: true
+    local_paths:
+    - ./bin/aitrackdown
+    - ./node_modules/.bin/aitrackdown
+index_database:
+  cache_directory: ./index/cache
+  cli_cache: ./index/cache/cli_data.json
+  dependencies_file: ./index/dependencies.json
+  projects_file: ./index/projects.json
+project_indexing:
+  auto_discovery: true
+  cli_integration:
+    enabled: true
+    fallback_to_basic: true
+    priority: cli_first
+    timeout: 10
+  enabled: true
+  health_check_interval: 600
+  scan_depth: 3
+  update_interval: 300
+project_types:
+  claude-pm-framework:
+    cli_commands:
+    - status
+    - epic list
+    - issue list
+    health_check: framework_core_check
+    indicators:
+    - claude_pm/__init__.py
+    - claude_pm/core/
+  managed:
+    cli_commands:
+    - status
+    - epic list
+    - issue list
+    - task list
+    health_check: managed_project_check
+    indicators:
+    - .claude-multiagent-pm/
+    - package.json
+  standalone:
+    cli_commands:
+    - status
+    health_check: standalone_project_check
+    indicators:
+    - .git/
+    - pyproject.toml
+    - requirements.txt

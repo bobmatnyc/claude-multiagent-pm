@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-07-09T13:51:38.611Z",
+  "lastUpdated": "2025-07-09T16:56:40.705Z",
   "projectPath": "/Users/masa/Projects/claude-multiagent-pm",
   "epics": {
     "undefined": {
@@ -342,14 +342,29 @@
       "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0032-cmpm-dashboard-slash-command-npm-publishing.md",
       "status": "planning",
       "priority": "high",
-      "lastModified": "2025-07-09T13:51:38.605Z",
-      "fileSize": 1870,
+      "lastModified": "2025-07-09T16:56:40.700Z",
+      "fileSize": 1909,
       "assignee": "masa",
       "issueIds": [
         "ISS-0051",
         "ISS-0052",
-        "ISS-0053"
+        "ISS-0053",
+        "ISS-0054",
+        "ISS-0055",
+        "ISS-0056"
       ],
+      "completion_percentage": 0
+    },
+    "EP-0033": {
+      "id": "EP-0033",
+      "title": "Framework Enhancement: CMCP-init and Agent Hierarchy",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0033-framework-enhancement-cmcp-init-and-agent-hierarchy.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-09T16:56:35.757Z",
+      "fileSize": 998,
+      "assignee": "masa",
+      "issueIds": [],
       "completion_percentage": 0
     }
   },
@@ -863,20 +878,65 @@
       "prIds": [],
       "blocked_by": [],
       "blocks": []
+    },
+    "ISS-0054": {
+      "id": "ISS-0054",
+      "title": "Rename and Enhance CMPM-index to CMCP-init",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0054-rename-and-enhance-cmpm-index-to-cmcp-init.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-09T16:56:37.249Z",
+      "fileSize": 941,
+      "assignee": "masa",
+      "epicId": "EP-0032",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0055": {
+      "id": "ISS-0055",
+      "title": "Implement AI-Trackdown-Tools Project Indexing",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0055-implement-ai-trackdown-tools-project-indexing.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-09T16:56:38.718Z",
+      "fileSize": 977,
+      "assignee": "masa",
+      "epicId": "EP-0032",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0056": {
+      "id": "ISS-0056",
+      "title": "Create Three-Tier Agent Hierarchy System",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0056-create-three-tier-agent-hierarchy-system.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-09T16:56:40.697Z",
+      "fileSize": 967,
+      "assignee": "masa",
+      "epicId": "EP-0032",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
     }
   },
   "tasks": {},
   "prs": {},
   "stats": {
-    "totalEpics": 25,
-    "totalIssues": 34,
+    "totalEpics": 26,
+    "totalIssues": 37,
     "totalTasks": 0,
     "totalPRs": 0,
     "lastFullScan": "2025-07-08T23:16:20.732Z",
-    "indexSize": 29503,
+    "indexSize": 31541,
     "performanceMetrics": {
       "lastLoadTime": 1,
-      "lastUpdateTime": 2,
+      "lastUpdateTime": 1,
       "lastRebuildTime": 4
     }
   }

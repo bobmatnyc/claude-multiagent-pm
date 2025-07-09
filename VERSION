@@ -1,4 +1,38 @@
-4.2.1
+4.4.0
+
+## v4.4.0 Release Notes (2025-07-09)
+
+### Major Framework Enhancement - Multi-Project Orchestrator Pattern
+
+#### New /cmpm-init Command System
+- **`/cmpm-init` Command** - Comprehensive framework initialization with setup, verify, and force options
+- **Multi-Project Orchestration** - Three-tier directory structure: framework, working, and project directories
+- **System Init Agent** - Specialized agent for framework initialization and configuration management
+- **Automated Setup** - Intelligent directory detection and automated dependency verification
+
+#### Multi-Project Architecture Enhancements
+- **Framework Directory** - Global user agents and system-trained prompt data at `~/.claude-multiagent-pm/`
+- **Working Directory** - Current session configuration and context management
+- **Project Directory** - Project-specific agents and configuration overrides
+- **Agent Hierarchy** - Priority-based agent loading: framework → project overrides
+
+#### System Init Agent Implementation
+- **Comprehensive Setup** - Complete framework initialization with dependency checking
+- **Directory Structure Creation** - Automated creation of all necessary framework directories
+- **Configuration Generation** - YAML-based configuration files for all operational modes
+- **Dependency Verification** - Real-time verification of mem0AI, ai-trackdown-tools, and Node.js environment
+- **Troubleshooting System** - Automated issue detection and solution recommendations
+
+#### Framework Directory Detection Fix
+- **Fixed cmpm-bridge.py** - Resolved framework directory detection issues across different working directories
+- **Enhanced Path Discovery** - Improved framework path resolution with multiple candidate locations
+- **Environment Variable Support** - `CLAUDE_PM_FRAMEWORK_PATH` environment variable support
+- **Fallback Mechanisms** - Graceful degradation when framework path is not detected
+
+#### Breaking Changes
+- **Directory Structure** - Migration from single-directory to multi-project orchestrator pattern
+- **Agent Loading** - Enhanced agent hierarchy with framework and project-specific agents
+- **Configuration Format** - YAML-based configuration replacing legacy configuration patterns
 
 ## v4.2.1 Release Notes (2025-07-09)
 

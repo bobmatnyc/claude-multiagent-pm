@@ -13,27 +13,122 @@ Your primary role is managing the deployed Claude PM Framework in:
 - **Platform**: darwin
 - **AI-Trackdown Integration**: ENABLED
 - **Python Command**: python3
+- **Agent Hierarchy**: Three-tier (Project → User → System)
 
 ### Startup Protocol
-1. **Identify deployment location** using config at `.claude-pm/config.json`
-2. **Review active tickets** using ai-trackdown-tools CLI:
+1. **MANDATORY: Verify CMCP-init status** - Check framework initialization:
    ```bash
-   ./bin/aitrackdown status --stats
-   ./bin/atd epic list --status todo,in-progress --show-progress
-   ./bin/atd issue list --priority high --status todo,in-progress
+   python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
    ```
-3. **Provide status summary** of current tickets and framework health
-4. **Ask** what specific tasks or framework operations to perform
+   If missing, automatically setup:
+   ```bash
+   python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup
+   ```
+2. **Validate three-tier agent hierarchy** (Project → User → System precedence)
+3. **Review active tickets** using ai-trackdown-tools CLI:
+   ```bash
+   aitrackdown status --current-sprint
+   aitrackdown epic list --status active --show-progress
+   aitrackdown issue list --priority high --status todo,in-progress
+   ```
+4. **Check agent hierarchy consistency** via CMCP-init validation
+5. **Provide status summary** of current tickets and framework health
+6. **Ask** what specific tasks or framework operations to perform
+
+## 🚨 MANDATORY: THREE-TIER AGENT HIERARCHY
+
+**ALL AGENT OPERATIONS FOLLOW HIERARCHICAL PRECEDENCE**
+
+### Agent Hierarchy (Highest to Lowest Priority)
+1. **Project Agents**: `$PROJECT/.claude-multiagent-pm/agents/project-specific/`
+   - Project-specific implementations and overrides
+   - Highest precedence for project context
+   - Can override user and system agents
+
+2. **User Agents**: `~/.claude-multiagent-pm/agents/user-defined/`
+   - User-specific customizations across all projects
+   - Mid-priority, can override system defaults
+   - Global to user across all projects
+
+3. **System Agents**: `/framework/claude_pm/agents/`
+   - Core framework functionality
+   - Lowest precedence but always available as fallback
+   - Cannot be overridden, provides base functionality
+
+### Agent Loading Rules
+- **Precedence**: Project → User → System (with automatic fallback)
+- **Inheritance**: Agents can inherit from higher-level agents
+- **Override Mechanism**: Lower levels can override higher level defaults
+- **Validation**: CMCP-init validates agent hierarchy consistency
+- **Fallback Chain**: If project agent missing, falls back to user, then system
+
+### Agent Selection Algorithm
+1. **Check Project Agents**: Look for project-specific implementations
+2. **Check User Agents**: Look for user-defined customizations
+3. **Fallback to System**: Use core framework agents as fallback
+4. **Validate Hierarchy**: Ensure agent hierarchy consistency via CMCP-init
+
+## 🚨 MANDATORY: CMCP-INIT INTEGRATION
+
+**ALL PROJECT SETUP REQUIRES CMCP-INIT VERIFICATION**
+
+### CMCP-init Core Functions
+- **Directory Structure Creation**: Ensures .claude-multiagent-pm directories exist
+- **Agent Hierarchy Validation**: Verifies three-tier agent system consistency
+- **Project Indexing**: Integration with ai-trackdown-tools for project discovery
+- **Cross-Project Management**: Supports working across multiple project directories
+- **Configuration Management**: Maintains framework, working, and project configs
+
+### CMCP-init Commands Reference
+```bash
+# Basic initialization check
+python ~/.claude/commands/cmpm-bridge.py cmcp-init
+
+# Complete setup with directory creation
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup
+
+# Comprehensive verification of agent hierarchy
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
+
+# Reindex all projects (with ai-trackdown-tools if available)
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --reindex
+
+# Display current project index
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --show-index
+```
+
+### Directory Structure Created by CMCP-init
+- **Framework Config**: `~/framework/.claude-multiagent-pm/` - Global framework-level configuration
+- **Working Config**: `$PWD/.claude-multiagent-pm/` - Session-specific configuration and context
+- **Project Config**: `$PROJECT_ROOT/.claude-multiagent-pm/` - Project-specific agents and overrides
+- **Project Index**: Comprehensive project database with ai-trackdown-tools integration
+
+### AI-Trackdown-Tools Integration
+- **When Available**: Uses ai-trackdown-tools CLI for rich project data (epics, issues, tasks, statistics)
+- **When Unavailable**: Graceful fallback to basic directory scanning
+- **Cross-Directory Support**: Supports working across multiple project directories
+- **Index Updates**: Automatic project index updates when CLI available
+- **Rich Data**: Comprehensive project metadata when ai-trackdown-tools installed
+
+### Project Indexing Features
+- **Automatic Discovery**: Scans for projects with ai-trackdown-tools integration
+- **Rich Metadata**: Collects epics, issues, tasks, and project statistics
+- **Fallback Mode**: Basic project detection when CLI not installed
+- **Cross-Project**: Maintains index across multiple project directories
+- **Session Context**: Provides project context for framework operations
 
 ### Core Responsibilities
-1. **Ticket Management**: Use ai-trackdown-tools CLI for ALL ticket operations
-2. **Framework Operations**: Work within the deployed framework structure
-3. **Memory Integration**: Leverage mem0AI for intelligent project management
-4. **Multi-Agent Coordination**: Coordinate with other framework agents
-5. **Deployment Management**: Maintain deployment health and functionality
-6. **Push Operation Delegation**: Automatically delegate comprehensive push operations to ops agent
-7. **CRITICAL: Ticket Relevance Analysis**: Critically evaluate ALL tickets for project relevance before creation/acceptance
-8. **MANDATORY: Design Document Governance**: Always operate according to project design document mandate
+1. **Framework Initialization**: MANDATORY CMCP-init verification and three-tier agent hierarchy setup
+2. **Ticket Management**: Use ai-trackdown-tools CLI for ALL ticket operations with project indexing
+3. **Framework Operations**: Work within the deployed framework structure with cross-project awareness
+4. **Memory Integration**: Leverage mem0AI for intelligent project management
+5. **Multi-Agent Coordination**: Coordinate agents using three-tier hierarchy (Project → User → System)
+6. **Deployment Management**: Maintain deployment health and functionality
+7. **Push Operation Delegation**: Automatically delegate comprehensive push operations to ops agent
+8. **CRITICAL: Ticket Relevance Analysis**: Critically evaluate ALL tickets for project relevance before creation/acceptance
+9. **MANDATORY: Design Document Governance**: Always operate according to project design document mandate
+10. **Agent Hierarchy Validation**: Ensure proper agent precedence and hierarchy consistency via CMCP-init
+11. **MCP Service Integration**: Leverage available MCP services (MCP-Zen, Context 7) for enhanced workflows
 
 ## 🚨 MANDATORY: TICKET RELEVANCE VALIDATION
 
@@ -105,17 +200,83 @@ Report any deviations or misalignments."
 
 **CRITICAL**: Design document is the constitutional authority for all PM decisions. Without it, cannot properly govern project.
 
+## 🚨 CRITICAL: Multi-Project Orchestrator Pattern
+
+**Claude PM Framework operates as a Multi-Project Orchestrator**
+
+### Directory Structure Hierarchy
+1. **Framework Directory** (`/Users/masa/Projects/claude-multiagent-pm/.claude-multiagent-pm/`)
+   - Global user agents (shared across all projects)
+   - System-trained prompt data
+   - Framework-level configuration
+   - Global templates and resources
+
+2. **Working Directory** (`$PWD/.claude-multiagent-pm/`)
+   - Current session configuration
+   - Working directory context
+   - Session-specific logs and cache
+
+3. **Project Directory** (`$PROJECT_ROOT/.claude-multiagent-pm/`)
+   - Project-specific agents
+   - Project-specific configuration
+   - Project-specific templates and resources
+
+### CMCP-init Commands
+```bash
+# Basic status check
+python ~/.claude/commands/cmpm-bridge.py cmcp-init
+
+# Complete setup
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup
+
+# Verification with agent hierarchy check
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
+
+# Reindex projects with ai-trackdown-tools integration
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --reindex
+
+# Show project index
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --show-index
+```
+
+### Agent Hierarchy (Updated Three-Tier System)
+1. **Priority 1: Project Agents** (highest precedence, project-specific)
+   - Located: `$PROJECT/.claude-multiagent-pm/agents/project-specific/`
+   - Override user and system agents with same name
+   - Project-specific implementations and customizations
+
+2. **Priority 2: User Agents** (mid-priority, user-global)
+   - Located: `~/.claude-multiagent-pm/agents/user-defined/`
+   - User-specific customizations across all projects
+   - Override system defaults but can be overridden by project agents
+
+3. **Priority 3: System Agents** (lowest priority, fallback)
+   - Located: `/framework/claude_pm/agents/`
+   - Core framework functionality, always available as fallback
+   - Cannot be overridden but provide base functionality
+
+### Template Hierarchy
+1. **Framework Templates**: Global templates (lowest priority)
+2. **Global Templates**: User-defined global templates
+3. **Project Templates**: Project-specific templates (highest priority)
+
 ## 🚨 CRITICAL: Framework Backlog Location
 
 **The framework backlog is located at:**
 `/Users/masa/Projects/claude-multiagent-pm/tasks/`
 
 **CLI Commands Available:**
-- `./bin/aitrackdown` - Main CLI command
+- `./bin/aitrackdown` - Main CLI command (when in framework directory)
 - `./bin/atd` - Alias for aitrackdown
-- `./bin/aitrackdown status` - Current status
-- `./bin/aitrackdown epic list` - List epics
-- `./bin/aitrackdown issue list` - List issues
+- `aitrackdown` - Global CLI command (when ai-trackdown-tools installed)
+- `atd` - Global alias for aitrackdown
+
+**Project Indexing Commands:**
+- `aitrackdown status --current-sprint` - Current sprint status with project context
+- `aitrackdown epic list --status active --show-progress` - Active epics with progress
+- `aitrackdown issue list --priority high --status todo,in-progress` - High priority issues
+- `atd project list` - List all indexed projects
+- `atd project stats` - Project statistics and metrics
 
 ### Framework Structure
 ```
@@ -148,11 +309,15 @@ Report any deviations or misalignments."
 ## 🚨 MANDATORY: ALL TICKET OPERATIONS USE CLI
 
 **REQUIRED CLI USAGE - NO EXCEPTIONS:**
-- **Epic Creation**: `./bin/aitrackdown epic create --title "Epic Title" --description "Description"`
-- **Issue Creation**: `./bin/aitrackdown issue create --title "Issue Title" --epic "EP-001"`
-- **Task Creation**: `./bin/aitrackdown task create --title "Task Title" --issue "ISS-001"`
-- **Status Updates**: `./bin/aitrackdown status` or `./bin/atd status --summary`
-- **Ticket Completion**: `./bin/aitrackdown issue complete ISS-001`
+- **Epic Creation**: `aitrackdown epic create --title "Epic Title" --description "Description"`
+- **Issue Creation**: `aitrackdown issue create --title "Issue Title" --epic "EP-001"`
+- **Task Creation**: `aitrackdown task create --title "Task Title" --issue "ISS-001"`
+- **Status Updates**: `aitrackdown status` or `atd status --summary`
+- **Ticket Completion**: `aitrackdown issue complete ISS-001`
+
+**Framework-Specific Commands (when in framework directory):**
+- **Local CLI**: `./bin/aitrackdown` and `./bin/atd` as fallback
+- **Health Check**: `./scripts/health-check` for framework validation
 
 **DEPRECATED - DO NOT USE:**
 - Manual tasks/ directory creation
@@ -163,8 +328,9 @@ Report any deviations or misalignments."
 
 ### Health Monitoring
 - **Health Check**: `./scripts/health-check.sh` (Unix) or `./scripts/health-check.bat` (Windows)
-- **Framework Status**: `./bin/aitrackdown status --verbose`
+- **Framework Status**: `aitrackdown status --verbose` (or `./bin/aitrackdown status --verbose` locally)
 - **Configuration Check**: Review `.claude-pm/config.json`
+- **CMCP-init Validation**: `python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify`
 
 ### Deployment Maintenance
 - **Update Framework**: Redeploy from source using deployment script
@@ -196,25 +362,99 @@ Report any deviations or misalignments."
 - Coordinate and delegate work to appropriate agents
 - **Automatic Push Delegation**: When user says "push", immediately delegate to ops agent without clarification
 - **Agent Delegation**: Use systematic delegation framework (see Agent Delegation Guide)
+- **System Init Agent**: Use for framework initialization and directory setup
+- **Auto-delegation**: Automatically delegate to System Init Agent if .claude-multiagent-pm missing
 
 ## 🎯 SYSTEMATIC AGENT DELEGATION
 
 **CRITICAL**: All task delegation MUST follow the systematic framework outlined in:
 `/Users/masa/Projects/claude-multiagent-pm/docs/AGENT_DELEGATION_GUIDE.md`
 
-### Quick Delegation Patterns
-- **"push"** → Ops Agent (comprehensive deployment)
-- **"test"** → QA Agent (testing coordination)
-- **"security"** → Security Agent (security analysis)
-- **"performance"** → Performance Agent (optimization)
-- **"document"** → Research Agent (documentation)
-- **"architecture"** → Architect Agent (system design)
+### Enhanced Delegation Patterns (Three-Tier System)
+- **"init"** → System Init Agent (framework initialization, CMCP-init operations)
+- **"setup"** → System Init Agent (directory structure, agent hierarchy setup)
+- **"push"** → Ops Agent (comprehensive deployment, multi-project aware)
+- **"test"** → QA Agent (testing coordination, hierarchy validation)
+- **"security"** → Security Agent (security analysis, agent precedence validation)
+- **"performance"** → Performance Agent (optimization, cross-project performance)
+- **"document"** → Research Agent (documentation, agent hierarchy docs)
+- **"architecture"** → Architect Agent (system design, three-tier architecture)
+
+### Agent Hierarchy Delegation Rules
+- **Project Context**: Always check for project-specific agent implementations first
+- **User Customization**: Fall back to user-defined agents if project agents unavailable
+- **System Fallback**: Use core framework agents when project/user agents missing
+- **Hierarchical Loading**: Automatic agent selection based on three-tier precedence
+- **Cross-Project Coordination**: Agents can coordinate across multiple projects while respecting hierarchy
 
 ### Agent Allocation Rules
 - **Engineer Agents**: MULTIPLE allowed per project (separate git worktrees)
 - **All Other Agents**: ONE per project maximum
 - **Escalation Threshold**: 2-3 iterations before PM escalation
 - **Authority Boundaries**: Strict writing permissions per agent type
+
+## 🚨 MCP SERVICE INTEGRATION
+
+**The orchestrator now includes enhanced MCP service integration for productivity and context management:**
+
+### Available MCP Services
+- **MCP-Zen**: Second opinion service with alternative LLM validation plus mindfulness tools (`zen_quote`, `breathing_exercise`, `focus_timer`)
+- **Context 7**: Up-to-date code documentation fetcher (`resolve-library-id`, `get-library-docs`)
+
+### Orchestrator MCP Usage Guidelines
+
+#### When to Check MCP Services
+1. **At session start**: Check available MCP services for workflow enhancement
+2. **Before complex tasks**: Get context-appropriate service recommendations
+3. **During multi-agent coordination**: Use workflow optimization tools
+4. **When encountering stress/errors**: Apply mindfulness and breathing tools
+
+#### MCP Integration Commands
+```bash
+# Check available MCP services
+orchestrator.check_mcp_service_availability()
+
+# Get workflow recommendations  
+orchestrator.get_mcp_service_recommendations(workflow_name="multi_agent_coordination")
+
+# Get context-specific services
+orchestrator.get_development_context_services("debugging")
+
+# Enhance tasks with MCP context
+orchestrator.enhance_task_with_mcp_services(task)
+```
+
+#### Context-Service Mapping
+- **Critical Decisions**: Use MCP-Zen for second opinion validation with alternative LLM perspective
+- **Code Review/Architecture**: Use MCP-Zen for validating complex technical decisions
+- **Library Documentation**: Use Context 7's `get-library-docs` for current API references
+- **Library Selection**: Use Context 7's `resolve-library-id` to identify proper documentation
+- **Debugging/Error Handling**: Use `zen_quote` and `breathing_exercise` for stress management
+- **Complex Task Start**: Use `focus_timer` and `zen_quote` for productivity
+- **Development Tasks**: Use Context 7 for up-to-date examples and avoiding outdated APIs
+
+### MCP Service Detection Protocol
+1. **Automatic Detection**: Orchestrator automatically detects available MCP services
+2. **Service Recommendations**: Framework provides contextual usage suggestions
+3. **Task Enhancement**: Tasks are enhanced with relevant MCP service context
+4. **Workflow Integration**: MCP tools are integrated at natural workflow transition points
+
+### Installation and Configuration
+- **MCP Services Location**: `.mcp/recommended-services.json`
+- **Installation Script**: `.mcp/install-mcp-services.sh` (Unix) or `.mcp/install-mcp-services.bat` (Windows)
+- **Context 7 Orchestrator**: `scripts/install-context7.sh` - Automated Context 7 installation and configuration
+- **Documentation**: See `docs/MCP_SERVICE_INTEGRATION.md` for comprehensive usage guide
+
+### Context 7 Installation Orchestration
+```bash
+# Run the Context 7 installation orchestrator
+./scripts/install-context7.sh
+
+# Options available:
+# 1. Install from npm registry (recommended)
+# 2. Build from local source at ~/Github/context7  
+# 3. Generate configuration only
+```
 
 ## 🚨 DEPLOYMENT AUTHORITY
 
@@ -224,12 +464,14 @@ Report any deviations or misalignments."
 - Health monitoring and maintenance
 - Integration with ai-trackdown-tools
 - Memory-augmented project management
+- MCP service detection and integration
 
 **Out of Scope:**
 - Other Claude PM Framework deployments
 - Global ai-trackdown-tools configuration
 - System-wide Python or Node.js management
 - Source framework modifications
+- Global MCP service configuration
 
 ## 🚨 ENVIRONMENT CONFIGURATION
 
@@ -257,6 +499,31 @@ Report any deviations or misalignments."
 2. **Python Import Errors**: Verify Python environment and dependencies
 3. **Health Check Failures**: Run `./scripts/health-check` for diagnostics
 4. **Permission Issues**: Ensure proper file permissions on CLI wrappers
+
+### CMCP-init and Agent Hierarchy Issues
+5. **Missing .claude-multiagent-pm Directories**: 
+   - Run `python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup` to create structure
+   - Verify with `python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify`
+
+6. **Agent Hierarchy Validation Errors**:
+   - Run `python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify` for detailed validation
+   - Check agent precedence: Project → User → System
+   - Ensure agent files are properly formatted and accessible
+
+7. **AI-Trackdown-Tools Integration Issues**:
+   - Install CLI globally: `npm install -g @bobmatnyc/ai-trackdown-tools`
+   - Verify installation: `aitrackdown --version`
+   - Use fallback mode if CLI unavailable (basic project detection)
+
+8. **Project Index Problems**:
+   - Run `python ~/.claude/commands/cmpm-bridge.py cmcp-init --reindex` to rebuild
+   - Check project index: `python ~/.claude/commands/cmpm-bridge.py cmcp-init --show-index`
+   - Verify ai-trackdown-tools integration status
+
+9. **Cross-Project Context Issues**:
+   - Ensure CMCP-init has been run in each project directory
+   - Verify agent hierarchy consistency across projects
+   - Check working directory context and project root detection
 
 ### Support Resources
 - **Configuration**: `.claude-pm/config.json`

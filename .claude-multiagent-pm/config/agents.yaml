@@ -1,0 +1,72 @@
+agent_hierarchy:
+  project_agents:
+    description: Project-specific agents with highest precedence
+    immutable: false
+    path: /Users/masa/Projects/claude-multiagent-pm/.claude-multiagent-pm/agents/project-specific
+    priority: 3
+  system_agents:
+    description: Core framework agents with highest authority
+    immutable: true
+    path: /Users/masa/Projects/claude-multiagent-pm/claude_pm/agents
+    priority: 1
+  user_agents:
+    description: Global user-defined agents across all projects
+    immutable: false
+    path: /Users/masa/Projects/claude-multiagent-pm/.claude-multiagent-pm/agents/user-defined
+    priority: 2
+agent_loading:
+  auto_discover: true
+  cache_agents: true
+  conflict_resolution: highest_priority_wins
+  fallback_enabled: true
+  lazy_loading: true
+  precedence_order:
+  - project_agents
+  - user_agents
+  - system_agents
+  reload_on_change: true
+  validation_enabled: true
+agent_types:
+  architect:
+    project: project_architect_agent.py
+    system: architect_agent.py
+    user: custom_architect_agent.py
+  engineer:
+    project: project_engineer_agent.py
+    system: system_engineer_agent.py
+    user: custom_engineer_agent.py
+  ops:
+    project: project_ops_agent.py
+    system: ops_agent.py
+    user: personal_ops_agent.py
+  orchestrator:
+    project: project_orchestrator_agent.py
+    system: orchestrator_agent.py
+    user: custom_orchestrator_agent.py
+  qa:
+    project: project_qa_agent.py
+    system: qa_agent.py
+    user: custom_qa_agent.py
+  security:
+    project: project_security_agent.py
+    system: security_agent.py
+    user: personal_security_agent.py
+coordination:
+  coordination_timeout: 300
+  cross_project_coordination: true
+  hierarchical_coordination: true
+  multi_agent_enabled: true
+  parallel_execution: true
+health_monitoring:
+  auto_reload_on_failure: true
+  check_interval: 60
+  enabled: true
+  health_logging: true
+templates:
+  custom_templates_enabled: true
+  template_hierarchy:
+  - project
+  - user
+  - system
+  template_inheritance: true
+  template_override: true

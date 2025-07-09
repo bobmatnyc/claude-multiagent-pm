@@ -14,6 +14,7 @@ from pathlib import Path
 import json
 
 from .claude_pm_memory import ClaudePMMemory, MemoryCategory
+from .mcp_service_detector import MCPServiceDetector, get_mcp_service_recommendations
 from ..core.logging_config import get_logger
 from ..core.enforcement import (
     get_enforcement_engine, EnforcementEngine, Agent as EnforcementAgent,
@@ -131,6 +132,9 @@ class MultiAgentOrchestrator:
         # Initialize enforcement engine for delegation constraints
         self.enforcement_engine = get_enforcement_engine()
         
+        # Initialize MCP service detector for enhanced workflows
+        self.mcp_detector = MCPServiceDetector()
+        
         # Initialize git worktree manager
         self.worktree_manager = GitWorktreeManager(
             base_repo_path=str(self.base_repo_path),
@@ -149,7 +153,7 @@ class MultiAgentOrchestrator:
         self.coordination_semaphore = asyncio.Semaphore(max_parallel)
         self.message_bus: Dict[str, List[Dict[str, Any]]] = {}
         
-        logger.info(f"MultiAgentOrchestrator initialized with {len(self.agent_definitions)} agents and enforcement engine")
+        logger.info(f"MultiAgentOrchestrator initialized with {len(self.agent_definitions)} agents, enforcement engine, and MCP service detection")
     
     def _initialize_agent_definitions(self) -> Dict[AgentType, Dict[str, Any]]:
         """Initialize agent definitions with memory integration capabilities."""
@@ -729,6 +733,186 @@ Context: {json.dumps(execution.task.context, indent=2)}
             stats["enforcement"] = {"error": str(e)}
         
         return stats
+    
+    async def get_mcp_service_recommendations(self, workflow_name: str = None, 
+                                           context: str = None) -> Dict[str, Any]:
+        """
+        Get MCP service recommendations for enhanced development workflows.
+        
+        Args:
+            workflow_name: Optional workflow name (e.g., 'multi_agent_coordination')
+            context: Optional development context (e.g., 'debugging', 'project_switching')
+            
+        Returns:
+            MCP service recommendations and guidance
+        """
+        try:
+            # Detect available MCP services
+            await self.mcp_detector.detect_available_services()
+            
+            recommendations = {
+                "orchestrator_guidance": self.mcp_detector.generate_orchestrator_guidance(),
+                "available_services": len(self.mcp_detector.available_services),
+                "detection_timestamp": datetime.now().isoformat()
+            }
+            
+            if workflow_name:
+                recommendations["workflow_recommendations"] = self.mcp_detector.get_workflow_recommendations(workflow_name)
+                logger.info(f"Generated MCP recommendations for workflow: {workflow_name}")
+            
+            if context:
+                context_services = self.mcp_detector.get_service_for_context(context)
+                recommendations["context_services"] = [
+                    {
+                        "name": service.name,
+                        "tools": service.available_tools,
+                        "usage": service.usage_context
+                    }
+                    for service in context_services
+                ]
+                logger.info(f"Generated MCP recommendations for context: {context}")
+            
+            return recommendations
+            
+        except Exception as e:
+            logger.error(f"Failed to get MCP service recommendations: {e}")
+            return {
+                "error": str(e),
+                "available_services": 0,
+                "orchestrator_guidance": {
+                    "status": "error",
+                    "message": f"Failed to detect MCP services: {e}"
+                }
+            }
+    
+    async def enhance_task_with_mcp_services(self, task: AgentTask) -> AgentTask:
+        """
+        Enhance a task with available MCP service integrations.
+        
+        Args:
+            task: Original task to enhance
+            
+        Returns:
+            Enhanced task with MCP service context
+        """
+        try:
+            # Get workflow-specific recommendations
+            workflow_recommendations = await self.get_mcp_service_recommendations(
+                workflow_name="multi_agent_coordination"
+            )
+            
+            # Add MCP context to task
+            if "workflow_recommendations" in workflow_recommendations:
+                task.context["mcp_services"] = workflow_recommendations["workflow_recommendations"]
+                task.context["mcp_guidance"] = workflow_recommendations["orchestrator_guidance"]
+                
+                logger.info(f"Enhanced task {task.task_id} with MCP service context")
+            
+            return task
+            
+        except Exception as e:
+            logger.warning(f"Failed to enhance task with MCP services: {e}")
+            return task
+    
+    async def get_development_context_services(self, context: str) -> List[Dict[str, Any]]:
+        """
+        Get MCP services relevant for a specific development context.
+        
+        Args:
+            context: Development context (e.g., 'debugging', 'complex_task_start', 'project_switching')
+            
+        Returns:
+            List of relevant MCP services with usage suggestions
+        """
+        try:
+            context_services = self.mcp_detector.get_service_for_context(context)
+            
+            return [
+                {
+                    "service_name": service.name,
+                    "service_type": service.service_type.value,
+                    "available_tools": service.available_tools,
+                    "capabilities": service.capabilities,
+                    "usage_suggestions": service.usage_context,
+                    "recommended_for_context": context
+                }
+                for service in context_services
+            ]
+            
+        except Exception as e:
+            logger.error(f"Failed to get context services for {context}: {e}")
+            return []
+    
+    async def check_mcp_service_availability(self) -> Dict[str, Any]:
+        """
+        Check the current availability status of MCP services.
+        
+        Returns:
+            Detailed status of MCP service availability
+        """
+        try:
+            services = await self.mcp_detector.detect_available_services(force_refresh=True)
+            
+            status = {
+                "total_services_detected": len(services),
+                "services": {},
+                "orchestrator_ready": len(services) > 0,
+                "last_check": datetime.now().isoformat()
+            }
+            
+            for service_id, service in services.items():
+                status["services"][service_id] = {
+                    "name": service.name,
+                    "type": service.service_type.value,
+                    "available": service.is_available,
+                    "tools": service.available_tools,
+                    "capabilities": service.capabilities
+                }
+            
+            if len(services) == 0:
+                status["recommendation"] = "Consider installing MCP-Zen or Context 7 for enhanced workflows"
+            else:
+                status["recommendation"] = f"Orchestrator enhanced with {len(services)} MCP services"
+            
+            return status
+            
+        except Exception as e:
+            logger.error(f"Failed to check MCP service availability: {e}")
+            return {
+                "error": str(e),
+                "total_services_detected": 0,
+                "orchestrator_ready": False,
+                "recommendation": "Unable to detect MCP services"
+            }
+    
+    def get_mcp_integration_status(self) -> Dict[str, Any]:
+        """
+        Get the current MCP integration status for the orchestrator.
+        
+        Returns:
+            Current MCP integration status and statistics
+        """
+        try:
+            return {
+                "mcp_detector_initialized": self.mcp_detector is not None,
+                "known_services": len(self.mcp_detector.known_services),
+                "available_services": len(self.mcp_detector.available_services),
+                "workflow_integrations": len(self.mcp_detector.workflow_integrations),
+                "cache_timeout": self.mcp_detector.detection_cache_timeout,
+                "last_detection": self.mcp_detector.last_detection_time,
+                "integration_features": [
+                    "Automatic service detection",
+                    "Workflow-specific recommendations", 
+                    "Context-aware service suggestions",
+                    "Task enhancement with MCP context"
+                ]
+            }
+        except Exception as e:
+            logger.error(f"Failed to get MCP integration status: {e}")
+            return {
+                "error": str(e),
+                "mcp_detector_initialized": False
+            }
     
     async def cleanup(self) -> None:
         """Cleanup orchestrator resources."""

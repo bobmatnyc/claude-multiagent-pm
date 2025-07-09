@@ -1,0 +1,90 @@
+checked_by: system-init-agent
+last_checked: '2025-07-09 14:05:56'
+status:
+  ai_trackdown_tools:
+    details: CLI available (local)
+    status: "\u2705 INSTALLED"
+    version: 1.0.1+build.1
+  claude_pm_portfolio_manager:
+    details: NPM package not found
+    status: "\u274C MISSING"
+    version: none
+  framework_core:
+    details: Framework at /Users/masa/Projects/claude-multiagent-pm
+    status: "\u2705 INSTALLED"
+    version: "4.3.0\n\n## v4.3.0 Release Notes (2025-07-09)\n\n### Major Framework\
+      \ Enhancement - Multi-Project Orchestrator Pattern\n\n#### New /cmpm-init Command\
+      \ System\n- **`/cmpm-init` Command** - Comprehensive framework initialization\
+      \ with setup, verify, and force options\n- **Multi-Project Orchestration** -\
+      \ Three-tier directory structure: framework, working, and project directories\n\
+      - **System Init Agent** - Specialized agent for framework initialization and\
+      \ configuration management\n- **Automated Setup** - Intelligent directory detection\
+      \ and automated dependency verification\n\n#### Multi-Project Architecture Enhancements\n\
+      - **Framework Directory** - Global user agents and system-trained prompt data\
+      \ at `~/.claude-multiagent-pm/`\n- **Working Directory** - Current session configuration\
+      \ and context management\n- **Project Directory** - Project-specific agents\
+      \ and configuration overrides\n- **Agent Hierarchy** - Priority-based agent\
+      \ loading: framework \u2192 project overrides\n\n#### System Init Agent Implementation\n\
+      - **Comprehensive Setup** - Complete framework initialization with dependency\
+      \ checking\n- **Directory Structure Creation** - Automated creation of all necessary\
+      \ framework directories\n- **Configuration Generation** - YAML-based configuration\
+      \ files for all operational modes\n- **Dependency Verification** - Real-time\
+      \ verification of mem0AI, ai-trackdown-tools, and Node.js environment\n- **Troubleshooting\
+      \ System** - Automated issue detection and solution recommendations\n\n####\
+      \ Framework Directory Detection Fix\n- **Fixed cmpm-bridge.py** - Resolved framework\
+      \ directory detection issues across different working directories\n- **Enhanced\
+      \ Path Discovery** - Improved framework path resolution with multiple candidate\
+      \ locations\n- **Environment Variable Support** - `CLAUDE_PM_FRAMEWORK_PATH`\
+      \ environment variable support\n- **Fallback Mechanisms** - Graceful degradation\
+      \ when framework path is not detected\n\n#### Breaking Changes\n- **Directory\
+      \ Structure** - Migration from single-directory to multi-project orchestrator\
+      \ pattern\n- **Agent Loading** - Enhanced agent hierarchy with framework and\
+      \ project-specific agents\n- **Configuration Format** - YAML-based configuration\
+      \ replacing legacy configuration patterns\n\n## v4.2.1 Release Notes (2025-07-09)\n\
+      \n### New Features - ai-trackdown-tools Integration\n- **ai-trackdown-tools\
+      \ Integration** - Comprehensive integration with persistent ticket management\n\
+      - **Documentation Updates** - Added ai-trackdown-tools configuration across\
+      \ all user guides\n- **Troubleshooting Guide** - Comprehensive troubleshooting\
+      \ section for ai-trackdown-tools\n- **Agent Configuration** - ai-trackdown-tools\
+      \ integration in custom agent configuration\n- **Framework Overview** - Enhanced\
+      \ architecture documentation with ai-trackdown-tools\n\n### Technical Enhancements\n\
+      - **Persistent Ticket Management** - Cross-process ticket persistence for multi-agent\
+      \ coordination\n- **Configuration Integration** - ai-trackdown-tools configuration\
+      \ in framework.yaml\n- **Fallback Mechanisms** - Graceful degradation when ai-trackdown-tools\
+      \ is unavailable\n- **Agent Permissions** - Granular permissions for ticket\
+      \ operations per agent\n- **Directory Organization** - Updated directory structure\
+      \ documentation\n\n### Documentation Updates\n- **docs/FRAMEWORK_OVERVIEW.md**\
+      \ - Added ai-trackdown-tools architecture section\n- **docs/user-guide/01-getting-started.md**\
+      \ - Added dependency setup instructions\n- **docs/user-guide/04-directory-organization.md**\
+      \ - Added configuration information\n- **docs/user-guide/05-custom-agents.md**\
+      \ - Added ai-trackdown-tools configuration\n- **docs/user-guide/07-troubleshooting-faq.md**\
+      \ - Added troubleshooting section\n- **docs/INDEX.md** - Updated with new references\
+      \ and command examples\n\n## v4.2.0 Release Notes (2025-07-09)\n\n### New Features\
+      \ - User Configuration Directory\n- **~/.claude-multiagent-pm/** - New user\
+      \ configuration directory structure\n- **User-Defined Agents** - Custom agent\
+      \ system in ~/.claude-multiagent-pm/agents/user-defined/\n- **Configuration\
+      \ Management** - YAML-based configuration in ~/.claude-multiagent-pm/config/\n\
+      - **Template System** - Enhanced templates in ~/.claude-multiagent-pm/templates/\n\
+      - **Training Modifications** - Agent training enhancements in ~/.claude-multiagent-pm/agents/training-modifications/\n\
+      \n### Technical Enhancements\n- **Directory Structure** - Migrated from ~/.claude-pm/\
+      \ to ~/.claude-multiagent-pm/\n- **Agent Architecture** - Enhanced user-defined\
+      \ agent loading system\n- **Configuration Format** - YAML-based configuration\
+      \ for improved flexibility\n- **Template Engine** - Advanced template system\
+      \ for rapid development\n- **Documentation Updates** - Comprehensive documentation\
+      \ updates for v4.2.0\n\n### Directory Features\n- **User Directory** - ~/.claude-multiagent-pm/\
+      \ for all user configurations\n- **Agent Management** - Centralized agent definitions\
+      \ and custom agents\n- **Configuration Hierarchy** - Structured configuration\
+      \ management\n- **Template Library** - Comprehensive template system for projects\
+      \ and agents"
+  mem0ai:
+    details: Service responding
+    status: "\u2705 ONLINE"
+    version: active
+  node_environment:
+    details: Node.js available
+    status: "\u2705 READY"
+    version: v20.19.0
+  python_environment:
+    details: All required packages available
+    status: "\u2705 READY"
+    version: Python 3.13.5

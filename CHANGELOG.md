@@ -2,6 +2,110 @@
 
 All notable changes to the Claude Multi-Agent Project Management Framework will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 4.4.0 (2025-07-09)
+
+### 🚀 Major Framework Enhancement - Three-Tier Agent Hierarchy Architecture
+
+#### New Three-Tier Agent Hierarchy System
+- **Hierarchical Agent Loading** - Complete three-tier agent system: Project → User → System
+- **Agent Precedence System** - Project agents override User agents, User agents override System agents
+- **Dynamic Agent Discovery** - Automatic discovery and loading of agents across all three tiers
+- **Agent Configuration Management** - Comprehensive configuration system with inheritance and overrides
+- **Hierarchical Agent Validator** - Service to validate agent hierarchy integrity and relationships
+
+#### CMCP-init Enhanced Implementation
+- **Comprehensive Project Indexing** - Enhanced `cmcp-init` with complete project data collection
+- **Three-Tier Directory Structure** - Automated creation of framework, working, and project directories
+- **Agent Template System** - Template-based agent creation for all three tiers
+- **Configuration Generation** - YAML-based configuration with inheritance support
+- **Dependency Verification** - Real-time verification of mem0AI, ai-trackdown-tools, and framework core
+
+#### AI-Trackdown-Tools Integration
+- **CLI Integration** - Seamless integration with `aitrackdown` and `atd` commands
+- **Project Data Collection** - Automated project indexing via ai-trackdown-tools CLI
+- **Graceful Fallback** - Fallback mechanisms when ai-trackdown-tools is unavailable
+- **Cross-Project Coordination** - Enhanced multi-project workflow coordination
+
+#### MCP Service Integration
+- **MCP Service Detector** - Automatic detection and integration of MCP services
+- **Service Orchestration** - Enhanced multi-agent orchestration with MCP service workflows
+- **Service Discovery** - Dynamic discovery of available MCP services
+- **Workflow Enhancement** - MCP services enhance multi-agent workflow capabilities
+
+#### Framework Instruction Architecture
+- **Complete CLAUDE.md Update** - Comprehensive framework instructions reflecting new three-tier architecture
+- **Agent Coordination Protocols** - Detailed protocols for cross-tier agent coordination
+- **Multi-Project Orchestration** - Instructions for managing multiple projects with shared agent hierarchy
+- **MCP Integration Guidelines** - Guidelines for leveraging MCP services in agent workflows
+
+#### Technical Enhancements
+- **Agent Discovery Service** - Service for dynamic agent discovery across all tiers
+- **Agent Hierarchy Validator** - Validation service ensuring proper agent hierarchy relationships
+- **Hierarchical Agent Loader** - Complete loading system with precedence and inheritance
+- **Service Manager Integration** - Full integration with enhanced service management architecture
+- **Multi-Agent Orchestrator** - Enhanced orchestration with three-tier agent support
+
+#### Breaking Changes
+- **Agent Architecture** - Migration to three-tier agent hierarchy system
+- **Configuration Format** - Enhanced YAML configuration with tier-specific settings
+- **Service Integration** - New MCP service integration requirements
+- **Framework Instructions** - Complete rewrite of framework coordination protocols
+
+### Technical Implementation Details
+- **56 files changed** with major architecture enhancements
+- **20,000+ lines added** including new agent hierarchy system
+- **Comprehensive testing** with hierarchical agent system tests
+- **MCP service detection** and workflow integration
+- **Enhanced documentation** with complete architecture overhaul
+
+## 4.3.0 (2025-07-09)
+
+### 🚀 Major Framework Enhancement - Multi-Project Orchestrator Pattern
+
+#### New /cmpm-init Command System
+- **`/cmpm-init` Command** - Comprehensive framework initialization with setup, verify, and force options
+- **Multi-Project Orchestration** - Three-tier directory structure: framework, working, and project directories
+- **System Init Agent** - Specialized agent for framework initialization and configuration management
+- **Automated Setup** - Intelligent directory detection and automated dependency verification
+
+#### Multi-Project Architecture Enhancements
+- **Framework Directory** - Global user agents and system-trained prompt data at `~/.claude-multiagent-pm/`
+- **Working Directory** - Current session configuration and context management
+- **Project Directory** - Project-specific agents and configuration overrides
+- **Agent Hierarchy** - Priority-based agent loading: framework → project overrides
+
+#### System Init Agent Implementation
+- **Comprehensive Setup** - Complete framework initialization with dependency checking
+- **Directory Structure Creation** - Automated creation of all necessary framework directories
+- **Configuration Generation** - YAML-based configuration files for all operational modes
+- **Dependency Verification** - Real-time verification of mem0AI, ai-trackdown-tools, and Node.js environment
+- **Troubleshooting System** - Automated issue detection and solution recommendations
+
+#### Framework Directory Detection Fix
+- **Fixed cmpm-bridge.py** - Resolved framework directory detection issues across different working directories
+- **Enhanced Path Discovery** - Improved framework path resolution with multiple candidate locations
+- **Environment Variable Support** - `CLAUDE_PM_FRAMEWORK_PATH` environment variable support
+- **Fallback Mechanisms** - Graceful degradation when framework path is not detected
+
+#### CLAUDE.md Configuration Updates
+- **Mandatory Initialization** - Added initialization requirements to startup protocol
+- **System Init Agent Integration** - Automatic delegation to System Init Agent for missing directories
+- **Multi-Project Documentation** - Comprehensive documentation of three-tier directory structure
+- **Agent Hierarchy Documentation** - Clear explanation of framework vs project agent precedence
+
+#### Technical Infrastructure
+- **Rich Console Output** - Professional initialization reporting with progress indicators
+- **YAML Configuration** - Structured configuration management across all modes
+- **Diagnostic System** - Comprehensive framework diagnostics and health reporting
+- **Error Handling** - Robust error handling with detailed troubleshooting guidance
+
+#### Breaking Changes
+- **Directory Structure** - Migration from single-directory to multi-project orchestrator pattern
+- **Agent Loading** - Enhanced agent hierarchy with framework and project-specific agents
+- **Configuration Format** - YAML-based configuration replacing legacy configuration patterns
+
+This release establishes the Claude PM Framework as a true multi-project orchestrator with comprehensive initialization, setup, and dependency management capabilities.
+
 ## 4.2.3 (2025-07-09)
 
 ### 📚 Documentation Enhancement - AI-Trackdown-Tools CLI Integration
