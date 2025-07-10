@@ -134,8 +134,8 @@ class HierarchicalAgentLoader(BaseService):
         
         # Agent directory paths
         self.system_agents_path = framework_path / "claude_pm" / "agents"
-        self.user_agents_path = user_home / ".claude-multiagent-pm" / "agents" / "user-defined"
-        self.project_agents_path = project_path / ".claude-multiagent-pm" / "agents" / "project-specific"
+        self.user_agents_path = user_home / ".claude-pm" / "agents" / "user-defined"
+        self.project_agents_path = project_path / ".claude-pm" / "agents" / "project-specific"
         
         # Agent hierarchy
         self.hierarchy = AgentHierarchy()
@@ -207,8 +207,8 @@ class HierarchicalAgentLoader(BaseService):
     async def _load_agent_configuration(self) -> None:
         """Load agent configuration from hierarchy."""
         config_files = [
-            self.project_path / ".claude-multiagent-pm" / "config" / "agents.yaml",
-            self.user_home / ".claude-multiagent-pm" / "config" / "agents.yaml",
+            self.project_path / ".claude-pm" / "config" / "agents.yaml",
+            self.user_home / ".claude-pm" / "config" / "agents.yaml",
             self.framework_path / "config" / "agents.yaml"
         ]
         

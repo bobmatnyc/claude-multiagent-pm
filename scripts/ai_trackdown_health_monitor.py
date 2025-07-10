@@ -31,7 +31,7 @@ class AITrackdownHealthMonitor:
     
     def __init__(self, framework_root: Optional[Path] = None):
         """Initialize the health monitor."""
-        self.framework_root = framework_root or Path("/Users/masa/Projects/claude-multiagent-pm")
+        self.framework_root = framework_root or Path("/Users/masa/Projects/claude-pm")
         self.collector = AITrackdownHealthCollector(self.framework_root)
         self.health_report_path = self.framework_root / "logs" / "ai_trackdown_health.json"
         

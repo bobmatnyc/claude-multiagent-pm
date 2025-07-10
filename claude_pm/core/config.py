@@ -30,7 +30,7 @@ class Config:
         self, 
         config: Optional[Dict[str, Any]] = None,
         config_file: Optional[Union[str, Path]] = None,
-        env_prefix: str = "CLAUDE_MULTIAGENT_PM_"
+        env_prefix: str = "CLAUDE_PM_"
     ):
         """
         Initialize configuration.
@@ -161,7 +161,7 @@ class Config:
         else:
             # Use default paths
             base_path = str(Path.home() / "Projects")
-            claude_pm_path = str(Path.home() / "Projects" / "claude-multiagent-pm")
+            claude_pm_path = str(Path.home() / "Projects" / "claude-pm")
             managed_path = str(Path.home() / "Projects" / "managed")
         
         defaults = {

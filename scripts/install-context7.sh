@@ -201,7 +201,7 @@ echo "• Configuration Guide: $CONFIG_DIR/context7-config.json"
 echo ""
 echo "🔄 Updating Claude PM Framework MCP status..."
 
-FRAMEWORK_CONFIG="/Users/masa/Projects/claude-multiagent-pm/.claude-pm/config.json"
+FRAMEWORK_CONFIG="/Users/masa/Projects/claude-pm/.claude-pm/config.json"
 if [ -f "$FRAMEWORK_CONFIG" ]; then
     # Update framework configuration to note Context 7 installation
     echo "✓ Claude PM Framework configuration updated"

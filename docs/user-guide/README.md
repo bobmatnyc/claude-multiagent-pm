@@ -223,10 +223,10 @@ aitrackdown issue list --status todo,in-progress # List active issues
 
 ```bash
 # Global Configuration
-~/.claude-multiagent-pm/config/config.yaml          # Main configuration
-~/.claude-multiagent-pm/logs/                       # System logs
-~/.claude-multiagent-pm/agents/user-defined/        # User-defined agents
-~/.claude-multiagent-pm/templates/                  # User templates
+~/.claude-pm/config/config.yaml          # Main configuration
+~/.claude-pm/logs/                       # System logs
+~/.claude-pm/agents/user-defined/        # User-defined agents
+~/.claude-pm/templates/                  # User templates
 
 # Project Configuration
 ./CLAUDE.md                               # Project instructions

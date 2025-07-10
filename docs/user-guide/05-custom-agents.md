@@ -92,7 +92,7 @@ The CMPM v4.2.0 framework introduces a powerful user-defined agent system that a
 #### Agent Directory Structure
 
 ```
-~/.claude-multiagent-pm/
+~/.claude-pm/
 ├── agents/
 │   ├── user-defined/                    # Custom agent definitions
 │   │   ├── my-custom-agent.md           # Agent definition file
@@ -112,16 +112,16 @@ The CMPM v4.2.0 framework introduces a powerful user-defined agent system that a
 1. **Create Agent Definition File**:
    ```bash
    # Create new agent in user-defined directory
-   mkdir -p ~/.claude-multiagent-pm/agents/user-defined
-   touch ~/.claude-multiagent-pm/agents/user-defined/my-custom-agent.md
+   mkdir -p ~/.claude-pm/agents/user-defined
+   touch ~/.claude-pm/agents/user-defined/my-custom-agent.md
    ```
 
 2. **Register Agent in Configuration**:
    ```yaml
-   # ~/.claude-multiagent-pm/config/config.yaml
+   # ~/.claude-pm/config/config.yaml
    user_defined_agents:
      - name: "my-custom-agent"
-       path: "~/.claude-multiagent-pm/agents/user-defined/my-custom-agent.md"
+       path: "~/.claude-pm/agents/user-defined/my-custom-agent.md"
        enabled: true
        specialization: "domain-specific"
    ```
@@ -3298,7 +3298,7 @@ The CMPM v4.2.0 framework includes an enhanced template system for rapid agent d
 #### Template Directory Structure
 
 ```
-~/.claude-multiagent-pm/templates/
+~/.claude-pm/templates/
 ├── agents/
 │   ├── basic-agent-template.md           # Basic agent template
 │   ├── specialized-agent-template.md     # Specialized agent template
@@ -3316,11 +3316,11 @@ The CMPM v4.2.0 framework includes an enhanced template system for rapid agent d
 1. **Create Agent from Template**:
    ```bash
    # Copy template to user-defined directory
-   cp ~/.claude-multiagent-pm/templates/agents/basic-agent-template.md \
-      ~/.claude-multiagent-pm/agents/user-defined/my-new-agent.md
+   cp ~/.claude-pm/templates/agents/basic-agent-template.md \
+      ~/.claude-pm/agents/user-defined/my-new-agent.md
    
    # Customize the agent definition
-   vim ~/.claude-multiagent-pm/agents/user-defined/my-new-agent.md
+   vim ~/.claude-pm/agents/user-defined/my-new-agent.md
    ```
 
 2. **Template Variables**:

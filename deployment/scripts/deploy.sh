@@ -197,7 +197,7 @@ configure_paths() {
     DEPLOYMENT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
     ENV_FILE="$DEPLOYMENT_PATH/environments/$ENVIRONMENT.env"
 
-    # Current script location (should be claude-multiagent-pm for this ticket)
+    # Current script location (should be claude-pm for this deployment)
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
@@ -399,6 +399,9 @@ deploy_framework() {
             install_development_dependencies
             ;;
     esac
+    
+    # Deploy CMPM-QA extension if available
+    deploy_cmpm_qa_extension
 }
 
 install_development_dependencies() {
@@ -484,6 +487,108 @@ deploy_docker() {
 deploy_cloud() {
     log_info "Cloud deployment not fully implemented in this version"
     log_info "Please use cloud-specific deployment scripts in deployment/cloud/"
+}
+
+# Deploy CMPM-QA extension components
+deploy_cmpm_qa_extension() {
+    log_header "Deploying CMPM-QA Extension"
+    
+    # Check if CMPM-QA directory exists
+    local cmpm_qa_source="$PROJECT_ROOT/cmpm-qa"
+    local cmpm_qa_target="$CLAUDE_PM_PATH/cmpm-qa"
+    
+    if [[ ! -d "$cmpm_qa_source" ]]; then
+        log_info "CMPM-QA extension not found - skipping (optional component)"
+        return 0
+    fi
+    
+    log_info "CMPM-QA extension found, deploying components..."
+    
+    if [[ "$DRY_RUN" == "false" ]]; then
+        # Copy CMPM-QA directory structure
+        cp -r "$cmpm_qa_source" "$cmpm_qa_target"
+        log_success "CMPM-QA files copied to deployment location"
+        
+        # Make scripts executable
+        chmod +x "$cmpm_qa_target/scripts"/*.sh 2>/dev/null || true
+        log_success "CMPM-QA scripts made executable"
+        
+        # Create QA extension configuration directory
+        mkdir -p "$CLAUDE_PM_PATH/.claude-pm/qa-extension/config"
+        mkdir -p "$CLAUDE_PM_PATH/.claude-pm/qa-extension/logs"
+        log_success "CMPM-QA directories created"
+        
+        # Check if we should run QA installation
+        case $ENVIRONMENT in
+            development)
+                log_info "Development environment detected"
+                if ask_confirmation "Install CMPM-QA extension components?"; then
+                    install_cmpm_qa_components
+                fi
+                ;;
+            production)
+                log_info "Production environment detected"
+                if ask_confirmation "Install CMPM-QA extension for production?"; then
+                    install_cmpm_qa_components
+                fi
+                ;;
+            *)
+                log_info "CMPM-QA components copied but not installed"
+                log_info "Run '$CLAUDE_PM_PATH/cmpm-qa/scripts/install-qa.sh' to install"
+                ;;
+        esac
+    else
+        log_info "[DRY RUN] Would deploy CMPM-QA extension"
+    fi
+}
+
+# Install CMPM-QA components using the specialized installer
+install_cmpm_qa_components() {
+    log_info "Installing CMPM-QA components..."
+    
+    local qa_installer="$CLAUDE_PM_PATH/cmpm-qa/scripts/install-qa.sh"
+    local qa_install_dir="$CLAUDE_PM_PATH/.claude-pm/qa-extension"
+    
+    if [[ -x "$qa_installer" ]]; then
+        # Run QA installer with appropriate flags
+        local install_flags=""
+        
+        # Add environment-specific flags
+        case $ENVIRONMENT in
+            development)
+                install_flags="--development --verbose"
+                ;;
+            production)
+                install_flags="--production"
+                ;;
+        esac
+        
+        # Add force flag if force deployment is enabled
+        if [[ "$FORCE_DEPLOYMENT" == "true" ]]; then
+            install_flags="$install_flags --force"
+        fi
+        
+        log_info "Running CMPM-QA installer..."
+        if "$qa_installer" $install_flags --install-dir "$qa_install_dir"; then
+            log_success "CMPM-QA installation completed"
+            
+            # Run validation to ensure installation succeeded
+            local qa_validator="$CLAUDE_PM_PATH/cmpm-qa/scripts/validate-install.sh"
+            if [[ -x "$qa_validator" ]]; then
+                log_info "Validating CMPM-QA installation..."
+                if "$qa_validator" --quick --qa-config "$qa_install_dir/config/qa-config.json"; then
+                    log_success "CMPM-QA validation passed"
+                else
+                    log_warning "CMPM-QA validation failed - manual review recommended"
+                fi
+            fi
+        else
+            log_warning "CMPM-QA installation failed - extension will not be available"
+            log_info "You can install manually later using: $qa_installer"
+        fi
+    else
+        log_warning "CMPM-QA installer not found or not executable"
+    fi
 }
 
 # Configure services
@@ -605,6 +710,16 @@ show_deployment_summary() {
         echo -e "${CYAN}Custom Root:${NC} $CLAUDE_PM_ROOT"
     fi
     
+    # Check if CMPM-QA was deployed
+    local qa_status="Not deployed"
+    if [[ -d "$CLAUDE_PM_PATH/cmpm-qa" ]]; then
+        qa_status="Available"
+        if [[ -d "$CLAUDE_PM_PATH/.claude-pm/qa-extension" ]]; then
+            qa_status="Installed"
+        fi
+    fi
+    echo -e "${CYAN}CMPM-QA Extension:${NC} $qa_status"
+    
     echo ""
     log_success "Deployment completed successfully!"
     echo ""
@@ -613,6 +728,19 @@ show_deployment_summary() {
     echo "2. Test CLI: claude-pm util info"
     echo "3. Check health: claude-pm health check"
     echo "4. View documentation: $CLAUDE_PM_PATH/docs/"
+    
+    if [[ "$qa_status" == "Installed" ]]; then
+        echo ""
+        echo -e "${BLUE}CMPM-QA Extension:${NC}"
+        echo "5. Test QA status: python3 -m claude_pm.cmpm_commands cmpm:qa-status"
+        echo "6. Run QA tests: python3 -m claude_pm.cmpm_commands cmpm:qa-test --browser"
+        echo "7. Validate QA: $CLAUDE_PM_PATH/cmpm-qa/scripts/validate-install.sh"
+    elif [[ "$qa_status" == "Available" ]]; then
+        echo ""
+        echo -e "${BLUE}CMPM-QA Extension (available but not installed):${NC}"
+        echo "5. Install QA: $CLAUDE_PM_PATH/cmpm-qa/scripts/install-qa.sh"
+        echo "6. Validate QA: $CLAUDE_PM_PATH/cmpm-qa/scripts/validate-install.sh"
+    fi
     echo ""
     echo -e "${BLUE}For support:${NC}"
     echo "- Run: claude-pm util doctor"

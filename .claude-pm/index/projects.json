@@ -1,0 +1,26 @@
+{
+  "version": "4.3.0",
+  "lastUpdated": "2025-07-09 16:00:27",
+  "currentProject": "/Users/masa/Projects/claude-multiagent-pm",
+  "projects": {
+    "project-1752091228": {
+      "name": "Claude PM Framework",
+      "path": "/Users/masa/Projects/claude-multiagent-pm",
+      "type": "claude-pm-framework",
+      "lastAccess": "2025-07-09 16:00:29",
+      "health": "operational",
+      "dependencies": {
+        "node": "detected",
+        "python": "detected"
+      },
+      "aiTrackdownTools": {
+        "available": true,
+        "version": "1.0.1",
+        "localCli": true,
+        "configPath": "/Users/masa/Projects/claude-multiagent-pm/.ai-trackdown"
+      },
+      "projectData": {},
+      "statistics": {}
+    }
+  }
+}

@@ -334,7 +334,7 @@ aitrackdown --version
 After installation, the framework will automatically detect and configure ai-trackdown-tools:
 
 ```yaml
-# ~/.claude-multiagent-pm/config/framework.yaml
+# ~/.claude-pm/config/framework.yaml
 ai_trackdown_tools:
   enabled: true                    # Automatically enabled when installed
   cli_command: "aitrackdown"       # Primary command
@@ -769,13 +769,13 @@ claude-multiagent-pm-service start
 claude-pm setup
 
 # Or manual configuration
-mkdir -p ~/.claude-multiagent-pm/{config,logs,agents/user-defined,templates}
+mkdir -p ~/.claude-pm/{config,logs,agents/user-defined,templates}
 ```
 
 **Create basic configuration:**
 ```bash
 # Create configuration file
-cat > ~/.claude-multiagent-pm/config/config.yaml << 'EOF'
+cat > ~/.claude-pm/config/config.yaml << 'EOF'
 version: "4.2.0"
 python_cmd: "python3"
 memory_service_url: "http://localhost:8002"
@@ -783,8 +783,8 @@ max_concurrent_agents: 5
 default_agent_timeout: 300
 log_level: "info"
 workspace_dir: "~/Projects/claude-pm-workspace"
-user_agents_dir: "~/.claude-multiagent-pm/agents/user-defined"
-templates_dir: "~/.claude-multiagent-pm/templates"
+user_agents_dir: "~/.claude-pm/agents/user-defined"
+templates_dir: "~/.claude-pm/templates"
 EOF
 ```
 
@@ -813,9 +813,9 @@ EOF
 cat >> ~/.bashrc << 'EOF'
 # Claude PM Framework Configuration
 export CLAUDE_PM_HOME=~/Projects/claude-pm-workspace
-export CLAUDE_PM_CONFIG_DIR=~/.claude-multiagent-pm
-export CLAUDE_PM_USER_AGENTS_DIR=~/.claude-multiagent-pm/agents/user-defined
-export CLAUDE_PM_TEMPLATES_DIR=~/.claude-multiagent-pm/templates
+export CLAUDE_PM_CONFIG_DIR=~/.claude-pm
+export CLAUDE_PM_USER_AGENTS_DIR=~/.claude-pm/agents/user-defined
+export CLAUDE_PM_TEMPLATES_DIR=~/.claude-pm/templates
 export CLAUDE_PM_LOG_LEVEL=info
 export CLAUDE_PM_MEMORY_URL=http://localhost:8002
 export CLAUDE_PM_MAX_AGENTS=5
@@ -1169,8 +1169,8 @@ pip install claude-multiagent-pm[production]
 claude-multiagent-pm-service setup --production
 
 # Configure logging
-mkdir -p ~/.claude-multiagent-pm/{config,logs,agents/user-defined,templates}
-echo "log_level: info" >> ~/.claude-multiagent-pm/config/config.yaml
+mkdir -p ~/.claude-pm/{config,logs,agents/user-defined,templates}
+echo "log_level: info" >> ~/.claude-pm/config/config.yaml
 ```
 
 **Team Setup:**
@@ -1200,7 +1200,7 @@ python3 -c "import claude_pm; print('Framework OK')" || echo "Framework not avai
 curl -s http://localhost:8002/health || echo "Memory service not running"
 
 # Check permissions
-ls -la ~/.claude-multiagent-pm/
+ls -la ~/.claude-pm/
 ls -la $(which claude-pm) || echo "CLI not in PATH"
 
 # Check dependencies
@@ -1219,8 +1219,8 @@ echo 'export PATH=$PATH:~/.npm-global/bin' >> ~/.bashrc
 **Problem: Permission denied**
 ```bash
 # Fix permissions
-sudo chown -R $(whoami) ~/.claude-multiagent-pm/
-chmod +x ~/.claude-multiagent-pm/bin/*
+sudo chown -R $(whoami) ~/.claude-pm/
+chmod +x ~/.claude-pm/bin/*
 ```
 
 **Problem: Service not starting**

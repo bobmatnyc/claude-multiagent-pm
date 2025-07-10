@@ -11,8 +11,6 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
 from ..core.base_agent import BaseAgent
-from ..core.memory import MemoryManager
-from ..services.ai_trackdown import AITrackdownService
 
 
 @dataclass
@@ -59,7 +57,7 @@ class PMAgent(BaseAgent):
     5. Communicates with stakeholders and reports status
     """
     
-    def __init__(self, memory_manager: MemoryManager, trackdown_service: AITrackdownService):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         super().__init__(
             agent_id="pm-agent",
             agent_type="pm",
@@ -72,10 +70,10 @@ class PMAgent(BaseAgent):
                 "resource_allocation",
                 "risk_management",
                 "quality_assurance"
-            ]
+            ],
+            config=config,
+            tier="system"
         )
-        self.memory_manager = memory_manager
-        self.trackdown_service = trackdown_service
         
         # PM-specific configurations
         self.prioritization_weights = {
@@ -119,13 +117,8 @@ class PMAgent(BaseAgent):
                 "success_criteria": self._extract_success_criteria(content)
             }
             
-            # Store analysis in memory
-            await self.memory_manager.store_memory(
-                agent_id=self.agent_id,
-                category="PROJECT_PLAN",
-                content=f"Project analysis: {project_analysis['project_type']}",
-                context={"analysis": project_analysis}
-            )
+            # Store analysis in memory (placeholder for memory integration)
+            self.logger.info(f"Project analysis completed: {project_analysis['project_type']}")
             
             return project_analysis
             
@@ -376,13 +369,8 @@ class PMAgent(BaseAgent):
                 success_metrics=project_analysis["success_criteria"]
             )
             
-            # Store project plan
-            await self.memory_manager.store_memory(
-                agent_id=self.agent_id,
-                category="PROJECT_PLAN",
-                content=f"Project plan created: {project_name}",
-                context={"plan": project_plan.__dict__}
-            )
+            # Store project plan (placeholder for memory integration)
+            self.logger.info(f"Project plan created: {project_name}")
             
             return project_plan
             
@@ -646,24 +634,16 @@ class PMAgent(BaseAgent):
     async def _create_epic_ticket(self, epic: Epic) -> str:
         """Create a tracking ticket for an epic"""
         try:
-            ticket = await self.trackdown_service.create_epic(
-                title=epic.title,
-                description=epic.description,
-                priority=epic.priority,
-                labels=["epic", "autonomous", epic.id.lower()]
-            )
+            # Placeholder for trackdown service integration
+            self.logger.info(f"Creating epic ticket: {epic.title}")
             
-            # Create tasks for the epic
-            for criterion in epic.acceptance_criteria:
-                await self.trackdown_service.create_task(
-                    title=f"Implement: {criterion}",
-                    description=f"Acceptance criteria for {epic.title}",
-                    epic_id=ticket["id"],
-                    priority=epic.priority,
-                    labels=["task", "acceptance-criteria"]
-                )
+            # Generate placeholder ticket ID
+            ticket_id = f"EP-{datetime.now().strftime('%Y%m%d%H%M%S')}"
             
-            return ticket["id"]
+            # Log epic creation
+            self.logger.info(f"Epic {ticket_id} created: {epic.title}")
+            
+            return ticket_id
             
         except Exception as e:
             self.logger.error(f"Error creating epic ticket: {e}")
@@ -801,11 +781,8 @@ class PMAgent(BaseAgent):
     async def _update_epic_status(self, epic_id: str, status: str) -> None:
         """Update epic status in tracking system"""
         try:
-            await self.trackdown_service.update_epic_status(
-                epic_id, 
-                status,
-                f"Epic {epic_id} status updated to {status}"
-            )
+            # Placeholder for trackdown service integration
+            self.logger.info(f"Epic {epic_id} status updated to {status}")
         except Exception as e:
             self.logger.error(f"Error updating epic status: {e}")
     
@@ -816,13 +793,8 @@ class PMAgent(BaseAgent):
         # Log the blocker
         self.logger.warning(f"Epic {epic.id} blocked: {blocker_reason}")
         
-        # Store blocker information
-        await self.memory_manager.store_memory(
-            agent_id=self.agent_id,
-            category="RISK_ASSESSMENT",
-            content=f"Epic blocker: {epic.id} - {blocker_reason}",
-            context={"epic_id": epic.id, "blocker": blocker_reason}
-        )
+        # Store blocker information (placeholder for memory integration)
+        self.logger.warning(f"Epic blocker recorded: {epic.id} - {blocker_reason}")
         
         # Attempt to resolve or escalate
         # For now, we'll just log it
@@ -840,3 +812,34 @@ class PMAgent(BaseAgent):
             return "completed"
         else:
             return "in_progress"
+    
+    async def _execute_operation(
+        self, 
+        operation: str, 
+        context: Optional[Dict[str, Any]] = None,
+        **kwargs
+    ) -> Any:
+        """Execute PM Agent operations."""
+        context = context or {}
+        
+        if operation == "analyze_project_requirements":
+            design_doc_path = kwargs.get("design_doc_path") or context.get("design_doc_path")
+            if not design_doc_path:
+                raise ValueError("design_doc_path required for analyze_project_requirements")
+            return await self.analyze_project_requirements(design_doc_path)
+        
+        elif operation == "create_project_plan":
+            project_analysis = kwargs.get("project_analysis") or context.get("project_analysis")
+            project_name = kwargs.get("project_name") or context.get("project_name")
+            if not project_analysis or not project_name:
+                raise ValueError("project_analysis and project_name required for create_project_plan")
+            return await self.create_project_plan(project_analysis, project_name)
+        
+        elif operation == "orchestrate_project_execution":
+            project_plan = kwargs.get("project_plan") or context.get("project_plan")
+            if not project_plan:
+                raise ValueError("project_plan required for orchestrate_project_execution")
+            return await self.orchestrate_project_execution(project_plan)
+        
+        else:
+            raise ValueError(f"Unknown operation: {operation}")

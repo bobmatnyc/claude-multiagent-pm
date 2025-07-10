@@ -8,7 +8,7 @@ echo "======================================================"
 
 # Check if we're in the correct directory
 if [[ ! -f "CLAUDE.md" ]]; then
-    echo "❌ Error: Must be run from claude-multiagent-pm directory"
+    echo "❌ Error: Must be run from claude-pm directory"
     exit 1
 fi
 

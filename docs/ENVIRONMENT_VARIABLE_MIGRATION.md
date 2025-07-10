@@ -2,140 +2,166 @@
 
 ## Overview
 
-The Claude Multi-Agent PM Framework has migrated from `CLAUDE_PM_` to `CLAUDE_MULTIAGENT_PM_` environment variable prefix to better reflect the project's expanded scope and modernize the configuration system.
+The Claude PM Framework has migrated from `CLAUDE_PM_` environment variable prefix to `CLAUDE_MULTIAGENT_PM_` prefix for improved compatibility and naming consistency.
+
+## Migration Status
+
+✅ **COMPLETED** - Migration tools and validation systems are ready  
+✅ **BACKWARD COMPATIBLE** - Legacy variables still work with deprecation warnings  
+✅ **VALIDATED** - Both old and new variables tested and confirmed working  
+
+## Quick Migration
+
+To migrate your environment variables immediately:
+
+```bash
+# 1. Generate migration commands
+python3 scripts/migrate_env_variables.py
+
+# 2. Apply migration (choose option 1 for testing, option 2 for permanent)
+scripts/setup_env_migration.sh
+
+# 3. Validate migration worked
+python3 scripts/validate_env_migration.py
+```
 
 ## Migration Timeline
 
-- **Current Version**: Full backward compatibility with legacy `CLAUDE_PM_` variables
-- **v4.0**: Legacy `CLAUDE_PM_` variables will be deprecated and removed
-- **Recommended Action**: Migrate to new `CLAUDE_MULTIAGENT_PM_` prefix immediately
+- **2025-07-10**: Migration tools created and validated
+- **Current**: Legacy variables work with deprecation warnings
+- **Recommended**: Migrate to new variables as soon as convenient
+- **Future**: Legacy variable support may be removed in future major versions
 
-## Variable Mapping
-
-### Core Framework Variables
+## Environment Variables Migrated
 
 | Legacy Variable | New Variable | Description |
-|---|---|---|
+|-----------------|--------------|-------------|
 | `CLAUDE_PM_ROOT` | `CLAUDE_MULTIAGENT_PM_ROOT` | Framework root directory |
-| `CLAUDE_PM_LOG_LEVEL` | `CLAUDE_MULTIAGENT_PM_LOG_LEVEL` | Logging level |
-| `CLAUDE_PM_DEBUG` | `CLAUDE_MULTIAGENT_PM_DEBUG` | Debug mode |
-| `CLAUDE_PM_VERBOSE` | `CLAUDE_MULTIAGENT_PM_VERBOSE` | Verbose logging |
+| `CLAUDE_PM_MANAGED` | `CLAUDE_MULTIAGENT_PM_MANAGED` | Managed projects directory |
+| `CLAUDE_PM_MEMORY_ENABLED` | `CLAUDE_MULTIAGENT_PM_MEMORY_ENABLED` | Enable memory service integration |
+| `CLAUDE_PM_MEMORY_SERVICE_URL` | `CLAUDE_MULTIAGENT_PM_MEMORY_SERVICE_URL` | Memory service URL |
+| `CLAUDE_PM_MEMORY_SERVICE_TIMEOUT` | `CLAUDE_MULTIAGENT_PM_MEMORY_SERVICE_TIMEOUT` | Memory service timeout |
+| `CLAUDE_PM_MEMORY_FALLBACK_MODE` | `CLAUDE_MULTIAGENT_PM_MEMORY_FALLBACK_MODE` | Memory service fallback mode |
+| `CLAUDE_PM_MEMORY_NAMESPACE` | `CLAUDE_MULTIAGENT_PM_MEMORY_NAMESPACE` | Memory service namespace |
+| `CLAUDE_PM_MEMORY_CACHE_TTL` | `CLAUDE_MULTIAGENT_PM_MEMORY_CACHE_TTL` | Memory cache TTL |
+| `CLAUDE_PM_MEMORY_MAX_CACHE_SIZE` | `CLAUDE_MULTIAGENT_PM_MEMORY_MAX_CACHE_SIZE` | Memory cache max size |
+| `CLAUDE_PM_MEMORY_BATCH_SIZE` | `CLAUDE_MULTIAGENT_PM_MEMORY_BATCH_SIZE` | Memory batch size |
+| `CLAUDE_PM_PROJECT_CONTEXT_ENABLED` | `CLAUDE_MULTIAGENT_PM_PROJECT_CONTEXT_ENABLED` | Enable project context |
+| `CLAUDE_PM_GLOBAL_PATTERNS_ENABLED` | `CLAUDE_MULTIAGENT_PM_GLOBAL_PATTERNS_ENABLED` | Enable global patterns |
+| `CLAUDE_PM_CROSS_PROJECT_LEARNING` | `CLAUDE_MULTIAGENT_PM_CROSS_PROJECT_LEARNING` | Enable cross-project learning |
+| `CLAUDE_PM_MANAGED_PROJECTS` | `CLAUDE_MULTIAGENT_PM_MANAGED_PROJECTS` | List of managed projects |
+| `CLAUDE_PM_SPECIALIZED_MEMORY_PROJECTS` | `CLAUDE_MULTIAGENT_PM_SPECIALIZED_MEMORY_PROJECTS` | Projects with specialized memory |
+| `CLAUDE_PM_MEMORY_INTEGRATED_PROJECTS` | `CLAUDE_MULTIAGENT_PM_MEMORY_INTEGRATED_PROJECTS` | Projects with memory integration |
+| `CLAUDE_PM_MEMORY_STATUS` | `CLAUDE_MULTIAGENT_PM_MEMORY_STATUS` | Memory service status |
+| `CLAUDE_PM_SESSION_MEMORY_ID` | `CLAUDE_MULTIAGENT_PM_SESSION_MEMORY_ID` | Session memory identifier |
+| `CLAUDE_PM_CURRENT_PROJECT` | `CLAUDE_MULTIAGENT_PM_CURRENT_PROJECT` | Current active project |
+| `CLAUDE_PM_PROJECT_MEMORY_ENABLED` | `CLAUDE_MULTIAGENT_PM_PROJECT_MEMORY_ENABLED` | Enable project memory |
+| `CLAUDE_PM_FRAMEWORK_STATUS` | `CLAUDE_MULTIAGENT_PM_FRAMEWORK_STATUS` | Framework status |
+| `CLAUDE_PM_MANAGED_STATUS` | `CLAUDE_MULTIAGENT_PM_MANAGED_STATUS` | Managed projects status |
 
-### Service Configuration
+## Migration Tools
 
-| Legacy Variable | New Variable | Description |
-|---|---|---|
-| `CLAUDE_PM_ENABLE_HEALTH_MONITORING` | `CLAUDE_MULTIAGENT_PM_ENABLE_HEALTH_MONITORING` | Health monitoring |
-| `CLAUDE_PM_HEALTH_CHECK_INTERVAL` | `CLAUDE_MULTIAGENT_PM_HEALTH_CHECK_INTERVAL` | Health check interval |
-| `CLAUDE_PM_ENABLE_METRICS` | `CLAUDE_MULTIAGENT_PM_ENABLE_METRICS` | Metrics collection |
-| `CLAUDE_PM_METRICS_INTERVAL` | `CLAUDE_MULTIAGENT_PM_METRICS_INTERVAL` | Metrics interval |
-| `CLAUDE_PM_GRACEFUL_SHUTDOWN_TIMEOUT` | `CLAUDE_MULTIAGENT_PM_GRACEFUL_SHUTDOWN_TIMEOUT` | Shutdown timeout |
-| `CLAUDE_PM_STARTUP_TIMEOUT` | `CLAUDE_MULTIAGENT_PM_STARTUP_TIMEOUT` | Startup timeout |
+### 1. Migration Script (`scripts/migrate_env_variables.py`)
 
-### Memory Integration
-
-| Legacy Variable | New Variable | Description |
-|---|---|---|
-| `CLAUDE_PM_MEMORY_HOST` | `CLAUDE_MULTIAGENT_PM_MEMORY_HOST` | Memory service host |
-| `CLAUDE_PM_MEMORY_PORT` | `CLAUDE_MULTIAGENT_PM_MEMORY_PORT` | Memory service port |
-| `CLAUDE_PM_MEMORY_TIMEOUT` | `CLAUDE_MULTIAGENT_PM_MEMORY_TIMEOUT` | Memory service timeout |
-| `CLAUDE_PM_MEMORY_API_KEY` | `CLAUDE_MULTIAGENT_PM_MEMORY_API_KEY` | Memory service API key |
-
-### Alerting & Monitoring
-
-| Legacy Variable | New Variable | Description |
-|---|---|---|
-| `CLAUDE_PM_ENABLE_ALERTING` | `CLAUDE_MULTIAGENT_PM_ENABLE_ALERTING` | Enable alerting |
-| `CLAUDE_PM_ALERT_THRESHOLD` | `CLAUDE_MULTIAGENT_PM_ALERT_THRESHOLD` | Alert threshold |
-| `CLAUDE_PM_EMAIL_ALERTS` | `CLAUDE_MULTIAGENT_PM_EMAIL_ALERTS` | Email alerts |
-| `CLAUDE_PM_SLACK_ALERTS` | `CLAUDE_MULTIAGENT_PM_SLACK_ALERTS` | Slack alerts |
-
-### Feature Flags
-
-| Legacy Variable | New Variable | Description |
-|---|---|---|
-| `CLAUDE_PM_EXPERIMENTAL_FEATURES` | `CLAUDE_MULTIAGENT_PM_EXPERIMENTAL_FEATURES` | Experimental features |
-| `CLAUDE_PM_LANGGRAPH_ENABLED` | `CLAUDE_MULTIAGENT_PM_LANGGRAPH_ENABLED` | LangGraph support |
-| `CLAUDE_PM_MULTI_AGENT_PARALLEL` | `CLAUDE_MULTIAGENT_PM_MULTI_AGENT_PARALLEL` | Parallel agents |
-
-### Performance Tuning
-
-| Legacy Variable | New Variable | Description |
-|---|---|---|
-| `CLAUDE_PM_MAX_WORKERS` | `CLAUDE_MULTIAGENT_PM_MAX_WORKERS` | Maximum workers |
-| `CLAUDE_PM_MEMORY_LIMIT` | `CLAUDE_MULTIAGENT_PM_MEMORY_LIMIT` | Memory limit |
-| `CLAUDE_PM_TASK_TIMEOUT` | `CLAUDE_MULTIAGENT_PM_TASK_TIMEOUT` | Task timeout |
-
-### Security
-
-| Legacy Variable | New Variable | Description |
-|---|---|---|
-| `CLAUDE_PM_SECURITY_MODE` | `CLAUDE_MULTIAGENT_PM_SECURITY_MODE` | Security mode |
-| `CLAUDE_PM_CORS_ENABLED` | `CLAUDE_MULTIAGENT_PM_CORS_ENABLED` | CORS enabled |
-| `CLAUDE_PM_SESSION_SECRET` | `CLAUDE_MULTIAGENT_PM_SESSION_SECRET` | Session secret |
-
-## Migration Steps
-
-### Step 1: Update Environment Files
-
-1. **Development Environment**
-   ```bash
-   # Update .env or development.env
-   cp deployment/environments/development.env .env
-   ```
-
-2. **Production Environment**
-   ```bash
-   # Update production.env
-   # Edit deployment/environments/production.env
-   ```
-
-3. **Staging Environment**
-   ```bash
-   # Update staging.env
-   # Edit deployment/environments/staging.env
-   ```
-
-### Step 2: Update Docker Configuration
-
-For Docker deployments:
-```bash
-# Update docker.env
-# Edit deployment/environments/docker.env
-```
-
-### Step 3: Update Scripts and Automation
-
-Update any deployment scripts, CI/CD pipelines, or automation that sets environment variables:
+Comprehensive migration tool that:
+- Scans current environment for `CLAUDE_PM_` variables
+- Generates migration commands for new variables  
+- Scans shell configuration files for variables
+- Creates backup files before modifications
+- Validates migration feasibility
 
 ```bash
-# Old way
-export CLAUDE_PM_LOG_LEVEL=DEBUG
-export CLAUDE_PM_DEBUG=true
+# Generate migration commands
+python3 scripts/migrate_env_variables.py
 
-# New way
-export CLAUDE_MULTIAGENT_PM_LOG_LEVEL=DEBUG
-export CLAUDE_MULTIAGENT_PM_DEBUG=true
+# Dry run mode (no changes)
+python3 scripts/migrate_env_variables.py --dry-run
+
+# Generate report only
+python3 scripts/migrate_env_variables.py --report-only
+
+# Validate migration feasibility
+python3 scripts/migrate_env_variables.py --validate-only
 ```
 
-### Step 4: Test Migration
+### 2. Setup Script (`scripts/setup_env_migration.sh`)
 
-1. **Validate Configuration**
+Interactive setup script that:
+- Applies migration to current session (temporary)
+- Adds migration to shell configuration files (permanent)
+- Shows migration commands for review
+- Creates backups of configuration files
+
+```bash
+# Run interactive setup
+scripts/setup_env_migration.sh
+```
+
+### 3. Validation Script (`scripts/validate_env_migration.py`)
+
+Comprehensive validation that:
+- Tests framework with new variables (should have no warnings)
+- Tests framework with legacy variables (should have warnings)
+- Confirms migration eliminates deprecation warnings
+- Generates validation report
+
+```bash
+# Validate migration works correctly
+python3 scripts/validate_env_migration.py
+```
+
+## Migration Process
+
+### Step-by-Step Migration
+
+1. **Assessment**
    ```bash
-   # Check configuration is loaded correctly
-   claude-pm config validate
+   # Check current environment variables
+   env | grep CLAUDE_PM_
+   
+   # Generate migration report
+   python3 scripts/migrate_env_variables.py --report-only
    ```
 
-2. **Run Health Check**
+2. **Testing**
    ```bash
-   # Verify services start correctly
-   claude-pm health check
+   # Test migration feasibility
+   python3 scripts/migrate_env_variables.py --validate-only
+   
+   # Run validation suite
+   python3 scripts/validate_env_migration.py
    ```
 
-3. **Test Memory Integration**
+3. **Temporary Migration** (for testing)
    ```bash
-   # Test memory service connectivity
-   claude-pm memory test
+   # Apply to current session only
+   scripts/setup_env_migration.sh
+   # Choose option 1
+   ```
+
+4. **Permanent Migration**
+   ```bash
+   # Apply to shell configuration
+   scripts/setup_env_migration.sh
+   # Choose option 2
+   
+   # Restart terminal or source config
+   source ~/.bashrc  # or ~/.zshrc
+   ```
+
+5. **Verification**
+   ```bash
+   # Verify new variables are set
+   env | grep CLAUDE_MULTIAGENT_PM_
+   
+   # Test framework works without warnings
+   python3 -c "from claude_pm.core.config import Config; Config()"
+   ```
+
+6. **Cleanup** (optional)
+   ```bash
+   # Remove legacy variables (after confirming everything works)
+   # See env_migration_commands.sh for unset commands
    ```
 
 ## Backward Compatibility

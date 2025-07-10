@@ -835,7 +835,7 @@ def project_info(project_name, format):
                 
                 if not summary:
                     console.print(f"[red]❌ Project '{project_name}' not found in index[/red]")
-                    console.print("Run 'claude-multiagent-pm project-index refresh' to update index")
+                    console.print("Run 'claude-pm project-index refresh' to update index")
                     return
                 
                 # Display summary
@@ -965,7 +965,7 @@ def search_projects(query, type, tech, limit, mode):
             
             if not results:
                 console.print(f"[yellow]No projects found matching: {query}[/yellow]")
-                console.print("Try a broader search or run 'claude-multiagent-pm project-index refresh' to update index")
+                console.print("Try a broader search or run 'claude-pm project-index refresh' to update index")
                 return
             
             console.print(f"[bold green]Found {len(results)} matching projects:[/bold green]\n")
@@ -1567,7 +1567,7 @@ def environment(env):
         
         if env_data['status'] == 'Not configured':
             console.print(f"\n[yellow]⚠️ Environment '{env}' requires configuration[/yellow]")
-            console.print("Use 'claude-multiagent-pm deploy start' to configure this environment")
+            console.print("Use 'claude-pm deploy start' to configure this environment")
     else:
         console.print(f"[red]Environment '{env}' not found[/red]")
         console.print(f"Available environments: {', '.join(environments.keys())}")
@@ -2053,15 +2053,15 @@ npm run lint → make lint
 make setup-dev → Complete development setup
 make install-ai → Install AI dependencies
 make type-check → Run type checking
-claude-multiagent-pm service start → Start all services
-claude-multiagent-pm project list → List all projects
-claude-multiagent-pm memory search → Search project memories
+claude-pm service start → Start all services
+claude-pm project list → List all projects
+claude-pm memory search → Search project memories
 
 [bold yellow]Development workflow:[/bold yellow]
 1. source .venv/bin/activate (activate virtual environment)
 2. make install-dev (install dependencies)
-3. claude-multiagent-pm service start (start services)
-4. claude-multiagent-pm health check (verify health)
+3. claude-pm service start (start services)
+4. claude-pm health check (verify health)
 5. make test (run tests)
 
 [bold yellow]Build system:[/bold yellow]
@@ -2101,7 +2101,7 @@ def doctor():
     
     # Directory structure check
     base_path = Path.home() / "Projects"
-    claude_pm_path = base_path / "claude-multiagent-pm"
+    claude_pm_path = base_path / "claude-pm"
     managed_path = base_path / "managed"
     
     checks.append(("Base directory", base_path.exists(), f"Create {base_path}"))
@@ -2135,7 +2135,7 @@ def doctor():
         console.print("\n[bold green]✅ All checks passed! Claude Multi-Agent PM Framework is ready.[/bold green]")
     else:
         console.print("\n[bold yellow]⚠️ Some checks failed. Please address the issues above.[/bold yellow]")
-        console.print("Run 'claude-multiagent-pm util migrate' for migration assistance.")
+        console.print("Run 'claude-pm util migrate' for migration assistance.")
 
 
 # M01-044 Unified Health Dashboard Helper Functions

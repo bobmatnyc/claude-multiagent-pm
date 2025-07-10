@@ -18,16 +18,16 @@ const CLAUDE_PM_VERSION = require('../package.json').version;
  * Get the framework installation path
  */
 function getFrameworkPath() {
-    // First check if we're running from NPM package
-    const packagePath = path.join(__dirname, '..', 'lib', 'framework');
-    if (fs.existsSync(packagePath)) {
-        return packagePath;
+    // First check for direct claude_pm directory (correct structure)
+    const directPath = path.join(__dirname, '..');
+    if (fs.existsSync(path.join(directPath, 'claude_pm'))) {
+        return directPath;
     }
     
     // Check for local installation
     const localPath = path.join(process.cwd(), 'claude_pm');
     if (fs.existsSync(localPath)) {
-        return localPath;
+        return process.cwd();
     }
     
     // Check for global installation in user home
@@ -37,7 +37,7 @@ function getFrameworkPath() {
     }
     
     console.error('❌ Claude PM Framework not found');
-    console.error('Please run: npm install -g claude-multiagent-pm');
+    console.error('Please run: npm install -g claude-pm');
     process.exit(1);
 }
 
@@ -104,7 +104,7 @@ Examples:
   claude-pm service start all
 
 For more information, visit:
-https://github.com/bobmatnyc/claude-multiagent-pm
+https://github.com/bobmatnyc/claude-pm
 `);
 }
 
@@ -129,22 +129,24 @@ function main() {
     const pythonCmd = validatePython();
     const frameworkPath = getFrameworkPath();
     
-    // Construct path to Python CLI
-    const cliPath = path.join(frameworkPath, 'claude_pm', 'cli.py');
+    // Construct path to Python CLI module
+    const cliModulePath = path.join(frameworkPath, 'claude_pm');
     
-    if (!fs.existsSync(cliPath)) {
-        console.error(`❌ Framework CLI not found at: ${cliPath}`);
+    if (!fs.existsSync(cliModulePath)) {
+        console.error(`❌ Framework CLI module not found at: ${cliModulePath}`);
         process.exit(1);
     }
     
-    // Execute Python CLI with all arguments
-    const pythonProcess = spawn(pythonCmd, [cliPath, ...args], {
+    // Execute Python CLI module with all arguments
+    const pythonProcess = spawn(pythonCmd, ['-m', 'claude_pm.cli', ...args], {
         stdio: 'inherit',
         env: {
             ...process.env,
+            PYTHONPATH: frameworkPath + (process.env.PYTHONPATH ? ':' + process.env.PYTHONPATH : ''),
             CLAUDE_PM_FRAMEWORK_PATH: frameworkPath,
             CLAUDE_PM_VERSION: CLAUDE_PM_VERSION
-        }
+        },
+        cwd: frameworkPath
     });
     
     pythonProcess.on('close', (code) => {

@@ -239,7 +239,7 @@ service.start()
 claude-multiagent-pm-service start
 
 # Check logs for detailed error information
-tail -f ~/.claude-multiagent-pm/logs/agent-orchestrator.log
+tail -f ~/.claude-pm/logs/agent-orchestrator.log
 ```
 
 #### 2. Agent Communication Failures
@@ -337,7 +337,7 @@ watch -n 5 'ps aux | grep claude-pm'
 
 **Symptoms**:
 ```bash
-Error: Invalid configuration in ~/.claude-multiagent-pm/config/config.yaml
+Error: Invalid configuration in ~/.claude-pm/config/config.yaml
 JSONDecodeError: Expecting ',' delimiter: line 5 column 4
 ```
 
@@ -347,7 +347,7 @@ JSONDecodeError: Expecting ',' delimiter: line 5 column 4
 python3 -c "
 import json
 try:
-    with open('~/.claude-multiagent-pm/config/config.yaml', 'r') as f:
+    with open('~/.claude-pm/config/config.yaml', 'r') as f:
         config = json.load(f)
     print('✓ Configuration valid')
     print(json.dumps(config, indent=2))
@@ -356,16 +356,16 @@ except Exception as e:
 "
 
 # Check configuration file permissions
-ls -la ~/.claude-multiagent-pm/config/config.yaml
+ls -la ~/.claude-pm/config/config.yaml
 ```
 
 **Solution**:
 ```bash
 # Create backup and fix configuration
-cp ~/.claude-multiagent-pm/config/config.yaml ~/.claude-multiagent-pm/config/config.yaml.backup
+cp ~/.claude-pm/config/config.yaml ~/.claude-pm/config/config.yaml.backup
 
 # Create new valid configuration
-cat > ~/.claude-multiagent-pm/config/config.yaml << 'EOF'
+cat > ~/.claude-pm/config/config.yaml << 'EOF'
 {
   "version": "4.2.0",
   "python_cmd": "python3",
@@ -411,7 +411,7 @@ export CLAUDE_PM_MAX_AGENTS=5
 cat >> ~/.bashrc << 'EOF'
 # Claude PM Framework Configuration
 export CLAUDE_PM_HOME=~/Projects/claude-pm-workspace
-export CLAUDE_PM_CONFIG_DIR=~/.claude-multiagent-pm
+export CLAUDE_PM_CONFIG_DIR=~/.claude-pm
 export CLAUDE_PM_LOG_LEVEL=info
 export CLAUDE_PM_MEMORY_URL=http://localhost:8002
 export CLAUDE_PM_MAX_AGENTS=5
@@ -761,7 +761,7 @@ aitrackdown --help
 aitrackdown status
 
 # Check configuration
-cat ~/.claude-multiagent-pm/config/config.yaml | grep -A 10 ai_trackdown_tools
+cat ~/.claude-pm/config/config.yaml | grep -A 10 ai_trackdown_tools
 ```
 
 **Solution 1: Installation Issues**
@@ -792,10 +792,10 @@ echo $PATH | grep -o "$(npm config get prefix)/bin"
 **Solution 3: Configuration Issues**
 ```bash
 # Check framework configuration
-cat ~/.claude-multiagent-pm/config/config.yaml
+cat ~/.claude-pm/config/config.yaml
 
 # Update ai-trackdown-tools configuration
-cat > ~/.claude-multiagent-pm/config/ai-trackdown-tools.yaml << 'EOF'
+cat > ~/.claude-pm/config/ai-trackdown-tools.yaml << 'EOF'
 ai_trackdown_tools:
   enabled: true
   cli_command: "aitrackdown"
@@ -816,11 +816,11 @@ aitrackdown status
 **Solution 4: Template Issues**
 ```bash
 # Check templates directory
-ls -la ~/.claude-multiagent-pm/templates/
+ls -la ~/.claude-pm/templates/
 ls -la /Users/masa/Projects/claude-multiagent-pm/templates/
 
 # Restore default templates
-cp /Users/masa/Projects/claude-multiagent-pm/templates/*.yaml ~/.claude-multiagent-pm/templates/
+cp /Users/masa/Projects/claude-multiagent-pm/templates/*.yaml ~/.claude-pm/templates/
 
 # Test template creation
 aitrackdown epic create --title "Test Epic" --description "Test description"
@@ -846,7 +846,7 @@ aitrackdown status
 **Solution 6: Fallback Mode**
 ```bash
 # Enable fallback mode in configuration
-cat > ~/.claude-multiagent-pm/config/config.yaml << 'EOF'
+cat > ~/.claude-pm/config/config.yaml << 'EOF'
 ai_trackdown_tools:
   enabled: true
   fallback_method: "logging"
@@ -1098,42 +1098,42 @@ node scripts/automated-health-monitor.js monitor --no-alerts
 
 ```bash
 # System logs
-tail -f ~/.claude-multiagent-pm/logs/system.log
+tail -f ~/.claude-pm/logs/system.log
 
 # Agent logs
-tail -f ~/.claude-multiagent-pm/logs/agents.log
+tail -f ~/.claude-pm/logs/agents.log
 
 # Health monitor logs
 tail -f ~/Projects/Claude-PM/logs/health-monitor.log
 
 # Error logs
-tail -f ~/.claude-multiagent-pm/logs/errors.log
+tail -f ~/.claude-pm/logs/errors.log
 ```
 
 #### 2. Log Analysis Commands
 
 ```bash
 # Search for errors
-grep -i error ~/.claude-multiagent-pm/logs/*.log
+grep -i error ~/.claude-pm/logs/*.log
 
 # Find performance issues
-grep -i "timeout\|slow\|performance" ~/.claude-multiagent-pm/logs/*.log
+grep -i "timeout\|slow\|performance" ~/.claude-pm/logs/*.log
 
 # Analyze patterns
-awk '/ERROR/ {print $1, $2, $5}' ~/.claude-multiagent-pm/logs/system.log
+awk '/ERROR/ {print $1, $2, $5}' ~/.claude-pm/logs/system.log
 ```
 
 #### 3. Log Rotation and Management
 
 ```bash
 # Check log sizes
-du -h ~/.claude-multiagent-pm/logs/
+du -h ~/.claude-pm/logs/
 
 # Rotate logs manually
-logrotate -f ~/.claude-multiagent-pm/logrotate.conf
+logrotate -f ~/.claude-pm/logrotate.conf
 
 # Clean old logs
-find ~/.claude-multiagent-pm/logs/ -name "*.log.*" -mtime +7 -delete
+find ~/.claude-pm/logs/ -name "*.log.*" -mtime +7 -delete
 ```
 
 ---
@@ -1202,7 +1202,7 @@ pip install -e .
 #### Q: Where are configuration files stored?
 
 **A**: Configuration files are stored in:
-- **Global config**: `~/.claude-multiagent-pm/config/config.yaml`
+- **Global config**: `~/.claude-pm/config/config.yaml`
 - **Project config**: `./claude-pm-project.json`
 - **Environment variables**: Shell profile files
 - **Service config**: `/etc/claude-pm/` (production)
@@ -1218,7 +1218,7 @@ export CLAUDE_PM_MEMORY_URL=http://localhost:8003
 claude-pm config set memory_service_url http://localhost:8003
 
 # Or edit directly
-vim ~/.claude-multiagent-pm/config/config.yaml
+vim ~/.claude-pm/config/config.yaml
 ```
 
 #### Q: Can I disable certain features?
@@ -1306,16 +1306,16 @@ claude-multiagent-pm-service restart --memory-limit 512M
 **A**:
 ```bash
 # Backup current configuration
-cp -r ~/.claude-multiagent-pm ~/.claude-multiagent-pm.backup
+cp -r ~/.claude-pm ~/.claude-pm.backup
 
 # Remove configuration
-rm -rf ~/.claude-multiagent-pm
+rm -rf ~/.claude-pm
 
 # Reinitialize
 claude-pm init
 
 # Or restore from backup
-mv ~/.claude-multiagent-pm.backup ~/.claude-multiagent-pm
+mv ~/.claude-pm.backup ~/.claude-pm
 ```
 
 #### Q: What should I do if agents stop responding?
@@ -1329,7 +1329,7 @@ claude-pm status
 claude-multiagent-pm-service restart
 
 # Check logs for errors
-tail -f ~/.claude-multiagent-pm/logs/agents.log
+tail -f ~/.claude-pm/logs/agents.log
 
 # Force restart if needed
 pkill -f claude-pm
@@ -1348,10 +1348,10 @@ uname -a >> diagnostic-report.txt
 cat /etc/os-release >> diagnostic-report.txt
 
 # Include configuration
-cat ~/.claude-multiagent-pm/config/config.yaml >> diagnostic-report.txt
+cat ~/.claude-pm/config/config.yaml >> diagnostic-report.txt
 
 # Include recent logs
-tail -100 ~/.claude-multiagent-pm/logs/system.log >> diagnostic-report.txt
+tail -100 ~/.claude-pm/logs/system.log >> diagnostic-report.txt
 ```
 
 ---
@@ -1448,10 +1448,10 @@ env | grep CLAUDE_PM
 **Error Logs**:
 ```bash
 # Recent errors
-tail -100 ~/.claude-multiagent-pm/logs/errors.log
+tail -100 ~/.claude-pm/logs/errors.log
 
 # System logs
-tail -100 ~/.claude-multiagent-pm/logs/system.log
+tail -100 ~/.claude-pm/logs/system.log
 ```
 
 **Steps to Reproduce**:
@@ -1498,7 +1498,7 @@ claude-pm --performance-mode emergency
 **Configuration Rollback**:
 ```bash
 # Restore from backup
-cp ~/.claude-multiagent-pm.backup/config/config.yaml ~/.claude-multiagent-pm/config/config.yaml
+cp ~/.claude-pm.backup/config/config.yaml ~/.claude-pm/config/config.yaml
 
 # Restart services
 claude-multiagent-pm-service restart
@@ -1510,7 +1510,7 @@ claude-multiagent-pm-service restart
 pip install claude-multiagent-pm==4.0.0
 
 # Restore previous configuration
-git checkout HEAD~1 -- ~/.claude-multiagent-pm/
+git checkout HEAD~1 -- ~/.claude-pm/
 ```
 
 ---

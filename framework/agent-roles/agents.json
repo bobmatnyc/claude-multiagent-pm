@@ -145,6 +145,17 @@
         "memory_categories": ["pattern", "team"],
         "specializations": ["ui_design", "ux_design", "frontend_development", "user_research"],
         "context_keywords": ["ui", "ux", "frontend", "design", "user_experience"]
+      },
+      "version_control": {
+        "name": "Version Control Agent",
+        "type": "standard",
+        "file": "version-control-agent.md",
+        "description": "Git operations, branch management, semantic versioning, and conflict resolution",
+        "tools": ["git_operations", "version_management", "conflict_resolution"],
+        "coordination_role": "version_control_management",
+        "memory_categories": ["pattern", "project", "error"],
+        "specializations": ["git_operations", "branch_management", "semantic_versioning", "conflict_resolution", "merge_operations", "workflow_automation"],
+        "context_keywords": ["git", "version", "branch", "merge", "conflict", "repository", "versioning"]
       }
     },
     "user_defined_agents": {}

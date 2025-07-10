@@ -50,11 +50,11 @@ class TestHierarchicalAgentSystem:
         system_agents_dir.mkdir(parents=True)
         
         # Create user agents directory
-        user_agents_dir = user_home / ".claude-multiagent-pm" / "agents" / "user-defined"
+        user_agents_dir = user_home / ".claude-pm" / "agents" / "user-defined"
         user_agents_dir.mkdir(parents=True)
         
         # Create project agents directory
-        project_agents_dir = project_path / ".claude-multiagent-pm" / "agents" / "project-specific"
+        project_agents_dir = project_path / ".claude-pm" / "agents" / "project-specific"
         project_agents_dir.mkdir(parents=True)
         
         yield {

@@ -34,10 +34,10 @@ echo ""
 
 # Check Claude PM framework
 echo "📋 Claude PM Framework:"
-if [ -f ~/Projects/claude-multiagent-pm/scripts/health-check.sh ]; then
+if [ -f ~/Projects/claude-pm/scripts/health-check.sh ]; then
     echo "✅ AI-Trackdown Tools system available"
     if command -v aitrackdown &> /dev/null; then
-        TASK_COUNT=$(cd ~/Projects/claude-multiagent-pm && aitrackdown status --stats 2>/dev/null | grep -o "Total.*: [0-9]*" | tail -1 | grep -o "[0-9]*" || echo "0")
+        TASK_COUNT=$(cd ~/Projects/claude-pm && aitrackdown status --stats 2>/dev/null | grep -o "Total.*: [0-9]*" | tail -1 | grep -o "[0-9]*" || echo "0")
         echo "   📊 Active items: $TASK_COUNT"
     else
         echo "   ⚠️  AI-trackdown CLI not available"
@@ -53,4 +53,4 @@ echo "  • Development tools: Check individual status above"
 echo "  • Framework: Operational"
 echo ""
 echo "📚 For detailed service management:"
-echo "  cd ~/Projects/claude-multiagent-pm/ops && ls *.md"
+echo "  cd ~/Projects/claude-pm/ops && ls *.md"

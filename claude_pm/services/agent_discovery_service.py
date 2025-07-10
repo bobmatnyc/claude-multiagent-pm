@@ -124,7 +124,7 @@ class AgentDiscoveryService(BaseService):
         self.file_watcher = AgentFileWatcher(self)
         
         # Agent registry cache
-        self.agent_registry_path = project_path / ".claude-multiagent-pm" / "agents" / "registry.json"
+        self.agent_registry_path = project_path / ".claude-pm" / "agents" / "registry.json"
         
         self.logger.info(f"Initialized AgentDiscoveryService")
     
@@ -252,8 +252,8 @@ class AgentDiscoveryService(BaseService):
             # Monitor agent directories
             directories_to_monitor = [
                 self.framework_path / "claude_pm" / "agents",
-                self.user_home / ".claude-multiagent-pm" / "agents" / "user-defined",
-                self.project_path / ".claude-multiagent-pm" / "agents" / "project-specific"
+                self.user_home / ".claude-pm" / "agents" / "user-defined",
+                self.project_path / ".claude-pm" / "agents" / "project-specific"
             ]
             
             for directory in directories_to_monitor:

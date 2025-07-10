@@ -550,7 +550,7 @@ Each section serves specific learning objectives:
 - **Command Not Found**: Page 31
 
 #### Configuration Quick Reference
-- **Global Config**: `~/.claude-multiagent-pm/config/config.yaml` (Page 43)
+- **Global Config**: `~/.claude-pm/config/config.yaml` (Page 43)
 - **Project Config**: `./claude-pm-project.json` (Page 45)
 - **Agent Config**: `framework/agent-roles/agents.json` (Page 155)
 
@@ -855,7 +855,7 @@ Each section serves specific learning objectives:
 - **CLI Reference** → `docs/TICKETING_SYSTEM.md`
 
 #### Configuration Files
-- **Global Configuration** → `~/.claude-multiagent-pm/config/config.yaml`
+- **Global Configuration** → `~/.claude-pm/config/config.yaml`
 - **Project Configuration** → `./claude-pm-project.json`
 - **Agent Registry** → `framework/agent-roles/agents.json`
 - **Environment Variables** → Various `.env` files

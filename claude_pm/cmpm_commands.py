@@ -39,6 +39,7 @@ from .services.memory_service import MemoryService
 from .services.multi_agent_orchestrator import MultiAgentOrchestrator
 from .core.config import Config
 from .core.service_manager import ServiceManager
+from .agents.enhanced_qa_agent import EnhancedQAAgent, execute_qa_command
 
 
 console = Console()
@@ -209,6 +210,30 @@ class CMPMHealthMonitor:
                 "last_check": datetime.now().isoformat()
             }
     
+    async def get_qa_system_health(self) -> Dict[str, Any]:
+        """Get Enhanced QA Agent system health status."""
+        try:
+            qa_agent = EnhancedQAAgent()
+            qa_health = await qa_agent.get_qa_health_status()
+            
+            return {
+                "status": qa_health.get("status", "unknown"),
+                "service": "enhanced_qa_agent",
+                "health_score": qa_health.get("health_score", 0),
+                "browser_extension": qa_health.get("extension_health", {}).get("status", "unknown"),
+                "memory_integration": qa_health.get("memory_health", {}).get("status", "unknown"),
+                "agent_version": qa_health.get("agent_version", "unknown"),
+                "last_check": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            return {
+                "status": "error",
+                "service": "enhanced_qa_agent",
+                "error": str(e),
+                "last_check": datetime.now().isoformat()
+            }
+    
     def calculate_system_reliability_score(self, health_data: Dict[str, Any]) -> int:
         """Calculate system reliability score (0-100)."""
         total_components = 0
@@ -241,20 +266,22 @@ class CMPMHealthMonitor:
                 self.get_aitrackdown_health(),
                 self.get_task_system_health(),
                 self.get_memory_system_health(),
+                self.get_qa_system_health(),
                 return_exceptions=True
             )
             
             progress.update(task, description="Generating dashboard...")
             
             # Process collected data
-            framework_health, aitrackdown_health, task_health, memory_health = health_data
+            framework_health, aitrackdown_health, task_health, memory_health, qa_health = health_data
             
             # Calculate reliability score
             all_health_data = {
                 "framework": framework_health,
                 "aitrackdown": aitrackdown_health,
                 "task_system": task_health,
-                "memory_system": memory_health
+                "memory_system": memory_health,
+                "qa_system": qa_health
             }
             
             reliability_score = self.calculate_system_reliability_score(all_health_data)
@@ -316,14 +343,28 @@ class CMPMHealthMonitor:
                 f"mem0AI: {'✓' if memory_health.get('mem0ai_connected') else '✗'} | {memory_health.get('response_time', 0)}ms"
             )
         
+        # Add QA system health
+        if isinstance(qa_health, dict):
+            qa_status = qa_health.get("status", "unknown")
+            status_color = "green" if qa_status in ["healthy", "operational"] else "yellow" if qa_status == "degraded" else "red"
+            table.add_row(
+                "Enhanced QA Agent",
+                f"[{status_color}]{qa_status.upper()}[/{status_color}]",
+                f"v{qa_health.get('agent_version', 'unknown')} | "
+                f"Health: {qa_health.get('health_score', 0):.0f}% | "
+                f"Extension: {'✓' if qa_health.get('browser_extension') == 'healthy' else '✗'}"
+            )
+        
         console.print(table)
         console.print()
         
         # System summary
+        qa_status_text = "active" if qa_health.get("status") == "healthy" else "degraded" if qa_health.get("status") == "degraded" else "inactive"
         summary_text = f"""
 🚀 **Framework Status**: Claude PM Framework v4.1.0 operational
 📊 **Task Management**: {task_health.get('total_items', 0)} total items managed
 🧠 **Memory Integration**: mem0AI connectivity {'active' if memory_health.get('mem0ai_connected') else 'inactive'}
+🧪 **Enhanced QA Agent**: Browser testing and memory-augmented analysis {qa_status_text}
 ⚡ **Performance**: {total_time:.2f}s response time | {reliability_score}% reliability
         """
         
@@ -337,7 +378,7 @@ class CMPMAgentMonitor:
         self.config = Config()
         self.framework_path = Path.cwd()
         self.agent_registry_path = self.framework_path / "framework/agent-roles/agents.json"
-        self.user_config_path = Path.home() / ".claude-multiagent-pm"
+        self.user_config_path = Path.home() / ".claude-pm"
         self.user_agents_config_path = self.user_config_path / "config/agents.yaml"
         self.user_agents_dir = self.user_config_path / "agents/user-defined"
         self.orchestrator = None
@@ -355,7 +396,7 @@ class CMPMAgentMonitor:
             return {"agent_registry": {"standard_agents": {}, "user_defined_agents": {}}}
     
     async def load_user_agent_config(self) -> Dict[str, Any]:
-        """Load user-defined agent configuration from ~/.claude-multiagent-pm/config/agents.yaml."""
+        """Load user-defined agent configuration from ~/.claude-pm/config/agents.yaml."""
         try:
             if self.user_agents_config_path.exists():
                 with open(self.user_agents_config_path, 'r') as f:
@@ -367,7 +408,7 @@ class CMPMAgentMonitor:
             return {"agents": {"user_defined": []}}
     
     async def discover_user_agents(self) -> Dict[str, Any]:
-        """Discover user-defined agents from ~/.claude-multiagent-pm/agents/user-defined/."""
+        """Discover user-defined agents from ~/.claude-pm/agents/user-defined/."""
         user_agents = {}
         
         try:
@@ -1416,6 +1457,261 @@ class CMPMDashboardLauncher:
             console.print("[dim]Dashboard launched in background. Use process management tools to monitor.[/dim]")
 
 
+class CMPMQAMonitor:
+    """CMPM QA Command Implementation with enhanced browser testing integration."""
+    
+    def __init__(self):
+        self.config = Config()
+        self.framework_path = Path.cwd()
+        self.qa_agent = None
+        self.start_time = time.time()
+    
+    async def get_qa_agent(self) -> EnhancedQAAgent:
+        """Get or create QA agent instance."""
+        if self.qa_agent is None:
+            self.qa_agent = EnhancedQAAgent(self.config)
+        return self.qa_agent
+    
+    async def execute_qa_tests(self, test_type: str = "all", browser: bool = False, 
+                              urls: List[str] = None, output_json: bool = False) -> None:
+        """Execute QA tests with comprehensive reporting."""
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+            transient=True
+        ) as progress:
+            task = progress.add_task("Initializing QA testing...", total=None)
+            
+            qa_agent = await self.get_qa_agent()
+            
+            if browser:
+                progress.update(task, description="Executing browser-based tests...")
+                test_config = {
+                    "test_suite": "cmpm_browser_tests",
+                    "urls": urls or ["http://localhost:3000"],
+                    "scenarios": ["basic_functionality", "ui_validation"],
+                    "screenshots": True,
+                    "performance": True
+                }
+                
+                results = await qa_agent.execute_browser_tests(test_config)
+            else:
+                progress.update(task, description=f"Running {test_type} tests...")
+                results = await qa_agent.run_framework_tests(test_type)
+            
+            progress.update(task, description="Generating test report...")
+        
+        if output_json:
+            # Clean results for JSON output
+            clean_results = {
+                "cmpm_version": "4.1.0",
+                "timestamp": datetime.now().isoformat(),
+                "test_type": "browser" if browser else test_type,
+                "results": results
+            }
+            print(json.dumps(clean_results, indent=2, ensure_ascii=True))
+            return
+        
+        # Generate comprehensive dashboard
+        await self._generate_qa_test_dashboard(results, test_type, browser)
+    
+    async def _generate_qa_test_dashboard(self, results: Dict[str, Any], test_type: str, 
+                                        browser: bool) -> None:
+        """Generate comprehensive QA test dashboard."""
+        total_time = time.time() - self.start_time
+        
+        # Determine status and colors
+        status = results.get("status", "unknown")
+        status_color = "green" if status == "success" else "yellow" if status == "partial_failure" else "red"
+        
+        # Create header
+        test_mode = "Browser Testing" if browser else f"{test_type.title()} Testing"
+        header = Panel(
+            Text(f"CMPM QA Test Results - {test_mode}\nExecution Time: {total_time:.2f}s", 
+                 justify="center", style="bold white"),
+            title="🧪 Enhanced QA Agent Test Dashboard",
+            border_style=status_color
+        )
+        
+        console.print(header)
+        console.print()
+        
+        # Create results table
+        table = Table(show_header=True, header_style="bold magenta")
+        table.add_column("Test Category", style="cyan", width=20)
+        table.add_column("Status", width=12)
+        table.add_column("Results", style="dim")
+        
+        # Add summary row
+        summary = results.get("summary", {})
+        if summary:
+            total_tests = summary.get("total_tests", 0)
+            passed_tests = summary.get("passed_tests", 0)
+            success_rate = summary.get("success_rate", 0)
+            
+            table.add_row(
+                "Test Summary",
+                f"[{status_color}]{status.upper()}[/{status_color}]",
+                f"{passed_tests}/{total_tests} passed ({success_rate:.1%})"
+            )
+        
+        # Add browser-specific results
+        if browser:
+            execution_summary = results.get("execution_summary", {})
+            if execution_summary:
+                table.add_row(
+                    "Browser Tests",
+                    f"[{status_color}]EXECUTED[/{status_color}]",
+                    f"Screenshots: {execution_summary.get('screenshots_captured', 0)} | "
+                    f"Time: {execution_summary.get('execution_time', 0):.1f}s"
+                )
+        
+        # Add detailed results
+        detailed_results = results.get("detailed_results", [])
+        for result in detailed_results:
+            test_name = result.get("test_type", "unknown")
+            test_status = result.get("status", "unknown")
+            test_color = "green" if test_status == "passed" else "red"
+            
+            details = ""
+            if result.get("return_code") is not None:
+                details += f"Exit code: {result.get('return_code')} | "
+            if result.get("execution_time"):
+                details += f"Time: {result.get('execution_time'):.1f}s"
+            
+            table.add_row(
+                test_name.replace("_", " ").title(),
+                f"[{test_color}]{test_status.upper()}[/{test_color}]",
+                details or "No details available"
+            )
+        
+        console.print(table)
+        console.print()
+        
+        # Pattern analysis
+        pattern_analysis = results.get("pattern_analysis", {})
+        if pattern_analysis:
+            pattern_text = f"""
+🔍 **Pattern Analysis**: Success rate {pattern_analysis.get('success_rate', 0):.1%}
+📊 **Performance**: {pattern_analysis.get('performance_trends', {}).get('average_time', 0):.1f}s average
+🎯 **Recommendations**: {len(pattern_analysis.get('recommendations', []))} suggestions available
+⚡ **Framework Integration**: Memory-augmented testing active
+            """
+            
+            console.print(Panel(pattern_text.strip(), title="QA Intelligence", border_style="blue"))
+            
+            # Show recommendations
+            recommendations = pattern_analysis.get("recommendations", [])
+            if recommendations:
+                console.print()
+                console.print("[bold yellow]Recommendations:[/bold yellow]")
+                for i, rec in enumerate(recommendations, 1):
+                    console.print(f"  {i}. {rec}")
+    
+    async def get_qa_status(self, output_json: bool = False) -> None:
+        """Get comprehensive QA system status."""
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+            transient=True
+        ) as progress:
+            task = progress.add_task("Checking QA system status...", total=None)
+            
+            qa_agent = await self.get_qa_agent()
+            status = await qa_agent.get_qa_health_status()
+            
+            progress.update(task, description="Generating status dashboard...")
+        
+        if output_json:
+            clean_status = {
+                "cmpm_version": "4.1.0",
+                "timestamp": datetime.now().isoformat(),
+                "qa_status": status
+            }
+            print(json.dumps(clean_status, indent=2, ensure_ascii=True))
+            return
+        
+        # Generate status dashboard
+        await self._generate_qa_status_dashboard(status)
+    
+    async def _generate_qa_status_dashboard(self, status: Dict[str, Any]) -> None:
+        """Generate QA status dashboard."""
+        total_time = time.time() - self.start_time
+        
+        # Determine overall status
+        overall_status = status.get("status", "unknown")
+        health_score = status.get("health_score", 0)
+        status_color = "green" if overall_status == "healthy" else "yellow" if overall_status == "degraded" else "red"
+        
+        # Create header
+        header = Panel(
+            Text(f"CMPM QA System Status\nHealth Score: {health_score:.1f}%\nResponse Time: {total_time:.2f}s", 
+                 justify="center", style="bold white"),
+            title="🔧 Enhanced QA Agent Status",
+            border_style=status_color
+        )
+        
+        console.print(header)
+        console.print()
+        
+        # Create status table
+        table = Table(show_header=True, header_style="bold magenta")
+        table.add_column("Component", style="cyan", width=20)
+        table.add_column("Status", width=12)
+        table.add_column("Details", style="dim")
+        
+        # Add extension health
+        extension_health = status.get("extension_health", {})
+        ext_status = extension_health.get("status", "unknown")
+        ext_color = "green" if ext_status == "healthy" else "red"
+        table.add_row(
+            "Browser Extension",
+            f"[{ext_color}]{ext_status.upper()}[/{ext_color}]",
+            f"v{extension_health.get('extension_version', 'unknown')} | "
+            f"Browsers: {', '.join(extension_health.get('connected_browsers', []))}"
+        )
+        
+        # Add memory health
+        memory_health = status.get("memory_health", {})
+        mem_status = memory_health.get("status", "unknown")
+        mem_color = "green" if mem_status == "healthy" else "red"
+        table.add_row(
+            "Memory Service",
+            f"[{mem_color}]{mem_status.upper()}[/{mem_color}]",
+            f"mem0AI: {'✓' if memory_health.get('mem0ai_connected') else '✗'} | "
+            f"Response: {memory_health.get('response_time', 0)}ms"
+        )
+        
+        # Add framework health
+        framework_health = status.get("framework_health", {})
+        framework_status = "healthy" if framework_health.get("test_commands_available") else "degraded"
+        framework_color = "green" if framework_status == "healthy" else "yellow"
+        table.add_row(
+            "Framework Testing",
+            f"[{framework_color}]{framework_status.upper()}[/{framework_color}]",
+            f"Commands: {'✓' if framework_health.get('test_commands_available') else '✗'} | "
+            f"Timeout: {framework_health.get('test_timeout_configured', False)}"
+        )
+        
+        console.print(table)
+        console.print()
+        
+        # System summary
+        agent_version = status.get("agent_version", "unknown")
+        capabilities = extension_health.get("test_capabilities", [])
+        
+        summary_text = f"""
+🧪 **QA Agent Version**: Enhanced QA Agent v{agent_version}
+🔗 **Browser Integration**: Extension capabilities: {', '.join(capabilities)}
+🧠 **Memory Integration**: Pattern recognition and test intelligence active
+⚡ **Performance**: {total_time:.2f}s status check | {health_score:.1f}% system health
+        """
+        
+        console.print(Panel(summary_text.strip(), title="QA System Summary", border_style="blue"))
+
+
 # Click command implementations
 @click.command(name="cmpm:health")
 @click.option('--json', 'output_json', is_flag=True, help='Output health data as JSON')
@@ -1486,10 +1782,127 @@ def cmpm_dashboard(keep_alive: bool, port: Optional[int]):
         sys.exit(1)
 
 
+@click.command(name="cmpm:qa-status")
+@click.option('--json', 'output_json', is_flag=True, help='Output QA status as JSON')
+def cmpm_qa_status(output_json: bool):
+    """🔧 /cmpm:qa-status - QA extension status and health monitoring."""
+    async def run_qa_status_check():
+        monitor = CMPMQAMonitor()
+        await monitor.get_qa_status(output_json=output_json)
+    
+    try:
+        asyncio.run(run_qa_status_check())
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        sys.exit(1)
+
+
+@click.command(name="cmpm:qa-test")
+@click.option('--type', 'test_type', default='all', help='Test type (all|unit|lint|framework)')
+@click.option('--browser', is_flag=True, help='Execute browser-based tests')
+@click.option('--urls', multiple=True, help='URLs to test (for browser tests)')
+@click.option('--json', 'output_json', is_flag=True, help='Output test results as JSON')
+def cmpm_qa_test(test_type: str, browser: bool, urls: Tuple[str, ...], output_json: bool):
+    """🧪 /cmpm:qa-test - Execute browser-based tests and framework validation."""
+    async def run_qa_tests():
+        monitor = CMPMQAMonitor()
+        url_list = list(urls) if urls else None
+        await monitor.execute_qa_tests(
+            test_type=test_type,
+            browser=browser,
+            urls=url_list,
+            output_json=output_json
+        )
+    
+    try:
+        asyncio.run(run_qa_tests())
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        sys.exit(1)
+
+
+@click.command(name="cmpm:qa-results")
+@click.option('--format', 'output_format', default='dashboard', help='Output format (dashboard|json|report)')
+@click.option('--limit', type=int, default=10, help='Limit number of results to show')
+def cmpm_qa_results(output_format: str, limit: int):
+    """📊 /cmpm:qa-results - View test results and patterns with memory-augmented analysis."""
+    async def run_qa_results():
+        # Simplified implementation - in real scenario would retrieve from memory service
+        monitor = CMPMQAMonitor()
+        qa_agent = await monitor.get_qa_agent()
+        
+        # Simulate retrieving recent test results
+        console.print(Panel(
+            Text(f"QA Results Dashboard\nFormat: {output_format} | Limit: {limit}", 
+                 justify="center", style="bold white"),
+            title="📊 Test Results & Patterns",
+            border_style="cyan"
+        ))
+        
+        console.print()
+        console.print("[dim]Recent test results would be displayed here.[/dim]")
+        console.print("[dim]Memory-augmented pattern analysis would show trends and recommendations.[/dim]")
+        console.print()
+        console.print("[yellow]Note: This is a placeholder implementation. Full results retrieval")
+        console.print("from memory service will be available in the complete implementation.[/yellow]")
+    
+    try:
+        asyncio.run(run_qa_results())
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        sys.exit(1)
+
+
 # Register commands for CLI integration
 def register_cmpm_commands(cli_group):
-    """Register CMPM commands with the main CLI group."""
+    """Register CMMP commands with the main CLI group."""
     cli_group.add_command(cmpm_health)
     cli_group.add_command(cmpm_agents)
     cli_group.add_command(cmpm_index)
     cli_group.add_command(cmpm_dashboard)
+    cli_group.add_command(cmpm_qa_status)
+    cli_group.add_command(cmpm_qa_test)
+    cli_group.add_command(cmpm_qa_results)
+
+
+# Main CLI group for direct module execution
+@click.group(invoke_without_command=True)
+@click.pass_context
+def main(ctx):
+    """CMPM Framework Commands - Main CLI Entry Point."""
+    if ctx.invoked_subcommand is None:
+        console.print("""
+[bold cyan]CMPM Framework Commands[/bold cyan]
+
+Available commands:
+• [green]cmpm:health[/green] - System health dashboard
+• [green]cmpm:agents[/green] - Agent registry overview
+• [green]cmpm:index[/green] - Project discovery index
+• [green]cmpm:dashboard[/green] - Portfolio manager dashboard
+• [green]cmpm:qa-status[/green] - QA extension status and health
+• [green]cmpm:qa-test[/green] - Execute browser-based tests
+• [green]cmpm:qa-results[/green] - View test results and patterns
+
+Usage:
+• [dim]python -m claude_pm.cmpm_commands cmpm:health[/dim]
+• [dim]python -m claude_pm.cmpm_commands cmpm:agents[/dim]
+• [dim]python -m claude_pm.cmpm_commands cmpm:index[/dim]
+• [dim]python -m claude_pm.cmpm_commands cmpm:dashboard[/dim]
+• [dim]python -m claude_pm.cmpm_commands cmpm:qa-status[/dim]
+• [dim]python -m claude_pm.cmpm_commands cmpm:qa-test --browser[/dim]
+• [dim]python -m claude_pm.cmpm_commands cmpm:qa-results[/dim]
+        """)
+
+
+# Register all commands to the main group
+main.add_command(cmpm_health)
+main.add_command(cmpm_agents)
+main.add_command(cmpm_index)
+main.add_command(cmpm_dashboard)
+main.add_command(cmpm_qa_status)
+main.add_command(cmpm_qa_test)
+main.add_command(cmpm_qa_results)
+
+
+if __name__ == "__main__":
+    main()

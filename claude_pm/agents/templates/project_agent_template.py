@@ -212,7 +212,7 @@ class {{CLASS_NAME}}(BaseService):
     async def _load_project_settings(self) -> None:
         """Load project-specific settings."""
         try:
-            settings_file = self.project_path / ".claude-multiagent-pm" / "agents" / "project-specific" / "config" / f"{self.name}.yaml"
+            settings_file = self.project_path / ".claude-pm" / "agents" / "project-specific" / "config" / f"{self.name}.yaml"
             
             if settings_file.exists():
                 import yaml
@@ -230,7 +230,7 @@ class {{CLASS_NAME}}(BaseService):
     async def _save_project_settings(self) -> None:
         """Save project-specific settings."""
         try:
-            settings_file = self.project_path / ".claude-multiagent-pm" / "agents" / "project-specific" / "config" / f"{self.name}.yaml"
+            settings_file = self.project_path / ".claude-pm" / "agents" / "project-specific" / "config" / f"{self.name}.yaml"
             settings_file.parent.mkdir(parents=True, exist_ok=True)
             
             import yaml

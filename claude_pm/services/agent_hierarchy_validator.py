@@ -178,7 +178,7 @@ class AgentHierarchyValidator(BaseService):
         self.validation_rules = self._initialize_validation_rules()
         
         # Reports storage
-        self.reports_path = Path.cwd() / ".claude-multiagent-pm" / "reports"
+        self.reports_path = Path.cwd() / ".claude-pm" / "reports"
         self.reports_path.mkdir(parents=True, exist_ok=True)
         
         self.logger.info("Initialized AgentHierarchyValidator")

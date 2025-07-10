@@ -548,7 +548,7 @@ echo "Security scan passed."
 ### Agent Hierarchy Integration
 **Project-Specific Security Agent:**
 ```bash
-# .claude-multiagent-pm/agents/project-specific/security.py
+# .claude-pm/agents/project-specific/security.py
 class ProjectSecurityAgent(SecurityAgent):
     def __init__(self):
         super().__init__()
@@ -565,7 +565,7 @@ class ProjectSecurityAgent(SecurityAgent):
 
 **User-Defined Security Agent:**
 ```bash
-# ~/.claude-multiagent-pm/agents/user-defined/security.py
+# ~/.claude-pm/agents/user-defined/security.py
 class UserSecurityAgent(SecurityAgent):
     def __init__(self):
         super().__init__()

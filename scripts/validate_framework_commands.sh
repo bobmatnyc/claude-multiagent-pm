@@ -55,7 +55,7 @@ echo "=== 1. AI-Trackdown Tools Core Commands ==="
 echo
 
 # Change to framework directory
-cd "/Users/masa/Projects/claude-multiagent-pm" || exit 1
+cd "/Users/masa/Projects/claude-pm" || exit 1
 
 # Test basic CLI availability
 run_test "AI-trackdown CLI Version" \

@@ -121,7 +121,7 @@ class AITrackdownTools:
         if self.fallback_method == 'logging':
             logger.info(f"[AI-TRACKDOWN-FALLBACK] {message}")
         elif self.fallback_method == 'file':
-            fallback_file = Path.home() / ".claude-multiagent-pm" / "logs" / "ai-trackdown-fallback.log"
+            fallback_file = Path.home() / ".claude-pm" / "logs" / "ai-trackdown-fallback.log"
             fallback_file.parent.mkdir(parents=True, exist_ok=True)
             with open(fallback_file, 'a') as f:
                 f.write(f"[{logger.name}] {message}\\n")

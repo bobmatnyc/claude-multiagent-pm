@@ -1,6 +1,7 @@
 """Core Claude PM Framework components."""
 
 from .base_service import BaseService
+from .base_agent import BaseAgent
 from .service_manager import ServiceManager
 from .config import Config
 from .logging_config import setup_logging
@@ -12,7 +13,7 @@ from .enforcement import (
 )
 
 __all__ = [
-    "BaseService", "ServiceManager", "Config", "setup_logging",
+    "BaseService", "BaseAgent", "ServiceManager", "Config", "setup_logging",
     "EnforcementEngine", "DelegationEnforcer", "AgentCapabilityManager", "ViolationMonitor",
     "Agent", "Action", "AgentPermissions", "ConstraintViolation", "ValidationResult",
     "AgentType", "ActionType", "ViolationSeverity", "FileCategory",

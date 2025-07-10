@@ -1,18 +1,37 @@
-# Claude Multi-Agent Project Management Framework v4.4.0 - Enhanced Configuration and Documentation Management
+# Claude Multi-Agent Project Management Framework v4.5.1 - Three-Tier Agent Hierarchy with Cross-Project Management
 
-[![Version](https://img.shields.io/badge/Version-4.4.0-blue.svg)](https://github.com/masa/claude-multiagent-pm)
+[![Version](https://img.shields.io/badge/Version-4.5.1-blue.svg)](https://github.com/masa/claude-multiagent-pm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Architecture](https://img.shields.io/badge/Architecture-Pure%20Task%20Delegation-brightgreen.svg)](./trackdown/CURRENT-STATUS.md)
-[![Memory Integration](https://img.shields.io/badge/Memory-Zero%20Config-purple.svg)](./docs/CLAUDE_PM_MEMORY_README.md)
-[![Task Tools](https://img.shields.io/badge/Coordination-Task%20Tool%20Subprocess-blue.svg)](./framework/subprocess-protocols/)
+[![Architecture](https://img.shields.io/badge/Architecture-Three--Tier%20Agent%20Hierarchy-brightgreen.svg)](./docs/FRAMEWORK_OVERVIEW.md)
+[![Cross-Project](https://img.shields.io/badge/Management-Cross--Project%20CMCP--init-purple.svg)](./docs/DEPLOYMENT_GUIDE.md)
+[![Memory Integration](https://img.shields.io/badge/Memory-mem0AI%20Integration-orange.svg)](./docs/CLAUDE_MULTIAGENT_PM_MEMORY_README.md)
+[![MCP Services](https://img.shields.io/badge/MCP-Context7%20%26%20Zen-blue.svg)](./docs/MCP_SERVICE_INTEGRATION.md)
 
-> **Pure subprocess delegation with memory-augmented Task tool coordination**
+> **Advanced three-tier agent hierarchy with cross-project CMCP-init management**
 
-Claude Multi-Agent Project Management Framework revolutionizes AI-assisted development through pure subprocess delegation with intelligent memory integration. The v4.4.0 release introduces enhanced configuration management, refined three-tier agent hierarchy, improved documentation quality, and comprehensive issue tracking capabilities alongside the established zero-configuration mem0AI integration and powerful Task tool subprocess coordination.
+Claude Multi-Agent Project Management Framework delivers sophisticated AI-assisted project management through an advanced three-tier agent hierarchy and cross-project coordination system. The v4.5.1 release features comprehensive framework cleanup, security agent implementation, and robust CMCP-init bridge system for seamless multi-project workflow orchestration.
 
 ## 🚀 Key Features
 
-### 🎯 CMPM Slash Commands (v4.1.0)
+### 🏗️ Three-Tier Agent Hierarchy Architecture
+
+#### Hierarchical Agent Management
+- **Project Agents**: `$PROJECT/.claude-pm/agents/project-specific/` - Highest precedence, project-specific implementations
+- **User Agents**: `~/.claude-pm/agents/user-defined/` - Global user customizations across all projects
+- **System Agents**: `/framework/claude_pm/agents/` - Core framework functionality with automatic fallback
+- **Dynamic Loading**: Automatic agent discovery with precedence-based selection (Project → User → System)
+- **Configuration Inheritance**: Hierarchical configuration merging with override capabilities
+
+#### Cross-Project CMCP-init Bridge System
+- **Universal Framework Access**: CMCP-init enables non-descendant projects to access framework capabilities
+- **Cross-Directory Management**: Work seamlessly across multiple project directories
+- **Project Indexing**: Comprehensive project discovery with ai-trackdown-tools integration
+- **Three-Layer Configuration**: Framework, Working, and Project-specific configurations
+- **Automatic Setup**: `python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup`
+
+### 🎯 Professional Command Interface
+
+#### CMPM Slash Commands
 
 #### Professional Command Interface
 - **`/cmpm:health`** - Comprehensive system health dashboard with real-time monitoring
@@ -32,7 +51,16 @@ Claude Multi-Agent Project Management Framework revolutionizes AI-assisted devel
 - **Agent Categories** - Standard vs user-defined agent classification
 - **Real-time Status** - Live agent availability and capability reporting
 
-### Pure Subprocess Delegation Architecture
+### 🤖 Multi-Agent Orchestration
+
+#### Core Agent Framework
+- **11 Specialized Agents**: PM, Documentation, Ticketing, Engineer, QA, Security, Performance, Data, DevOps, Research, Architect
+- **Agent Hierarchy Validation**: Real-time validation of three-tier agent system consistency
+- **Template-Based Agent Creation**: Standardized agent templates for system, user, and project tiers
+- **Dynamic Agent Discovery**: Automatic agent file monitoring and lifecycle management
+- **Performance Monitoring**: Comprehensive agent health checks and performance metrics
+
+### Memory-Augmented Intelligence
 
 #### Simplified Memory Integration (mem0AI)
 - **Instant Memory Access**: Requires OpenAI API key configuration
@@ -105,35 +133,99 @@ Claude Multi-Agent Project Management Framework revolutionizes AI-assisted devel
 - **Multi-Agent Orchestration**: Coordinated team of specialists with shared memory
 - **Continuous Learning**: Pattern recognition and knowledge amplification across projects
 
+## 🏗️ Framework Architecture
+
+### Three-Layer Configuration System
+
+The Claude PM Framework uses a sophisticated three-layer configuration system that enables cross-project management and flexible agent deployment:
+
+```
+Framework Architecture
+├── Framework Layer: ~/framework/.claude-pm/
+│   ├── Global framework-level configuration
+│   ├── System agents and templates
+│   └── Cross-project shared resources
+├── Working Layer: $PWD/.claude-pm/
+│   ├── Session-specific configuration
+│   ├── Working directory context
+│   └── Temporary session data
+└── Project Layer: $PROJECT_ROOT/.claude-pm/
+    ├── Project-specific agents and overrides
+    ├── Project configuration and metadata
+    └── Local project resources
+```
+
+### CMCP-init Bridge System
+
+The CMCP-init system enables the framework to work across any project directory, even those not descended from the framework:
+
+```bash
+# Initialize framework access in any project
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup
+
+# Verify three-tier agent hierarchy
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
+
+# Reindex projects with ai-trackdown-tools integration
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --reindex
+```
+
+### Agent Hierarchy System
+
+```
+Agent Precedence (Highest to Lowest)
+├── 🔹 Project Agents (Priority 3)
+│   ├── Location: $PROJECT/.claude-pm/agents/project-specific/
+│   ├── Scope: Project-specific implementations
+│   └── Authority: Override user and system agents
+├── 🔸 User Agents (Priority 2)
+│   ├── Location: ~/.claude-pm/agents/user-defined/
+│   ├── Scope: Global user customizations
+│   └── Authority: Override system defaults
+└── 🔹 System Agents (Priority 1)
+    ├── Location: /framework/claude_pm/agents/
+    ├── Scope: Core framework functionality
+    └── Authority: Fallback when higher tiers unavailable
+```
+
 ### Directory Structure
 ```
-claude-multiagent-pm/
+claude-pm/
 ├── .git/                           # Dedicated PM git repository
-├── README.md                      # This file (updated for v4.0.0)
+├── README.md                      # This file (updated for v4.5.1)
 ├── claude_pm/                     # Core framework implementation
-│   ├── services/                  # Memory and orchestration services
-│   │   ├── mem0_context_manager.py    # Advanced context management
-│   │   ├── intelligent_task_planner.py # Memory-driven decomposition
-│   │   └── continuous_learning_engine.py # Learning and improvement
-│   └── agents/                    # 11-agent ecosystem implementation
-├── config/                        # Zero-configuration setup
-│   ├── memory_config.py          # Factory functions and auto-discovery
-│   └── task_delegation_config.py # Task tool subprocess configuration
-├── trackdown/                     # TrackDown project management
-│   ├── BACKLOG.md                # 42 active tickets (83% Phase 1 complete)
-│   ├── CURRENT-STATUS.md          # Real-time progress tracking
-│   └── MEM-00X-STATUS.md          # Individual ticket completion reports
+│   ├── agents/                    # Agent hierarchy system
+│   │   ├── hierarchical_agent_loader.py # Three-tier agent loading
+│   │   ├── system_init_agent.py         # CMCP-init implementation
+│   │   ├── pm_agent.py                  # Project management agent
+│   │   ├── documentation_agent.py       # Documentation agent
+│   │   ├── ticketing_agent.py           # Specialized ticketing agent
+│   │   └── templates/                   # Agent templates for all tiers
+│   ├── core/                      # Core framework services
+│   │   ├── agent_config.py              # Hierarchical configuration
+│   │   ├── service_manager.py           # Enhanced service management
+│   │   └── config.py                    # Framework configuration
+│   └── services/                  # Framework services
+│       ├── agent_discovery_service.py   # Real-time agent discovery
+│       ├── agent_hierarchy_validator.py # Hierarchy validation
+│       ├── mcp_service_detector.py      # MCP service integration
+│       └── mem0_context_manager.py      # Memory integration
+├── tasks/                         # AI-trackdown-tools integration
+│   ├── epics/                     # Strategic epics
+│   ├── issues/                    # Implementation issues
+│   ├── tasks/                     # Development tasks
+│   └── templates/                 # Ticket templates
 ├── docs/                          # Comprehensive documentation
-│   ├── CLAUDE_PM_MEMORY_README.md      # Memory integration guide
-│   ├── CLAUDE_PM_MEMORY_INTEGRATION.md # Technical implementation
-│   ├── TICKETING_SYSTEM.md             # 42-ticket system overview
-│   └── design/                          # Architecture specifications
-├── examples/                      # Memory integration demonstrations
-│   ├── mem003_multi_agent_demo.py      # 11-agent ecosystem demo
-│   └── memory_integration_demo.py      # Zero-config memory usage
-└── schemas/                       # Enterprise memory schemas
-    ├── memory-schemas.py          # 4 memory categories with validation
-    └── schema-migration.py        # Versioning and migration system
+│   ├── FRAMEWORK_OVERVIEW.md            # Architecture overview
+│   ├── MCP_SERVICE_INTEGRATION.md       # MCP service guide
+│   ├── SECURITY_AGENT_INSTRUCTIONS.md   # Security agent documentation
+│   └── user-guide/                      # Complete user guide
+├── examples/                      # Integration demonstrations
+│   ├── ai_trackdown_tools_integration_demo.py
+│   └── scaffolding-agent/               # Agent scaffolding examples
+└── deployment/                    # Production deployment
+    ├── docker/                          # Container configuration
+    └── scripts/                         # Deployment automation
 ```
 
 ## 🎯 Framework Principles
@@ -158,15 +250,12 @@ claude-multiagent-pm/
 - **Continuous Learning**: Pattern recognition and success analysis
 - **Cross-Project Memory**: Shared knowledge across 12+ managed projects
 
-## 📦 Installation & Distribution
+## 📦 Installation & Quick Start
 
-### Core Dependencies
+### Prerequisites
 
-The Claude Multi-Agent PM Framework has one critical dependency for persistent tracking across subprocess boundaries:
-
-#### ai-trackdown-tools (Required)
 ```bash
-# Install ai-trackdown-tools globally
+# Required: ai-trackdown-tools for project management
 npm install -g @bobmatnyc/ai-trackdown-tools
 
 # Verify installation
@@ -174,290 +263,366 @@ aitrackdown --version
 atd --version  # alias command
 ```
 
-**Why ai-trackdown-tools is Essential**:
-- **Subprocess Persistence**: Issues and PRs persist beyond individual process lifetimes
-- **Multi-Agent Coordination**: Enables coordinated work across subprocess boundaries
+### Framework Installation
+
+#### Option 1: Framework Development (Recommended)
+```bash
+# Clone the framework repository
+git clone https://github.com/masa/claude-multiagent-pm.git claude-pm
+cd claude-pm
+
+# Install dependencies
+pip install -r requirements/production.txt
+
+# Initialize framework
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup
+```
+
+#### Option 2: Cross-Project Usage
+```bash
+# Initialize framework access in any existing project
+cd /path/to/your/project
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup
+
+# Verify three-tier agent hierarchy
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
+```
+
+### Why ai-trackdown-tools Integration?
+- **Cross-Project Coordination**: Manage tickets across multiple project directories
+- **Persistent State Management**: Issues persist beyond individual Claude sessions
 - **Hierarchical Organization**: Epic → Issue → Task → PR lifecycle management
-- **Comprehensive Tracking**: Full issue and PR lifecycle with status management
-- **Configuration Optional**: Framework can operate with or without ai-trackdown-tools
+- **Rich Project Indexing**: Comprehensive project metadata collection
+- **Multi-Agent Coordination**: Enables sophisticated agent workflows
 
-### Dual Packaging Support
+### Framework Capabilities
 
-The Claude Multi-Agent PM Framework supports both NPM and Python packaging for maximum deployment flexibility:
+#### Three Shortcut Commands
+- **`push`**: Comprehensive deployment with versioning, changelog, and git operations
+- **`deploy`**: Production deployment with health validation and rollback support
+- **`publish`**: Package publishing with automated distribution across NPM and PyPI
 
-#### NPM Installation (Recommended for CLI usage)
+#### Core Agent System
+- **PM Agent**: Project management orchestration and delegation coordination
+- **Documentation Agent**: Intelligent documentation updates with project pattern scanning
+- **Ticketing Agent**: Specialized issue management with ai-trackdown-tools integration
+- **Security Agent**: Pre-push veto authority with comprehensive security scanning
+- **11 Specialized Agents**: Complete ecosystem for software development workflows
+
+#### MCP Service Integration
+- **Context 7**: Up-to-date library documentation and API references
+- **MCP-Zen**: Second opinion validation and mindfulness tools for productivity
+- **Automatic Detection**: Runtime MCP service discovery and contextual recommendations
+- **Enhanced Workflows**: MCP-enhanced agent workflows for improved accuracy
+
+#### Cross-Project Management Features
+- **Project Indexing**: Comprehensive project discovery across multiple directories
+- **Unified Configuration**: Three-layer configuration system (Framework → User → Project)
+- **Agent Customization**: Hierarchical agent customization with precedence rules
+- **Template System**: Standardized templates for agents, projects, and configurations
+
+## 🚀 Getting Started
+
+### Quick Setup for New Projects
+
 ```bash
-# Global installation - provides claude-pm CLI
-npm install -g claude-multiagent-pm
+# Setup framework access in any project directory
+cd /path/to/your/project
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup
 
-# Verify installation
-claude-pm --version
+# Verify agent hierarchy
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
 
-# Quick health check
-claude-pm status
+# Check available agents
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --show-index
 ```
 
-#### Python Installation (Recommended for development)
-```bash
-# Standard installation
-pip install claude-multiagent-pm
-
-# Development installation with all features
-pip install claude-multiagent-pm[all]
-
-# Verify installation
-claude-multiagent-pm --version
-
-# Service management
-claude-multiagent-pm-service start
-```
-
-#### Package Manager Comparison
-
-| Feature | NPM Package | Python Package |
-|---------|-------------|----------------|
-| **Primary Use Case** | CLI operations, deployment automation | Development, library integration |
-| **Installation** | `npm install -g claude-multiagent-pm` | `pip install claude-multiagent-pm` |
-| **CLI Command** | `claude-pm` | `claude-multiagent-pm` |
-| **Platform Support** | Cross-platform (Node.js >=16.0.0) | Cross-platform (Python >=3.9) |
-| **Service Management** | Via npm scripts | Via Python CLI tools |
-| **Development Mode** | `npm run dev` | `pip install -e .` |
-| **Dependencies** | Node.js ecosystem | Python ecosystem |
-
-#### Environment Requirements
-
-**NPM Package**:
-- Node.js >=16.0.0
-- Cross-platform: Darwin, Linux, Windows
-- Architecture: x64, ARM64
-
-**Python Package**:
-- Python >=3.9 (supports 3.9-3.12)
-- Operating System: OS Independent
-- Optional dependencies for AI features
-
-#### Why Dual Packaging?
-
-1. **Team Flexibility**: Choose your preferred package ecosystem
-2. **Use Case Optimization**: NPM for operations, Python for development
-3. **CI/CD Integration**: Both package managers supported
-4. **Enterprise Deployment**: Multiple distribution vectors
-5. **Developer Experience**: Use familiar tools and workflows
-
-## 🚀 Quick Start
-
-### Dependency Installation
+### Framework Development Setup
 
 ```bash
-# Step 1: Install ai-trackdown-tools (required for persistent tracking)
+# Clone and setup framework for development
+git clone https://github.com/masa/claude-multiagent-pm.git claude-pm
+cd claude-pm
+
+# Install dependencies
+pip install -r requirements/production.txt
 npm install -g @bobmatnyc/ai-trackdown-tools
 
-# Step 2: Verify ai-trackdown-tools installation
-aitrackdown --version
-atd status  # Check ai-trackdown-tools functionality
-
-# Step 3: Install Claude Multi-Agent PM Framework
-npm install -g claude-multiagent-pm
-# OR
-pip install claude-multiagent-pm
+# Initialize framework
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup
 ```
 
-### 🎯 CMPM Slash Commands
+### Agent Customization
 
-#### Health Dashboard
+#### Creating Project-Specific Agents
 ```bash
-# Comprehensive system health dashboard
-./bin/cmpm /cmpm:health
+# Create a project-specific QA agent
+cd /path/to/your/project
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --create-agent qa --tier project
 
-# Detailed health information with extended metrics
-./bin/cmpm /cmpm:health --detailed
-
-# JSON output for integrations and automation
-./bin/cmpm /cmpm:health --json
+# Create a user-defined documentation agent
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --create-agent documentation --tier user
 ```
 
-#### Agent Registry
-```bash
-# Complete agent registry overview
-./bin/cmpm /cmpm:agents
-
-# Filter agents by type (standard or user-defined)
-./bin/cmpm /cmpm:agents --filter=standard
-./bin/cmpm /cmpm:agents --filter=user_defined
-
-# JSON output for programmatic access
-./bin/cmpm /cmpm:agents --json
-```
-
-#### Command Features
-- **Professional Output** - Color-coded dashboards with tabular data
-- **Real-time Monitoring** - Live status updates with timestamp tracking
-- **Error Resilience** - Graceful degradation for offline components
-- **Performance Metrics** - Sub-5-second response times with reliability scoring
-
-### Zero-Configuration Memory Access
+#### Agent Hierarchy Usage
 ```python
-# Instant memory access - minimal configuration required (OpenAI API key)
-from config.memory_config import create_claude_pm_memory
+# Framework automatically selects highest precedence agent
+# Order: Project → User → System
 
-# Automatic service discovery and connection
-memory = create_claude_pm_memory()
+# Load agent (automatic hierarchy resolution)
+from claude_pm.core.service_manager import ServiceManager
+service_manager = ServiceManager()
+agent = await service_manager.load_agent("engineer")
 
-# Add project memory with automatic categorization
-memory.add_project_memory("Implemented user authentication with JWT tokens")
-
-# Retrieve pattern memories for context enhancement
-patterns = memory.get_pattern_memories("authentication")
+# Agent will be loaded from:
+# 1. $PROJECT/.claude-pm/agents/project-specific/ (if exists)
+# 2. ~/.claude-pm/agents/user-defined/ (if exists)
+# 3. /framework/claude_pm/agents/ (system fallback)
 ```
 
-### Verify Memory Service
+### Configuration Examples
+
+#### Cross-Project Configuration
+```yaml
+# ~/.claude-pm/config/agents.yaml
+agent_hierarchy:
+  precedence_order: ["project_agents", "user_agents", "system_agents"]
+  conflict_resolution: "highest_priority_wins"
+  fallback_enabled: true
+
+user_preferences:
+  default_agent_template: "advanced"
+  enable_mcp_services: true
+  context7_enabled: true
+```
+
+### CMCP-init Commands Reference
+
 ```bash
-# Check zero-configuration memory service
-curl http://localhost:8002/health
+# Basic initialization and verification
+python ~/.claude/commands/cmpm-bridge.py cmcp-init                    # Basic status
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup            # Complete setup
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify           # Hierarchy validation
 
-# View current framework status
-cat /Users/masa/Projects/claude-multiagent-pm/trackdown/CURRENT-STATUS.md
+# Project management
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --reindex          # Reindex projects
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --show-index       # Display project index
 
-# Check architecture status (complete)
-grep -A20 "Architecture Status" /Users/masa/Projects/claude-multiagent-pm/trackdown/BACKLOG.md
+# Agent management
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --create-agent qa --tier project
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --list-agents       # List available agents
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --validate-agents   # Validate agent hierarchy
 ```
 
-### 11-Agent Ecosystem Usage
-```python
-# Memory-augmented agent coordination
-from claude_pm.services.mem0_context_manager import Mem0ContextManager
+### Health Monitoring and Validation
 
-# Initialize with zero-configuration memory
-context_manager = Mem0ContextManager()
+```bash
+# Framework health check
+./scripts/health-check.sh
 
-# Get agent-specific context with memory enhancement
-context = await context_manager.prepare_agent_context(
-    agent_role="engineer",
-    task="implement feature",
-    project_id="my-project"
-)
+# AI-trackdown-tools status
+aitrackdown status --current-sprint
+atd epic list --status active
+
+# Agent hierarchy validation
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
+
+# MCP service detection
+echo "Available MCP services:"
+claude mcp list | grep -E "context7|zen"
 ```
 
-### Managed Projects Integration
-All projects in `/Users/masa/Projects/managed/` automatically have:
-- Universal memory access via factory functions
-- 11-agent ecosystem availability
-- Zero-configuration Memzero AI integration
-- Cross-project pattern sharing and learning
+### Advanced Usage Patterns
+
+#### Framework Development vs Framework Usage
+
+**Framework Development**: Working on the framework itself
+```bash
+cd ~/Projects/claude-pm  # Framework directory
+# Full agent development capabilities
+# Access to framework internals
+# Can modify system agents
+```
+
+**Framework Usage**: Using framework for project management
+```bash
+cd /path/to/any/project             # Any project directory
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup
+# Framework capabilities available
+# Project-specific agent customization
+# Cross-project coordination
+```
+
+#### Configuration Inheritance Flow
+
+1. **System Configuration**: Framework defaults
+2. **User Configuration**: `~/.claude-pm/config/`
+3. **Project Configuration**: `$PROJECT/.claude-pm/config/`
+4. **Session Configuration**: `$PWD/.claude-pm/config/`
+
+Each layer can override the previous, enabling flexible customization.
+
+### Usage Patterns
+
+#### Cross-Project Workflow Management
+- **Universal Framework Access**: Any project can leverage the full framework via CMCP-init
+- **Project Indexing**: Automatic discovery and indexing of projects with ai-trackdown-tools
+- **Agent Customization**: Project-specific agents override user and system defaults
+- **Configuration Inheritance**: Hierarchical configuration with per-project customization
+
+#### Memory Integration
+- **mem0AI Integration**: Intelligent context management with historical pattern recognition
+- **Cross-Project Learning**: Shared patterns and insights across all managed projects
+- **Agent-Aware Context**: Role-specific memory filtering and context preparation
+- **Enterprise Schemas**: Structured memory categories with validation and migration support
 
 ## 🔗 Integration Points
 
-### Memory Integration
-- **Universal Access**: All Claude instances have instant memory integration
-- **Zero Configuration**: Automatic service discovery eliminates setup complexity
-- **Cross-Project Memory**: Shared patterns and learning across all managed projects
-- **Enterprise Schemas**: 4 memory categories with validation and migration
+### MCP Service Integration
+- **Context 7**: Up-to-date library documentation and API references
+- **MCP-Zen**: Second opinion validation with alternative LLM perspectives
+- **Automatic Detection**: Runtime MCP service discovery and contextual recommendations
+- **Workflow Enhancement**: MCP services enhance agent accuracy and decision-making
 
-### Task Tool Coordination
-- **Subprocess Management**: Direct agent delegation via Task tool subprocess creation
-- **Agent Communication**: Structured protocols for 11 specialized agents
-- **Performance Monitoring**: Real-time metrics and health monitoring
-- **Parallel Execution**: Up to 5 concurrent agents with git worktree isolation
+### AI-Trackdown-Tools Integration
+- **Project Management**: Epic → Issue → Task → PR hierarchical lifecycle management
+- **Cross-Process State**: Persistent tickets that survive Claude session boundaries
+- **Rich Project Data**: Comprehensive project metadata and progress tracking
+- **CLI Integration**: Seamless `aitrackdown` and `atd` command integration
 
-### Managed Projects
-- **12+ Active Projects**: All in `/Users/masa/Projects/managed/` with memory integration
-- **Production Validation**: Tested across diverse architectures and tech stacks
-- **Continuous Learning**: Pattern recognition and success analysis across projects
-- **Automated Enhancement**: Memory-driven task decomposition and context preparation
+### Three-Tier Agent System
+- **Dynamic Agent Loading**: Runtime agent discovery with precedence-based selection
+- **Configuration Inheritance**: Hierarchical configuration merging with override support
+- **Template System**: Standardized agent creation templates for all tiers
+- **Real-time Validation**: Continuous agent hierarchy health monitoring
+
+### Cross-Project Coordination
+- **CMCP-init Bridge**: Universal framework access regardless of project location
+- **Project Indexing**: Automatic project discovery and metadata collection
+- **Unified Configuration**: Three-layer configuration system enabling flexible customization
+- **Session Management**: Context-aware session handling across multiple projects
 
 ## 📊 Current Status & Metrics
 
 ### Recent Developments (July 2025)
 
-#### TSK-0001 Completion - Ticket Data Migration
-- **Migration Status**: ✅ COMPLETED - All ticket data successfully migrated to ai-trackdown-tools
-- **Infrastructure**: MCP infrastructure restored and operational
-- **CLI Integration**: ai-trackdown-tools CLI fixes implemented
-- **Deployment**: Framework deployed to ~/Clients with portable configuration
-- **Ticket System**: 11 epics, 6 issues, 2 tasks operational
+#### v4.5.1 - Comprehensive Framework Cleanup and Optimization
+- **Space Savings**: 139MB+ recovered through systematic cleanup (185MB → 46MB total)
+- **Framework Integrity**: Complete validation of core systems post-cleanup
+- **Dependency Cleanup**: Removed obsolete node_modules and coverage reports
+- **Structure Compliance**: Achieved canonical v4.5.0 directory structure
 
-#### Infrastructure Improvements
-- **Health Monitoring**: Real-time framework health monitoring system
-- **Deployment Automation**: Portable deployment system for client environments
-- **Multi-Agent Coordination**: Enhanced subprocess coordination protocols
-- **Memory Integration**: Stable mem0AI integration with zero-configuration access
+#### v4.5.0 - Security Agent Implementation
+- **Security Agent**: Comprehensive security agent with pre-push veto authority
+- **Multi-Tier Security**: Medium security default with automatic high security escalation
+- **Vulnerability Detection**: Comprehensive patterns for secrets, code vulnerabilities, and configuration issues
+- **Regulatory Compliance**: HIPAA, COPPA, PII protection, and SOC 2 compliance support
 
-### Architecture Status - Pure Delegation Model Complete
-- **100% Complete**: All core architecture story points delivered
-- **Memory Integration**: MEM-001 through MEM-006 completed
-- **Subprocess Coordination**: TSK-001 through TSK-003 completed  
-- **Zero-Config Achievement**: Universal memory access without manual setup
-- **Pure Delegation Model**: Task tool subprocess coordination operational
-- **11-Agent Ecosystem**: Memory-augmented multi-agent architecture with clean subprocess delegation
+#### v4.4.0 - Three-Tier Agent Hierarchy
+- **Agent Hierarchy**: Complete three-tier system (Project → User → System)
+- **CMCP-init Enhancement**: Comprehensive project indexing and cross-directory management
+- **AI-Trackdown Integration**: Seamless CLI integration with graceful fallback
+- **MCP Service Integration**: Automatic service detection and workflow enhancement
+
+### Architecture Status - Three-Tier Hierarchy Complete
+- **🏗️ Three-Tier Agent Hierarchy**: Project → User → System precedence fully operational
+- **🔄 CMCP-init Bridge System**: Cross-project framework access implemented
+- **🤖 Agent System**: 11 specialized agents with hierarchical loading and validation
+- **🔐 Security Integration**: Comprehensive security agent with pre-push veto authority
+- **📊 Project Indexing**: AI-trackdown-tools integration with rich project metadata
+- **🛠️ MCP Service Integration**: Context 7 and MCP-Zen service detection and workflows
 
 ### Infrastructure Metrics
-- **Memory Service**: localhost:8002 with automatic service discovery
-- **Performance**: Sub-second context preparation and memory operations
-- **Coverage**: 12+ managed projects with universal memory integration
-- **Reliability**: Production-validated across diverse project architectures
+- **Agent Discovery**: ~100ms for typical project hierarchy validation
+- **Agent Loading**: ~50ms per agent with precedence resolution
+- **Project Indexing**: Comprehensive project metadata with ai-trackdown-tools
+- **MCP Service Detection**: Automatic detection of Context 7 and MCP-Zen services
+- **Cross-Project Coordination**: Seamless framework access across multiple directories
+- **Framework Size**: 46MB optimized framework (139MB+ savings from cleanup)
 
 ### Next Phase Targets
-- **Enhanced Task Protocols**: Advanced subprocess communication patterns
-- **Monitoring Integration**: Enhanced agent performance dashboards
-- **Delegation Optimization**: Advanced task distribution and load balancing
+- **Agent Versioning**: Version management and backward compatibility for agents
+- **Performance Optimization**: Agent loading caching and optimization
+- **Enhanced Monitoring**: Visual hierarchy monitoring and performance dashboards
+- **Security Enhancements**: Agent sandboxing and permission systems
+- **Template Marketplace**: Shared agent template repository and distribution
 
 ---
 
 **Repository Created**: 2025-07-05  
-**Framework Version**: v4.4.0 (Enhanced Configuration and Documentation Management)  
-**Architecture Status**: Complete - Pure Task Tool Delegation Operational  
-**Memory Integration**: ✅ Zero-Configuration Universal Access  
-**Subprocess Coordination**: ✅ Task Tool Direct Agent Delegation  
-**Agent Ecosystem**: ✅ 11-Agent Memory-Augmented Architecture  
-**Command Interface**: ✅ Professional CMPM Slash Commands (/cmpm:health, /cmpm:agents)  
-**Maintenance**: Active development with continuous learning and subprocess delegation
+**Framework Version**: v4.5.1 (Three-Tier Agent Hierarchy with Cross-Project Management)  
+**Architecture Status**: ✅ Complete - Three-Tier Agent Hierarchy Operational  
+**Cross-Project System**: ✅ CMCP-init Bridge with Universal Framework Access  
+**Agent Hierarchy**: ✅ Project → User → System Precedence with Dynamic Loading  
+**Security Integration**: ✅ Comprehensive Security Agent with Pre-Push Veto Authority  
+**MCP Integration**: ✅ Context 7 and MCP-Zen Service Detection and Workflows  
+**Project Management**: ✅ AI-Trackdown-Tools Integration with Rich Project Indexing  
+**Framework Optimization**: ✅ 139MB+ Space Savings with Complete Validation  
+**Maintenance**: Active development with advanced multi-agent coordination and cross-project orchestration
 
-## 🎯 Getting Started
+## 📚 Documentation & Resources
 
 ### Quick Navigation
 📚 **[Complete Documentation Index](./docs/INDEX.md)** - Your starting point for all framework documentation
 
-**For immediate productivity**:
-1. **[Framework Overview](./docs/FRAMEWORK_OVERVIEW.md)** - Understanding the architecture
-2. **[Memory Integration Guide](./docs/CLAUDE_MULTIAGENT_PM_MEMORY_README.md)** - Memory setup and usage
-3. **[Deployment Guide](./docs/DEPLOYMENT_GUIDE.md)** - Installation and deployment
-4. **[Documentation Maintenance Guide](./docs/DOCUMENTATION_MAINTENANCE_GUIDE.md)** - Keep code & docs synchronized
+**Essential Guides**:
+1. **[Framework Overview](./docs/FRAMEWORK_OVERVIEW.md)** - Three-tier architecture and CMCP-init system
+2. **[User Guide](./docs/user-guide/README.md)** - Complete user guide with examples
+3. **[MCP Service Integration](./docs/MCP_SERVICE_INTEGRATION.md)** - Context 7 and MCP-Zen usage
+4. **[Security Agent Instructions](./docs/SECURITY_AGENT_INSTRUCTIONS.md)** - Security scanning and validation
+5. **[Deployment Guide](./docs/DEPLOYMENT_GUIDE.md)** - Production deployment and configuration
+
+**Agent Development**:
+- **[Agent Delegation Guide](./docs/AGENT_DELEGATION_GUIDE.md)** - Systematic agent delegation patterns
+- **[Agent Templates](./claude_pm/agents/templates/)** - Templates for system, user, and project agents
+- **[Agent Discovery Service](./claude_pm/services/agent_discovery_service.py)** - Real-time agent monitoring
 
 ### Framework Status Check
 ```bash
-# NEW: CMPM Slash Commands (v4.1.0)
-./bin/cmpm /cmpm:health        # Comprehensive health dashboard
-./bin/cmpm /cmpm:agents        # Agent registry overview
-./bin/cmpm help                # Command help
+# CMCP-init system validation
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --show-index
 
-# Comprehensive health check (NPM installation)
-claude-pm health
+# Agent hierarchy validation
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --validate-agents
 
-# Comprehensive health check (Python installation)
-claude-multiagent-pm-health
-
-# Basic health check script
+# Framework health monitoring
 ./scripts/health-check.sh
 
-# Verify Memory Service
-curl http://localhost:8002/health
+# AI-trackdown-tools integration
+aitrackdown status --current-sprint
+atd epic list --status active
 
-# AI-trackdown tools status
-./bin/aitrackdown status
+# MCP service detection
+echo "Checking MCP services..."
+claude mcp list | grep -E "context7|zen" || echo "MCP services not detected"
 
-# Check framework components
+# Framework core validation
 python3 -c "import claude_pm; print('✓ Framework core accessible')"
+python3 -c "from claude_pm.agents.hierarchical_agent_loader import HierarchicalAgentLoader; print('✓ Agent hierarchy system operational')"
 ```
 
-### Zero-Configuration Memory Access
+### Advanced Framework Usage
 ```python
-# Instant memory integration - no setup required
-from config.memory_config import create_claude_pm_memory
+# Three-tier agent system usage
+from claude_pm.core.service_manager import ServiceManager
+from claude_pm.agents.hierarchical_agent_loader import HierarchicalAgentLoader
 
-memory = create_claude_pm_memory()  # Auto-discovery localhost:8002
-memory.add_project_memory("Framework exploration complete!")
+# Initialize service manager with three-tier support
+service_manager = ServiceManager()
+await service_manager.initialize_agent_system()
+
+# Load agent (automatic precedence resolution)
+engineer_agent = await service_manager.load_agent("engineer")
+# Loads from: Project → User → System (highest precedence available)
+
+# Validate agent hierarchy
+from claude_pm.services.agent_hierarchy_validator import AgentHierarchyValidator
+validator = AgentHierarchyValidator()
+report = await validator.validate_hierarchy_comprehensive()
+print(f"Hierarchy health: {report.overall_health}")
 ```
 
-The framework is production-ready with zero-configuration memory integration and 11-agent orchestration. All major memory infrastructure is complete and validated across 12+ managed projects.
+The framework is production-ready with three-tier agent hierarchy, cross-project CMCP-init coordination, and comprehensive MCP service integration. All major infrastructure is complete and validated across multiple deployment scenarios.
 
-**New to the framework?** → Start with the **[Documentation Index](./docs/INDEX.md)**
+**New to the framework?** → Start with the **[User Guide](./docs/user-guide/README.md)** for comprehensive examples and tutorials.

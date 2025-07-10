@@ -15,7 +15,7 @@ def store_pdf_knowledge_locally():
     
     # Knowledge data structure
     knowledge_data = {
-        "project_name": "claude-multiagent-pm",
+        "project_name": "claude-pm",
         "timestamp": datetime.now().isoformat(),
         "knowledge_items": []
     }
@@ -29,7 +29,7 @@ set -e
 
 # Configuration
 OUTPUT_FILE="${1:-cmpm-user-guide.pdf}"
-DOCS_DIR="/Users/masa/Projects/claude-multiagent-pm/docs/user-guide"
+DOCS_DIR="/Users/masa/Projects/claude-pm/docs/user-guide"
 TEMP_DIR="/tmp/cmpm-guide-build"
 
 echo "🔧 Generating CMPM User Guide PDF..."
@@ -276,7 +276,7 @@ This template provides a standardized approach to implementing PDF generation fo
     })
     
     # Create output directory if it doesn't exist
-    output_dir = "/Users/masa/Projects/claude-multiagent-pm/docs/knowledge"
+    output_dir = "/Users/masa/Projects/claude-pm/docs/knowledge"
     os.makedirs(output_dir, exist_ok=True)
     
     # Write knowledge data to file

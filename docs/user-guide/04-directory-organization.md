@@ -380,10 +380,10 @@ Agent Workspace Structure:
 ```
 Configuration Structure:
 ├── Global Framework Config
-│   ├── ~/.claude-multiagent-pm/config/config.yaml    # Main configuration
-│   ├── ~/.claude-multiagent-pm/agents/user-defined/  # User agents
-│   ├── ~/.claude-multiagent-pm/templates/            # User templates
-│   ├── ~/.claude-multiagent-pm/logs/                 # System logs
+│   ├── ~/.claude-pm/config/config.yaml    # Main configuration
+│   ├── ~/.claude-pm/agents/user-defined/  # User agents
+│   ├── ~/.claude-pm/templates/            # User templates
+│   ├── ~/.claude-pm/logs/                 # System logs
 │   └── framework/LOCAL_SERVICES.md                   # Service config
 ├── Project-Specific Config
 │   ├── CLAUDE.md                        # Project instructions
@@ -397,7 +397,7 @@ Configuration Structure:
 
 ### Configuration File Patterns
 
-#### Global Configuration (`~/.claude-multiagent-pm/config/config.yaml`)
+#### Global Configuration (`~/.claude-pm/config/config.yaml`)
 
 ```yaml
 version: "4.2.0"
@@ -414,9 +414,9 @@ agent_coordination:
   max_concurrent: 5
   default_timeout: 300
   git_worktree_enabled: true
-user_agents_dir: "~/.claude-multiagent-pm/agents/user-defined"
-templates_dir: "~/.claude-multiagent-pm/templates"
-training_modifications_dir: "~/.claude-multiagent-pm/agents/training-modifications"
+user_agents_dir: "~/.claude-pm/agents/user-defined"
+templates_dir: "~/.claude-pm/templates"
+training_modifications_dir: "~/.claude-pm/agents/training-modifications"
 
 # ai-trackdown-tools configuration
 ai_trackdown_tools:
@@ -480,15 +480,15 @@ You are working on an AI-enhanced web application using CMPM.
 ```bash
 # Framework Environment Variables
 export CLAUDE_PM_HOME="/Users/masa/Projects/claude-multiagent-pm"
-export CLAUDE_PM_CONFIG_DIR="~/.claude-multiagent-pm"
-export CLAUDE_PM_USER_AGENTS_DIR="~/.claude-multiagent-pm/agents/user-defined"
-export CLAUDE_PM_TEMPLATES_DIR="~/.claude-multiagent-pm/templates"
+export CLAUDE_PM_CONFIG_DIR="~/.claude-pm"
+export CLAUDE_PM_USER_AGENTS_DIR="~/.claude-pm/agents/user-defined"
+export CLAUDE_PM_TEMPLATES_DIR="~/.claude-pm/templates"
 export CLAUDE_PM_PYTHON_CMD="python3"
 export CLAUDE_PM_MEMORY_URL="http://localhost:8002"
 
 # Project Environment Variables
 export PROJECT_ROOT="/Users/masa/Projects/managed/my-project"
-export PROJECT_CONFIG_DIR="$PROJECT_ROOT/.claude-multiagent-pm"
+export PROJECT_CONFIG_DIR="$PROJECT_ROOT/.claude-pm"
 export PROJECT_MEMORY_ENABLED="true"
 export PROJECT_AGENTS_ENABLED="engineer,qa,security"
 
@@ -962,7 +962,7 @@ mkdir -p /Users/masa/Projects/managed/new-project/{src,tests,docs,config,trackdo
 mkdir -p /tmp/agent-workspaces/{engineer,qa,security,architect}
 
 # Create configuration directory
-mkdir -p ~/.claude-multiagent-pm/{config,logs,agents/user-defined,templates,cache,backups}
+mkdir -p ~/.claude-pm/{config,logs,agents/user-defined,templates,cache,backups}
 
 # Create template directory
 mkdir -p /Users/masa/Projects/templates/{python,nodejs,rust,polyglot}

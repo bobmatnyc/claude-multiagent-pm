@@ -254,12 +254,12 @@ class TestAITrackdownToolsIntegration:
         # Clean up and test managed
         import shutil
         shutil.rmtree(claude_pm_dir)
-        (self.temp_dir / ".claude-multiagent-pm").mkdir()
+        (self.temp_dir / ".claude-pm").mkdir()
         
         assert self.agent._detect_project_type(self.temp_dir) == "managed"
         
         # Clean up and test standalone
-        shutil.rmtree(self.temp_dir / ".claude-multiagent-pm")
+        shutil.rmtree(self.temp_dir / ".claude-pm")
         (self.temp_dir / ".git").mkdir()
         
         assert self.agent._detect_project_type(self.temp_dir) == "standalone"

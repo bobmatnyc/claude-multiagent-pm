@@ -130,8 +130,8 @@ class AgentConfigurationManager:
         
         # Configuration paths
         self.system_config_path = framework_path / "config" / "agents"
-        self.user_config_path = user_home / ".claude-multiagent-pm" / "agents" / "user-defined" / "config"
-        self.project_config_path = project_path / ".claude-multiagent-pm" / "agents" / "project-specific" / "config"
+        self.user_config_path = user_home / ".claude-pm" / "agents" / "user-defined" / "config"
+        self.project_config_path = project_path / ".claude-pm" / "agents" / "project-specific" / "config"
         
         # Configuration sources cache
         self.config_sources: Dict[str, List[ConfigurationSource]] = {

@@ -114,7 +114,7 @@ Epic (Strategic Goal)
 
 #### 4. **Configurable Integration**
 ```yaml
-# ~/.claude-multiagent-pm/config/framework.yaml
+# ~/.claude-pm/config/framework.yaml
 ai_trackdown_tools:
   enabled: true                    # Can be disabled if alternative tracking preferred
   timeout: 30
@@ -127,7 +127,7 @@ ai_trackdown_tools:
 When ai-trackdown-tools is disabled or unavailable, the framework gracefully degrades:
 
 1. **Logging Fallback**: All tracking operations log to framework logs
-2. **File Fallback**: Tracking data written to `~/.claude-multiagent-pm/logs/ai-trackdown-fallback.log`
+2. **File Fallback**: Tracking data written to `~/.claude-pm/logs/ai-trackdown-fallback.log`
 3. **Disabled Fallback**: No tracking performed (minimal functionality)
 
 ### Installation and Setup
@@ -149,7 +149,7 @@ aitrackdown status
 The framework includes comprehensive configuration options for ai-trackdown-tools integration:
 
 ```yaml
-# ~/.claude-multiagent-pm/config/framework.yaml
+# ~/.claude-pm/config/framework.yaml
 ai_trackdown_tools:
   enabled: true                    # Enable/disable ai-trackdown-tools integration
   cli_command: "aitrackdown"       # CLI command to use (aitrackdown or atd)

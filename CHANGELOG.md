@@ -2,6 +2,49 @@
 
 All notable changes to the Claude Multi-Agent Project Management Framework will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 4.5.1 (2025-07-10)
+
+### 🚨 CRITICAL FIX: NPM Installation Dependency Resolution
+
+#### Package Publication Fix
+- **Dependency Correction**: Fixed critical npm installation failure caused by local file dependency
+- **Registry Migration**: Replaced `file:../managed/ai-trackdown-tools/bobmatnyc-ai-trackdown-tools-1.0.1.tgz` with `^1.1.1` from npm registry
+- **User Impact**: Resolves ENOENT error preventing global installation of claude-multiagent-pm
+- **Installation Validation**: Verified clean installation workflow for end users
+
+#### Technical Resolution
+- **Root Cause**: Local development dependency leaked into production package.json
+- **Solution**: Updated to use published `@bobmatnyc/ai-trackdown-tools@^1.1.1` from npm registry
+- **Testing**: Confirmed npm install, npm pack, and deployment workflows function correctly
+- **Compatibility**: Maintains full compatibility with existing framework functionality
+
+### 🧹 Comprehensive Framework Cleanup and Optimization
+
+#### Major Cleanup Operation
+- **Space Savings**: 139MB+ recovered (185MB → 46MB total framework size)
+- **Duplicate Removal**: Removed complete duplicate lib/framework/ directory structure
+- **Project Separation**: Relocated misplaced ai-code-review project to proper location
+- **Dependency Cleanup**: Cleaned 85MB node_modules and 10MB coverage reports
+- **Cache Cleanup**: Removed Python cache files and obsolete backup files
+- **Structure Compliance**: Achieved canonical v4.5.0 directory structure
+
+#### Framework Integrity Validation
+- **Python Import**: claude_pm module operational post-cleanup
+- **AI-Trackdown CLI**: Version 1.0.1 functional and validated
+- **Health Check**: Core framework operational with all systems intact
+- **Security Agent**: Integration preserved and validated
+
+#### Safety Protocols
+- **Complete Backup**: Full backup created before all operations
+- **Rollback Capability**: All critical files preserved in backup
+- **Progressive Validation**: Framework functionality validated after each phase
+- **Documentation**: Comprehensive cleanup analysis and completion reports
+
+#### Deliverables
+- **CLEANUP_ANALYSIS_REPORT.md**: Comprehensive pre-cleanup analysis
+- **CLEANUP_COMPLETION_REPORT.md**: Final operation results and validation
+- **backups/cleanup-backup-20250709-223332/**: Complete backup of cleaned items
+
 ## 4.5.0 (2025-07-10)
 
 ### 🔐 Security Agent Implementation with Pre-Push Veto Authority

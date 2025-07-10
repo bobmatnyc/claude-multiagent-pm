@@ -10,8 +10,6 @@ from pathlib import Path
 from dataclasses import dataclass, field
 
 from ..core.base_agent import BaseAgent
-from ..core.memory import MemoryManager
-from ..services.ai_trackdown import AITrackdownService
 
 
 @dataclass
@@ -50,7 +48,7 @@ class ScaffoldingAgent(BaseAgent):
     5. Implements approved scaffolding if not controversial
     """
     
-    def __init__(self, memory_manager: MemoryManager, trackdown_service: AITrackdownService):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         super().__init__(
             agent_id="scaffolding-agent",
             agent_type="scaffolding",
@@ -61,10 +59,10 @@ class ScaffoldingAgent(BaseAgent):
                 "technology_stack_recommendation",
                 "project_structure_generation",
                 "best_practices_enforcement"
-            ]
+            ],
+            config=config,
+            tier="system"
         )
-        self.memory_manager = memory_manager
-        self.trackdown_service = trackdown_service
         self.templates_path = Path(__file__).parent.parent.parent / "templates" / "scaffolding-agent"
         
         # Load framework preferences
@@ -128,13 +126,8 @@ class ScaffoldingAgent(BaseAgent):
                 recommended_frameworks=recommended_frameworks
             )
             
-            # Store analysis in memory
-            await self.memory_manager.store_memory(
-                agent_id=self.agent_id,
-                category="SCAFFOLDING_PATTERN",
-                content=f"Design doc analysis: {project_type}, complexity: {complexity_score}",
-                context={"analysis": analysis.__dict__}
-            )
+            # Store analysis in memory (placeholder for memory integration)
+            self.logger.info(f"Design doc analysis: {project_type}, complexity: {complexity_score}")
             
             return analysis
             
@@ -288,13 +281,8 @@ class ScaffoldingAgent(BaseAgent):
                 concerns=self._identify_concerns(analysis, template)
             )
             
-            # Store recommendation in memory
-            await self.memory_manager.store_memory(
-                agent_id=self.agent_id,
-                category="SCAFFOLDING_PATTERN",
-                content=f"Scaffolding recommendation: {recommendation.template_used}",
-                context={"recommendation": recommendation.__dict__}
-            )
+            # Store recommendation in memory (placeholder for memory integration)
+            self.logger.info(f"Scaffolding recommendation: {recommendation.template_used}")
             
             return recommendation
             
@@ -432,13 +420,8 @@ class ScaffoldingAgent(BaseAgent):
 {"Awaiting PM approval before proceeding" if recommendation.approval_required else "Ready to proceed with scaffolding"}
         """
         
-        # Create tracking ticket
-        await self.trackdown_service.create_task(
-            title=f"Scaffolding: {recommendation.template_used}",
-            description=suggestion,
-            priority="high" if recommendation.approval_required else "medium",
-            labels=["scaffolding", "architecture", analysis.project_type]
-        )
+        # Create tracking ticket (placeholder for trackdown service integration)
+        self.logger.info(f"Scaffolding task suggested: {recommendation.template_used}")
         
         return suggestion.strip()
     
@@ -466,13 +449,8 @@ class ScaffoldingAgent(BaseAgent):
             # Create basic files
             self._create_basic_files(project_dir, recommendation)
             
-            # Store successful scaffolding pattern
-            await self.memory_manager.store_memory(
-                agent_id=self.agent_id,
-                category="SCAFFOLDING_PATTERN",
-                content=f"Successfully scaffolded {recommendation.template_used}",
-                context={"project_path": project_path, "template": recommendation.template_used}
-            )
+            # Store successful scaffolding pattern (placeholder for memory integration)
+            self.logger.info(f"Successfully scaffolded {recommendation.template_used} at {project_path}")
             
             return True
             
@@ -518,3 +496,41 @@ class ScaffoldingAgent(BaseAgent):
         # This would create actual starter files
         # For now, just create placeholder files
         pass
+    
+    async def _execute_operation(
+        self, 
+        operation: str, 
+        context: Optional[Dict[str, Any]] = None,
+        **kwargs
+    ) -> Any:
+        """Execute Scaffolding Agent operations."""
+        context = context or {}
+        
+        if operation == "analyze_design_document":
+            doc_path = kwargs.get("doc_path") or context.get("doc_path")
+            if not doc_path:
+                raise ValueError("doc_path required for analyze_design_document")
+            return await self.analyze_design_document(doc_path)
+        
+        elif operation == "generate_scaffolding_recommendation":
+            analysis = kwargs.get("analysis") or context.get("analysis")
+            if not analysis:
+                raise ValueError("analysis required for generate_scaffolding_recommendation")
+            return await self.generate_scaffolding_recommendation(analysis)
+        
+        elif operation == "suggest_to_pm":
+            recommendation = kwargs.get("recommendation") or context.get("recommendation")
+            analysis = kwargs.get("analysis") or context.get("analysis")
+            if not recommendation or not analysis:
+                raise ValueError("recommendation and analysis required for suggest_to_pm")
+            return await self.suggest_to_pm(recommendation, analysis)
+        
+        elif operation == "implement_scaffolding":
+            recommendation = kwargs.get("recommendation") or context.get("recommendation")
+            project_path = kwargs.get("project_path") or context.get("project_path")
+            if not recommendation or not project_path:
+                raise ValueError("recommendation and project_path required for implement_scaffolding")
+            return await self.implement_scaffolding(recommendation, project_path)
+        
+        else:
+            raise ValueError(f"Unknown operation: {operation}")

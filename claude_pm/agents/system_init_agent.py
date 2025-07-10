@@ -56,9 +56,9 @@ class SystemInitAgent(BaseService):
         self.working_dir = working_dir or Path.cwd()
         self.project_dir = project_dir or self._detect_project_directory()
         self.framework_path = self._discover_framework_path()
-        self.local_config_dir = self.working_dir / ".claude-multiagent-pm"
-        self.project_config_dir = self.project_dir / ".claude-multiagent-pm"
-        self.framework_config_dir = self.framework_path / ".claude-multiagent-pm" if self.framework_path else None
+        self.local_config_dir = self.working_dir / ".claude-pm"
+        self.project_config_dir = self.project_dir / ".claude-pm"
+        self.framework_config_dir = self.framework_path / ".claude-pm" if self.framework_path else None
         self.console = Console()
         self.logger = setup_logging(__name__)
     
@@ -86,7 +86,7 @@ class SystemInitAgent(BaseService):
         
         Project directory detection logic:
         1. Look for project indicators (.git, package.json, pyproject.toml, etc.)
-        2. Check for existing .claude-multiagent-pm directory
+        2. Check for existing .claude-pm directory
         3. Use working directory as fallback
         """
         current = self.working_dir
@@ -100,7 +100,7 @@ class SystemInitAgent(BaseService):
             "Cargo.toml",
             "go.mod",
             "pom.xml",
-            ".claude-multiagent-pm"
+            ".claude-pm"
         ]
         
         # Walk up the directory tree to find project root
@@ -123,8 +123,8 @@ class SystemInitAgent(BaseService):
         # Check common installation locations
         home = Path.home()
         candidates = [
-            home / "Projects" / "claude-multiagent-pm",
-            home / "Clients" / "claude-multiagent-pm",
+            home / "Projects" / "claude-pm",
+            home / "Clients" / "claude-pm",
             Path.cwd(),
             Path.cwd().parent,
         ]
@@ -215,7 +215,7 @@ class SystemInitAgent(BaseService):
     
     def _create_directory_structure(self) -> bool:
         """
-        Create the enhanced .claude-multiagent-pm directory structure with three-tier agent hierarchy.
+        Create the enhanced .claude-pm directory structure with three-tier agent hierarchy.
         
         Creates three types of directories:
         1. Framework directory: Global user agents, system training data
@@ -224,8 +224,8 @@ class SystemInitAgent(BaseService):
         
         Agent Hierarchy Structure:
         - System Agents: /framework/claude_pm/agents/ (core framework)
-        - User Agents: ~/.claude-multiagent-pm/agents/user-defined/ (global)
-        - Project Agents: $PROJECT/.claude-multiagent-pm/agents/project-specific/ (local)
+        - User Agents: ~/.claude-pm/agents/user-defined/ (global)
+        - Project Agents: $PROJECT/.claude-pm/agents/project-specific/ (local)
         """
         try:
             # Framework directory structure (global) - ENHANCED WITH AGENT HIERARCHY
@@ -541,7 +541,7 @@ Contents may be cleared during framework updates.
                         "examples": ["custom_engineer_agent.py", "personal_qa_agent.py"]
                     },
                     "project": {
-                        "path": "PROJECT/.claude-multiagent-pm/agents/project-specific/",
+                        "path": "PROJECT/.claude-pm/agents/project-specific/",
                         "priority": 3,
                         "description": "Project-specific agents with highest precedence",
                         "immutable": False,
@@ -657,7 +657,7 @@ Contents may be cleared during framework updates.
             # Generate framework-level configuration (global)
             if self.framework_config_dir:
                 framework_config = {
-                    "claude-multiagent-pm": {
+                    "claude-pm": {
                         "version": "4.2.3",
                         "mode": "multi-project-orchestrator",
                         "framework_location": str(self.framework_path),
@@ -698,7 +698,7 @@ Contents may be cleared during framework updates.
             
             # Generate working directory configuration
             working_config = {
-                "claude-multiagent-pm": {
+                "claude-pm": {
                     "version": "4.2.3",
                     "mode": "working-directory",
                     "working_directory": str(self.working_dir),
@@ -727,7 +727,7 @@ Contents may be cleared during framework updates.
             # Generate project-specific configuration (if different from working)
             if self.project_dir != self.working_dir and self.project_config_dir:
                 project_config = {
-                    "claude-multiagent-pm": {
+                    "claude-pm": {
                         "version": "4.2.3",
                         "mode": "project-specific",
                         "project_directory": str(self.project_dir),
@@ -1057,7 +1057,7 @@ Contents may be cleared during framework updates.
         # Check if framework path exists
         if not self.framework_path:
             issues.append("Claude PM Framework not found")
-            solutions.append("Install framework: git clone https://github.com/bobmatnyc/claude-multiagent-pm.git ~/Projects/claude-multiagent-pm")
+            solutions.append("Install framework: git clone https://github.com/bobmatnyc/claude-multiagent-pm.git ~/Projects/claude-pm")
         
         # Check dependencies
         dependencies = await self._verify_dependencies()
@@ -1241,7 +1241,7 @@ Contents may be cleared during framework updates.
                         "cli_commands": ["status", "epic list", "issue list"]
                     },
                     "managed": {
-                        "indicators": [".claude-multiagent-pm/", "package.json"],
+                        "indicators": [".claude-pm/", "package.json"],
                         "health_check": "managed_project_check",
                         "cli_commands": ["status", "epic list", "issue list", "task list"]
                     },
@@ -1334,7 +1334,7 @@ Contents may be cleared during framework updates.
             if (self.working_dir / "claude_pm" / "__init__.py").exists():
                 project_info["type"] = "claude-pm-framework"
                 project_info["name"] = "Claude PM Framework"
-            elif (self.working_dir / ".claude-multiagent-pm").exists():
+            elif (self.working_dir / ".claude-pm").exists():
                 project_info["type"] = "managed"
             elif (self.working_dir / ".git").exists():
                 project_info["type"] = "standalone"
@@ -1521,8 +1521,8 @@ Contents may be cleared during framework updates.
             old_path = self.working_dir
             self.working_dir = new_path
             self.project_dir = self._detect_project_directory()
-            self.local_config_dir = self.working_dir / ".claude-multiagent-pm"
-            self.project_config_dir = self.project_dir / ".claude-multiagent-pm"
+            self.local_config_dir = self.working_dir / ".claude-pm"
+            self.project_config_dir = self.project_dir / ".claude-pm"
             
             # Update project index for new location
             await self._update_project_index_for_directory(new_path)
@@ -1590,7 +1590,7 @@ Contents may be cleared during framework updates.
         """Detect project type from directory contents."""
         if (directory / "claude_pm" / "__init__.py").exists():
             return "claude-pm-framework"
-        elif (directory / ".claude-multiagent-pm").exists():
+        elif (directory / ".claude-pm").exists():
             return "managed"
         elif (directory / ".git").exists():
             return "standalone"

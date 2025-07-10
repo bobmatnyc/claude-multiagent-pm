@@ -43,7 +43,7 @@ def sync_completed_tickets_only(repository: str, dry_run: bool = True):
     milestone_manager = GitHubMilestoneManager(client, repository)
     
     # Parse tickets from ai-trackdown-tools structure
-    framework_path = "/Users/masa/Projects/claude-multiagent-pm"
+    framework_path = "/Users/masa/Projects/claude-pm"
     
     # Try to get completed tickets from ai-trackdown-tools
     try:
@@ -87,7 +87,7 @@ def sync_completed_tickets_only(repository: str, dry_run: bool = True):
     logger.info(f"Found {len(completed_tickets)} completed tickets")
     
     # Load existing sync records to avoid duplicates
-    sync_log_path = "/Users/masa/Projects/claude-multiagent-pm/sync/github_sync_log.json"
+    sync_log_path = "/Users/masa/Projects/claude-pm/sync/github_sync_log.json"
     existing_tickets = set()
     if Path(sync_log_path).exists():
         with open(sync_log_path, 'r') as f:

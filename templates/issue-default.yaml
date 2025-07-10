@@ -3,6 +3,7 @@ name: default
 description: Default issue template
 frontmatter_template:
   title: Issue Title
+  epic_id: ""
   description: Issue description
   status: planning
   priority: medium

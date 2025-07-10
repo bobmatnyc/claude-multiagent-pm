@@ -39,7 +39,7 @@ class AITrackdownHealthCollector(HealthCollector):
             timeout_seconds: Timeout for health collection
         """
         super().__init__("ai_trackdown_tools", timeout_seconds)
-        self.framework_root = framework_root or Path("/Users/masa/Projects/claude-multiagent-pm")
+        self.framework_root = framework_root or Path("/Users/masa/Projects/claude-pm")
         self.cli_path = self.framework_root / "bin" / "aitrackdown"
         self.tasks_path = self.framework_root / "tasks"
         
