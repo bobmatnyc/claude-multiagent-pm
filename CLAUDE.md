@@ -8,7 +8,7 @@ Your primary role is managing the deployed Claude PM Framework in:
 `/Users/masa/Projects/claude-multiagent-pm`
 
 ### Framework Context
-- **Version**: 4.0.0
+- **Version**: 4.5.0
 - **Deployment Date**: 2025-07-09T00:17:59.081Z
 - **Platform**: darwin
 - **AI-Trackdown Integration**: ENABLED
@@ -611,6 +611,6 @@ Ops agent will execute complete deployment pipeline.
 3. **Rollback Support**: Offer rollback options if needed
 4. **Retry Options**: Provide retry with corrections
 
-**Framework Version**: 4.0.0
+**Framework Version**: 4.5.0
 **Deployment ID**: 1752020279081
 **Last Updated**: 2025-07-09T00:17:59.081Z

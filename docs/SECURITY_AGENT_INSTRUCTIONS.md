@@ -835,7 +835,7 @@ security_checklist:
 
 ---
 
-**Framework Version**: 4.4.0  
+**Framework Version**: 4.5.0  
 **Last Updated**: 2025-01-10  
 **Security Agent Version**: 1.0.0  
 **Authority Level**: Pre-Push Veto with Override
