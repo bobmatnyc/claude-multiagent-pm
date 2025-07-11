@@ -1,6 +1,6 @@
 {
   "name": "@bobmatnyc/claude-multiagent-pm",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Claude Multi-Agent PM Framework - Universal deployment package for AI-driven project management",
   "main": "claude_pm/cli.py",
   "bin": {
