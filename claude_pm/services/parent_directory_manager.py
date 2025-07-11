@@ -140,7 +140,7 @@ class ParentDirectoryManager(BaseService):
 
         # Working paths
         self.working_dir = Path.cwd()
-        self.framework_path = self.working_dir
+        self.framework_path = self._detect_framework_path()
         self.parent_directory_manager_dir = (
             self.working_dir / ".claude-pm" / "parent_directory_manager"
         )
@@ -212,6 +212,25 @@ class ParentDirectoryManager(BaseService):
         # Configuration files
         self.managed_directories_file = self.configs_dir / "managed_directories.json"
         self.operation_history_file = self.logs_dir / "operation_history.json"
+
+    def _detect_framework_path(self) -> Path:
+        """Detect framework path from environment or deployment structure."""
+        import os
+        # Try environment variable first (set by Node.js CLI)
+        if framework_path := os.getenv('CLAUDE_PM_FRAMEWORK_PATH'):
+            return Path(framework_path)
+            
+        # Try deployment directory
+        if deployment_dir := os.getenv('CLAUDE_PM_DEPLOYMENT_DIR'):
+            return Path(deployment_dir)
+            
+        # Try relative to current module
+        current_dir = Path(__file__).parent.parent.parent
+        if (current_dir / 'framework' / 'CLAUDE.md').exists():
+            return current_dir
+            
+        # Fallback to working directory
+        return self.working_dir
 
     def _create_directory_structure(self):
         """Create the parent directory manager directory structure."""

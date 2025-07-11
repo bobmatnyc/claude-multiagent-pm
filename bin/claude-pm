@@ -722,6 +722,7 @@ Commands:
   service             Service management
   workflow            Workflow orchestration
   enforcement         Framework enforcement
+  deploy-template     Deploy CLAUDE.md template to current directory
   --version           Show version information
   --deployment-info   Show deployment detection results
   --system-info       Show system information with CLAUDE.md version
@@ -1429,6 +1430,22 @@ async function main() {
         process.exit(0);
     }
     
+    // Handle manual CLAUDE.md deployment command
+    if (args.includes('deploy-template') || args.includes('--deploy-template')) {
+        console.log('🚀 Manually deploying CLAUDE.md template...');
+        try {
+            const deployed = await handleAutomaticClaudeMdDeployment();
+            if (deployed) {
+                console.log('✅ CLAUDE.md template deployed successfully');
+            } else {
+                console.log('ℹ️  No deployment needed - CLAUDE.md already exists or no global deployment info available');
+            }
+        } catch (error) {
+            console.error(`❌ Template deployment error: ${error.message}`);
+        }
+        process.exit(0);
+    }
+
     // Handle framework CLAUDE.md management flag
     if (args.includes('--manage-claude-md')) {
         console.log('🧹 Managing framework CLAUDE.md deployment tree...');
@@ -1521,6 +1538,9 @@ async function main() {
     } else if (!pythonPath) {
         enhancedEnv.PYTHONPATH = frameworkPath;
     }
+    
+    // FIXED: Handle automatic CLAUDE.md deployment for global installations
+    await handleAutomaticClaudeMdDeployment();
     
     // FIXED: Handle Python script updates and deployment
     await handlePythonScriptDeployment(frameworkPath, enhancedEnv);
@@ -1767,7 +1787,113 @@ asyncio.run(get_status())
 }
 
 /**
- * CMPM-105 Integration: Handle Python script deployment
+ * Handle automatic CLAUDE.md deployment for global installations
+ */
+async function handleAutomaticClaudeMdDeployment() {
+    try {
+        const globalConfigDir = path.join(os.homedir(), '.claude-pm');
+        const globalDeploymentInfoPath = path.join(globalConfigDir, 'global-deployment.json');
+        
+        // Check if we have global deployment info
+        if (!fs.existsSync(globalDeploymentInfoPath)) {
+            return false; // No global deployment info available
+        }
+        
+        const globalInfo = JSON.parse(fs.readFileSync(globalDeploymentInfoPath, 'utf8'));
+        
+        // Only proceed if this is a global installation that needs first run deployment
+        if (!globalInfo.needsFirstRunDeployment || globalInfo.installationType !== 'global') {
+            return false;
+        }
+        
+        const workingDir = process.cwd();
+        const workingClaudemd = path.join(workingDir, 'CLAUDE.md');
+        
+        // Check if CLAUDE.md already exists in working directory
+        if (fs.existsSync(workingClaudemd)) {
+            const content = fs.readFileSync(workingClaudemd, 'utf8');
+            const isFrameworkFile = content.includes('Claude PM Framework Configuration - Deployment') || 
+                                  content.includes('AI ASSISTANT ROLE DESIGNATION');
+            
+            if (!isFrameworkFile) {
+                // User has custom CLAUDE.md, don't override
+                return false;
+            }
+        }
+        
+        // Check if framework template exists
+        const frameworkTemplate = globalInfo.frameworkTemplatePath;
+        if (!fs.existsSync(frameworkTemplate)) {
+            console.log('⚠️  Framework template not found for auto-deployment');
+            return false;
+        }
+        
+        // Deploy CLAUDE.md to working directory
+        console.log('🚀 Auto-deploying CLAUDE.md from global installation...');
+        
+        let templateContent = fs.readFileSync(frameworkTemplate, 'utf8');
+        const packageJson = require(path.join(path.dirname(frameworkTemplate), '..', 'package.json'));
+        
+        const deploymentDate = new Date().toISOString();
+        const deploymentId = Date.now();
+        
+        // Template variable replacements
+        const replacements = {
+            '{{CLAUDE_MD_VERSION}}': `${packageJson.version}-001`,
+            '{{FRAMEWORK_VERSION}}': packageJson.version,
+            '{{DEPLOYMENT_DATE}}': deploymentDate,
+            '{{LAST_UPDATED}}': deploymentDate,
+            '{{DEPLOYMENT_DIR}}': workingDir,
+            '{{PLATFORM}}': os.platform(),
+            '{{PYTHON_CMD}}': 'python3',
+            '{{AI_TRACKDOWN_PATH}}': 'Global installation available',
+            '{{DEPLOYMENT_ID}}': deploymentId,
+            '{{PLATFORM_NOTES}}': getPlatformNotes(os.platform())
+        };
+        
+        // Apply template variable substitutions
+        for (const [placeholder, value] of Object.entries(replacements)) {
+            const escapedPlaceholder = placeholder.replace(/[{}]/g, '\\$&');
+            templateContent = templateContent.replace(new RegExp(escapedPlaceholder, 'g'), value);
+        }
+        
+        // Write the deployed CLAUDE.md
+        fs.writeFileSync(workingClaudemd, templateContent);
+        console.log(`✅ Framework CLAUDE.md deployed to: ${workingClaudemd}`);
+        
+        // Mark as deployed by removing the needsFirstRunDeployment flag
+        globalInfo.needsFirstRunDeployment = false;
+        globalInfo.lastDeploymentDate = deploymentDate;
+        globalInfo.lastDeploymentDir = workingDir;
+        
+        fs.writeFileSync(globalDeploymentInfoPath, JSON.stringify(globalInfo, null, 2));
+        
+        return true;
+        
+    } catch (error) {
+        console.log(`⚠️  Auto-deployment failed: ${error.message}`);
+        return false;
+    }
+}
+
+/**
+ * Get platform-specific notes for template deployment
+ */
+function getPlatformNotes(platform) {
+    switch (platform) {
+        case 'darwin':
+            return '**macOS-specific:**\n- Use `.sh` files for scripts\n- CLI wrappers: `bin/aitrackdown` and `bin/atd`\n- Health check: `scripts/health-check.sh`\n- May require Xcode Command Line Tools';
+        case 'linux':
+            return '**Linux-specific:**\n- Use `.sh` files for scripts\n- CLI wrappers: `bin/aitrackdown` and `bin/atd`\n- Health check: `scripts/health-check.sh`\n- Ensure proper file permissions';
+        case 'win32':
+            return '**Windows-specific:**\n- Use `.bat` files for scripts\n- CLI wrappers: `bin/aitrackdown.bat` and `bin/atd.bat`\n- Health check: `scripts/health-check.bat`\n- Path separators: Use backslashes in Windows paths';
+        default:
+            return `**Platform**: ${platform}\n- Use appropriate script extensions for your platform\n- Ensure proper file permissions on CLI wrappers`;
+    }
+}
+
+/**
+ * CMCP-105 Integration: Handle Python script deployment
  */
 async function handlePythonScriptDeployment(frameworkPath, environment) {
     try {
