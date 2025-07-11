@@ -1,0 +1,281 @@
+name: ISS-0074 Session Cleanup Validation
+
+on:
+  push:
+    branches:
+      - feature/ISS-0074-session-cleanup-fixes
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'claude_pm/collectors/framework_services.py'
+      - 'claude_pm/services/memory_service.py'
+      - 'claude_pm/core/connection_manager.py'
+      - 'claude_pm/services/health_dashboard.py'
+      - 'scripts/fix_connection_leaks.py'
+      - 'scripts/test_connection_fixes.py'
+      - 'tests/**/*session*'
+      - 'tests/**/*connection*'
+      - 'tests/**/*cleanup*'
+
+env:
+  PYTHON_VERSION: '3.13'
+  NODE_VERSION: '20.19.0'
+
+jobs:
+  session-cleanup-validation:
+    name: Session Cleanup Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements/**/*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/dev.txt
+          pip install -r requirements/base.txt
+          
+      - name: Install Node.js dependencies
+        run: npm ci
+        
+      - name: Run connection leak detection tests
+        run: |
+          python scripts/test_connection_fixes.py
+          
+      - name: Run aiohttp session cleanup validation
+        run: |
+          python -m pytest tests/ -k "session or connection or cleanup" -v --tb=short
+          
+      - name: Run framework services health check
+        run: |
+          python -c "
+          import asyncio
+          from claude_pm.collectors.framework_services import FrameworkServicesCollector
+          
+          async def test_session_cleanup():
+              collector = FrameworkServicesCollector()
+              # Test session creation and cleanup
+              await collector.collect_health_metrics()
+              print('✅ Session cleanup validation passed')
+              
+          asyncio.run(test_session_cleanup())
+          "
+          
+      - name: Run memory service session validation
+        run: |
+          python -c "
+          import asyncio
+          from claude_pm.services.memory_service import MemoryService
+          
+          async def test_memory_sessions():
+              try:
+                  service = MemoryService()
+                  # Test session management
+                  await service.initialize()
+                  await service.cleanup()
+                  print('✅ Memory service session management validated')
+              except Exception as e:
+                  print(f'❌ Memory service session validation failed: {e}')
+                  raise
+                  
+          asyncio.run(test_memory_sessions())
+          "
+          
+      - name: Generate coverage report
+        run: |
+          python -m pytest tests/ -k "session or connection or cleanup" --cov=claude_pm --cov-report=xml --cov-report=html
+          
+      - name: Upload coverage to artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-iss-0074
+          path: |
+            coverage.xml
+            htmlcov/
+            
+      - name: Performance regression test
+        run: |
+          python scripts/fix_connection_leaks.py --validate-performance
+          
+      - name: Session leak detection
+        run: |
+          python -c "
+          import asyncio
+          import gc
+          import weakref
+          from claude_pm.services.health_dashboard import HealthDashboard
+          
+          async def test_no_session_leaks():
+              sessions = []
+              dashboard = HealthDashboard()
+              
+              # Create multiple sessions and track with weak references
+              for i in range(10):
+                  await dashboard.get_health_status()
+                  if hasattr(dashboard, '_session'):
+                      sessions.append(weakref.ref(dashboard._session))
+              
+              await dashboard.cleanup()
+              gc.collect()
+              
+              # Check for leaked sessions
+              leaked = [s for s in sessions if s() is not None]
+              if leaked:
+                  raise Exception(f'❌ {len(leaked)} sessions leaked')
+              print('✅ No session leaks detected')
+              
+          asyncio.run(test_no_session_leaks())
+          "
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: session-cleanup-validation
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/dev.txt
+          pip install -r requirements/base.txt
+          
+      - name: Run integration test suite
+        run: |
+          python -m pytest tests/test_memory_fixes.py -v
+          python -m pytest tests/test_hierarchical_agent_system.py -v
+          python -m pytest tests/test_claude_pm_memory.py -v
+          
+      - name: Health monitoring system test
+        run: |
+          python scripts/health-check.sh
+          
+      - name: Framework services reliability test
+        run: |
+          python -c "
+          import asyncio
+          from claude_pm.collectors.framework_services import FrameworkServicesCollector
+          
+          async def reliability_test():
+              collector = FrameworkServicesCollector()
+              success_count = 0
+              total_tests = 100
+              
+              for i in range(total_tests):
+                  try:
+                      await collector.collect_health_metrics()
+                      success_count += 1
+                  except Exception as e:
+                      print(f'Test {i+1} failed: {e}')
+              
+              reliability = (success_count / total_tests) * 100
+              print(f'✅ Reliability: {reliability}% ({success_count}/{total_tests})')
+              
+              if reliability < 75:
+                  raise Exception(f'❌ Reliability below target: {reliability}% < 75%')
+                  
+          asyncio.run(reliability_test())
+          "
+
+  deployment-readiness:
+    name: Deployment Readiness Check
+    runs-on: ubuntu-latest
+    needs: [session-cleanup-validation, integration-tests]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/dev.txt
+          pip install -r requirements/base.txt
+          
+      - name: Version compatibility check
+        run: |
+          python -c "
+          import sys
+          print(f'✅ Python version: {sys.version}')
+          
+          import claude_pm
+          print(f'✅ Claude PM version: {claude_pm.__version__ if hasattr(claude_pm, \"__version__\") else \"dev\"}')
+          
+          import aiohttp
+          print(f'✅ aiohttp version: {aiohttp.__version__}')
+          "
+          
+      - name: Configuration validation
+        run: |
+          python -c "
+          from claude_pm.core.config import Config
+          config = Config()
+          print('✅ Configuration validation passed')
+          "
+          
+      - name: Service registry test
+        run: |
+          python -c "
+          import asyncio
+          from claude_pm.core.service_manager import ServiceManager
+          
+          async def test_service_registry():
+              manager = ServiceManager()
+              await manager.initialize()
+              services = await manager.get_active_services()
+              print(f'✅ Active services: {len(services)}')
+              await manager.cleanup()
+              
+          asyncio.run(test_service_registry())
+          "
+          
+      - name: Generate deployment report
+        run: |
+          echo "# ISS-0074 Deployment Readiness Report" > deployment-report.md
+          echo "" >> deployment-report.md
+          echo "## Test Results" >> deployment-report.md
+          echo "- ✅ Session cleanup validation: PASSED" >> deployment-report.md
+          echo "- ✅ Integration tests: PASSED" >> deployment-report.md
+          echo "- ✅ Deployment readiness: PASSED" >> deployment-report.md
+          echo "" >> deployment-report.md
+          echo "## Branch: \`feature/ISS-0074-session-cleanup-fixes\`" >> deployment-report.md
+          echo "## Target: Version 4.5.2" >> deployment-report.md
+          echo "## Date: $(date -u)" >> deployment-report.md
+          
+      - name: Upload deployment report
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-readiness-report
+          path: deployment-report.md

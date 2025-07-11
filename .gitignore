@@ -158,3 +158,12 @@ sync/
 
 # Archive directory
 _archive/
+
+# Operational documents (should be managed via ai-trackdown-cli tickets)
+*-COMPLETION-REPORT.md
+*-IMPLEMENTATION-REPORT.md
+*-DEPLOYMENT-REPORT.md
+*-QA-VALIDATION-REPORT.md
+*_COMPLETION_REPORT.md
+*_IMPLEMENTATION_REPORT.md
+*_DEPLOYMENT_REPORT.md

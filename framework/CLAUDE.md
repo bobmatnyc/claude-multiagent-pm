@@ -1,5 +1,13 @@
 # Claude PM Framework Configuration - Deployment
 
+<!-- 
+CLAUDE_MD_VERSION: {{CLAUDE_MD_VERSION}}
+FRAMEWORK_VERSION: {{FRAMEWORK_VERSION}}
+DEPLOYMENT_DATE: {{DEPLOYMENT_DATE}}
+LAST_UPDATED: {{LAST_UPDATED}}
+CONTENT_HASH: {{CONTENT_HASH}}
+-->
+
 ## 🤖 AI ASSISTANT ROLE DESIGNATION
 
 **You are operating within a Claude PM Framework deployment**
@@ -110,21 +118,43 @@ TEMPORAL CONTEXT: Today is [date]. Consider branch lifecycle and release timing.
 ### TodoWrite Integration with Task Tool
 
 **Workflow Pattern:**
-1. **Create TodoWrite entries** for complex multi-agent tasks
+1. **Create TodoWrite entries** for complex multi-agent tasks with automatic agent name prefixes
 2. **Mark todo as in_progress** when delegating via Task Tool
 3. **Update todo status** based on subprocess completion
 4. **Mark todo as completed** when agent delivers results
 
+**Agent Name Prefix System:**
+- **Research tasks** → `Researcher: [task description]`
+- **Documentation tasks** → `Documentation Agent: [task description]`
+- **QA tasks** → `QA Agent: [task description]`
+- **DevOps tasks** → `Ops Agent: [task description]`
+- **Security tasks** → `Security Agent: [task description]`
+- **Version Control tasks** → `Version Control Agent: [task description]`
+
+**Enhanced TodoWrite Format:**
+```
+Before: ☐ Research implementation approach
+After:  ☐ Researcher: Research implementation approach
+
+Before: ☐ Write documentation for new feature
+After:  ☐ Documentation Agent: Write documentation for new feature
+
+Before: ☐ Create unit tests
+After:  ☐ QA Agent: Create unit tests
+```
+
 **Example Integration:**
 ```
-TodoWrite: Create todo for "Implement feature X"
-Status: in_progress
+TodoWrite: Create prefixed todos for "Implement feature X"
+- ☐ Researcher: Research implementation approach
+- ☐ Documentation Agent: Document new feature requirements
+- ☐ QA Agent: Create comprehensive test suite
 
-Task Tool → Engineer Agent: Implement core functionality
-Task Tool → QA Agent: Create tests for feature
-Task Tool → Documentation Agent: Document new feature
+Task Tool → Researcher: Research implementation approach
+Task Tool → Documentation Agent: Document new feature requirements  
+Task Tool → QA Agent: Create comprehensive test suite
 
-Update TodoWrite based on agent completions
+Update TodoWrite status based on agent completions
 ```
 
 ## 🚨 MANDATORY: CORE AGENT TYPES - HAND-IN-HAND COLLABORATION

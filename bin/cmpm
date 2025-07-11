@@ -21,7 +21,11 @@ framework_path = Path(__file__).parent.parent
 sys.path.insert(0, str(framework_path))
 
 from claude_pm.cli import main as cli_main
-from claude_pm.cmpm_commands import cmpm_health, cmpm_agents, cmpm_index
+from claude_pm.cmpm_commands import (
+    cmpm_health, cmpm_agents, cmpm_index, cmpm_dashboard, 
+    cmpm_qa_status, cmpm_qa_test, cmpm_qa_results, 
+    cmpm_integration, cmpm_ai_ops
+)
 from rich.console import Console
 
 console = Console()
@@ -34,16 +38,23 @@ def show_help():
 =====================================
 
 [bold green]Available Commands:[/bold green]
-  [cyan]/cmpm:health[/cyan]    - Comprehensive system health dashboard
-  [cyan]/cmpm:agents[/cyan]    - List all active agent types and status
-  [cyan]/cmpm:index[/cyan]     - Generate comprehensive project discovery index
-  [cyan]help[/cyan]           - Show this help message
+  [cyan]/cmpm:health[/cyan]       - Comprehensive system health dashboard
+  [cyan]/cmpm:agents[/cyan]       - List all active agent types and status
+  [cyan]/cmpm:index[/cyan]        - Generate comprehensive project discovery index
+  [cyan]/cmpm:dashboard[/cyan]    - Portfolio manager dashboard
+  [cyan]/cmpm:qa-status[/cyan]    - QA extension status and health
+  [cyan]/cmpm:qa-test[/cyan]      - Execute browser-based tests
+  [cyan]/cmpm:qa-results[/cyan]   - View test results and patterns
+  [cyan]/cmpm:integration[/cyan]  - Integration management
+  [cyan]/cmpm:ai-ops[/cyan]       - AI operations management
+  [cyan]help[/cyan]              - Show this help message
 
 [bold yellow]Examples:[/bold yellow]
   cmpm /cmpm:health --detailed
   cmpm /cmpm:agents --filter=standard
   cmpm /cmpm:index --verbose
-  cmpm /cmpm:index --json
+  cmpm /cmpm:qa-test --browser
+  cmpm /cmpm:integration --action status
 
 [bold blue]Framework Info:[/bold blue]
   Version: 4.1.0
@@ -69,18 +80,23 @@ def main():
     if command.startswith("/cmpm:"):
         command_name = command[6:]  # Remove "/cmpm:" prefix
         
-        if command_name == "health":
-            # Remove the slash command from sys.argv and call the health command
-            sys.argv = ["cmpm:health"] + sys.argv[2:]
-            cmpm_health.main(standalone_mode=False)
-        elif command_name == "agents":
-            # Remove the slash command from sys.argv and call the agents command
-            sys.argv = ["cmpm:agents"] + sys.argv[2:]
-            cmpm_agents.main(standalone_mode=False)
-        elif command_name == "index":
-            # Remove the slash command from sys.argv and call the index command
-            sys.argv = ["cmpm:index"] + sys.argv[2:]
-            cmpm_index.main(standalone_mode=False)
+        # Map of command names to their functions
+        command_map = {
+            "health": cmpm_health,
+            "agents": cmpm_agents,
+            "index": cmpm_index,
+            "dashboard": cmpm_dashboard,
+            "qa-status": cmpm_qa_status,
+            "qa-test": cmpm_qa_test,
+            "qa-results": cmpm_qa_results,
+            "integration": cmpm_integration,
+            "ai-ops": cmpm_ai_ops
+        }
+        
+        if command_name in command_map:
+            # Remove the slash command from sys.argv and call the appropriate command
+            sys.argv = [f"cmpm:{command_name}"] + sys.argv[2:]
+            command_map[command_name]()
         else:
             console.print(f"[red]Unknown CMPM command: {command}[/red]")
             console.print("Run 'cmpm help' for available commands")

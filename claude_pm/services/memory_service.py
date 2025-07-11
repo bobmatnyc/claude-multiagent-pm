@@ -26,6 +26,7 @@ from enum import Enum
 # Import from the existing framework
 from ..core.logging_config import get_logger
 from ..core.base_service import BaseService
+from ..core.connection_manager import get_connection_manager, ConnectionConfig
 
 logger = get_logger(__name__)
 
@@ -197,22 +198,21 @@ class ClaudePMMemory:
             bool: True if connection successful, False otherwise
         """
         try:
-            # Create connection pool
-            self._connection_pool = aiohttp.TCPConnector(
-                limit=self.config.connection_pool_size,
-                limit_per_host=self.config.connection_pool_size // 2,
-                ttl_dns_cache=300,
-                use_dns_cache=True,
-                enable_cleanup_closed=True
+            # Check if already connected
+            if self._session and not self._session.closed and self._connected:
+                return True
+                
+            # Get connection manager
+            conn_manager = await get_connection_manager()
+            
+            # Create connection config
+            conn_config = ConnectionConfig(
+                pool_size=self.config.connection_pool_size,
+                timeout=self.config.timeout,
+                connect_timeout=10
             )
             
-            # Create session with timeout configuration
-            timeout = aiohttp.ClientTimeout(
-                total=self.config.timeout,
-                connect=10,
-                sock_read=self.config.timeout
-            )
-            
+            # Setup headers
             headers = {
                 "User-Agent": "ClaudePM-Memory-Client/3.0.0",
                 "Content-Type": "application/json"
@@ -221,11 +221,11 @@ class ClaudePMMemory:
             if self.config.api_key:
                 headers["Authorization"] = f"Bearer {self.config.api_key}"
             
-            self._session = aiohttp.ClientSession(
-                connector=self._connection_pool,
-                timeout=timeout,
-                headers=headers,
-                raise_for_status=False
+            # Get managed session
+            self._session = await conn_manager.get_session(
+                service_name=f"memory_service_{id(self)}",
+                config=conn_config,
+                headers=headers
             )
             
             # Test connection with health check
@@ -248,18 +248,44 @@ class ClaudePMMemory:
         """Disconnect from mem0AI service and cleanup resources."""
         try:
             if self._session:
-                await self._session.close()
+                # Properly close the aiohttp session
+                if not self._session.closed:
+                    await self._session.close()
+                    logger.debug("Closed aiohttp session")
+                
+                # Clear session reference
                 self._session = None
             
             if self._connection_pool:
-                await self._connection_pool.close()
-                self._connection_pool = None
+                # Close connection pool if it exists
+                if not self._connection_pool.closed:
+                    await self._connection_pool.close()
+                    logger.debug("Closed connection pool")
                 
+                self._connection_pool = None
+            
             self._connected = False
-            logger.info("Disconnected from mem0AI service")
+            logger.info("Disconnected from mem0AI service with proper cleanup")
             
         except Exception as e:
             logger.error(f"Error during disconnect: {e}")
+        finally:
+            # Ensure resources are always cleared
+            if self._session and not self._session.closed:
+                try:
+                    await self._session.close()
+                except Exception as cleanup_error:
+                    logger.warning(f"Final session cleanup error: {cleanup_error}")
+            
+            if self._connection_pool and not self._connection_pool.closed:
+                try:
+                    await self._connection_pool.close()
+                except Exception as cleanup_error:
+                    logger.warning(f"Final connection pool cleanup error: {cleanup_error}")
+            
+            self._session = None
+            self._connection_pool = None
+            self._connected = False
     
     async def _health_check(self) -> bool:
         """

@@ -155,6 +155,46 @@ def _detect_memory_manager_info():
         return "error"
 
 
+def _detect_claude_md_version():
+    """Detect CLAUDE.md version and provide concise information."""
+    try:
+        import os
+        import re
+        from pathlib import Path
+        
+        # Check for CLAUDE.md in current directory
+        current_dir = Path.cwd()
+        claude_md_path = current_dir / "CLAUDE.md"
+        
+        if not claude_md_path.exists():
+            return "Not found"
+        
+        # Read and parse CLAUDE.md content
+        try:
+            with open(claude_md_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Extract CLAUDE_MD_VERSION using regex that supports both formats
+            version_match = re.search(r'CLAUDE_MD_VERSION:\s*([\d\.-]+)', content)
+            if version_match:
+                version = version_match.group(1)
+                
+                # Format display based on version type
+                if '-' in version:
+                    framework_ver, serial = version.split('-', 1)
+                    return f"v{version} (Framework: v{framework_ver}, Serial: {serial})"
+                else:
+                    return f"v{version} (Legacy format)"
+            else:
+                return "Found (no version detected)"
+                
+        except Exception as e:
+            return f"Error reading file: {str(e)}"
+            
+    except Exception as e:
+        return f"Detection error: {str(e)}"
+
+
 def _display_directory_context():
     """Display deployment and working directories with enhanced system information."""
     import os
@@ -185,9 +225,13 @@ def _display_directory_context():
         # Get Memory Manager information
         memory_info = _detect_memory_manager_info()
         
+        # Get CLAUDE.md version information
+        claude_md_info = _detect_claude_md_version()
+        
         # Create enhanced display
         console.print(f"[dim]📁 Deployment: {deployment_dir}[/dim]")
         console.print(f"[dim]📂 Working: {working_dir}[/dim]")
+        console.print(f"[dim]📄 CLAUDE.md: {claude_md_info}[/dim]")
         console.print(f"[dim]🔧 AI-Trackdown: {aitrackdown_info}[/dim]")
         console.print(f"[dim]🧠 Memory: {memory_info}[/dim]")
         console.print("")  # Add spacing

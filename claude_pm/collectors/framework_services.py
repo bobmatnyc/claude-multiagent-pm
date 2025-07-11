@@ -180,19 +180,40 @@ class FrameworkServicesCollector(HealthCollector):
         return reports
     
     async def _check_memory_service(self) -> ServiceHealthReport:
-        """Check memory service availability."""
+        """Check memory service availability using temporary service pattern."""
         try:
             from ..services.memory_service import MemoryService
+            from ..core.service_registry import get_service_registry
             
-            # Try to create instance (doesn't start it)
-            memory_service = MemoryService()
+            # Use service registry for proper lifecycle management
+            service_registry = await get_service_registry()
             
-            return create_service_health_report(
-                name="memory_service",
-                status=HealthStatus.UNKNOWN,
-                message="Memory service class available but not initialized",
-                metrics={"import_successful": True}
-            )
+            # Use temporary service for health check
+            async with service_registry.temporary_service(MemoryService) as memory_service:
+                # Perform actual health check on running service
+                health_data = await memory_service._health_check()
+                
+                # Determine status based on health check
+                if health_data.get("mem0ai_connection", False):
+                    status = HealthStatus.HEALTHY
+                    message = "Memory service operational with mem0AI connection"
+                elif health_data.get("client_initialized", False):
+                    status = HealthStatus.DEGRADED
+                    message = "Memory service initialized but mem0AI connection failed"
+                else:
+                    status = HealthStatus.UNHEALTHY
+                    message = "Memory service client not properly initialized"
+                
+                return create_service_health_report(
+                    name="memory_service",
+                    status=status,
+                    message=message,
+                    metrics={
+                        "client_initialized": health_data.get("client_initialized", False),
+                        "mem0ai_connection": health_data.get("mem0ai_connection", False),
+                        "service_uptime": memory_service.uptime or 0
+                    }
+                )
             
         except ImportError as e:
             return create_service_health_report(
@@ -201,27 +222,59 @@ class FrameworkServicesCollector(HealthCollector):
                 message=f"Memory service import failed: {str(e)}",
                 error=str(e)
             )
+        except Exception as e:
+            return create_service_health_report(
+                name="memory_service",
+                status=HealthStatus.ERROR,
+                message=f"Memory service health check failed: {str(e)}",
+                error=str(e)
+            )
     
     async def _check_project_service(self) -> ServiceHealthReport:
-        """Check project service availability."""
+        """Check project service availability using temporary service pattern."""
         try:
             from ..services.project_service import ProjectService
+            from ..core.service_registry import get_service_registry
             
-            # Try to create instance
-            project_service = ProjectService()
+            # Use service registry for proper lifecycle management
+            service_registry = await get_service_registry()
             
-            return create_service_health_report(
-                name="project_service",
-                status=HealthStatus.UNKNOWN,
-                message="Project service class available but not initialized",
-                metrics={"import_successful": True}
-            )
+            # Use temporary service for health check
+            async with service_registry.temporary_service(ProjectService) as project_service:
+                # Perform health check on running service
+                if project_service.running and project_service.health.status == "healthy":
+                    status = HealthStatus.HEALTHY
+                    message = "Project service operational"
+                elif project_service.running:
+                    status = HealthStatus.DEGRADED
+                    message = f"Project service running but degraded: {project_service.health.message}"
+                else:
+                    status = HealthStatus.UNHEALTHY
+                    message = "Project service not running properly"
+                
+                return create_service_health_report(
+                    name="project_service",
+                    status=status,
+                    message=message,
+                    metrics={
+                        "running": project_service.running,
+                        "health_status": project_service.health.status,
+                        "service_uptime": project_service.uptime or 0
+                    }
+                )
             
         except ImportError as e:
             return create_service_health_report(
                 name="project_service",
                 status=HealthStatus.ERROR,
                 message=f"Project service import failed: {str(e)}",
+                error=str(e)
+            )
+        except Exception as e:
+            return create_service_health_report(
+                name="project_service",
+                status=HealthStatus.ERROR,
+                message=f"Project service health check failed: {str(e)}",
                 error=str(e)
             )
     

@@ -67,9 +67,36 @@ Welcome to the Claude Multi-Agent PM Framework documentation hub. This index pro
 | Document | Purpose | Read Time |
 |----------|---------|-----------|
 | [README.md](../README.md) | Framework introduction and quick overview | 3 min |
-| [Framework Architecture](#technical-architecture) | Detailed architecture and design decisions | 10 min |
+| [Memory Integration Guide](MEMORY_INTEGRATION_GUIDE.md) | Complete memory integration documentation | 15 min |
+| [Agent Delegation Guide](AGENT_DELEGATION_GUIDE.md) | Multi-agent coordination and delegation | 10 min |
+| [Systems Guide](SYSTEMS_GUIDE.md) | Framework systems and automation | 12 min |
 | [Ticketing System](TICKETING_SYSTEM.md) | 42-ticket project management system | 5 min |
-| [Current Status](../trackdown/CURRENT-STATUS.md) | Real-time progress and metrics | 2 min |
+
+### Framework Architecture
+The Claude PM Framework v4.5.1 represents a breakthrough in AI-assisted development through intelligent memory integration (mem0AI) and pure Task tool subprocess delegation. 
+
+**Key Achievements**:
+- ✅ **Simplified Memory Setup**: Universal access via localhost:8002 with minimal configuration
+- ✅ **11-Agent Ecosystem**: Memory-augmented specialists with parallel execution capabilities  
+- ✅ **Task Tool Delegation**: Pure subprocess coordination with structured protocols
+- ✅ **Production Validation**: Deployed across 12+ managed projects with continuous learning
+
+**Core Architecture Components**:
+
+#### 1. Memory-Augmented Intelligence (mem0AI)
+- Universal Access via localhost:8002 service discovery
+- Memory Categories: Project, Pattern, Team, Error
+- Factory Functions: ClaudePMMemory class with auto-connect
+- Cross-Project Learning: Shared patterns across managed projects
+
+#### 2. Task Tool Subprocess Delegation with ai-trackdown-tools
+- Direct Subprocess Coordination with Task Tool Interface
+- ai-trackdown-tools Integration for Persistent issue and PR tracking
+- Structured Protocols for Clear agent communication standards
+- Context Isolation using Git worktree separation for parallel execution
+- Cross-Process State: Persistent tickets survive process boundaries
+
+**Why ai-trackdown-tools is Essential**: When Claude PM Framework operates through Task tool subprocess delegation, each agent runs in its own process with isolated memory space. ai-trackdown-tools provides persistent, cross-process state management that enables true multi-agent coordination across subprocess boundaries.
 
 ### Quick Start
 > **Goal**: Get productive with the framework in 15 minutes
@@ -129,9 +156,9 @@ cat trackdown/CURRENT-STATUS.md    # Framework status
 4. **Error Memory**: Issue patterns and resolution strategies
 
 #### Key Documents
-- [Memory Integration Guide](CLAUDE_PM_MEMORY_INTEGRATION.md) - Technical implementation
-- [Memory Schema Design](../schemas/memory-schemas.py) - Enterprise schemas
-- [mem0AI Security Guide](MEM0AI_SECURITY_GUIDE.md) - Security configuration
+- [Memory Integration Guide](MEMORY_INTEGRATION_GUIDE.md) - Complete memory integration documentation
+- [Systems Guide](SYSTEMS_GUIDE.md) - System architecture and automation
+- [MEM0AI Security Guide](MEM0AI_SECURITY_GUIDE.md) - Security configuration
 
 ### ai-trackdown-tools Integration
 > **Persistent Ticket Management**: Essential for multi-agent coordination
@@ -245,13 +272,15 @@ from claude_pm.services.multi_agent_orchestrator import MultiAgentOrchestrator
 
 #### Architecture Documents
 - [Multi-Agent Architecture](design/claude-pm-max-mem0.md) - Complete system design
-- [Memory Integration Architecture](CLAUDE_PM_MEMORY_INTEGRATION.md) - Memory system design
+- [Memory Integration Guide](MEMORY_INTEGRATION_GUIDE.md) - Memory system design and implementation
+- [Agent Delegation Guide](AGENT_DELEGATION_GUIDE.md) - Multi-agent coordination patterns
+- [Systems Guide](SYSTEMS_GUIDE.md) - Framework systems and automation
 - [Service Architecture](services.md) - Service layer documentation
 
 #### Implementation Details
-- [Memory Integration Guide](CLAUDE_PM_MEMORY_INTEGRATION.md) - Memory-augmented agent patterns
+- [Memory Integration Guide](MEMORY_INTEGRATION_GUIDE.md) - Memory-augmented agent patterns and API reference
 - [Service Architecture](services.md) - Core service implementations
-- [Memory Configuration](../claude_pm/core/memory_config.py) - Zero-configuration setup
+- [Agent Delegation Guide](AGENT_DELEGATION_GUIDE.md) - Task delegation and coordination protocols
 
 ### Health Monitoring
 > **System monitoring, alerting, and troubleshooting**

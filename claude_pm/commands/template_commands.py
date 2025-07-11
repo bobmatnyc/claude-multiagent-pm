@@ -10,6 +10,7 @@ and deployment-aware functionality.
 import os
 import json
 import yaml
+import asyncio
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from datetime import datetime
@@ -622,103 +623,178 @@ async def recommend(ctx, project_type, requirements, show_reasons):
 @template.command()
 @click.option('--target-dir', type=click.Path(), help='Target directory (defaults to parent of current working directory)')
 @click.option('--backup/--no-backup', default=True, help='Create backup of existing CLAUDE.md file')
-@click.option('--force', is_flag=True, help='Force overwrite without confirmation')
+@click.option('--force', is_flag=True, help='Force deployment even if version is current (overrides version checking)')
+@click.option('--show-version-check', is_flag=True, help='Show detailed version checking information')
 @click.pass_context
-async def deploy_claude_md(ctx, target_dir, backup, force):
-    """Deploy CLAUDE.md template to parent directory with handlebars processing."""
-    try:
-        import platform
-        import shutil
-        from datetime import datetime
-        
-        # Initialize template deployment integration
-        integration = TemplateDeploymentIntegration()
-        await integration._initialize()
-        
-        # Get deployment config
-        deployment_config = await integration.get_deployment_aware_template_config()
-        
-        # Determine target directory
-        if target_dir:
-            target_directory = Path(target_dir)
-        else:
-            target_directory = Path.cwd().parent
-        
-        # Ensure target directory exists
-        target_directory.mkdir(parents=True, exist_ok=True)
-        
-        # Check for framework CLAUDE.md template
-        # Use explicit framework path to avoid deployment detection issues
-        framework_path = Path(__file__).parent.parent.parent  # Go up to project root
-        framework_template_path = framework_path / "framework" / "CLAUDE.md"
-        
-        if not framework_template_path.exists():
-            console.print(f"❌ Framework CLAUDE.md template not found at: {framework_template_path}")
-            return
-        
-        # Read template content
-        template_content = framework_template_path.read_text()
-        
-        # Set up template variables for handlebars processing
-        template_variables = {
-            "FRAMEWORK_VERSION": "4.5.1",
-            "DEPLOYMENT_DATE": datetime.now().isoformat(),
-            "PLATFORM": platform.system().lower(),
-            "PYTHON_CMD": "python3",
-            "DEPLOYMENT_ID": str(int(datetime.now().timestamp() * 1000)),
-            "DEPLOYMENT_DIR": str(framework_path),
-            "WORKING_DIR": str(Path.cwd()),
-            "TARGET_DIR": str(target_directory),
-            "AI_TRACKDOWN_PATH": "/Users/masa/.nvm/versions/node/v20.19.0/lib/node_modules/@bobmatnyc/ai-trackdown-tools/dist/index.js",
-            "PLATFORM_NOTES": "**macOS-specific:**\n- Use `.sh` files for scripts\n- CLI wrappers: `bin/aitrackdown` and `bin/atd`\n- Health check: `scripts/health-check.sh`\n- May require Xcode Command Line Tools",
-            "LAST_UPDATED": datetime.now().isoformat()
-        }
-        
-        console.print(f"🔧 [bold]Deploying CLAUDE.md Template[/bold]")
-        console.print(f"   • Framework Path: {framework_path}")
-        console.print(f"   • Template Path: {framework_template_path}")
-        console.print(f"   • Target Directory: {target_directory}")
-        
-        # Process handlebars variables
-        processed_content = template_content
-        for key, value in template_variables.items():
-            placeholder = f"{{{{{key}}}}}"
-            processed_content = processed_content.replace(placeholder, str(value))
-        
-        # Handle target file
-        target_file = target_directory / "CLAUDE.md"
-        
-        # Create backup if file exists and backup is enabled
-        if target_file.exists() and backup:
-            backup_filename = f"CLAUDE.md.backup.{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            backup_path = target_directory / backup_filename
-            shutil.copy2(target_file, backup_path)
-            console.print(f"   • Created backup: {backup_path}")
-        
-        # Check if file exists and get confirmation
-        if target_file.exists() and not force:
-            if not Confirm.ask(f"CLAUDE.md already exists at {target_file}. Overwrite?"):
-                console.print("❌ Deployment cancelled")
-                return
-        
-        # Write processed content
-        target_file.write_text(processed_content)
-        
-        console.print(f"✅ [bold green]CLAUDE.md deployed successfully![/bold green]")
-        console.print(f"   • Target: {target_file}")
-        console.print(f"   • Size: {len(processed_content)} characters")
-        console.print(f"   • Variables processed: {len(template_variables)}")
-        
-        # Show processed variables
-        console.print(f"\n🔍 [bold]Template Variables:[/bold]")
-        for key, value in template_variables.items():
-            console.print(f"   • {key}: {value}")
-        
-        await integration._cleanup()
-        
-    except Exception as e:
-        console.print(f"❌ Error: {e}")
-        logger.error(f"Template deploy-claude-md command failed: {e}")
+def deploy_claude_md(ctx, target_dir, backup, force, show_version_check):
+    """Deploy CLAUDE.md template to parent directory with version-aware deployment."""
+    
+    async def _deploy_claude_md_async():
+        try:
+            from ..services.parent_directory_manager import ParentDirectoryManager, ParentDirectoryContext
+            from datetime import datetime
+            
+            console.print(f"🔧 [bold]CLAUDE.md Deployment with Version Checking[/bold]")
+            
+            # Initialize Parent Directory Manager for version-aware deployment
+            manager = ParentDirectoryManager()
+            await manager._initialize()
+            
+            # Determine target directory
+            if target_dir:
+                target_directory = Path(target_dir)
+            else:
+                target_directory = Path.cwd().parent
+            
+            # Ensure target directory exists
+            target_directory.mkdir(parents=True, exist_ok=True)
+            
+            # Show source and target paths
+            framework_template_path = manager.framework_path / "framework" / "CLAUDE.md"
+            target_file = target_directory / "CLAUDE.md"
+            
+            console.print(f"\n📂 [bold]File Paths:[/bold]")
+            console.print(f"   • Source Template: {framework_template_path}")
+            console.print(f"   • Target File: {target_file}")
+            console.print(f"   • Target Directory: {target_directory}")
+            console.print(f"   • Force Deployment: {'Yes' if force else 'No'}")
+            console.print(f"   • Version Checking: {'Disabled' if force else 'Enabled'}")
+            
+            # Show framework version from source template
+            if framework_template_path.exists():
+                framework_content = framework_template_path.read_text()
+                framework_version = manager._extract_claude_md_version(framework_content)
+                console.print(f"   • Framework Template Version: {framework_version or 'Not found'}")
+            else:
+                console.print(f"   • Framework Template: ❌ Not found")
+            
+            # Detect parent directory context
+            context = await manager.detect_parent_directory_context(target_directory)
+            console.print(f"   • Directory Context: {context.value}")
+            
+            # Register the directory for management if not already registered
+            directory_key = str(target_directory)
+            if directory_key not in manager.managed_directories:
+                success = await manager.register_parent_directory(
+                    target_directory,
+                    context,
+                    "parent_directory_claude_md",
+                    {"backup_enabled": backup}
+                )
+                if success:
+                    console.print(f"   • Directory registered for management")
+                else:
+                    console.print(f"   ⚠️  Failed to register directory, continuing...")
+            
+            # Template variables with version metadata (CLAUDE_MD_VERSION will be auto-generated)
+            framework_version = "4.5.1"
+            template_variables = {
+                "FRAMEWORK_VERSION": framework_version,
+                "DEPLOYMENT_DATE": datetime.now().isoformat(),
+                "PLATFORM": "darwin",
+                "PYTHON_CMD": "python3",
+                "DEPLOYMENT_ID": str(int(datetime.now().timestamp() * 1000)),
+                "DEPLOYMENT_DIR": str(manager.framework_path),
+                "WORKING_DIR": str(Path.cwd()),
+                "TARGET_DIR": str(target_directory),
+                "AI_TRACKDOWN_PATH": "/Users/masa/.nvm/versions/node/v20.19.0/lib/node_modules/@bobmatnyc/ai-trackdown-tools/dist/index.js",
+                "PLATFORM_NOTES": "**macOS-specific:**\n- Use `.sh` files for scripts\n- CLI wrappers: `bin/aitrackdown` and `bin/atd`\n- Health check: `scripts/health-check.sh`\n- May require Xcode Command Line Tools",
+                "LAST_UPDATED": datetime.now().isoformat()
+            }
+            
+            # Generate CLAUDE.md version using new versioning scheme
+            claude_md_version = manager._generate_next_claude_md_version(target_file, framework_version)
+            template_variables["CLAUDE_MD_VERSION"] = claude_md_version
+            
+            console.print(f"   • Generated CLAUDE.md Version: {claude_md_version}")
+            
+            # Show existing file version information
+            if target_file.exists():
+                existing_content = target_file.read_text()
+                existing_version = manager._extract_claude_md_version(existing_content)
+                template_version = claude_md_version
+                
+                console.print(f"   • Existing File Version: {existing_version or 'Not found'}")
+                
+                # Show version checking details if requested or if versions are different
+                if show_version_check or existing_version != template_version:
+                    console.print(f"\n🔍 [bold]Version Comparison:[/bold]")
+                    console.print(f"   • Existing: {existing_version or 'None'} (in {target_file})")
+                    console.print(f"   • Template: {template_version} (from {framework_template_path})")
+                    
+                    if existing_version and template_version:
+                        comparison = manager._compare_versions(existing_version, template_version)
+                        if comparison == 0:
+                            console.print(f"   • Result: ✅ Versions are equal - will skip unless forced")
+                        elif comparison > 0:
+                            console.print(f"   • Result: ⚠️  Existing version is newer - will skip unless forced")
+                        else:
+                            console.print(f"   • Result: 🆙 Template version is newer - will deploy")
+                    
+                    # Test skip logic without modifying files
+                    should_skip, reason = manager._should_skip_deployment(target_file, 
+                        f"CLAUDE_MD_VERSION: {claude_md_version}", force)
+                    console.print(f"   • Action: {'Skip deployment' if should_skip else 'Proceed with deployment'}")
+                    if reason:
+                        console.print(f"   • Reason: {reason}")
+            else:
+                console.print(f"   • Existing File: ❌ Not found - will create new")
+                if show_version_check:
+                    console.print(f"\n🔍 [bold]Version Check:[/bold] No existing file, deployment will proceed")
+            
+            # Perform installation using Parent Directory Manager with version checking
+            operation = await manager.install_template_to_parent_directory(
+                target_directory,
+                "parent_directory_claude_md",
+                template_variables,
+                force=force
+            )
+            
+            # Display results
+            console.print(f"\n{'='*60}")
+            if operation.success:
+                if operation.warnings and "skipped" in operation.warnings[0].lower():
+                    console.print(f"⏭️  [bold yellow]Deployment Skipped - Version Current[/bold yellow]")
+                    console.print(f"   • {operation.warnings[0]}")
+                    console.print(f"   • Use --force to override version checking")
+                    console.print(f"   • Source: {framework_template_path}")
+                    console.print(f"   • Target: {operation.target_path}")
+                else:
+                    console.print(f"✅ [bold green]CLAUDE.md Deployed Successfully![/bold green]")
+                    console.print(f"   • Source: {framework_template_path}")
+                    console.print(f"   • Target: {operation.target_path}")
+                    if operation.backup_path:
+                        console.print(f"   • Backup: {operation.backup_path}")
+                    if operation.version:
+                        console.print(f"   • Template Version: {operation.version}")
+                    
+                    # Show key template variables
+                    console.print(f"\n🔧 [bold]Key Variables Applied:[/bold]")
+                    key_vars = ["CLAUDE_MD_VERSION", "FRAMEWORK_VERSION", "DEPLOYMENT_DATE", "PLATFORM"]
+                    for key in key_vars:
+                        if key in template_variables:
+                            console.print(f"   • {key}: {template_variables[key]}")
+            else:
+                console.print(f"❌ [bold red]Deployment Failed[/bold red]")
+                console.print(f"   • Source: {framework_template_path}")
+                console.print(f"   • Target: {operation.target_path}")
+                if operation.error_message:
+                    console.print(f"   • Error: {operation.error_message}")
+            
+            # Show operation history
+            if operation.changes_made:
+                console.print(f"\n📝 [bold]Changes Made:[/bold]")
+                for change in operation.changes_made:
+                    console.print(f"   • {change}")
+            
+            await manager._cleanup()
+            
+        except Exception as e:
+            console.print(f"❌ Error: {e}")
+            logger.error(f"Template deploy-claude-md command failed: {e}")
+    
+    # Run the async function
+    return asyncio.run(_deploy_claude_md_async())
 
 
 # Add the template command group to the main CLI

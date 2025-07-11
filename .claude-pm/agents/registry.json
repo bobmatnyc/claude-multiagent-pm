@@ -1,17 +1,55 @@
 {
   "registry_version": "1.0",
   "created_at": "2025-07-09 16:00:27",
-  "last_updated": "2025-07-09 16:00:27",
-  "total_agents": 0,
+  "last_updated": "2025-07-11 11:12:00",
+  "total_agents": 1,
   "agents_by_tier": {
     "system": {},
     "user": {},
-    "project": {}
+    "project": {
+      "claude-multiagent-pm-ops-agent": {
+        "name": "claude-multiagent-pm-ops-agent",
+        "version": "1.0.0",
+        "type": "project-specific",
+        "tier": "project",
+        "path": ".claude-pm/agents/project-specific/ops-agent",
+        "main_script": "ops-agent.py",
+        "framework_version": "4.5.1",
+        "authority_level": "project-deployment",
+        "created_date": "2025-07-11",
+        "capabilities": [
+          "full-deployment",
+          "incremental-sync",
+          "comprehensive-diagnostics",
+          "health-monitoring",
+          "script-synchronization",
+          "binary-deployment",
+          "claude-md-management",
+          "performance-analysis",
+          "troubleshooting",
+          "framework-knowledge"
+        ],
+        "specialization": "claude-multiagent-pm local development and deployment operations",
+        "integration_points": [
+          "mem0ai-v0.1.113",
+          "ai-trackdown-tools",
+          "three-tier-hierarchy",
+          "claude-md-deployment-tree"
+        ],
+        "health_status": "healthy",
+        "last_health_check": "2025-07-11 11:12:00"
+      }
+    }
   },
-  "agent_types": {},
+  "agent_types": {
+    "ops": ["claude-multiagent-pm-ops-agent"],
+    "deployment": ["claude-multiagent-pm-ops-agent"],
+    "diagnostics": ["claude-multiagent-pm-ops-agent"],
+    "project-specific": ["claude-multiagent-pm-ops-agent"]
+  },
   "health_status": {
-    "last_check": null,
-    "healthy_agents": 0,
+    "last_check": "2025-07-11 11:12:00",
+    "healthy_agents": 1,
     "unhealthy_agents": 0,
     "unloaded_agents": 0
   }

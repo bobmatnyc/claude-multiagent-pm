@@ -43,6 +43,95 @@ class AgentType(str, Enum):
     CODE_REVIEW_ENGINEER = "code_review_engineer"
 
 
+class AgentDisplayNames:
+    """Standardized display names for agents used in task prefix generation."""
+    
+    # Mapping from AgentType enum values to shortened display names
+    DISPLAY_NAME_MAP = {
+        AgentType.ORCHESTRATOR: "PM",
+        AgentType.ARCHITECT: "Architect", 
+        AgentType.ENGINEER: "Engineer",
+        AgentType.QA: "QA",
+        AgentType.RESEARCHER: "Researcher",
+        AgentType.OPERATIONS: "Ops",
+        AgentType.SECURITY_ENGINEER: "Security",
+        AgentType.PERFORMANCE_ENGINEER: "Performance",
+        AgentType.DEVOPS_ENGINEER: "DevOps", 
+        AgentType.DATA_ENGINEER: "DataEng",
+        AgentType.UI_UX_ENGINEER: "UIUX",
+        AgentType.CODE_REVIEW_ENGINEER: "CodeReview"
+    }
+    
+    # Core agent types with their display names (for framework compatibility)
+    CORE_AGENT_DISPLAY_NAMES = {
+        "documentation_agent": "Documenter",
+        "ticketing_agent": "Ticketing", 
+        "version_control_agent": "GitAgent"
+    }
+    
+    @classmethod
+    def get_display_name(cls, agent_type: Union[AgentType, str]) -> str:
+        """
+        Get the standardized display name for an agent type.
+        
+        Args:
+            agent_type: AgentType enum or string identifier
+            
+        Returns:
+            Standardized display name for task prefixing
+        """
+        if isinstance(agent_type, AgentType):
+            return cls.DISPLAY_NAME_MAP.get(agent_type, agent_type.value.title())
+        
+        # Handle string agent types (e.g., core agents)
+        if isinstance(agent_type, str):
+            # Check core agent mappings first
+            if agent_type in cls.CORE_AGENT_DISPLAY_NAMES:
+                return cls.CORE_AGENT_DISPLAY_NAMES[agent_type]
+            
+            # Try to convert to AgentType
+            try:
+                enum_type = AgentType(agent_type.lower())
+                return cls.DISPLAY_NAME_MAP.get(enum_type, agent_type.title())
+            except ValueError:
+                # Fallback: format string as title case
+                return agent_type.replace("_", "").title()
+    
+    @classmethod
+    def get_task_prefix(cls, agent_type: Union[AgentType, str], task_description: str = "") -> str:
+        """
+        Generate a task prefix using the agent display name.
+        
+        Args:
+            agent_type: AgentType enum or string identifier
+            task_description: Optional task description for context
+            
+        Returns:
+            Formatted task prefix: "[AgentName]"
+        """
+        display_name = cls.get_display_name(agent_type)
+        return f"[{display_name}]"
+    
+    @classmethod
+    def get_all_display_names(cls) -> Dict[str, str]:
+        """
+        Get all available agent types and their display names.
+        
+        Returns:
+            Dictionary mapping agent type values to display names
+        """
+        result = {}
+        
+        # Add enum-based agents
+        for agent_type, display_name in cls.DISPLAY_NAME_MAP.items():
+            result[agent_type.value] = display_name
+            
+        # Add core agents
+        result.update(cls.CORE_AGENT_DISPLAY_NAMES)
+        
+        return result
+
+
 class ActionType(str, Enum):
     """Types of actions that can be performed by agents."""
     READ = "read"
@@ -83,6 +172,14 @@ class Agent:
     
     def __str__(self) -> str:
         return f"{self.agent_type.value}[{self.agent_id}]"
+    
+    def get_display_name(self) -> str:
+        """Get the standardized display name for this agent."""
+        return AgentDisplayNames.get_display_name(self.agent_type)
+    
+    def get_task_prefix(self) -> str:
+        """Get the task prefix for this agent."""
+        return AgentDisplayNames.get_task_prefix(self.agent_type)
 
 
 @dataclass

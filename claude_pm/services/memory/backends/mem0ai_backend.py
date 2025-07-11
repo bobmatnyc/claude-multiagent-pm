@@ -82,8 +82,12 @@ class Mem0AIBackend(MemoryBackend):
         """Initialize mem0AI connection."""
         try:
             async with self._connection_lock:
-                if self.session:
+                # Check if already initialized with valid session
+                if self.session and not self.session.closed and self._initialized:
                     return True
+                
+                # Cleanup any existing connections
+                await self._cleanup_connection()
                 
                 # Create connection pool
                 self.connector = aiohttp.TCPConnector(
@@ -555,7 +559,8 @@ class Mem0AIBackend(MemoryBackend):
         """Safely cleanup connection resources."""
         if self.session:
             try:
-                await self.session.close()
+                if not self.session.closed:
+                    await self.session.close()
             except Exception as e:
                 self.logger.warning(f"Error closing session: {e}")
             finally:
@@ -563,7 +568,8 @@ class Mem0AIBackend(MemoryBackend):
         
         if self.connector:
             try:
-                await self.connector.close()
+                if not self.connector.closed:
+                    await self.connector.close()
             except Exception as e:
                 self.logger.warning(f"Error closing connector: {e}")
             finally:
@@ -576,6 +582,15 @@ class Mem0AIBackend(MemoryBackend):
         """Cleanup resources."""
         await self._cleanup_connection()
         self.logger.info("mem0AI backend cleanup completed")
+    
+    async def __aenter__(self):
+        """Async context manager entry."""
+        await self.initialize()
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit."""
+        await self.cleanup()
     
     def get_stats(self) -> Dict[str, Any]:
         """Get backend statistics."""

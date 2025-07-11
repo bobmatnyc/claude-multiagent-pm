@@ -38,7 +38,7 @@ class HealthDashboardOrchestrator:
         self,
         cache_ttl_seconds: float = 60.0,
         max_parallel_collectors: int = 8,
-        global_timeout_seconds: float = 2.0,
+        global_timeout_seconds: float = 30.0,
         version: str = "3.0.0"
     ):
         """
@@ -73,17 +73,17 @@ class HealthDashboardOrchestrator:
     def _initialize_default_collectors(self) -> None:
         """Initialize default health collectors."""
         # Legacy health monitor adapter
-        legacy_adapter = HealthMonitorServiceAdapter(timeout_seconds=2.0)
+        legacy_adapter = HealthMonitorServiceAdapter(timeout_seconds=10.0)
         self.add_collector(legacy_adapter)
         
         # Framework services collector
         from ..collectors.framework_services import FrameworkServicesCollector
-        framework_collector = FrameworkServicesCollector(timeout_seconds=2.0)
+        framework_collector = FrameworkServicesCollector(timeout_seconds=10.0)
         self.add_collector(framework_collector)
         
         # AI-trackdown tools collector
         from ..collectors.ai_trackdown_collector import AITrackdownHealthCollector
-        ai_trackdown_collector = AITrackdownHealthCollector(timeout_seconds=2.0)
+        ai_trackdown_collector = AITrackdownHealthCollector(timeout_seconds=10.0)
         self.add_collector(ai_trackdown_collector)
     
     def add_collector(self, collector: HealthCollector) -> None:
@@ -505,6 +505,38 @@ class HealthDashboardOrchestrator:
     def cleanup_expired_cache(self) -> int:
         """Clean up expired cache entries."""
         return self._cache.cleanup_expired()
+    
+    async def cleanup(self) -> None:
+        """Cleanup all resources including collector connections."""
+        try:
+            # Cleanup all collectors
+            for collector in self._collectors:
+                if hasattr(collector, 'cleanup') and callable(getattr(collector, 'cleanup')):
+                    try:
+                        await collector.cleanup()
+                        self._logger.debug(f"Cleaned up collector: {collector.name}")
+                    except Exception as e:
+                        self._logger.warning(f"Error cleaning up collector {collector.name}: {e}")
+            
+            # Clear cache
+            self._cache.clear()
+            
+            # Reset circuit breakers
+            for cb in self._circuit_breakers.values():
+                cb.reset()
+            
+            self._logger.info("Health dashboard cleanup completed")
+            
+        except Exception as e:
+            self._logger.error(f"Error during health dashboard cleanup: {e}")
+    
+    async def __aenter__(self):
+        """Async context manager entry."""
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit."""
+        await self.cleanup()
     
     async def health_check(self) -> Dict[str, Any]:
         """Perform a health check on the orchestrator itself."""

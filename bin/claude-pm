@@ -592,6 +592,8 @@ Commands:
   enforcement         Framework enforcement
   --version           Show version information
   --deployment-info   Show deployment detection results
+  --system-info       Show system information with CLAUDE.md version
+  --manage-claude-md  Manage framework CLAUDE.md deployment tree
   --template-status   Show template management status (CMPM-102)
   --dependency-status Show dependency management status (CMPM-103)
   --parent-directory-status Show parent directory management status (CMPM-104)
@@ -680,7 +682,7 @@ function displaySystemInfo() {
         
         switch (deploymentType) {
             case 'deployed':
-                installType = 'Deployed Instance';
+                installType = 'Local Deploy';
                 break;
             case 'npm_global':
                 installType = 'Global NPM Installation';
@@ -703,20 +705,126 @@ function displaySystemInfo() {
         console.log(`⚙️  Install Type: Not detected`);
     }
     
-    // Memory System Status
+    // Memory System Status - Use dedicated Python detection function
     try {
-        const memoryConfigPath = path.join(process.cwd(), '.claude-pm', 'memory.json');
-        const globalMemoryPath = path.join(os.homedir(), '.claude-pm', 'memory.json');
+        const { execSync } = require('child_process');
+        // Call the Python _detect_memory_manager_info() function directly
+        const memoryInfo = execSync('python3 -c "import sys; sys.path.insert(0, \'.\'); from claude_pm.cli import _detect_memory_manager_info; print(_detect_memory_manager_info())"', {
+            cwd: process.cwd(),
+            timeout: 2000,
+            encoding: 'utf8',
+            stdio: 'pipe'
+        }).trim();
         
-        if (fs.existsSync(memoryConfigPath)) {
-            console.log(`🧠 Memory System Status: Local memory system active`);
-        } else if (fs.existsSync(globalMemoryPath)) {
-            console.log(`🧠 Memory System Status: Global memory system active`);
+        if (memoryInfo && memoryInfo !== 'error') {
+            console.log(`🧠 Memory: ${memoryInfo}`);
         } else {
-            console.log(`🧠 Memory System Status: No memory system detected`);
+            // Fallback detection only if Python function fails
+            const localMemoryJsonPath = path.join(process.cwd(), 'memory.json');
+            const localMemoryDbPath = path.join(process.cwd(), 'memory.db');
+            
+            if (fs.existsSync(localMemoryJsonPath) || fs.existsSync(localMemoryDbPath)) {
+                console.log(`🧠 Memory: Memory files detected`);
+            } else {
+                console.log(`🧠 Memory: No memory system detected`);
+            }
         }
     } catch (error) {
-        console.log(`🧠 Memory System Status: Unable to determine`);
+        // Fallback detection if Python call fails
+        const localMemoryJsonPath = path.join(process.cwd(), 'memory.json');
+        const localMemoryDbPath = path.join(process.cwd(), 'memory.db');
+        
+        if (fs.existsSync(localMemoryJsonPath) || fs.existsSync(localMemoryDbPath)) {
+            console.log(`🧠 Memory: Memory files detected`);
+        } else {
+            console.log(`🧠 Memory: Unable to determine status`);
+        }
+    }
+    
+    // CLAUDE.md Detection - Current Directory and Framework
+    try {
+        const currentDirClaudeMd = path.join(process.cwd(), 'CLAUDE.md');
+        let foundCurrentDir = false;
+        
+        if (fs.existsSync(currentDirClaudeMd)) {
+            const claudeMdContent = fs.readFileSync(currentDirClaudeMd, 'utf8');
+            
+            // Extract CLAUDE_MD_VERSION using regex that supports both formats
+            const versionMatch = claudeMdContent.match(/CLAUDE_MD_VERSION:\s*([\d\.-]+)/);
+            if (versionMatch) {
+                const version = versionMatch[1];
+                console.log(`📄 CLAUDE.md (Current): v${version}`);
+                
+                // Show version format info
+                if (version.includes('-')) {
+                    const [frameworkVer, serial] = version.split('-');
+                    console.log(`   • Framework: v${frameworkVer} | Serial: ${serial}`);
+                } else {
+                    console.log(`   • Legacy format (pre-serial versioning)`);
+                }
+            } else {
+                console.log(`📄 CLAUDE.md (Current): Found (no version detected)`);
+            }
+            foundCurrentDir = true;
+        }
+        
+        // Quick framework CLAUDE.md detection for system info - context-aware
+        const cwd = process.cwd();
+        const frameworkPaths = [];
+        
+        // If we're in the framework directory, prioritize framework's own CLAUDE.md
+        if (cwd.includes('claude-multiagent-pm')) {
+            frameworkPaths.push(
+                path.join(cwd, 'CLAUDE.md'),                    // Current framework directory
+                path.join(cwd, '..', 'CLAUDE.md'),              // Parent of framework
+                '/Users/masa/Projects/CLAUDE.md'                // Top-level Projects
+            );
+        } else {
+            // If we're outside framework, look in broader context
+            frameworkPaths.push(
+                path.join(cwd, 'CLAUDE.md'),                    // Current directory
+                path.join(cwd, '..', 'CLAUDE.md'),              // Parent directory
+                '/Users/masa/Projects/managed/CLAUDE.md',       // Managed template
+                '/Users/masa/Projects/CLAUDE.md'                // Top-level Projects
+            );
+        }
+        
+        let foundFramework = false;
+        for (const frameworkPath of frameworkPaths) {
+            if (fs.existsSync(frameworkPath)) {
+                try {
+                    const content = fs.readFileSync(frameworkPath, 'utf8');
+                    
+                    // Check if it's a framework file
+                    const isFramework = content.includes('template CLAUDE.md file for the Claude PM Framework') ||
+                                      content.includes('Claude PM Framework Configuration - Deployment') ||
+                                      content.includes('AI ASSISTANT ROLE DESIGNATION');
+                    
+                    if (isFramework) {
+                        // Format path with ~ for home directory
+                        const displayPath = frameworkPath.replace('/Users/masa', '~');
+                        const versionMatch = content.match(/CLAUDE_MD_VERSION:\s*([\d\.-]+)/);
+                        
+                        if (versionMatch) {
+                            console.log(`📋 Framework CLAUDE.md: ${displayPath} (${versionMatch[1]})`);
+                        } else {
+                            console.log(`📋 Framework CLAUDE.md: ${displayPath}`);
+                        }
+                        foundFramework = true;
+                        break;
+                    }
+                } catch (error) {
+                    // Skip unreadable files
+                }
+            }
+        }
+        
+        if (!foundCurrentDir) {
+            console.log(`📄 User CLAUDE.md: not in working path`);
+        }
+        
+    } catch (error) {
+        console.log(`📄 CLAUDE.md: Unable to check (${error.message})`);
     }
     
     console.log('');
@@ -724,6 +832,228 @@ function displaySystemInfo() {
     console.log('🎯 Launching Claude with optimized settings...');
     console.log('='.repeat(70));
     console.log('');
+}
+
+/**
+ * Framework CLAUDE.md Management - Safe cleanup of framework deployments
+ */
+async function manageFrameworkClaudeMd() {
+    const fs = require('fs');
+    const path = require('path');
+    
+    try {
+        // Get current working directory
+        const cwd = process.cwd();
+        
+        // Find the framework directory
+        let frameworkDir = null;
+        const possibleFrameworkPaths = [
+            cwd, // If we're already in the framework
+            path.join(cwd, 'claude-multiagent-pm'), // If framework is a subdirectory
+            path.dirname(cwd) // If we're in a subdirectory of the framework area
+        ];
+        
+        for (const testPath of possibleFrameworkPaths) {
+            if (fs.existsSync(path.join(testPath, 'claude_pm')) && 
+                fs.existsSync(path.join(testPath, 'framework', 'CLAUDE.md'))) {
+                frameworkDir = testPath;
+                break;
+            }
+        }
+        
+        // Find all CLAUDE.md files - use context-aware search like system info
+        const claudeMdFiles = [];
+        let searchRoot;
+        
+        if (!frameworkDir) {
+            // Not in a framework context, search in broader area
+            searchRoot = '/Users/masa/Projects';
+        } else {
+            // Framework context - only search within our working path, not external areas
+            searchRoot = path.dirname(frameworkDir);
+            
+            // Context-aware file list - only look in our working path
+            const cwd = process.cwd();
+            const contextAwarePaths = [];
+            
+            // If we're in the framework directory, only check our immediate context
+            if (cwd.includes('claude-multiagent-pm')) {
+                contextAwarePaths.push(
+                    path.join(cwd, 'CLAUDE.md'),                    // Current framework directory
+                    path.join(cwd, '..', 'CLAUDE.md')               // Parent of framework
+                );
+            } else {
+                contextAwarePaths.push(
+                    path.join(cwd, 'CLAUDE.md'),                    // Current directory
+                    path.join(cwd, '..', 'CLAUDE.md')               // Parent directory
+                );
+            }
+            
+            // Only add files that actually exist in our context
+            for (const contextPath of contextAwarePaths) {
+                if (fs.existsSync(contextPath)) {
+                    claudeMdFiles.push(contextPath);
+                }
+            }
+        }
+        
+        // Only do broader search if not in framework context
+        if (!frameworkDir) {
+            function findClaudeMdFiles(dir, maxDepth = 3, currentDepth = 0) {
+                if (currentDepth >= maxDepth) return;
+                
+                try {
+                    const items = fs.readdirSync(dir);
+                    
+                    for (const item of items) {
+                        const itemPath = path.join(dir, item);
+                        const stat = fs.statSync(itemPath);
+                        
+                        if (stat.isFile() && item === 'CLAUDE.md') {
+                            claudeMdFiles.push(itemPath);
+                        } else if (stat.isDirectory() && !item.startsWith('.') && 
+                                  item !== 'node_modules' && item !== '_archive') {
+                            findClaudeMdFiles(itemPath, maxDepth, currentDepth + 1);
+                        }
+                    }
+                } catch (error) {
+                    // Skip directories we can't read
+                }
+            }
+            
+            findClaudeMdFiles(searchRoot);
+        }
+        
+        
+        // Analyze each CLAUDE.md to determine if it's framework-generated
+        const frameworkFiles = [];
+        const userFiles = [];
+        
+        for (const filePath of claudeMdFiles) {
+            try {
+                const content = fs.readFileSync(filePath, 'utf8');
+                
+                // Framework indicators (be very conservative)
+                const frameworkIndicators = [
+                    'Claude PM Framework Configuration - Deployment',
+                    'CLAUDE_MD_VERSION:',
+                    'FRAMEWORK_VERSION:',
+                    'AI ASSISTANT ROLE DESIGNATION',
+                    'multi-agent orchestrator',
+                    'template CLAUDE.md file for the Claude PM Framework',
+                    'Deployment Root:',
+                    'Generated:'
+                ];
+                
+                // User/project indicators (these make it NOT a framework file)
+                const userIndicators = [
+                    'project-specific',
+                    'custom instructions',
+                    'my project',
+                    'this project',
+                    'application',
+                    'repository',
+                    'codebase'
+                ];
+                
+                const hasFrameworkIndicators = frameworkIndicators.some(indicator => 
+                    content.includes(indicator));
+                const hasUserIndicators = userIndicators.some(indicator => 
+                    content.toLowerCase().includes(indicator.toLowerCase()));
+                
+                // Strong framework indicators override weak user indicators
+                const strongFrameworkIndicators = [
+                    'Claude PM Framework Configuration - Deployment',
+                    'AI ASSISTANT ROLE DESIGNATION',
+                    'multi-agent orchestrator'
+                ];
+                
+                const hasStrongFrameworkIndicators = strongFrameworkIndicators.some(indicator => 
+                    content.includes(indicator));
+                
+                // If we have strong framework indicators, it's definitely a framework file
+                const isFrameworkFile = hasStrongFrameworkIndicators || (hasFrameworkIndicators && !hasUserIndicators);
+                
+                if (isFrameworkFile) {
+                    frameworkFiles.push({
+                        path: filePath,
+                        relativePath: path.relative(searchRoot, filePath),
+                        content: content.substring(0, 200) // First 200 chars for analysis
+                    });
+                } else {
+                    userFiles.push({
+                        path: filePath,
+                        relativePath: path.relative(searchRoot, filePath)
+                    });
+                }
+            } catch (error) {
+                // Skip files we can't read
+            }
+        }
+        
+        // Find the top-most directory that should have the framework CLAUDE.md
+        const topLevel = searchRoot;
+        const targetFrameworkFile = path.join(topLevel, 'CLAUDE.md');
+        
+        // Check if we have a proper framework CLAUDE.md at the top level
+        const hasTopLevelFramework = frameworkFiles.some(f => f.path === targetFrameworkFile);
+        
+        if (!hasTopLevelFramework) {
+            // Check if we have any framework files at other levels
+            const activeFrameworkFile = frameworkFiles.length > 0 ? frameworkFiles[0] : null;
+            
+            return {
+                action: 'no_action',
+                reason: 'No framework CLAUDE.md at top level (normal)',
+                frameworkFiles: frameworkFiles.length,
+                userFiles: userFiles.length,
+                activeFrameworkFile: activeFrameworkFile ? activeFrameworkFile.relativePath : null
+            };
+        }
+        
+        // We have a framework CLAUDE.md at top level, remove any duplicates below it
+        const filesToRemove = frameworkFiles.filter(f => f.path !== targetFrameworkFile);
+        
+        if (filesToRemove.length === 0) {
+            return {
+                action: 'clean',
+                reason: 'Framework CLAUDE.md structure is already clean',
+                frameworkFiles: frameworkFiles.length,
+                userFiles: userFiles.length,
+                topLevelFile: path.relative(searchRoot, targetFrameworkFile)
+            };
+        }
+        
+        // Remove duplicate framework files (VERY CAREFULLY)
+        const removedFiles = [];
+        for (const file of filesToRemove) {
+            try {
+                // Extra safety check - make sure it's really a framework file
+                if (file.content.includes('Claude PM Framework') || 
+                    file.content.includes('CLAUDE_MD_VERSION:')) {
+                    fs.unlinkSync(file.path);
+                    removedFiles.push(file.relativePath);
+                }
+            } catch (error) {
+                console.error(`Warning: Could not remove ${file.path}: ${error.message}`);
+            }
+        }
+        
+        return {
+            action: 'cleaned',
+            reason: `Removed ${removedFiles.length} duplicate framework CLAUDE.md files`,
+            removedFiles,
+            frameworkFiles: frameworkFiles.length,
+            userFiles: userFiles.length,
+            topLevelFile: path.relative(searchRoot, targetFrameworkFile)
+        };
+        
+    } catch (error) {
+        return {
+            action: 'error',
+            reason: error.message
+        };
+    }
 }
 
 /**
@@ -791,6 +1121,30 @@ async function main() {
         // Display comprehensive system information
         displaySystemInfo();
         
+        // Manage framework CLAUDE.md deployment tree and show active framework file
+        try {
+            const frameworkResult = await manageFrameworkClaudeMd();
+            if (frameworkResult.action === 'cleaned') {
+                console.log(`🧹 Framework cleanup: ${frameworkResult.reason}`);
+                if (frameworkResult.removedFiles.length > 0) {
+                    console.log(`   Removed files: ${frameworkResult.removedFiles.join(', ')}`);
+                }
+            } else if (frameworkResult.action === 'error') {
+                console.log(`⚠️  Framework cleanup warning: ${frameworkResult.reason}`);
+            }
+            
+            // Show which framework CLAUDE.md is active
+            if (frameworkResult.topLevelFile) {
+                console.log(`📋 Active framework CLAUDE.md: ${frameworkResult.topLevelFile}`);
+            } else if (frameworkResult.activeFrameworkFile) {
+                console.log(`📋 Active framework CLAUDE.md: ${frameworkResult.activeFrameworkFile}`);
+            } else if (frameworkResult.frameworkFiles === 0) {
+                console.log(`📋 Framework CLAUDE.md: None detected (normal for non-framework contexts)`);
+            }
+        } catch (error) {
+            console.log(`⚠️  Framework cleanup error: ${error.message}`);
+        }
+        
         try {
             const claudeProcess = spawn('claude', ['--dangerously-skip-permissions', '--model', 'sonnet'], {
                 stdio: 'inherit',
@@ -821,6 +1175,39 @@ async function main() {
         console.log('\n🔍 Claude PM Framework Deployment Detection Results:');
         console.log('=' .repeat(60));
         console.log(JSON.stringify(deploymentConfig, null, 2));
+        process.exit(0);
+    }
+    
+    // Handle system info display flag
+    if (args.includes('--system-info')) {
+        displaySystemInfo();
+        process.exit(0);
+    }
+    
+    // Handle framework CLAUDE.md management flag
+    if (args.includes('--manage-claude-md')) {
+        console.log('🧹 Managing framework CLAUDE.md deployment tree...');
+        try {
+            const result = await manageFrameworkClaudeMd();
+            console.log('\n📊 Framework CLAUDE.md Management Result:');
+            console.log('=' .repeat(50));
+            console.log(`Action: ${result.action}`);
+            console.log(`Reason: ${result.reason}`);
+            if (result.frameworkFiles !== undefined) {
+                console.log(`Framework files found: ${result.frameworkFiles}`);
+            }
+            if (result.userFiles !== undefined) {
+                console.log(`User files preserved: ${result.userFiles}`);
+            }
+            if (result.removedFiles) {
+                console.log(`Removed files: ${result.removedFiles.join(', ')}`);
+            }
+            if (result.topLevelFile) {
+                console.log(`Top-level framework file: ${result.topLevelFile}`);
+            }
+        } catch (error) {
+            console.error(`❌ Framework management error: ${error.message}`);
+        }
         process.exit(0);
     }
     
