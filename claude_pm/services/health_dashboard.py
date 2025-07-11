@@ -28,7 +28,7 @@ class HealthDashboardOrchestrator:
     Features:
     - Parallel health collection from multiple collectors
     - Circuit breaker pattern for fault tolerance  
-    - Intelligent caching with 30-second TTL
+    - Intelligent caching with 60-second TTL
     - Sub-3-second response time target
     - Rich dashboard analytics and trends
     - Backward compatibility with existing HealthMonitorService
@@ -36,7 +36,7 @@ class HealthDashboardOrchestrator:
     
     def __init__(
         self,
-        cache_ttl_seconds: float = 30.0,
+        cache_ttl_seconds: float = 60.0,
         max_parallel_collectors: int = 8,
         global_timeout_seconds: float = 2.0,
         version: str = "3.0.0"
@@ -45,7 +45,7 @@ class HealthDashboardOrchestrator:
         Initialize the health dashboard orchestrator.
         
         Args:
-            cache_ttl_seconds: Cache TTL for health reports (default 30s)
+            cache_ttl_seconds: Cache TTL for health reports (default 60s)
             max_parallel_collectors: Maximum parallel collector execution
             global_timeout_seconds: Global timeout for health collection (2.5s for 3s total target)
             version: Framework version for reports

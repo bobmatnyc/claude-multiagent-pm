@@ -93,10 +93,20 @@ class AITrackdownHealthCollector(HealthCollector):
                     stderr=asyncio.subprocess.PIPE,
                     cwd=str(self.framework_root)
                 )
-                stdout, stderr = await asyncio.wait_for(
-                    process.communicate(), 
-                    timeout=3.0
-                )
+                try:
+                    stdout, stderr = await asyncio.wait_for(
+                        process.communicate(), 
+                        timeout=3.0
+                    )
+                finally:
+                    # Ensure process cleanup
+                    if process.returncode is None:
+                        try:
+                            process.terminate()
+                            await asyncio.wait_for(process.wait(), timeout=1.0)
+                        except asyncio.TimeoutError:
+                            process.kill()
+                            await process.wait()
                 
                 response_time = (time.time() - start_time) * 1000
                 
@@ -337,10 +347,20 @@ class AITrackdownHealthCollector(HealthCollector):
                 cwd=str(self.framework_root)
             )
             
-            stdout, stderr = await asyncio.wait_for(
-                process.communicate(), 
-                timeout=10.0
-            )
+            try:
+                stdout, stderr = await asyncio.wait_for(
+                    process.communicate(), 
+                    timeout=10.0
+                )
+            finally:
+                # Ensure process cleanup
+                if process.returncode is None:
+                    try:
+                        process.terminate()
+                        await asyncio.wait_for(process.wait(), timeout=1.0)
+                    except asyncio.TimeoutError:
+                        process.kill()
+                        await process.wait()
             
             response_time = (time.time() - start_time) * 1000
             
@@ -405,10 +425,20 @@ class AITrackdownHealthCollector(HealthCollector):
                 cwd=str(self.framework_root)
             )
             
-            stdout, stderr = await asyncio.wait_for(
-                process.communicate(), 
-                timeout=10.0
-            )
+            try:
+                stdout, stderr = await asyncio.wait_for(
+                    process.communicate(), 
+                    timeout=10.0
+                )
+            finally:
+                # Ensure process cleanup
+                if process.returncode is None:
+                    try:
+                        process.terminate()
+                        await asyncio.wait_for(process.wait(), timeout=1.0)
+                    except asyncio.TimeoutError:
+                        process.kill()
+                        await process.wait()
             
             response_time = (time.time() - start_time) * 1000
             
@@ -477,10 +507,20 @@ class AITrackdownHealthCollector(HealthCollector):
                         cwd=str(self.framework_root)
                     )
                     
-                    stdout, stderr = await asyncio.wait_for(
-                        process.communicate(), 
-                        timeout=5.0
-                    )
+                    try:
+                        stdout, stderr = await asyncio.wait_for(
+                            process.communicate(), 
+                            timeout=5.0
+                        )
+                    finally:
+                        # Ensure process cleanup
+                        if process.returncode is None:
+                            try:
+                                process.terminate()
+                                await asyncio.wait_for(process.wait(), timeout=1.0)
+                            except asyncio.TimeoutError:
+                                process.kill()
+                                await process.wait()
                     
                     command_results[command_name] = {
                         "success": process.returncode == 0,
