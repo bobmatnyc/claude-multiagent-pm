@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 class CMPMAgentMonitor(CMPMCommandBase):
     """CMPM Agents Command Implementation with MCP infrastructure support."""
-    
+
     def __init__(self):
         super().__init__()
         self.agent_registry_path = self.framework_path / "framework/agent-roles/agents.json"
@@ -42,40 +42,40 @@ class CMPMAgentMonitor(CMPMCommandBase):
         self.user_agents_config_path = self.user_config_path / "config/agents.yaml"
         self.user_agents_dir = self.user_config_path / "agents/user-defined"
         self.orchestrator = None
-        
+
     async def load_framework_agent_registry(self) -> Dict[str, Any]:
         """Load framework agent registry from source configuration."""
         try:
             if self.agent_registry_path.exists():
-                with open(self.agent_registry_path, 'r') as f:
+                with open(self.agent_registry_path, "r") as f:
                     return json.load(f)
             else:
                 return {"agent_registry": {"standard_agents": {}, "user_defined_agents": {}}}
         except Exception as e:
             logger.error(f"Failed to load framework agent registry: {e}")
             return {"agent_registry": {"standard_agents": {}, "user_defined_agents": {}}}
-    
+
     async def load_user_agent_config(self) -> Dict[str, Any]:
         """Load user-defined agent configuration from ~/.claude-pm/config/agents.yaml."""
         try:
             if self.user_agents_config_path.exists():
-                with open(self.user_agents_config_path, 'r') as f:
+                with open(self.user_agents_config_path, "r") as f:
                     return yaml.safe_load(f) or {}
             else:
                 return {"agents": {"user_defined": []}}
         except Exception as e:
             logger.error(f"Failed to load user agent configuration: {e}")
             return {"agents": {"user_defined": []}}
-    
+
     async def discover_user_agents(self) -> Dict[str, Any]:
         """Discover user-defined agents from ~/.claude-pm/agents/user-defined/."""
         user_agents = {}
-        
+
         try:
             if self.user_agents_dir.exists():
                 for agent_file in self.user_agents_dir.glob("*.md"):
                     agent_name = agent_file.stem
-                    
+
                     # Create agent entry based on discovered file
                     user_agents[agent_name] = {
                         "name": agent_name.replace("-", " ").title(),
@@ -87,44 +87,44 @@ class CMPMAgentMonitor(CMPMCommandBase):
                         "domain_focus": "user_defined",
                         "version": "1.0.0",
                         "created": datetime.now().isoformat(),
-                        "source": "user_directory"
+                        "source": "user_directory",
                     }
-                    
+
                     # Try to extract more information from the file
                     try:
-                        with open(agent_file, 'r', encoding='utf-8') as f:
+                        with open(agent_file, "r", encoding="utf-8") as f:
                             content = f.read()
                             # Extract description from first paragraph or heading
-                            lines = content.split('\n')
+                            lines = content.split("\n")
                             for line in lines:
-                                if line.strip() and not line.startswith('#'):
+                                if line.strip() and not line.startswith("#"):
                                     clean_desc = line.strip()[:100]
                                     if clean_desc:
                                         user_agents[agent_name]["description"] = clean_desc
                                         break
                     except Exception:
                         pass
-                        
+
         except Exception as e:
             logger.error(f"Failed to discover user agents: {e}")
-            
+
         return user_agents
-    
+
     async def load_agent_registry(self) -> Dict[str, Any]:
         """Load combined agent registry from both framework and user configurations."""
         try:
             # Load framework agents
             framework_registry = await self.load_framework_agent_registry()
-            
+
             # Load user config
             user_config = await self.load_user_agent_config()
-            
+
             # Discover user agents from directory
             discovered_user_agents = await self.discover_user_agents()
-            
+
             # Merge user agents from config and discovered agents
             user_agents = {}
-            
+
             # Add agents from user config
             for agent_config in user_config.get("agents", {}).get("user_defined", []):
                 agent_name = agent_config.get("name", "").replace("-", "_")
@@ -141,42 +141,46 @@ class CMPMAgentMonitor(CMPMCommandBase):
                         "created": agent_config.get("created_date", ""),
                         "enabled": agent_config.get("enabled", True),
                         "priority": agent_config.get("priority", "medium"),
-                        "source": "user_config"
+                        "source": "user_config",
                     }
-            
+
             # Add discovered agents (prefer config over discovered)
             for agent_name, agent_data in discovered_user_agents.items():
                 if agent_name not in user_agents:
                     user_agents[agent_name] = agent_data
-            
+
             # Combine with framework registry
             combined_registry = {
                 "agent_registry": {
-                    "standard_agents": framework_registry.get("agent_registry", {}).get("standard_agents", {}),
-                    "user_defined_agents": user_agents
+                    "standard_agents": framework_registry.get("agent_registry", {}).get(
+                        "standard_agents", {}
+                    ),
+                    "user_defined_agents": user_agents,
                 }
             }
-            
+
             return combined_registry
-            
+
         except Exception as e:
             logger.error(f"Failed to load combined agent registry: {e}")
             return {"agent_registry": {"standard_agents": {}, "user_defined_agents": {}}}
-    
+
     async def get_agent_status(self, agent_name: str, agent_data: Dict[str, Any]) -> Dict[str, Any]:
         """Get status for a specific agent with enhanced information."""
         try:
             # Extract proper specialization and tools from agent data
-            specialization = agent_data.get("specialization", agent_data.get("description", "general"))
+            specialization = agent_data.get(
+                "specialization", agent_data.get("description", "general")
+            )
             tools = agent_data.get("tools", [])
-            
+
             # Get coordination role or derive from type
             coordination_role = agent_data.get("coordination_role", "unknown")
-            
+
             # Determine actual agent status (simulate based on framework health)
             # In a real implementation, this would check actual agent instances
             status = "available"
-            
+
             # Add enhanced information
             agent_info = {
                 "name": agent_data.get("name", agent_name),
@@ -186,70 +190,73 @@ class CMPMAgentMonitor(CMPMCommandBase):
                 "coordination_role": coordination_role,
                 "tools": tools,
                 "description": agent_data.get("description", "No description available"),
-                "last_active": datetime.now().isoformat()
+                "last_active": datetime.now().isoformat(),
             }
-            
+
             # Add user-defined agent specific information
             if agent_data.get("type") == "user_defined":
-                agent_info.update({
-                    "base_type": agent_data.get("base_type", "unknown"),
-                    "domain_focus": agent_data.get("domain_focus", "general"),
-                    "version": agent_data.get("version", "unknown"),
-                    "created": agent_data.get("created", "unknown"),
-                    "source": agent_data.get("source", "unknown"),
-                    "enabled": agent_data.get("enabled", True),
-                    "priority": agent_data.get("priority", "medium")
-                })
-            
+                agent_info.update(
+                    {
+                        "base_type": agent_data.get("base_type", "unknown"),
+                        "domain_focus": agent_data.get("domain_focus", "general"),
+                        "version": agent_data.get("version", "unknown"),
+                        "created": agent_data.get("created", "unknown"),
+                        "source": agent_data.get("source", "unknown"),
+                        "enabled": agent_data.get("enabled", True),
+                        "priority": agent_data.get("priority", "medium"),
+                    }
+                )
+
             return agent_info
-            
+
         except Exception as e:
             return {
                 "name": agent_name,
                 "status": "error",
                 "error": str(e),
-                "last_active": datetime.now().isoformat()
+                "last_active": datetime.now().isoformat(),
             }
-    
-    async def generate_agents_dashboard(self, agent_filter: Optional[str] = None, 
-                                       output_json: bool = False, detailed: bool = False) -> None:
+
+    async def generate_agents_dashboard(
+        self, agent_filter: Optional[str] = None, output_json: bool = False, detailed: bool = False
+    ) -> None:
         """Generate comprehensive CMPM agents dashboard."""
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
             console=console,
-            transient=True
+            transient=True,
         ) as progress:
             task = progress.add_task("Loading agent registry...", total=None)
-            
+
             # Load agent registry
             registry = await self.load_agent_registry()
-            
+
             progress.update(task, description="Analyzing agent status...")
-            
+
             # Get agent status for all agents
             standard_agents = registry.get("agent_registry", {}).get("standard_agents", {})
             user_defined_agents = registry.get("agent_registry", {}).get("user_defined_agents", {})
-            
+
             # Apply filtering if specified
             if agent_filter == "standard":
                 user_defined_agents = {}
             elif agent_filter == "user_defined":
                 standard_agents = {}
-            
+
             # Collect agent status data
             agent_status_tasks = []
-            
+
             for agent_name, agent_data in standard_agents.items():
                 agent_status_tasks.append(self.get_agent_status(agent_name, agent_data))
-            
+
             for agent_name, agent_data in user_defined_agents.items():
                 agent_status_tasks.append(self.get_agent_status(agent_name, agent_data))
-            
+
             all_agent_status = await asyncio.gather(*agent_status_tasks, return_exceptions=True)
-            
+
             progress.update(task, description="Generating dashboard...")
-        
+
         # Handle JSON output
         if output_json:
             # Clean agent data for JSON output
@@ -257,34 +264,43 @@ class CMPMAgentMonitor(CMPMCommandBase):
             for status in all_agent_status:
                 if isinstance(status, dict):
                     clean_agents.append(status)
-            
+
             json_output = {
                 "cmpm_version": "4.5.0",
                 "timestamp": datetime.now().isoformat(),
                 "total_agents": len(clean_agents),
-                "available_agents": sum(1 for agent in clean_agents if agent.get("status") == "available"),
+                "available_agents": sum(
+                    1 for agent in clean_agents if agent.get("status") == "available"
+                ),
                 "standard_agents": len(standard_agents),
                 "user_defined_agents": len(user_defined_agents),
                 "agents": clean_agents,
-                "agent_filter": agent_filter
+                "agent_filter": agent_filter,
             }
             console.print(format_json_output(json_output))
             return
-        
+
         # Create dashboard header
         total_agents = len(standard_agents) + len(user_defined_agents)
-        available_agents = sum(1 for status in all_agent_status if isinstance(status, dict) and status.get("status") == "available")
-        
-        header = Panel(
-            Text(f"CMPM Agents Dashboard v4.5.0\nTotal Agents: {total_agents} | Available: {available_agents}", 
-                 justify="center", style="bold white"),
-            title="🤖 Claude Multi-Agent PM Framework - Agent Registry",
-            border_style="cyan"
+        available_agents = sum(
+            1
+            for status in all_agent_status
+            if isinstance(status, dict) and status.get("status") == "available"
         )
-        
+
+        header = Panel(
+            Text(
+                f"CMPM Agents Dashboard v4.5.0\nTotal Agents: {total_agents} | Available: {available_agents}",
+                justify="center",
+                style="bold white",
+            ),
+            title="🤖 Claude Multi-Agent PM Framework - Agent Registry",
+            border_style="cyan",
+        )
+
         console.print(header)
         console.print()
-        
+
         # Create agents table
         table = Table(show_header=True, header_style="bold magenta")
         table.add_column("Agent Name", style="cyan", width=20)
@@ -294,34 +310,36 @@ class CMPMAgentMonitor(CMPMCommandBase):
         table.add_column("Tools", style="dim", width=30)
         if detailed:
             table.add_column("Description", style="dim", width=40)
-        
+
         # Add standard agents
         for i, (agent_name, agent_data) in enumerate(standard_agents.items()):
             if i < len(all_agent_status):
                 status = all_agent_status[i]
                 if isinstance(status, dict):
                     status_color = "green" if status.get("status") == "available" else "red"
-                    
+
                     # Format tools display
                     tools_list = status.get("tools", [])
                     tools_display = ", ".join(tools_list[:3]) if tools_list else "none"
                     if len(tools_list) > 3:
                         tools_display += f" (+{len(tools_list) - 3} more)"
-                    
+
                     row_data = [
                         status.get("name", agent_name),
                         f"[blue]{status.get('type', 'standard')}[/blue]",
                         f"[{status_color}]{status.get('status', 'unknown').upper()}[/{status_color}]",
                         status.get("coordination_role", "unknown").replace("_", " ").title(),
-                        tools_display
+                        tools_display,
                     ]
-                    
+
                     if detailed:
                         description = status.get("description", "No description available")
-                        row_data.append(description[:35] + "..." if len(description) > 35 else description)
-                    
+                        row_data.append(
+                            description[:35] + "..." if len(description) > 35 else description
+                        )
+
                     table.add_row(*row_data)
-        
+
         # Add user-defined agents
         standard_count = len(standard_agents)
         for i, (agent_name, agent_data) in enumerate(user_defined_agents.items()):
@@ -330,34 +348,38 @@ class CMPMAgentMonitor(CMPMCommandBase):
                 status = all_agent_status[status_index]
                 if isinstance(status, dict):
                     status_color = "green" if status.get("status") == "available" else "red"
-                    
+
                     # Format tools display
                     tools_list = status.get("tools", [])
                     tools_display = ", ".join(tools_list[:3]) if tools_list else "none"
                     if len(tools_list) > 3:
                         tools_display += f" (+{len(tools_list) - 3} more)"
-                    
+
                     # Show domain focus for user-defined agents
-                    role_display = status.get("domain_focus", status.get("coordination_role", "unknown"))
+                    role_display = status.get(
+                        "domain_focus", status.get("coordination_role", "unknown")
+                    )
                     role_display = role_display.replace("_", " ").title()
-                    
+
                     row_data = [
                         status.get("name", agent_name),
                         f"[yellow]{status.get('type', 'user_defined')}[/yellow]",
                         f"[{status_color}]{status.get('status', 'unknown').upper()}[/{status_color}]",
                         role_display,
-                        tools_display
+                        tools_display,
                     ]
-                    
+
                     if detailed:
                         description = status.get("description", "No description available")
-                        row_data.append(description[:35] + "..." if len(description) > 35 else description)
-                    
+                        row_data.append(
+                            description[:35] + "..." if len(description) > 35 else description
+                        )
+
                     table.add_row(*row_data)
-        
+
         console.print(table)
         console.print()
-        
+
         # Agent categories summary
         categories = {}
         total_tools = set()
@@ -367,11 +389,11 @@ class CMPMAgentMonitor(CMPMCommandBase):
                 if coord_role not in categories:
                     categories[coord_role] = 0
                 categories[coord_role] += 1
-                
+
                 # Collect all tools
                 tools = status.get("tools", [])
                 total_tools.update(tools)
-        
+
         # Get MultiAgentOrchestrator statistics if available
         orchestrator_info = "Available"
         orchestrator_stats = None
@@ -379,13 +401,15 @@ class CMPMAgentMonitor(CMPMCommandBase):
             # Try to get orchestrator statistics
             if self.orchestrator:
                 orchestrator_stats = self.orchestrator.get_orchestrator_stats()
-                orchestrator_info = f"{orchestrator_stats.get('agent_definitions', 0)} agent types in orchestrator"
+                orchestrator_info = (
+                    f"{orchestrator_stats.get('agent_definitions', 0)} agent types in orchestrator"
+                )
             else:
                 orchestrator_info = "11 agent types in orchestrator (static)"
         except Exception as e:
             logger.debug(f"Could not get orchestrator stats: {e}")
             orchestrator_info = "Orchestrator not available"
-        
+
         summary_text = f"""
 🎯 **Agent Distribution**: {len(standard_agents)} standard + {len(user_defined_agents)} user-defined
 📊 **Availability**: {available_agents}/{total_agents} agents available
@@ -394,13 +418,13 @@ class CMPMAgentMonitor(CMPMCommandBase):
 ⚡ **Framework Integration**: MCP-enabled multi-agent coordination
 🤖 **Orchestrator**: {orchestrator_info}
         """
-        
+
         console.print(Panel(summary_text.strip(), title="Agent Summary", border_style="blue"))
 
 
 class CMPMIndexOrchestrator(CMPMCommandBase):
     """CMPM Index Command Implementation with documentation agent delegation."""
-    
+
     def detect_project_type(self, project_path: Path) -> str:
         """Detect project type based on file patterns."""
         if (project_path / "package.json").exists():
@@ -415,7 +439,7 @@ class CMPMIndexOrchestrator(CMPMCommandBase):
             return "Documentation"
         else:
             return "Unknown"
-    
+
     def extract_project_metadata(self, project_path: Path) -> Dict[str, Any]:
         """Extract metadata from project files."""
         metadata = {
@@ -424,54 +448,59 @@ class CMPMIndexOrchestrator(CMPMCommandBase):
             "type": self.detect_project_type(project_path),
             "last_modified": datetime.fromtimestamp(project_path.stat().st_mtime).isoformat(),
             "size": self._get_directory_size(project_path),
-            "description": "No description available"
+            "description": "No description available",
         }
-        
+
         # Try to extract description from package.json
         package_json = project_path / "package.json"
         if package_json.exists():
             try:
-                with open(package_json, 'r') as f:
+                with open(package_json, "r") as f:
                     data = json.load(f)
                     metadata["description"] = data.get("description", "No description available")
                     metadata["version"] = data.get("version", "Unknown")
             except Exception:
                 pass
-        
+
         # Try to extract description from pyproject.toml
         pyproject_toml = project_path / "pyproject.toml"
         if pyproject_toml.exists():
             try:
                 import tomli
-                with open(pyproject_toml, 'rb') as f:
+
+                with open(pyproject_toml, "rb") as f:
                     data = tomli.load(f)
                     if "project" in data:
-                        metadata["description"] = data["project"].get("description", "No description available")
+                        metadata["description"] = data["project"].get(
+                            "description", "No description available"
+                        )
                         metadata["version"] = data["project"].get("version", "Unknown")
             except Exception:
                 pass
-        
+
         # Try to extract description from README
         readme_path = project_path / "README.md"
         if readme_path.exists():
             try:
-                with open(readme_path, 'r', encoding='utf-8') as f:
+                with open(readme_path, "r", encoding="utf-8") as f:
                     content = f.read()
                     # Extract first paragraph as description
-                    lines = content.split('\n')
+                    lines = content.split("\n")
                     for line in lines:
-                        if line.strip() and not line.startswith('#'):
+                        if line.strip() and not line.startswith("#"):
                             # Clean the description to remove control characters, emojis, and normalize whitespace
-                            clean_desc = ''.join(char if 32 <= ord(char) <= 126 else ' ' for char in line.strip())
-                            clean_desc = ' '.join(clean_desc.split())  # Normalize whitespace
+                            clean_desc = "".join(
+                                char if 32 <= ord(char) <= 126 else " " for char in line.strip()
+                            )
+                            clean_desc = " ".join(clean_desc.split())  # Normalize whitespace
                             if clean_desc:  # Only use if not empty after cleaning
                                 metadata["description"] = clean_desc[:100] + "..."
                                 break
             except Exception:
                 pass
-        
+
         return metadata
-    
+
     def _get_directory_size(self, path: Path) -> str:
         """Get human-readable directory size."""
         try:
@@ -480,7 +509,7 @@ class CMPMIndexOrchestrator(CMPMCommandBase):
                 for f in filenames:
                     fp = os.path.join(dirpath, f)
                     total_size += os.path.getsize(fp)
-            
+
             # Convert to human readable format
             if total_size < 1024:
                 return f"{total_size} B"
@@ -492,82 +521,92 @@ class CMPMIndexOrchestrator(CMPMCommandBase):
                 return f"{total_size/1024**3:.1f} GB"
         except Exception:
             return "Unknown"
-    
+
     def discover_projects(self, base_path: Path = None) -> List[Dict[str, Any]]:
         """Discover all projects in the current directory and subdirectories."""
         if base_path is None:
             base_path = self.framework_path
-        
+
         projects = []
         project_indicators = [
-            "package.json", "pyproject.toml", "setup.py", "requirements.txt",
-            ".git", "README.md", "Makefile", "Dockerfile"
+            "package.json",
+            "pyproject.toml",
+            "setup.py",
+            "requirements.txt",
+            ".git",
+            "README.md",
+            "Makefile",
+            "Dockerfile",
         ]
-        
+
         try:
             # Scan immediate subdirectories
             for item in base_path.iterdir():
-                if item.is_dir() and not item.name.startswith('.'):
+                if item.is_dir() and not item.name.startswith("."):
                     # Check if this directory contains project indicators
                     has_indicators = any(
                         (item / indicator).exists() for indicator in project_indicators
                     )
-                    
+
                     if has_indicators:
                         metadata = self.extract_project_metadata(item)
                         projects.append(metadata)
         except Exception as e:
             logger.error(f"Error discovering projects: {e}")
-        
+
         return projects
-    
+
     def delegate_to_documentation_agent(self, projects: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Simulate delegation to documentation agent for comprehensive project analysis."""
         # In a real implementation, this would use the Task tool to delegate
         # For now, we'll simulate the documentation agent's enhanced analysis
-        
+
         enhanced_projects = []
         for project in projects:
             enhanced_project = project.copy()
-            
+
             # Simulate documentation agent analysis
-            enhanced_project["documentation_score"] = self._calculate_documentation_score(Path(project["path"]))
+            enhanced_project["documentation_score"] = self._calculate_documentation_score(
+                Path(project["path"])
+            )
             enhanced_project["health_status"] = self._assess_project_health(Path(project["path"]))
-            enhanced_project["complexity_score"] = self._calculate_complexity_score(Path(project["path"]))
-            
+            enhanced_project["complexity_score"] = self._calculate_complexity_score(
+                Path(project["path"])
+            )
+
             enhanced_projects.append(enhanced_project)
-        
+
         return {
             "projects": enhanced_projects,
             "total_projects": len(enhanced_projects),
             "analysis_timestamp": datetime.now().isoformat(),
-            "agent_delegated": "documentation_agent"
+            "agent_delegated": "documentation_agent",
         }
-    
+
     def _calculate_documentation_score(self, project_path: Path) -> int:
         """Calculate documentation score (0-100) based on available docs."""
         score = 0
-        
+
         # Check for README
         if (project_path / "README.md").exists():
             score += 30
-        
+
         # Check for docs directory
         if (project_path / "docs").exists():
             score += 20
-        
+
         # Check for CHANGELOG
         if (project_path / "CHANGELOG.md").exists():
             score += 15
-        
+
         # Check for LICENSE
         if (project_path / "LICENSE").exists():
             score += 10
-        
+
         # Check for contributing guidelines
         if (project_path / "CONTRIBUTING.md").exists():
             score += 10
-        
+
         # Check for code comments (simplified)
         try:
             py_files = list(project_path.glob("**/*.py"))
@@ -575,29 +614,29 @@ class CMPMIndexOrchestrator(CMPMCommandBase):
                 score += 15  # Assume Python files have some documentation
         except Exception:
             pass
-        
+
         return min(score, 100)
-    
+
     def _assess_project_health(self, project_path: Path) -> str:
         """Assess project health based on file patterns."""
         health_score = 0
-        
+
         # Check for version control
         if (project_path / ".git").exists():
             health_score += 25
-        
+
         # Check for dependency management
         if (project_path / "package.json").exists() or (project_path / "pyproject.toml").exists():
             health_score += 25
-        
+
         # Check for testing
         if (project_path / "tests").exists() or list(project_path.glob("**/test_*.py")):
             health_score += 25
-        
+
         # Check for CI/CD
         if (project_path / ".github").exists() or (project_path / ".gitlab-ci.yml").exists():
             health_score += 25
-        
+
         if health_score >= 75:
             return "Excellent"
         elif health_score >= 50:
@@ -606,11 +645,11 @@ class CMPMIndexOrchestrator(CMPMCommandBase):
             return "Fair"
         else:
             return "Poor"
-    
+
     def _calculate_complexity_score(self, project_path: Path) -> int:
         """Calculate project complexity score (0-100)."""
         complexity = 0
-        
+
         try:
             # Count total files
             total_files = len(list(project_path.glob("**/*")))
@@ -620,12 +659,12 @@ class CMPMIndexOrchestrator(CMPMCommandBase):
                 complexity += 20
             elif total_files > 20:
                 complexity += 10
-            
+
             # Count source files
             source_files = (
-                len(list(project_path.glob("**/*.py"))) +
-                len(list(project_path.glob("**/*.js"))) +
-                len(list(project_path.glob("**/*.ts")))
+                len(list(project_path.glob("**/*.py")))
+                + len(list(project_path.glob("**/*.js")))
+                + len(list(project_path.glob("**/*.ts")))
             )
             if source_files > 50:
                 complexity += 30
@@ -633,7 +672,7 @@ class CMPMIndexOrchestrator(CMPMCommandBase):
                 complexity += 20
             elif source_files > 10:
                 complexity += 10
-            
+
             # Check for multiple languages
             languages = []
             if list(project_path.glob("**/*.py")):
@@ -642,53 +681,57 @@ class CMPMIndexOrchestrator(CMPMCommandBase):
                 languages.append("JavaScript/TypeScript")
             if list(project_path.glob("**/*.java")):
                 languages.append("Java")
-            
+
             if len(languages) > 1:
                 complexity += 20
-            
+
             # Check for subdirectories
-            subdirs = [d for d in project_path.iterdir() if d.is_dir() and not d.name.startswith('.')]
+            subdirs = [
+                d for d in project_path.iterdir() if d.is_dir() and not d.name.startswith(".")
+            ]
             if len(subdirs) > 10:
                 complexity += 20
             elif len(subdirs) > 5:
                 complexity += 10
-            
+
         except Exception:
             pass
-        
+
         return min(complexity, 100)
-    
-    async def generate_index_dashboard(self, output_json: bool = False, verbose: bool = False) -> None:
+
+    async def generate_index_dashboard(
+        self, output_json: bool = False, verbose: bool = False
+    ) -> None:
         """Generate comprehensive CMPM project index dashboard."""
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
             console=console,
-            transient=True
+            transient=True,
         ) as progress:
             task = progress.add_task("Discovering projects...", total=None)
-            
+
             # Discover projects
             projects = self.discover_projects()
-            
+
             progress.update(task, description="Delegating to documentation agent...")
-            
+
             # Delegate to documentation agent for enhanced analysis
             enhanced_data = self.delegate_to_documentation_agent(projects)
-            
+
             progress.update(task, description="Generating index dashboard...")
-            
+
             total_time = self.get_execution_time()
-        
+
         if output_json:
             # Output JSON format - clean all string values to ensure valid JSON
             def clean_json_string(value):
                 if isinstance(value, str):
                     # Keep only printable ASCII characters to ensure JSON compatibility
-                    cleaned = ''.join(char if 32 <= ord(char) <= 126 else ' ' for char in value)
-                    return ' '.join(cleaned.split())  # Normalize whitespace
+                    cleaned = "".join(char if 32 <= ord(char) <= 126 else " " for char in value)
+                    return " ".join(cleaned.split())  # Normalize whitespace
                 return value
-            
+
             def clean_json_object(obj):
                 if isinstance(obj, dict):
                     return {k: clean_json_object(v) for k, v in obj.items()}
@@ -696,28 +739,31 @@ class CMPMIndexOrchestrator(CMPMCommandBase):
                     return [clean_json_object(item) for item in obj]
                 else:
                     return clean_json_string(obj)
-            
+
             json_output = {
                 "cmpm_version": "4.5.0",
                 "index_timestamp": datetime.now().isoformat(),
                 "total_projects": enhanced_data["total_projects"],
                 "projects": clean_json_object(enhanced_data["projects"]),
-                "generation_time": f"{total_time:.2f}s"
+                "generation_time": f"{total_time:.2f}s",
             }
             console.print(format_json_output(json_output))
             return
-        
+
         # Create dashboard header
         header = Panel(
-            Text(f"CMPM Project Index v4.5.0\nTotal Projects: {enhanced_data['total_projects']}\nGeneration Time: {total_time:.2f}s", 
-                 justify="center", style="bold white"),
+            Text(
+                f"CMPM Project Index v4.5.0\nTotal Projects: {enhanced_data['total_projects']}\nGeneration Time: {total_time:.2f}s",
+                justify="center",
+                style="bold white",
+            ),
             title="📁 Claude Multi-Agent PM Framework - Project Index",
-            border_style="cyan"
+            border_style="cyan",
         )
-        
+
         console.print(header)
         console.print()
-        
+
         # Create projects table
         table = Table(show_header=True, header_style="bold magenta")
         table.add_column("Project Name", style="cyan", width=20)
@@ -727,53 +773,65 @@ class CMPMIndexOrchestrator(CMPMCommandBase):
         table.add_column("Complexity", width=8)
         if verbose:
             table.add_column("Description", style="dim", width=40)
-        
+
         # Add projects to table
         for project in enhanced_data["projects"]:
             health_color = {
                 "Excellent": "green",
                 "Good": "yellow",
                 "Fair": "orange",
-                "Poor": "red"
+                "Poor": "red",
             }.get(project.get("health_status", "Poor"), "red")
-            
+
             docs_score = project.get("documentation_score", 0)
             docs_color = "green" if docs_score >= 70 else "yellow" if docs_score >= 40 else "red"
-            
+
             complexity_score = project.get("complexity_score", 0)
-            complexity_color = "red" if complexity_score >= 70 else "yellow" if complexity_score >= 40 else "green"
-            
+            complexity_color = (
+                "red" if complexity_score >= 70 else "yellow" if complexity_score >= 40 else "green"
+            )
+
             row = [
                 project["name"],
                 f"[blue]{project['type']}[/blue]",
                 f"[{health_color}]{project.get('health_status', 'Unknown')}[/{health_color}]",
                 f"[{docs_color}]{docs_score}%[/{docs_color}]",
-                f"[{complexity_color}]{complexity_score}%[/{complexity_color}]"
+                f"[{complexity_color}]{complexity_score}%[/{complexity_color}]",
             ]
-            
+
             if verbose:
                 row.append(project.get("description", "No description")[:40] + "...")
-            
+
             table.add_row(*row)
-        
+
         console.print(table)
         console.print()
-        
+
         # Project statistics
         project_types = {}
         health_distribution = {}
-        
+
         for project in enhanced_data["projects"]:
             ptype = project["type"]
             project_types[ptype] = project_types.get(ptype, 0) + 1
-            
+
             health = project.get("health_status", "Unknown")
             health_distribution[health] = health_distribution.get(health, 0) + 1
-        
+
         # Calculate averages
-        avg_docs = sum(p.get("documentation_score", 0) for p in enhanced_data["projects"]) / len(enhanced_data["projects"]) if enhanced_data["projects"] else 0
-        avg_complexity = sum(p.get("complexity_score", 0) for p in enhanced_data["projects"]) / len(enhanced_data["projects"]) if enhanced_data["projects"] else 0
-        
+        avg_docs = (
+            sum(p.get("documentation_score", 0) for p in enhanced_data["projects"])
+            / len(enhanced_data["projects"])
+            if enhanced_data["projects"]
+            else 0
+        )
+        avg_complexity = (
+            sum(p.get("complexity_score", 0) for p in enhanced_data["projects"])
+            / len(enhanced_data["projects"])
+            if enhanced_data["projects"]
+            else 0
+        )
+
         summary_text = f"""
 📊 **Project Types**: {', '.join(f'{k}: {v}' for k, v in project_types.items())}
 🏥 **Health Distribution**: {', '.join(f'{k}: {v}' for k, v in health_distribution.items())}
@@ -782,23 +840,24 @@ class CMPMIndexOrchestrator(CMPMCommandBase):
 🕐 **Generation Time**: {total_time:.2f}s
 🤖 **Agent Delegated**: Documentation Agent for enhanced analysis
         """
-        
+
         console.print(Panel(summary_text.strip(), title="Project Summary", border_style="blue"))
 
 
 # CLI Commands
 @click.command(name="cmpm:agents")
-@click.option("--agent-filter", type=click.Choice(["standard", "user_defined"]), 
-              help="Filter agents by type")
+@click.option(
+    "--agent-filter", type=click.Choice(["standard", "user_defined"]), help="Filter agents by type"
+)
 @click.option("--output-json", is_flag=True, help="Output as JSON")
 @click.option("--detailed", is_flag=True, help="Show detailed agent information")
 def cmpm_agents(agent_filter: Optional[str], output_json: bool, detailed: bool):
     """🤖 CMPM Agents - Active agent types and status listing"""
-    
+
     async def run_agents_command():
         monitor = CMPMAgentMonitor()
         await monitor.generate_agents_dashboard(agent_filter, output_json, detailed)
-    
+
     run_async_command(run_agents_command())
 
 
@@ -807,17 +866,12 @@ def cmpm_agents(agent_filter: Optional[str], output_json: bool, detailed: bool):
 @click.option("--verbose", is_flag=True, help="Show verbose project information")
 def cmpm_index(output_json: bool, verbose: bool):
     """📁 CMPM Index - Project discovery index with agent delegation"""
-    
+
     async def run_index_command():
         orchestrator = CMPMIndexOrchestrator()
         await orchestrator.generate_index_dashboard(output_json, verbose)
-    
+
     run_async_command(run_index_command())
 
 
-__all__ = [
-    'cmpm_agents',
-    'cmpm_index',
-    'CMPMAgentMonitor',
-    'CMPMIndexOrchestrator'
-]
+__all__ = ["cmpm_agents", "cmpm_index", "CMPMAgentMonitor", "CMPMIndexOrchestrator"]

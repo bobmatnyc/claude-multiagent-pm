@@ -6,6 +6,4 @@ Contains abstract interfaces and protocols for framework components.
 
 from .health import HealthCollector
 
-__all__ = [
-    "HealthCollector"
-]
+__all__ = ["HealthCollector"]

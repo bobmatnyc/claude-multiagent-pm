@@ -2,10 +2,10 @@
 
 [![Version](https://img.shields.io/badge/Version-0.4.6-blue.svg)](https://github.com/masa/claude-multiagent-pm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Architecture](https://img.shields.io/badge/Architecture-Three--Tier%20Agent%20Hierarchy-brightgreen.svg)](./docs/FRAMEWORK_OVERVIEW.md)
-[![Cross-Project](https://img.shields.io/badge/Management-Cross--Project%20CMCP--init-purple.svg)](./docs/DEPLOYMENT_GUIDE.md)
-[![Memory Integration](https://img.shields.io/badge/Memory-mem0AI%20Integration-orange.svg)](./docs/CLAUDE_MULTIAGENT_PM_MEMORY_README.md)
-[![MCP Services](https://img.shields.io/badge/MCP-Context7%20%26%20Zen-blue.svg)](./docs/MCP_SERVICE_INTEGRATION.md)
+[![Architecture](https://img.shields.io/badge/Architecture-Three--Tier%20Agent%20Hierarchy-brightgreen.svg)](./docs/10-architecture-frameworks-comprehensive-guide.md)
+[![Cross-Project](https://img.shields.io/badge/Management-Cross--Project%20CMCP--init-purple.svg)](./docs/DEPLOYMENT-GUIDE-v4.5.1.md)
+[![Memory Integration](https://img.shields.io/badge/Memory-mem0AI%20Integration-orange.svg)](./docs/INDEX.md)
+[![MCP Services](https://img.shields.io/badge/MCP-Context7%20%26%20Zen-blue.svg)](./docs/04-integrations-comprehensive-guide.md)
 
 > **Advanced three-tier agent hierarchy with cross-project CMCP-init management**
 

@@ -17,10 +17,10 @@ sys.path.insert(0, str(framework_path))
 # Import and run the main CLI
 try:
     from .cmpm_commands import main
-    
+
     if __name__ == "__main__":
         main()
-        
+
 except ImportError as e:
     print(f"Error importing CMPM commands: {e}")
     print("Please ensure you're running this from the Claude PM Framework directory")

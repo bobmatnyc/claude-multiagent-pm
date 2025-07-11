@@ -10,13 +10,13 @@ from .health import (
     HealthReport,
     HealthDashboard,
     ServiceHealthReport,
-    SubsystemHealth
+    SubsystemHealth,
 )
 
 __all__ = [
     "HealthStatus",
-    "HealthReport", 
+    "HealthReport",
     "HealthDashboard",
     "ServiceHealthReport",
-    "SubsystemHealth"
+    "SubsystemHealth",
 ]

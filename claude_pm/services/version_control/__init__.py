@@ -12,7 +12,7 @@ from .git_operations import (
     GitOperationsManager,
     GitBranchInfo,
     GitOperationResult,
-    GitOperationError
+    GitOperationError,
 )
 
 from .semantic_versioning import (
@@ -20,7 +20,7 @@ from .semantic_versioning import (
     SemanticVersion,
     VersionBumpType,
     VersionMetadata,
-    ChangeAnalysis
+    ChangeAnalysis,
 )
 
 from .branch_strategy import (
@@ -29,7 +29,7 @@ from .branch_strategy import (
     BranchType,
     BranchWorkflow,
     BranchNamingRule,
-    BranchLifecycleRule
+    BranchLifecycleRule,
 )
 
 from .conflict_resolution import (
@@ -38,36 +38,33 @@ from .conflict_resolution import (
     ResolutionStrategy,
     FileConflict,
     ConflictResolution,
-    ConflictAnalysis
+    ConflictAnalysis,
 )
 
 __all__ = [
     # Git Operations
-    'GitOperationsManager',
-    'GitBranchInfo',
-    'GitOperationResult',
-    'GitOperationError',
-    
+    "GitOperationsManager",
+    "GitBranchInfo",
+    "GitOperationResult",
+    "GitOperationError",
     # Semantic Versioning
-    'SemanticVersionManager',
-    'SemanticVersion',
-    'VersionBumpType',
-    'VersionMetadata',
-    'ChangeAnalysis',
-    
+    "SemanticVersionManager",
+    "SemanticVersion",
+    "VersionBumpType",
+    "VersionMetadata",
+    "ChangeAnalysis",
     # Branch Strategy
-    'BranchStrategyManager',
-    'BranchStrategyType',
-    'BranchType',
-    'BranchWorkflow',
-    'BranchNamingRule',
-    'BranchLifecycleRule',
-    
+    "BranchStrategyManager",
+    "BranchStrategyType",
+    "BranchType",
+    "BranchWorkflow",
+    "BranchNamingRule",
+    "BranchLifecycleRule",
     # Conflict Resolution
-    'ConflictResolutionManager',
-    'ConflictType',
-    'ResolutionStrategy',
-    'FileConflict',
-    'ConflictResolution',
-    'ConflictAnalysis'
+    "ConflictResolutionManager",
+    "ConflictType",
+    "ResolutionStrategy",
+    "FileConflict",
+    "ConflictResolution",
+    "ConflictAnalysis",
 ]

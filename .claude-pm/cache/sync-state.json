@@ -1,12 +1,12 @@
 {
-  "scripts_hash": "b19a679e943572b4e14918fdcc00b5573b1a2b029e75c09f0a2804b38cd7d87a",
-  "binary_claude-pm": "80c576b9fabd73b60752db7e71ca1c98cd460c332f392f944de89a071985e145",
+  "scripts_hash": "940447c2b133efdefc22663bb29259a4a057b3b92744db323ec143aaca5eaa5f",
+  "binary_claude-pm": "71a5d89f36c39f800bdefae231c268ad10eb343693fc6b8e84d87a124beef667",
   "binary_atd-framework": "a6b0680dc36ae09d4403d93220936a5bc64bc84d74d5b7d31291a444178e94db",
   "binary_aitrackdown": "537ce5ea70f0cd3340c252632d9caa59bbf75fcbf6ad30e64798ab7bae9ec868",
   "binary_atd": "ed616953c34e392186d2990d862ade6489875d407da201af8c81a7fa015de3bd",
   "binary_cmpm": "bf9c01db68b53f3e7e71c64f978d7b67ec1a073218e7b3fbe36220d1992dadb3",
   "binary_claude-pm.cmd": "3654d47e86b8e70e6fa45cfe37a7062e8374383dd02145451c8ca470c7c4b3eb",
   "binary_aitrackdown-framework": "36db1c36c286b7990d90e9072dd8abf3c4af7415af74470801610392ff5ec5d6",
-  "claude_md_template": "3736817624bfff9ca4ee632192836e5c12ecca19136642db74e61beb3475637b",
+  "claude_md_template": "0da2432df473d91f8ad1ad84fa0e7d92d98df00c33958bc399c6c04af07033fb",
   "config_hash": "7415d1a4faefda62a03b47987d1c28778648ee23b14825b73d326cbb3e7ce4bd"
 }

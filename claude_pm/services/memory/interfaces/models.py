@@ -13,15 +13,15 @@ from datetime import datetime
 
 class MemoryCategory(str, Enum):
     """Standardized memory categories for the Claude PM Framework."""
-    
+
     PROJECT = "project"  # Architectural decisions, requirements, milestones
     PATTERN = "pattern"  # Successful solutions, code patterns, reusable approaches
-    TEAM = "team"       # Coding standards, team preferences, workflows
-    ERROR = "error"     # Bug patterns, error solutions, debugging knowledge
-    
+    TEAM = "team"  # Coding standards, team preferences, workflows
+    ERROR = "error"  # Bug patterns, error solutions, debugging knowledge
+
     def __str__(self) -> str:
         return self.value
-    
+
     @classmethod
     def from_string(cls, value: str) -> "MemoryCategory":
         """Create category from string value."""
@@ -34,7 +34,7 @@ class MemoryCategory(str, Enum):
 @dataclass
 class MemoryItem:
     """Unified memory item representation across all backends."""
-    
+
     id: str
     content: str
     category: MemoryCategory
@@ -43,18 +43,18 @@ class MemoryItem:
     created_at: str
     updated_at: str
     project_name: str
-    
+
     def __post_init__(self):
         """Validate and normalize data after initialization."""
         if isinstance(self.category, str):
             self.category = MemoryCategory.from_string(self.category)
-        
+
         if not isinstance(self.tags, list):
             self.tags = []
-        
+
         if not isinstance(self.metadata, dict):
             self.metadata = {}
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         return {
@@ -65,9 +65,9 @@ class MemoryItem:
             "metadata": self.metadata,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
-            "project_name": self.project_name
+            "project_name": self.project_name,
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "MemoryItem":
         """Create from dictionary representation."""
@@ -79,31 +79,31 @@ class MemoryItem:
             metadata=data.get("metadata", {}),
             created_at=data.get("created_at", ""),
             updated_at=data.get("updated_at", ""),
-            project_name=data.get("project_name", "")
+            project_name=data.get("project_name", ""),
         )
-    
+
     def get_age_seconds(self) -> float:
         """Get age of memory item in seconds."""
         try:
-            created_time = datetime.fromisoformat(self.created_at.replace('Z', '+00:00'))
+            created_time = datetime.fromisoformat(self.created_at.replace("Z", "+00:00"))
             return (datetime.now(created_time.tzinfo) - created_time).total_seconds()
         except (ValueError, AttributeError):
             return 0.0
-    
+
     def matches_query(self, query: str) -> bool:
         """Check if memory item matches a text query."""
         query_lower = query.lower()
         return (
-            query_lower in self.content.lower() or
-            any(query_lower in tag.lower() for tag in self.tags) or
-            query_lower in str(self.metadata).lower()
+            query_lower in self.content.lower()
+            or any(query_lower in tag.lower() for tag in self.tags)
+            or query_lower in str(self.metadata).lower()
         )
 
 
 @dataclass
 class MemoryQuery:
     """Standardized query parameters for memory searches."""
-    
+
     query: str
     category: Optional[MemoryCategory] = None
     tags: Optional[List[str]] = None
@@ -113,7 +113,7 @@ class MemoryQuery:
     similarity_threshold: float = 0.7
     max_age_seconds: Optional[float] = None
     min_age_seconds: Optional[float] = None
-    
+
     def __post_init__(self):
         """Validate query parameters."""
         if self.limit <= 0:
@@ -122,13 +122,13 @@ class MemoryQuery:
             self.offset = 0
         if self.similarity_threshold < 0 or self.similarity_threshold > 1:
             self.similarity_threshold = 0.7
-        
+
         if isinstance(self.category, str):
             self.category = MemoryCategory.from_string(self.category)
-        
+
         if self.tags and not isinstance(self.tags, list):
             self.tags = []
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         return {
@@ -140,9 +140,9 @@ class MemoryQuery:
             "include_metadata": self.include_metadata,
             "similarity_threshold": self.similarity_threshold,
             "max_age_seconds": self.max_age_seconds,
-            "min_age_seconds": self.min_age_seconds
+            "min_age_seconds": self.min_age_seconds,
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "MemoryQuery":
         """Create from dictionary representation."""
@@ -155,14 +155,14 @@ class MemoryQuery:
             include_metadata=data.get("include_metadata", True),
             similarity_threshold=data.get("similarity_threshold", 0.7),
             max_age_seconds=data.get("max_age_seconds"),
-            min_age_seconds=data.get("min_age_seconds")
+            min_age_seconds=data.get("min_age_seconds"),
         )
 
 
 @dataclass
 class HealthStatus:
     """Health status information for memory backends."""
-    
+
     backend_name: str
     is_healthy: bool
     response_time_ms: float
@@ -170,7 +170,7 @@ class HealthStatus:
     features: Dict[str, bool] = field(default_factory=dict)
     last_checked: float = field(default_factory=time.time)
     uptime_percentage: float = 0.0
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         return {
@@ -180,9 +180,9 @@ class HealthStatus:
             "error_message": self.error_message,
             "features": self.features,
             "last_checked": self.last_checked,
-            "uptime_percentage": self.uptime_percentage
+            "uptime_percentage": self.uptime_percentage,
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "HealthStatus":
         """Create from dictionary representation."""
@@ -193,14 +193,14 @@ class HealthStatus:
             error_message=data.get("error_message"),
             features=data.get("features", {}),
             last_checked=data.get("last_checked", time.time()),
-            uptime_percentage=data.get("uptime_percentage", 0.0)
+            uptime_percentage=data.get("uptime_percentage", 0.0),
         )
 
 
 @dataclass
 class BackendHealth:
     """Comprehensive backend health information."""
-    
+
     backend_name: str
     is_healthy: bool
     response_time: float
@@ -211,15 +211,17 @@ class BackendHealth:
     consecutive_successes: int = 0
     total_requests: int = 0
     successful_requests: int = 0
-    
-    def update_health(self, is_healthy: bool, response_time: float, error_message: Optional[str] = None):
+
+    def update_health(
+        self, is_healthy: bool, response_time: float, error_message: Optional[str] = None
+    ):
         """Update health status with new check result."""
         self.is_healthy = is_healthy
         self.response_time = response_time
         self.error_message = error_message
         self.last_checked = time.time()
         self.total_requests += 1
-        
+
         if is_healthy:
             self.consecutive_successes += 1
             self.consecutive_failures = 0
@@ -227,13 +229,13 @@ class BackendHealth:
         else:
             self.consecutive_failures += 1
             self.consecutive_successes = 0
-    
+
     def get_success_rate(self) -> float:
         """Get success rate percentage."""
         if self.total_requests == 0:
             return 0.0
         return (self.successful_requests / self.total_requests) * 100
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         return {
@@ -247,21 +249,21 @@ class BackendHealth:
             "consecutive_successes": self.consecutive_successes,
             "total_requests": self.total_requests,
             "successful_requests": self.successful_requests,
-            "success_rate": self.get_success_rate()
+            "success_rate": self.get_success_rate(),
         }
 
 
 @dataclass
 class OperationResult:
     """Result of a memory operation."""
-    
+
     success: bool
     data: Optional[Any] = None
     error: Optional[str] = None
     backend_used: Optional[str] = None
     response_time_ms: float = 0.0
     operation_type: str = "unknown"
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         return {
@@ -270,14 +272,14 @@ class OperationResult:
             "error": self.error,
             "backend_used": self.backend_used,
             "response_time_ms": self.response_time_ms,
-            "operation_type": self.operation_type
+            "operation_type": self.operation_type,
         }
 
 
 @dataclass
 class MemoryStatistics:
     """Statistics about memory usage and performance."""
-    
+
     total_memories: int = 0
     memories_by_category: Dict[str, int] = field(default_factory=dict)
     memories_by_project: Dict[str, int] = field(default_factory=dict)
@@ -285,7 +287,7 @@ class MemoryStatistics:
     average_memory_age_seconds: float = 0.0
     most_recent_memory: Optional[str] = None
     oldest_memory: Optional[str] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         return {
@@ -295,7 +297,7 @@ class MemoryStatistics:
             "total_size_bytes": self.total_size_bytes,
             "average_memory_age_seconds": self.average_memory_age_seconds,
             "most_recent_memory": self.most_recent_memory,
-            "oldest_memory": self.oldest_memory
+            "oldest_memory": self.oldest_memory,
         }
 
 

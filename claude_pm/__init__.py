@@ -11,8 +11,9 @@ from pathlib import Path
 
 try:
     from dotenv import load_dotenv
+
     # Load .env file from project root
-    env_path = Path(__file__).parent.parent / '.env'
+    env_path = Path(__file__).parent.parent / ".env"
     if env_path.exists():
         load_dotenv(env_path)
 except ImportError:
@@ -33,7 +34,7 @@ from .services.project_service import ProjectService
 
 __all__ = [
     "BaseService",
-    "ServiceManager", 
+    "ServiceManager",
     "HealthMonitorService",
     "MemoryCategory",
     "ProjectService",

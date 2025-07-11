@@ -24,52 +24,46 @@ Supported Backends:
 
 Usage:
     from claude_pm.services.memory import (
-        FlexibleMemoryService, 
+        FlexibleMemoryService,
         create_memory_recall_service,
         MemoryCategory,
         MemoryQuery
     )
-    
+
     # Initialize basic memory service
     memory_service = FlexibleMemoryService()
     await memory_service.initialize()
-    
+
     # Add memory
     memory_id = await memory_service.add_memory(
-        "my_project", 
-        "Important decision", 
+        "my_project",
+        "Important decision",
         MemoryCategory.PROJECT
     )
-    
+
     # Search memories
     memories = await memory_service.search_memories(
-        "my_project", 
+        "my_project",
         MemoryQuery("decision")
     )
-    
+
     # Use intelligent memory recall
     recall_service = create_memory_recall_service(memory_service)
     await recall_service.initialize()
-    
+
     # Get memory-driven recommendations for operations
     result = await recall_service.recall_for_operation(
         project_name="my_project",
         operation_type="deploy",
         operation_context={"environment": "production"}
     )
-    
+
     if result.success:
         recommendations = result.recommendations.get_top_recommendations()
         context = result.enriched_context.get_agent_context()
 """
 
-from .interfaces.models import (
-    MemoryCategory,
-    MemoryItem, 
-    MemoryQuery,
-    HealthStatus,
-    BackendHealth
-)
+from .interfaces.models import MemoryCategory, MemoryItem, MemoryQuery, HealthStatus, BackendHealth
 
 from .interfaces.backend import MemoryBackend
 from .interfaces.exceptions import (
@@ -77,7 +71,7 @@ from .interfaces.exceptions import (
     BackendError,
     CircuitBreakerOpenError,
     ConfigurationError,
-    MigrationError
+    MigrationError,
 )
 
 from .services.unified_service import FlexibleMemoryService
@@ -92,11 +86,7 @@ from .monitoring.health import HealthMonitor
 
 # Memory trigger infrastructure
 from .trigger_types import TriggerType, TriggerPriority
-from .trigger_orchestrator import (
-    MemoryTriggerOrchestrator,
-    TriggerEvent,
-    TriggerResult
-)
+from .trigger_orchestrator import MemoryTriggerOrchestrator, TriggerEvent, TriggerResult
 from .trigger_policies import TriggerPolicyEngine, PolicyRule, PolicyConfig, PolicyDecision
 from .framework_hooks import FrameworkMemoryHooks, HookContext
 from .decorators import (
@@ -114,7 +104,7 @@ from .decorators import (
     is_memory_triggers_enabled,
     get_memory_trigger_metrics,
     set_global_hooks,
-    get_global_hooks
+    get_global_hooks,
 )
 from .memory_trigger_service import (
     MemoryTriggerService,
@@ -123,114 +113,103 @@ from .memory_trigger_service import (
     get_global_memory_trigger_service,
     initialize_global_memory_trigger_service,
     cleanup_global_memory_trigger_service,
-    DEFAULT_CONFIG
+    DEFAULT_CONFIG,
 )
 
 # Memory recall system
-from ..memory_recall_service import (
-    MemoryRecallService,
-    MemoryRecallConfig,
-    MemoryRecallResult
-)
+from ..memory_recall_service import MemoryRecallService, MemoryRecallConfig, MemoryRecallResult
 from .memory_context_enhancer import (
     MemoryContextEnhancer,
     MemoryContext,
     RecallTrigger,
-    RecallConfig
+    RecallConfig,
 )
 from .similarity_matcher import (
     SimilarityMatcher,
     SimilarityResult,
     SimilarityAlgorithm,
-    MatchingConfig
+    MatchingConfig,
 )
-from .context_builder import (
-    ContextBuilder,
-    EnrichedContext,
-    ContextType,
-    ContextTemplate
-)
+from .context_builder import ContextBuilder, EnrichedContext, ContextType, ContextTemplate
 from .recommendation_engine import (
     RecommendationEngine,
     Recommendation,
     RecommendationSet,
     RecommendationType,
-    RecommendationConfig
+    RecommendationConfig,
 )
 
 __version__ = "1.2.0"
 __author__ = "Claude PM Framework"
 
+
 # Main service factory
 def create_flexible_memory_service(config: dict = None) -> FlexibleMemoryService:
     """
     Factory function to create a FlexibleMemoryService instance.
-    
+
     Args:
         config: Optional configuration dictionary
-        
+
     Returns:
         FlexibleMemoryService: Configured memory service instance
     """
     return FlexibleMemoryService(config)
 
+
 # Memory recall service factory
 def create_memory_recall_service(
-    memory_service: FlexibleMemoryService = None,
-    config: MemoryRecallConfig = None
+    memory_service: FlexibleMemoryService = None, config: MemoryRecallConfig = None
 ) -> MemoryRecallService:
     """
     Factory function to create a MemoryRecallService instance.
-    
+
     Args:
         memory_service: Optional memory service instance (creates one if None)
         config: Optional recall configuration
-        
+
     Returns:
         MemoryRecallService: Configured memory recall service instance
     """
     if memory_service is None:
         memory_service = create_flexible_memory_service()
-    
+
     return MemoryRecallService(memory_service, config)
+
 
 # Backward compatibility
 def get_memory_service(config: dict = None) -> FlexibleMemoryService:
     """Legacy factory function for backward compatibility."""
     return create_flexible_memory_service(config)
 
+
 __all__ = [
     # Core interfaces
     "MemoryCategory",
-    "MemoryItem", 
+    "MemoryItem",
     "MemoryQuery",
     "HealthStatus",
     "BackendHealth",
     "MemoryBackend",
-    
     # Main service
     "FlexibleMemoryService",
     "create_flexible_memory_service",
     "create_memory_recall_service",
     "get_memory_service",  # Legacy
-    
     # Support services
     "CircuitBreaker",
-    "CircuitState", 
+    "CircuitState",
     "AutoDetectionEngine",
-    
     # Backends
     "Mem0AIBackend",
     "SQLiteBackend",
-    
     # Monitoring
     "PerformanceMonitor",
     "HealthMonitor",
-    
     # Memory trigger infrastructure
     "MemoryTriggerOrchestrator",
     "TriggerType",
-    "TriggerPriority", 
+    "TriggerPriority",
     "TriggerEvent",
     "TriggerResult",
     "TriggerPolicyEngine",
@@ -246,7 +225,6 @@ __all__ = [
     "initialize_global_memory_trigger_service",
     "cleanup_global_memory_trigger_service",
     "DEFAULT_CONFIG",
-    
     # Memory trigger decorators
     "memory_trigger",
     "workflow_memory_trigger",
@@ -263,33 +241,31 @@ __all__ = [
     "get_memory_trigger_metrics",
     "set_global_hooks",
     "get_global_hooks",
-    
     # Memory recall system
     "MemoryRecallService",
-    "MemoryRecallConfig", 
+    "MemoryRecallConfig",
     "MemoryRecallResult",
     "MemoryContextEnhancer",
     "MemoryContext",
     "RecallTrigger",
     "RecallConfig",
     "SimilarityMatcher",
-    "SimilarityResult", 
+    "SimilarityResult",
     "SimilarityAlgorithm",
     "MatchingConfig",
     "ContextBuilder",
     "EnrichedContext",
     "ContextType",
-    "ContextTemplate", 
+    "ContextTemplate",
     "RecommendationEngine",
     "Recommendation",
     "RecommendationSet",
     "RecommendationType",
     "RecommendationConfig",
-    
     # Exceptions
     "MemoryServiceError",
     "BackendError",
-    "CircuitBreakerOpenError", 
+    "CircuitBreakerOpenError",
     "ConfigurationError",
-    "MigrationError"
+    "MigrationError",
 ]

@@ -8,9 +8,4 @@ from .circuit_breaker import CircuitBreaker, CircuitState
 from .auto_detection import AutoDetectionEngine
 from .unified_service import FlexibleMemoryService
 
-__all__ = [
-    "CircuitBreaker",
-    "CircuitState",
-    "AutoDetectionEngine", 
-    "FlexibleMemoryService"
-]
+__all__ = ["CircuitBreaker", "CircuitState", "AutoDetectionEngine", "FlexibleMemoryService"]

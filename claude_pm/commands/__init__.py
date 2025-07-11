@@ -25,7 +25,8 @@ console = Console()
 def main(ctx):
     """CMPM Framework Commands - Main CLI Entry Point."""
     if ctx.invoked_subcommand is None:
-        console.print("""
+        console.print(
+            """
 [bold cyan]CMPM Framework Commands[/bold cyan]
 
 Available commands:
@@ -51,7 +52,8 @@ Usage:
 • [dim]python -m claude_pm.cmpm_commands cmpm:integration[/dim]
 • [dim]python -m claude_pm.cmpm_commands cmpm:ai-ops[/dim]
 • [dim]python -m claude_pm.cmpm_commands template deploy-claude-md[/dim]
-        """)
+        """
+        )
 
 
 # Register all commands to the main group
@@ -68,15 +70,15 @@ main.add_command(template)
 
 
 __all__ = [
-    'main',
-    'cmpm_health',
-    'cmpm_agents',
-    'cmpm_index',
-    'cmpm_dashboard',
-    'cmpm_qa_status',
-    'cmpm_qa_test',
-    'cmpm_qa_results',
-    'cmpm_integration',
-    'cmpm_ai_ops',
-    'template'
+    "main",
+    "cmpm_health",
+    "cmpm_agents",
+    "cmpm_index",
+    "cmpm_dashboard",
+    "cmpm_qa_status",
+    "cmpm_qa_test",
+    "cmpm_qa_results",
+    "cmpm_integration",
+    "cmpm_ai_ops",
+    "template",
 ]

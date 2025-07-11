@@ -31,7 +31,7 @@ from .commands import (
     cmpm_qa_test,
     cmpm_qa_results,
     cmpm_integration,
-    cmpm_ai_ops
+    cmpm_ai_ops,
 )
 
 console = Console()
@@ -53,17 +53,17 @@ def register_cmpm_commands(cli_group):
 
 # Export the main function for direct module execution
 __all__ = [
-    'main',
-    'register_cmpm_commands',
-    'cmpm_health',
-    'cmpm_agents',
-    'cmpm_index',
-    'cmpm_dashboard',
-    'cmpm_qa_status',
-    'cmpm_qa_test',
-    'cmpm_qa_results',
-    'cmpm_integration',
-    'cmpm_ai_ops'
+    "main",
+    "register_cmpm_commands",
+    "cmpm_health",
+    "cmpm_agents",
+    "cmpm_index",
+    "cmpm_dashboard",
+    "cmpm_qa_status",
+    "cmpm_qa_test",
+    "cmpm_qa_results",
+    "cmpm_integration",
+    "cmpm_ai_ops",
 ]
 
 

@@ -18,5 +18,5 @@ __all__ = [
     "AnthropicProvider",
     "GoogleProvider",
     "OpenRouterProvider",
-    "VercelProvider"
+    "VercelProvider",
 ]

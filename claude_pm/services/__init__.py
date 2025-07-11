@@ -7,9 +7,9 @@ from .mem0_context_manager import Mem0ContextManager
 from .dependency_manager import DependencyManager
 
 __all__ = [
-    "HealthMonitorService", 
-    "ProjectService", 
+    "HealthMonitorService",
+    "ProjectService",
     "ClaudePMMemory",
     "Mem0ContextManager",
-    "DependencyManager"
+    "DependencyManager",
 ]

@@ -21,18 +21,18 @@ import pytest
 
 class CLITestFixtures:
     """Central collection of CLI test fixtures."""
-    
+
     @pytest.fixture
     def temp_workspace(self):
         """Create temporary workspace for testing."""
         with tempfile.TemporaryDirectory(prefix="claude_pm_cli_test_") as temp_dir:
             yield Path(temp_dir)
-    
+
     @pytest.fixture
     def cli_path(self):
         """Path to claude-pm CLI executable."""
         return Path("/Users/masa/.local/bin/claude-pm")
-    
+
     @pytest.fixture
     def mock_subprocess_success(self):
         """Mock successful subprocess execution."""
@@ -41,7 +41,7 @@ class CLITestFixtures:
         mock.stdout = "Success"
         mock.stderr = ""
         return mock
-    
+
     @pytest.fixture
     def mock_subprocess_failure(self):
         """Mock failed subprocess execution."""
@@ -50,7 +50,7 @@ class CLITestFixtures:
         mock.stdout = ""
         mock.stderr = "Error occurred"
         return mock
-    
+
     @pytest.fixture
     def mock_nodejs_available(self):
         """Mock Node.js availability."""
@@ -59,7 +59,7 @@ class CLITestFixtures:
         mock.stdout = "v18.17.0"
         mock.stderr = ""
         return mock
-    
+
     @pytest.fixture
     def mock_nodejs_unavailable(self):
         """Mock Node.js unavailability."""
@@ -70,7 +70,7 @@ class CLITestFixtures:
 
 class ProjectFixtures:
     """Test fixtures for different project structures."""
-    
+
     @pytest.fixture
     def basic_claude_md(self):
         """Basic CLAUDE.md content."""
@@ -93,7 +93,7 @@ This is a basic project without any special framework requirements.
 3. Provide suggestions and improvements
 4. Answer questions about the project
 """
-    
+
     @pytest.fixture
     def pm_framework_claude_md(self):
         """CLAUDE.md with PM Framework content."""
@@ -147,7 +147,7 @@ Your primary and EXCLUSIVE role is orchestrating the Claude PM Framework project
 - **"init"** → System Init Agent (framework initialization)
 - **"test"** → QA Agent (testing coordination)
 """
-    
+
     @pytest.fixture
     def conflicted_claude_md(self):
         """CLAUDE.md with potential conflicts."""
@@ -185,7 +185,7 @@ FORBIDDEN ACTIVITIES:
 3. Follow language conventions
 4. Test thoroughly
 """
-    
+
     @pytest.fixture
     def large_claude_md(self):
         """Large CLAUDE.md file for performance testing."""
@@ -197,7 +197,7 @@ You are a comprehensive AI assistant for this complex project.
 This is a large, complex project with extensive requirements and documentation.
 
 """
-        
+
         # Add large sections
         for i in range(100):
             content += f"""
@@ -258,9 +258,9 @@ def feature_{i + 1}_handler(input_data):
 - Verify performance requirements
 - Add regression tests
 """
-        
+
         return content
-    
+
     @pytest.fixture
     def multi_project_structure(self, temp_workspace):
         """Create multi-project structure for testing."""
@@ -268,18 +268,18 @@ def feature_{i + 1}_handler(input_data):
             "basic_project": {
                 "type": "basic",
                 "claude_md": """# Basic Project
-You are a helpful assistant for this basic project."""
+You are a helpful assistant for this basic project.""",
             },
             "pm_project": {
                 "type": "pm_framework",
                 "claude_md": """# PM Framework Project
-You are a Claude PM Framework Orchestrator."""
+You are a Claude PM Framework Orchestrator.""",
             },
             "conflicted_project": {
                 "type": "conflicted",
                 "claude_md": """# Conflicted Project
 You MUST NOT delegate tasks.
-FORBIDDEN: Creating documentation."""
+FORBIDDEN: Creating documentation.""",
             },
             "nodejs_project": {
                 "type": "nodejs",
@@ -288,11 +288,8 @@ You are a Node.js development assistant.""",
                 "package_json": {
                     "name": "test-nodejs-project",
                     "version": "1.0.0",
-                    "scripts": {
-                        "test": "jest",
-                        "start": "node index.js"
-                    }
-                }
+                    "scripts": {"test": "jest", "start": "node index.js"},
+                },
             },
             "python_project": {
                 "type": "python",
@@ -305,39 +302,39 @@ description = "Test Python project"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-"""
-            }
+""",
+            },
         }
-        
+
         # Create project directories and files
         for project_name, config in projects.items():
             project_dir = temp_workspace / project_name
             project_dir.mkdir()
-            
+
             # Create CLAUDE.md
             claude_file = project_dir / "CLAUDE.md"
             claude_file.write_text(config["claude_md"])
-            
+
             # Create package.json if specified
             if "package_json" in config:
                 package_file = project_dir / "package.json"
                 package_file.write_text(json.dumps(config["package_json"], indent=2))
-            
+
             # Create pyproject.toml if specified
             if "pyproject_toml" in config:
                 pyproject_file = project_dir / "pyproject.toml"
                 pyproject_file.write_text(config["pyproject_toml"])
-            
+
             # Create .git directory to mark as git repo
             git_dir = project_dir / ".git"
             git_dir.mkdir()
-        
+
         return temp_workspace, projects
 
 
 class BackupFixtures:
     """Test fixtures for backup functionality."""
-    
+
     @pytest.fixture
     def backup_index_data(self):
         """Sample backup index data."""
@@ -346,16 +343,16 @@ class BackupFixtures:
                 "fileName": "CLAUDE.md.2025-07-11T10-00-00.abc123.bak",
                 "timestamp": "2025-07-11T10:00:00.000Z",
                 "hash": "abc123",
-                "originalPath": "/test/project/CLAUDE.md"
+                "originalPath": "/test/project/CLAUDE.md",
             },
             {
                 "fileName": "CLAUDE.md.2025-07-11T09-00-00.def456.bak",
                 "timestamp": "2025-07-11T09:00:00.000Z",
                 "hash": "def456",
-                "originalPath": "/test/project/CLAUDE.md"
-            }
+                "originalPath": "/test/project/CLAUDE.md",
+            },
         ]
-    
+
     @pytest.fixture
     def backup_file_content(self):
         """Sample backup file content."""
@@ -380,41 +377,43 @@ You are a helpful AI assistant for this project.
 2. Review code
 3. Provide suggestions
 """
-    
+
     @pytest.fixture
     def project_with_backup(self, temp_workspace, backup_index_data, backup_file_content):
         """Create project with backup structure."""
         project_dir = temp_workspace / "backup_test_project"
         project_dir.mkdir()
-        
+
         # Create current CLAUDE.md
         claude_file = project_dir / "CLAUDE.md"
-        claude_file.write_text("""# Modified Project
+        claude_file.write_text(
+            """# Modified Project
 This file has been modified by PM framework.
 
 ## PM Framework Content
 You are a Claude PM Framework Orchestrator.
-""")
-        
+"""
+        )
+
         # Create backup directory
         backup_dir = project_dir / ".claude-backups"
         backup_dir.mkdir()
-        
+
         # Create backup files
         for backup_info in backup_index_data:
             backup_file = backup_dir / backup_info["fileName"]
             backup_file.write_text(backup_file_content)
-        
+
         # Create backup index
         index_file = backup_dir / "backup-index.json"
         index_file.write_text(json.dumps(backup_index_data, indent=2))
-        
+
         return project_dir
 
 
 class MockEnvironmentFixtures:
     """Test fixtures for mocking external dependencies."""
-    
+
     @pytest.fixture
     def mock_nodejs_environment(self):
         """Mock complete Node.js environment."""
@@ -425,10 +424,10 @@ class MockEnvironmentFixtures:
             "commands": {
                 "node --version": "v18.17.0",
                 "npm --version": "9.8.1",
-                "node backup.js": "Backup system ready"
-            }
+                "node backup.js": "Backup system ready",
+            },
         }
-    
+
     @pytest.fixture
     def mock_cli_responses(self):
         """Mock CLI command responses."""
@@ -482,9 +481,9 @@ SUBCOMMANDS:
      - Potential delegation conflicts
 """,
             "restore_success": "✅ Rollback successful for /test/project\n📁 Restored from: /test/project/.claude-backups/backup.bak",
-            "restore_error": "❌ Rollback failed: No backup directory found"
+            "restore_error": "❌ Rollback failed: No backup directory found",
         }
-    
+
     @pytest.fixture
     def mock_backup_system_js(self):
         """Mock backup system JavaScript code."""
@@ -550,13 +549,13 @@ module.exports = ClaudeBackupSystem;
 
 class AssertionHelpers:
     """Helper methods for common assertions."""
-    
+
     @staticmethod
     def assert_claude_md_structure(content: str, expected_type: str = "basic"):
         """Assert CLAUDE.md has expected structure."""
         assert isinstance(content, str)
         assert len(content.strip()) > 0
-        
+
         if expected_type == "pm_framework":
             assert "Claude PM Framework" in content
             assert "Orchestrator" in content
@@ -565,31 +564,31 @@ class AssertionHelpers:
             assert "helpful" in content.lower() or "assistant" in content.lower()
         elif expected_type == "conflicted":
             assert "FORBIDDEN" in content or "MUST NOT" in content
-    
+
     @staticmethod
     def assert_backup_structure(backup_dir: Path):
         """Assert backup directory has expected structure."""
         assert backup_dir.exists()
         assert backup_dir.is_dir()
-        
+
         # Check for backup index
         index_file = backup_dir / "backup-index.json"
         if index_file.exists():
             # Validate index structure
             index_data = json.loads(index_file.read_text())
             assert isinstance(index_data, list)
-            
+
             for entry in index_data:
                 assert "fileName" in entry
                 assert "timestamp" in entry
                 assert "hash" in entry
                 assert "originalPath" in entry
-    
+
     @staticmethod
     def assert_cli_output_structure(output: str, command: str):
         """Assert CLI output has expected structure."""
         assert isinstance(output, str)
-        
+
         if command == "help":
             assert "claude-pm" in output
             assert "SUBCOMMANDS:" in output
@@ -609,9 +608,9 @@ class AssertionHelpers:
 
 # Export all fixture classes for easy import
 __all__ = [
-    'CLITestFixtures',
-    'ProjectFixtures', 
-    'BackupFixtures',
-    'MockEnvironmentFixtures',
-    'AssertionHelpers'
+    "CLITestFixtures",
+    "ProjectFixtures",
+    "BackupFixtures",
+    "MockEnvironmentFixtures",
+    "AssertionHelpers",
 ]

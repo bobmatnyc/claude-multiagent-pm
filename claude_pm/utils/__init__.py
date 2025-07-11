@@ -13,12 +13,12 @@ from .model_context import (
     prepare_code_review_context,
     get_context_stats,
     health_check,
-    initialize_mcp_context
+    initialize_mcp_context,
 )
 
 __all__ = [
     "CircuitBreaker",
-    "HealthCache", 
+    "HealthCache",
     "CacheEntry",
     "MCPContextBridge",
     "get_mcp_context_bridge",
@@ -26,5 +26,5 @@ __all__ = [
     "prepare_code_review_context",
     "get_context_stats",
     "health_check",
-    "initialize_mcp_context"
+    "initialize_mcp_context",
 ]

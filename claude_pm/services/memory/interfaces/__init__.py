@@ -4,13 +4,7 @@ Memory Service Interfaces
 This module defines the core interfaces and data models for the unified memory service.
 """
 
-from .models import (
-    MemoryCategory,
-    MemoryItem,
-    MemoryQuery, 
-    HealthStatus,
-    BackendHealth
-)
+from .models import MemoryCategory, MemoryItem, MemoryQuery, HealthStatus, BackendHealth
 
 from .backend import MemoryBackend
 
@@ -19,19 +13,19 @@ from .exceptions import (
     BackendError,
     CircuitBreakerOpenError,
     ConfigurationError,
-    MigrationError
+    MigrationError,
 )
 
 __all__ = [
     "MemoryCategory",
-    "MemoryItem", 
+    "MemoryItem",
     "MemoryQuery",
     "HealthStatus",
     "BackendHealth",
     "MemoryBackend",
     "MemoryServiceError",
-    "BackendError", 
+    "BackendError",
     "CircuitBreakerOpenError",
     "ConfigurationError",
-    "MigrationError"
+    "MigrationError",
 ]
