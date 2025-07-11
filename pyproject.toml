@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "claude-multiagent-pm"
-version = "4.1.0"
+version = "0.4.6"
 description = "Claude Multi-Agent Project Management Framework for AI-driven orchestration"
 readme = "README.md"
 license = {text = "MIT"}
@@ -310,7 +310,7 @@ edit_uri = "edit/main/docs/"
 # Development and build tools
 [tool.setuptools_scm]
 write_to = "claude_pm/_version.py"
-fallback_version = "4.1.0"
+fallback_version = "0.4.6"
 
 [tool.wheel]
 universal = false

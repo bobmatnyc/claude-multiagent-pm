@@ -1,6 +1,6 @@
-# Claude Multi-Agent Project Management Framework v4.5.1 - Three-Tier Agent Hierarchy with Cross-Project Management
+# Claude Multi-Agent Project Management Framework v0.4.6 - Three-Tier Agent Hierarchy with Cross-Project Management
 
-[![Version](https://img.shields.io/badge/Version-4.5.1-blue.svg)](https://github.com/masa/claude-multiagent-pm)
+[![Version](https://img.shields.io/badge/Version-0.4.6-blue.svg)](https://github.com/masa/claude-multiagent-pm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Architecture](https://img.shields.io/badge/Architecture-Three--Tier%20Agent%20Hierarchy-brightgreen.svg)](./docs/FRAMEWORK_OVERVIEW.md)
 [![Cross-Project](https://img.shields.io/badge/Management-Cross--Project%20CMCP--init-purple.svg)](./docs/DEPLOYMENT_GUIDE.md)
@@ -9,7 +9,51 @@
 
 > **Advanced three-tier agent hierarchy with cross-project CMCP-init management**
 
-Claude Multi-Agent Project Management Framework delivers sophisticated AI-assisted project management through an advanced three-tier agent hierarchy and cross-project coordination system. The v4.5.1 release features **ISS-0074 session cleanup implementation** with 77% performance improvement (67+ sec → <15 sec), comprehensive security agent implementation, and robust CMCP-init bridge system for seamless multi-project workflow orchestration.
+Claude Multi-Agent Project Management Framework delivers sophisticated AI-assisted project management through an advanced three-tier agent hierarchy and cross-project coordination system. The v0.4.6 release features **ISS-0074 session cleanup implementation** with 77% performance improvement (67+ sec → <15 sec), comprehensive security agent implementation, and robust CMCP-init bridge system for seamless multi-project workflow orchestration.
+
+## 📋 Version Note
+
+**Version Shift: 0.4.6 → 0.4.6**
+
+This framework has been reset from version 0.4.6 to 0.4.6 to establish a cleaner semantic versioning approach as we prepare for broader release. All functionality remains intact with significant improvements in session cleanup, health monitoring, and multi-agent orchestration.
+
+## 🚀 Quick Start
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/masa/claude-multiagent-pm.git
+cd claude-multiagent-pm
+
+# Install dependencies
+pip install -r requirements/production.txt
+
+# Initialize the framework
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup
+
+# Verify installation
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
+```
+
+### Basic Usage
+
+```bash
+# Start framework health check
+./scripts/health-check.sh
+
+# Check available agents
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --show-index
+
+# Initialize in any project directory
+cd /path/to/your/project
+python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup
+
+# Framework shortcut commands
+# push    - Complete quality validation and version control
+# deploy  - Local deployment operations
+# publish - Package publication pipeline
+```
 
 ## 🚀 Key Features
 
@@ -192,7 +236,7 @@ Agent Precedence (Highest to Lowest)
 ```
 claude-pm/
 ├── .git/                           # Dedicated PM git repository
-├── README.md                      # This file (updated for v4.5.1)
+├── README.md                      # This file (updated for v0.4.6)
 ├── claude_pm/                     # Core framework implementation
 │   ├── agents/                    # Agent hierarchy system
 │   │   ├── hierarchical_agent_loader.py # Three-tier agent loading
@@ -250,7 +294,7 @@ claude-pm/
 - **Continuous Learning**: Pattern recognition and success analysis
 - **Cross-Project Memory**: Shared knowledge across 12+ managed projects
 
-## 📦 Installation & Quick Start
+## 📦 Prerequisites & Advanced Installation
 
 ### Prerequisites
 
@@ -263,7 +307,7 @@ aitrackdown --version
 atd --version  # alias command
 ```
 
-### Framework Installation
+### Advanced Installation Options
 
 #### Option 1: Framework Development (Recommended)
 ```bash
@@ -506,13 +550,13 @@ Each layer can override the previous, enabling flexible customization.
 
 ### Recent Developments (July 2025)
 
-#### v4.5.1 - Comprehensive Framework Cleanup and Optimization
+#### v0.4.6 - Comprehensive Framework Cleanup and Optimization
 - **Space Savings**: 139MB+ recovered through systematic cleanup (185MB → 46MB total)
 - **Framework Integrity**: Complete validation of core systems post-cleanup
 - **Dependency Cleanup**: Removed obsolete node_modules and coverage reports
-- **Structure Compliance**: Achieved canonical v4.5.0 directory structure
+- **Structure Compliance**: Achieved canonical v0.4.6 directory structure
 
-#### v4.5.0 - Security Agent Implementation
+#### v0.4.5 - Security Agent Implementation
 - **Security Agent**: Comprehensive security agent with pre-push veto authority
 - **Multi-Tier Security**: Medium security default with automatic high security escalation
 - **Vulnerability Detection**: Comprehensive patterns for secrets, code vulnerabilities, and configuration issues
@@ -550,7 +594,7 @@ Each layer can override the previous, enabling flexible customization.
 ---
 
 **Repository Created**: 2025-07-05  
-**Framework Version**: v4.5.1 (Three-Tier Agent Hierarchy with Cross-Project Management)  
+**Framework Version**: v0.4.6 (Three-Tier Agent Hierarchy with Cross-Project Management)  
 **Architecture Status**: ✅ Complete - Three-Tier Agent Hierarchy Operational  
 **Cross-Project System**: ✅ CMCP-init Bridge with Universal Framework Access  
 **Agent Hierarchy**: ✅ Project → User → System Precedence with Dynamic Loading  

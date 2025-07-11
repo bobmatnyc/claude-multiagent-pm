@@ -62,7 +62,7 @@ class CMPMQAService:
         
         # Service metadata
         self.service_version = "1.0.0"
-        self.framework_version = "4.1.0"
+        self.framework_version = "0.4.6"
         self.start_time = datetime.now()
         
         # Setup routes
