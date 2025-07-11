@@ -21,6 +21,7 @@ import json
 import yaml
 import subprocess
 import time
+import aiohttp
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 
@@ -32,6 +33,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from ..core.base_service import BaseService
 from ..core.config import Config
 from ..core.logging_config import setup_logging
+from ..core.connection_manager import get_connection_manager
 
 
 class SystemInitAgent(BaseService):
@@ -887,15 +889,20 @@ Contents may be cleared during framework updates.
         return dependencies
     
     async def _check_mem0ai_service(self) -> Dict[str, str]:
-        """Check mem0AI service availability."""
+        """Check mem0AI service availability using connection manager."""
         try:
-            import aiohttp
-            async with aiohttp.ClientSession() as session:
-                async with session.get("http://localhost:8002/health", timeout=5) as response:
-                    if response.status == 200:
-                        return {"status": "✅ ONLINE", "version": "active", "details": "Service responding"}
-                    else:
-                        return {"status": "⚠️ DEGRADED", "version": "unknown", "details": f"HTTP {response.status}"}
+            # Use connection manager for proper session lifecycle
+            conn_manager = await get_connection_manager()
+            session = await conn_manager.get_session(
+                service_name="system_init_mem0ai_check",
+                timeout=aiohttp.ClientTimeout(total=5.0)
+            )
+            
+            async with session.get("http://localhost:8002/health") as response:
+                if response.status == 200:
+                    return {"status": "✅ ONLINE", "version": "active", "details": "Service responding"}
+                else:
+                    return {"status": "⚠️ DEGRADED", "version": "unknown", "details": f"HTTP {response.status}"}
         except Exception as e:
             return {"status": "❌ OFFLINE", "version": "unknown", "details": str(e)}
     

@@ -584,10 +584,10 @@ class FallbackMemorySystemTester:
             }),
             ("tinydb", TinyDBBackend, {
                 "db_path": os.path.join(self.temp_dir, "perf_tinydb.json")
-            }),
-            # ("memory", InMemoryBackend, {  # InMemory backend removed
-                "max_memory_size": 1000
             })
+            # ("memory", InMemoryBackend, {  # InMemory backend removed
+            #     "max_memory_size": 1000
+            # })
         ]
         
         performance_results = {}

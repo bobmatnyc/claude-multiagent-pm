@@ -150,7 +150,7 @@ class MemoryTriggerOrchestrator:
                 "min_priority": TriggerPriority.MEDIUM,
                 "max_queue_size": 200,
                 "batch_size": 20,
-                "timeout_seconds": 60
+                "timeout_seconds": 15  # Reduced from 60 to 15 seconds
             },
             TriggerType.ERROR_RESOLUTION: {
                 "enabled": True,
@@ -171,14 +171,14 @@ class MemoryTriggerOrchestrator:
                 "min_priority": TriggerPriority.LOW,
                 "max_queue_size": 500,
                 "batch_size": 50,
-                "timeout_seconds": 120
+                "timeout_seconds": 30  # Reduced from 120 to 30 seconds
             },
             TriggerType.PATTERN_DETECTION: {
                 "enabled": True,
                 "min_priority": TriggerPriority.MEDIUM,
                 "max_queue_size": 100,
                 "batch_size": 10,
-                "timeout_seconds": 45
+                "timeout_seconds": 15  # Reduced from 45 to 15 seconds
             },
             TriggerType.DECISION_POINT: {
                 "enabled": True,

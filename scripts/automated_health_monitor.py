@@ -41,6 +41,10 @@ from contextlib import asynccontextmanager
 import aiohttp
 from rich.console import Console
 from rich.table import Table
+
+# Add Claude PM Framework imports for connection management
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from claude_pm.core.connection_manager import get_connection_manager
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.panel import Panel
 from rich.text import Text
@@ -266,17 +270,21 @@ class ClaudePMHealthMonitor:
             return {"listening": False, "error": str(e)}
     
     async def http_check(self, url: str, timeout: float = 5.0) -> Dict[str, Union[bool, int, str, None]]:
-        """Perform HTTP health check."""
+        """Perform HTTP health check using connection manager to prevent leaks."""
         try:
-            async with aiohttp.ClientSession(
+            # Use connection manager for proper session lifecycle
+            conn_manager = await get_connection_manager()
+            session = await conn_manager.get_session(
+                service_name="health_monitor",
                 timeout=aiohttp.ClientTimeout(total=timeout)
-            ) as session:
-                async with session.get(url) as response:
-                    return {
-                        "success": 200 <= response.status < 400,
-                        "status_code": response.status,
-                        "error": None
-                    }
+            )
+            
+            async with session.get(url) as response:
+                return {
+                    "success": 200 <= response.status < 400,
+                    "status_code": response.status,
+                    "error": None
+                }
         except asyncio.TimeoutError:
             return {"success": False, "error": "Request timeout"}
         except Exception as e:

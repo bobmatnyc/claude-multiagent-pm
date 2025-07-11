@@ -41,7 +41,8 @@ class AITrackdownHealthCollector(HealthCollector):
         super().__init__("ai_trackdown_tools", timeout_seconds)
         self.framework_root = framework_root or Path("/Users/masa/Projects/claude-multiagent-pm")
         # Use global CLI installation instead of local bin
-        self.cli_path = "aitrackdown"  # Use global command
+        self.cli_path = "aitrackdown"  # Use global command (string for subprocess)
+        self.cli_path_obj = None  # No path object for global command
         self.tasks_path = self.framework_root / "tasks"
         
     async def collect_health(self) -> List[ServiceHealthReport]:
@@ -664,6 +665,6 @@ class AITrackdownHealthCollector(HealthCollector):
             "framework_root": str(self.framework_root),
             "cli_path": str(self.cli_path),
             "tasks_path": str(self.tasks_path),
-            "cli_exists": self.cli_path.exists(),
+            "cli_exists": self.cli_path_obj.exists() if self.cli_path_obj else False,
             "tasks_dir_exists": self.tasks_path.exists()
         }

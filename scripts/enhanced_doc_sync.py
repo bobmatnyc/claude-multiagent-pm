@@ -863,7 +863,7 @@ Generated: {stats.last_update}
 - **In Progress**: {stats.in_progress_tickets}
 - **Planned**: {stats.planned_tickets}
 - **Blocked**: {stats.blocked_tickets}
-- **Story Points**: {stats.completed_story_points}/{stats.total_story_points} ({stats.completed_story_points/stats.total_story_points*100:.1f}%)
+- **Story Points**: {stats.completed_story_points}/{stats.total_story_points} ({(stats.completed_story_points/stats.total_story_points*100) if stats.total_story_points > 0 else 0:.1f}%)
 - **Phase 1 Completion**: {stats.phase_1_completion:.1f}%
 
 ## Validation Results

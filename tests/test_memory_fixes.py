@@ -440,10 +440,10 @@ class MemoryBackendTester:
             }),
             ("TinyDB_REMOVED", TinyDB_REMOVED_Backend, {
                 "db_path": os.path.join(self.temp_dir, "perf_tinydb.json")
-            }),
-            # ("InMemory", InMemoryBackend, {  # InMemory backend removed
-                "max_memory_size": 1000
             })
+            # ("InMemory", InMemoryBackend, {  # InMemory backend removed
+            #     "max_memory_size": 1000
+            # })
         ]
         
         performance_results = {}
@@ -574,11 +574,11 @@ class MemoryBackendTester:
                 analysis.append("❌ TinyDB_REMOVED backend has issues")
         
         # if "InMemory Backend" in self.test_results:  # InMemory backend removed
-            # inmemory_result = self.test_results["InMemory Backend"]  # InMemory backend removed
-            if inmemory_result["status"] == "PASSED":
-                # analysis.append("✅ InMemory backend provides excellent performance for testing")  # InMemory backend removed
-            else:
-                # analysis.append("❌ InMemory backend has issues")  # InMemory backend removed
+        #     inmemory_result = self.test_results["InMemory Backend"]  # InMemory backend removed
+        #     if inmemory_result["status"] == "PASSED":
+        #         analysis.append("✅ InMemory backend provides excellent performance for testing")  # InMemory backend removed
+        #     else:
+        #         analysis.append("❌ InMemory backend has issues")  # InMemory backend removed
         
         if "Fallback System" in self.test_results:
             fallback_result = self.test_results["Fallback System"]

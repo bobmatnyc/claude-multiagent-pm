@@ -38,7 +38,7 @@ class HealthDashboardOrchestrator:
         self,
         cache_ttl_seconds: float = 60.0,
         max_parallel_collectors: int = 8,
-        global_timeout_seconds: float = 30.0,
+        global_timeout_seconds: float = 15.0,  # Reduced from 30 to 15 seconds
         version: str = "3.0.0"
     ):
         """
@@ -73,17 +73,17 @@ class HealthDashboardOrchestrator:
     def _initialize_default_collectors(self) -> None:
         """Initialize default health collectors."""
         # Legacy health monitor adapter
-        legacy_adapter = HealthMonitorServiceAdapter(timeout_seconds=10.0)
+        legacy_adapter = HealthMonitorServiceAdapter(timeout_seconds=5.0)  # Reduced from 10 to 5 seconds
         self.add_collector(legacy_adapter)
         
         # Framework services collector
         from ..collectors.framework_services import FrameworkServicesCollector
-        framework_collector = FrameworkServicesCollector(timeout_seconds=10.0)
+        framework_collector = FrameworkServicesCollector(timeout_seconds=5.0)  # Reduced from 10 to 5 seconds
         self.add_collector(framework_collector)
         
         # AI-trackdown tools collector
         from ..collectors.ai_trackdown_collector import AITrackdownHealthCollector
-        ai_trackdown_collector = AITrackdownHealthCollector(timeout_seconds=10.0)
+        ai_trackdown_collector = AITrackdownHealthCollector(timeout_seconds=5.0)  # Reduced from 10 to 5 seconds
         self.add_collector(ai_trackdown_collector)
     
     def add_collector(self, collector: HealthCollector) -> None:

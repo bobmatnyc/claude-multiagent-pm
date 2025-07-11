@@ -172,52 +172,53 @@ async def test_sqlite_isolated():
             pass
 
 async def test_inmemory_isolated():
-    # """Test InMemory backend in isolation."""  # InMemory backend removed
-    # logger.info("Testing InMemory backend isolation...")  # InMemory backend removed
+    """Test InMemory backend in isolation - DISABLED: InMemory backend removed."""
+    logger.info("Skipping InMemory backend test - backend removed")
+    pass
     
-    try:
-        # backend = InMemoryBackend({  # InMemory backend removed
-            "max_memory_size": 100,
-            "enable_expiration": False
-        })
-        
-        # Check initialization
-        success = await backend.initialize()
-        logger.info(f"Backend initialization: {success}")
-        
-        # Check health
-        health = await backend.health_check()
-        logger.info(f"Backend health check: {health}")
-        
-        if success and health:
-            # Test basic operations
-            memory_id = await backend.add_memory(
-                "test_project",
-                "Test content",
-                MemoryCategory.PROJECT,
-                ["test"],
-                {"test": True}
-            )
-            logger.info(f"✅ Memory added: {memory_id}")
-            
-            memory = await backend.get_memory("test_project", memory_id)
-            logger.info(f"✅ Memory retrieved: {memory.content if memory else 'None'}")
-            
-            # Test search
-            query = MemoryQuery(query="content", limit=10)
-            results = await backend.search_memories("test_project", query)
-            logger.info(f"✅ Search results: {len(results)}")
-            
-            # Test statistics
-            stats = await backend.get_memory_stats("test_project")
-            logger.info(f"✅ Statistics: {stats}")
-        
-        await backend.cleanup()
-        
-    except Exception as e:
-        # logger.error(f"❌ InMemory test failed: {e}")  # InMemory backend removed
-        import traceback
-        traceback.print_exc()
+    # try:
+    #     backend = InMemoryBackend({
+    #         "max_memory_size": 100,
+    #         "enable_expiration": False
+    #     })
+    #     
+    #     # Check initialization
+    #     success = await backend.initialize()
+    #     logger.info(f"Backend initialization: {success}")
+    #     
+    #     # Check health
+    #     health = await backend.health_check()
+    #     logger.info(f"Backend health check: {health}")
+    #     
+    #     if success and health:
+    #         # Test basic operations
+    #         memory_id = await backend.add_memory(
+    #             "test_project",
+    #             "Test content",
+    #             MemoryCategory.PROJECT,
+    #             ["test"],
+    #             {"test": True}
+    #         )
+    #         logger.info(f"✅ Memory added: {memory_id}")
+    #         
+    #         memory = await backend.get_memory("test_project", memory_id)
+    #         logger.info(f"✅ Memory retrieved: {memory.content if memory else 'None'}")
+    #         
+    #         # Test search
+    #         query = MemoryQuery(query="content", limit=10)
+    #         results = await backend.search_memories("test_project", query)
+    #         logger.info(f"✅ Search results: {len(results)}")
+    #         
+    #         # Test statistics
+    #         stats = await backend.get_memory_stats("test_project")
+    #         logger.info(f"✅ Statistics: {stats}")
+    #     
+    #     await backend.cleanup()
+    #     
+    # except Exception as e:
+    #     logger.error(f"❌ InMemory test failed: {e}")
+    #     import traceback
+    #     traceback.print_exc()
 
 async def main():
     """Run focused tests."""
