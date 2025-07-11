@@ -1,6 +1,6 @@
 {
   "name": "@bobmatnyc/claude-multiagent-pm",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Claude Multi-Agent PM Framework - Universal deployment package for AI-driven project management",
   "main": "claude_pm/cli.py",
   "bin": {
@@ -64,6 +64,7 @@
     "deploy:dry-run": "node install/deploy.js --dry-run --verbose",
     "validate-deployment": "node install/validate-deployment.js",
     "health-check": "./trackdown/scripts/health-check.sh",
+    "fix-npm-deployment": "node scripts/fix_npm_deployment.js",
     "monitor:health": "node scripts/automated-health-monitor.js monitor",
     "monitor:once": "node scripts/automated-health-monitor.js once",
     "monitor:status": "node scripts/automated-health-monitor.js status",

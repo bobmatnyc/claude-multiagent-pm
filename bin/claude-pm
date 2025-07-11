@@ -55,7 +55,27 @@ function resolveVersion() {
         }
     }
     
-    // Strategy 3: Use npm to resolve package version (if available)
+    // Strategy 3: Check for NPM package in node_modules (new prioritized strategy)
+    try {
+        const nodeModulesPaths = [
+            path.join(process.cwd(), 'node_modules', '@bobmatnyc', 'claude-multiagent-pm', 'package.json'),
+            path.join(process.cwd(), '..', 'node_modules', '@bobmatnyc', 'claude-multiagent-pm', 'package.json'),
+            path.join(require.resolve('@bobmatnyc/claude-multiagent-pm/package.json'))
+        ];
+        
+        for (const npmPackagePath of nodeModulesPaths) {
+            if (fs.existsSync(npmPackagePath)) {
+                const pkg = JSON.parse(fs.readFileSync(npmPackagePath, 'utf8'));
+                if (pkg.name === '@bobmatnyc/claude-multiagent-pm' && pkg.version) {
+                    return pkg.version;
+                }
+            }
+        }
+    } catch (e) {
+        // Continue to fallback
+    }
+    
+    // Strategy 4: Use npm to resolve package version (if available)
     try {
         const { execSync } = require('child_process');
         const result = execSync('npm list @bobmatnyc/claude-multiagent-pm --depth=0 --json', { 
@@ -159,34 +179,34 @@ class DeploymentDetector {
      * Perform deployment detection logic
      */
     _performDetection() {
-        // Strategy 1: Deployed instance (from install/deploy.js) - Check first to prioritize over local source
-        const deployedResult = this._detectDeployedInstance();
-        if (deployedResult.found) {
-            return this._buildConfig('deployed', deployedResult);
+        // Strategy 1: NPM local installation (node_modules) - Prioritize over deployed instances
+        const npmLocalResult = this._detectNpmLocal();
+        if (npmLocalResult.found) {
+            return this._buildConfig('npm_local', npmLocalResult);
         }
 
-        // Strategy 2: Local source development (bin/claude-pm in source repo)
-        const localSourceResult = this._detectLocalSource();
-        if (localSourceResult.found) {
-            return this._buildConfig('local_source', localSourceResult);
-        }
-
-        // Strategy 3: NPM global installation
+        // Strategy 2: NPM global installation
         const npmGlobalResult = this._detectNpmGlobal();
         if (npmGlobalResult.found) {
             return this._buildConfig('npm_global', npmGlobalResult);
         }
 
-        // Strategy 4: NPX execution
+        // Strategy 3: NPX execution
         const npxResult = this._detectNpxExecution();
         if (npxResult.found) {
             return this._buildConfig('npx', npxResult);
         }
 
-        // Strategy 5: NPM local installation (node_modules)
-        const npmLocalResult = this._detectNpmLocal();
-        if (npmLocalResult.found) {
-            return this._buildConfig('npm_local', npmLocalResult);
+        // Strategy 4: Local source development (bin/claude-pm in source repo)
+        const localSourceResult = this._detectLocalSource();
+        if (localSourceResult.found) {
+            return this._buildConfig('local_source', localSourceResult);
+        }
+
+        // Strategy 5: Deployed instance (from install/deploy.js) - Lower priority than NPM
+        const deployedResult = this._detectDeployedInstance();
+        if (deployedResult.found) {
+            return this._buildConfig('deployed', deployedResult);
         }
 
         // Strategy 6: Environment-based detection
@@ -748,25 +768,24 @@ function displaySystemInfo() {
     console.log(`📅 System Status as of ${today}`);
     console.log('');
     
-    // Framework Version
+    // Framework Version - Show both package and deployed if different
     console.log(`📦 Claude PM Framework Version: v${CLAUDE_PM_VERSION}`);
     
-    // CLI Version display removed to clean up startup output
-    // try {
-    //     if (deploymentConfig && deploymentConfig.config && deploymentConfig.config.found) {
-    //         const config = deploymentConfig.config;
-    //         
-    //         if (config.deploymentType === 'deployed' && config.metadata?.deployedConfig) {
-    //             console.log(`🔧 CLI Version (Deployment Config): v${config.metadata.deployedConfig.version}`);
-    //         } else {
-    //             console.log(`🔧 CLI Version (Deployment Config): v${CLAUDE_PM_VERSION}`);
-    //         }
-    //     } else {
-    //         console.log(`🔧 CLI Version (Deployment Config): v${CLAUDE_PM_VERSION}`);
-    //     }
-    // } catch (error) {
-    //     console.log(`🔧 CLI Version (Deployment Config): v${CLAUDE_PM_VERSION}`);
-    // }
+    // Show deployment config version if different from package version
+    try {
+        if (deploymentConfig && deploymentConfig.config && deploymentConfig.config.found) {
+            const config = deploymentConfig.config;
+            
+            if (config.deploymentType === 'deployed' && config.metadata?.deployedConfig) {
+                const deployedVersion = config.metadata.deployedConfig.version;
+                if (deployedVersion !== CLAUDE_PM_VERSION) {
+                    console.log(`⚙️  Deployed Config Version: v${deployedVersion} (will be updated)`);
+                }
+            }
+        }
+    } catch (error) {
+        // Silent fallback
+    }
     
     // Install Path
     if (deploymentConfig && deploymentConfig.config && deploymentConfig.config.found) {

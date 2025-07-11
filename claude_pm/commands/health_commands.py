@@ -25,7 +25,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from ..services.health_dashboard import HealthDashboardOrchestrator
 from ..services.memory_service import MemoryService
 from ..core.config import Config
-from ..agents.enhanced_qa_agent import EnhancedQAAgent
+# from ..agents.enhanced_qa_agent import EnhancedQAAgent  # Module not yet implemented
 from .utils.command_utils import CMPMCommandBase, handle_command_error, run_async_command
 from .utils.formatters import format_health_status, format_json_output
 
@@ -65,6 +65,26 @@ class CMPMHealthMonitor(CMPMCommandBase):
         except Exception as e:
             logger.error(f"Framework health check failed: {e}")
             return {"status": "error", "error": str(e), "last_updated": datetime.now().isoformat()}
+
+    def get_aitrackdown_version(self) -> str:
+        """Get ai-trackdown-tools version from npm."""
+        try:
+            result = subprocess.run(
+                ["npm", "list", "-g", "@bobmatnyc/ai-trackdown-tools", "--depth=0", "--json"],
+                capture_output=True,
+                text=True,
+                timeout=3,
+            )
+            if result.returncode == 0:
+                import json
+                data = json.loads(result.stdout)
+                # Navigate the npm list structure
+                deps = data.get("dependencies", {})
+                package_info = deps.get("@bobmatnyc/ai-trackdown-tools", {})
+                return package_info.get("version", "unknown")
+        except Exception:
+            pass
+        return "unknown"
 
     async def get_aitrackdown_health(self) -> Dict[str, Any]:
         """Get ai-trackdown-tools integration health status via orchestrator."""
@@ -121,7 +141,7 @@ class CMPMHealthMonitor(CMPMCommandBase):
                 return {
                     "status": status,
                     "service": "ai-trackdown-tools",
-                    "version": "1.0.0+build.1",
+                    "version": self.get_aitrackdown_version(),
                     "cli_responsive": True,
                     "total_items": total_items,
                     "reports_count": len(ai_trackdown_reports),
@@ -141,7 +161,7 @@ class CMPMHealthMonitor(CMPMCommandBase):
                     return {
                         "status": "operational",
                         "service": "ai-trackdown-tools",
-                        "version": "1.0.0+build.1",
+                        "version": self.get_aitrackdown_version(),
                         "cli_responsive": True,
                         "fallback_method": "direct_cli",
                         "last_check": datetime.now().isoformat(),
@@ -291,27 +311,13 @@ class CMPMHealthMonitor(CMPMCommandBase):
 
     async def get_qa_system_health(self) -> Dict[str, Any]:
         """Get Enhanced QA Agent system health status."""
-        try:
-            qa_agent = EnhancedQAAgent()
-            qa_health = await qa_agent.get_qa_health_status()
-
-            return {
-                "status": qa_health.get("status", "unknown"),
-                "service": "enhanced_qa_agent",
-                "health_score": qa_health.get("health_score", 0),
-                "browser_extension": qa_health.get("extension_health", {}).get("status", "unknown"),
-                "memory_integration": qa_health.get("memory_health", {}).get("status", "unknown"),
-                "agent_version": qa_health.get("agent_version", "unknown"),
-                "last_check": datetime.now().isoformat(),
-            }
-
-        except Exception as e:
-            return {
-                "status": "error",
-                "service": "enhanced_qa_agent",
-                "error": str(e),
-                "last_check": datetime.now().isoformat(),
-            }
+        # QA Agent module not yet implemented
+        return {
+            "status": "not_implemented",
+            "service": "enhanced_qa_agent",
+            "message": "QA Agent module not yet implemented",
+            "last_check": datetime.now().isoformat(),
+        }
 
     def calculate_system_reliability_score(self, health_data: Dict[str, Any]) -> int:
         """Calculate system reliability score (0-100)."""

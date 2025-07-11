@@ -306,6 +306,110 @@ class PostInstallSetup {
     }
 
     /**
+     * Deploy framework CLAUDE.md to working directory if needed
+     */
+    async deployFrameworkToWorkingDirectory() {
+        try {
+            const workingDir = process.cwd();
+            const workingClaudemd = path.join(workingDir, 'CLAUDE.md');
+            
+            // Check if working directory already has CLAUDE.md
+            if (fsSync.existsSync(workingClaudemd)) {
+                const content = fsSync.readFileSync(workingClaudemd, 'utf8');
+                // If it's a user/project file, don't overwrite
+                if (!content.includes('Claude PM Framework Configuration - Deployment') && 
+                    !content.includes('AI ASSISTANT ROLE DESIGNATION')) {
+                    this.log('Working directory has custom CLAUDE.md, skipping framework deployment');
+                    return;
+                }
+            }
+            
+            // Deploy framework CLAUDE.md with variable substitution
+            const frameworkTemplate = path.join(this.packageRoot, 'framework', 'CLAUDE.md');
+            if (fsSync.existsSync(frameworkTemplate)) {
+                let templateContent = fsSync.readFileSync(frameworkTemplate, 'utf8');
+                
+                const packageJson = require('../package.json');
+                const deploymentDate = new Date().toISOString();
+                const deploymentId = Date.now();
+                
+                // Replace template variables
+                const replacements = {
+                    '{{CLAUDE_MD_VERSION}}': `${packageJson.version}-001`,
+                    '{{FRAMEWORK_VERSION}}': packageJson.version,
+                    '{{DEPLOYMENT_DATE}}': deploymentDate,
+                    '{{LAST_UPDATED}}': deploymentDate,
+                    '{{DEPLOYMENT_DIR}}': workingDir,
+                    '{{PLATFORM}}': this.platform,
+                    '{{PYTHON_CMD}}': 'python3',
+                    '{{AI_TRACKDOWN_PATH}}': 'Global installation available',
+                    '{{DEPLOYMENT_ID}}': deploymentId,
+                    '{{PLATFORM_NOTES}}': this.getPlatformNotes()
+                };
+                
+                for (const [placeholder, value] of Object.entries(replacements)) {
+                    const escapedPlaceholder = placeholder.replace(/[{}]/g, '\\$&');
+                    templateContent = templateContent.replace(new RegExp(escapedPlaceholder, 'g'), value);
+                }
+                
+                fsSync.writeFileSync(workingClaudemd, templateContent);
+                this.log(`Framework CLAUDE.md deployed to: ${workingClaudemd}`);
+            }
+            
+        } catch (error) {
+            this.log(`Failed to deploy framework CLAUDE.md: ${error.message}`, 'warn');
+        }
+    }
+    
+    /**
+     * Get platform-specific notes
+     */
+    getPlatformNotes() {
+        switch (this.platform) {
+            case 'darwin':
+                return '**macOS-specific:**\n- Use `.sh` files for scripts\n- CLI wrappers: `bin/aitrackdown` and `bin/atd`\n- Health check: `scripts/health-check.sh`\n- May require Xcode Command Line Tools';
+            case 'linux':
+                return '**Linux-specific:**\n- Use `.sh` files for scripts\n- CLI wrappers: `bin/aitrackdown` and `bin/atd`\n- Health check: `scripts/health-check.sh`\n- Ensure proper file permissions';
+            case 'win32':
+                return '**Windows-specific:**\n- Use `.bat` files for scripts\n- CLI wrappers: `bin/aitrackdown.bat` and `bin/atd.bat`\n- Health check: `scripts/health-check.bat`\n- Path separators: Use backslashes in Windows paths';
+            default:
+                return `**Platform**: ${this.platform}\n- Use appropriate script extensions for your platform\n- Ensure proper file permissions on CLI wrappers`;
+        }
+    }
+    
+    /**
+     * Update deployed instance version if exists
+     */
+    async updateDeployedInstanceVersion() {
+        try {
+            const deployedConfigPaths = [
+                path.join(os.homedir(), '.local', '.claude-pm', 'config.json'),
+                path.join(os.homedir(), '.claude-pm', 'config.json')
+            ];
+            
+            const packageJson = require('../package.json');
+            
+            for (const configPath of deployedConfigPaths) {
+                if (fsSync.existsSync(configPath)) {
+                    const config = JSON.parse(fsSync.readFileSync(configPath, 'utf8'));
+                    
+                    // Update to current package version
+                    config.version = packageJson.version;
+                    config.lastNpmUpdate = new Date().toISOString();
+                    config.npmPackageVersion = packageJson.version;
+                    
+                    fsSync.writeFileSync(configPath, JSON.stringify(config, null, 2));
+                    this.log(`Updated deployed instance version to: ${packageJson.version}`);
+                    break; // Only update the first found config
+                }
+            }
+            
+        } catch (error) {
+            this.log(`Failed to update deployed instance version: ${error.message}`, 'warn');
+        }
+    }
+
+    /**
      * Main post-install process
      */
     async run() {
@@ -318,6 +422,12 @@ class PostInstallSetup {
             await this.prepareSchemas();
             await this.platformSetup();
             await this.validateInstallation();
+            
+            // NEW: Deploy framework CLAUDE.md to working directory
+            await this.deployFrameworkToWorkingDirectory();
+            
+            // NEW: Update deployed instance version if exists
+            await this.updateDeployedInstanceVersion();
             
             this.log('Post-install setup completed successfully');
             this.showInstructions();

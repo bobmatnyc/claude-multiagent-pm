@@ -22,7 +22,7 @@ from rich.text import Text
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from ..core.config import Config
-from ..agents.enhanced_qa_agent import EnhancedQAAgent
+# from ..agents.enhanced_qa_agent import EnhancedQAAgent  # Module not yet implemented
 from .utils.command_utils import CMPMCommandBase, handle_command_error, run_async_command
 from .utils.formatters import format_json_output, create_status_panel
 
@@ -37,11 +37,10 @@ class CMPMQAMonitor(CMPMCommandBase):
         super().__init__()
         self.qa_agent = None
 
-    async def get_qa_agent(self) -> EnhancedQAAgent:
+    async def get_qa_agent(self):
         """Get or create QA agent instance."""
-        if self.qa_agent is None:
-            self.qa_agent = EnhancedQAAgent(self.config)
-        return self.qa_agent
+        # QA Agent module not yet implemented
+        raise NotImplementedError("Enhanced QA Agent module not yet implemented")
 
     async def execute_qa_tests(
         self,
