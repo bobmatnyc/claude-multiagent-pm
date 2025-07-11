@@ -237,6 +237,123 @@ def monitoring():
 
 
 @cli.command()
+@click.option('--target-dir', type=click.Path(), help='Target directory (defaults to parent of current working directory)')
+@click.option('--backup/--no-backup', default=True, help='Create backup of existing CLAUDE.md file')
+@click.option('--force', is_flag=True, help='Force overwrite without confirmation')
+@click.pass_context
+def setup(ctx, target_dir, backup, force):
+    """🚀 Setup CLAUDE.md template in parent directory with deployment-aware configuration."""
+    async def run():
+        from .commands.template_commands import deploy_claude_md
+        
+        # Create a mock Click context for the template command
+        import click
+        template_ctx = click.Context(deploy_claude_md)
+        template_ctx.params = {
+            'target_dir': target_dir,
+            'backup': backup,
+            'force': force
+        }
+        
+        try:
+            # Import the deploy_claude_md function directly
+            from .commands.template_commands import deploy_claude_md
+            
+            # Run the deployment directly
+            import platform
+            import shutil
+            from datetime import datetime
+            from .services.template_deployment_integration import TemplateDeploymentIntegration
+            
+            # Initialize template deployment integration
+            integration = TemplateDeploymentIntegration()
+            await integration._initialize()
+            
+            # Get deployment config
+            deployment_config = await integration.get_deployment_aware_template_config()
+            
+            # Determine target directory
+            if target_dir:
+                target_directory = Path(target_dir)
+            else:
+                target_directory = Path.cwd().parent
+            
+            # Ensure target directory exists
+            target_directory.mkdir(parents=True, exist_ok=True)
+            
+            # Check for framework CLAUDE.md template
+            # Use explicit framework path to avoid deployment detection issues
+            framework_path = Path(__file__).parent.parent  # Go up to project root
+            framework_template_path = framework_path / "framework" / "CLAUDE.md"
+            
+            if not framework_template_path.exists():
+                console.print(f"❌ Framework CLAUDE.md template not found at: {framework_template_path}")
+                return
+            
+            # Read template content
+            template_content = framework_template_path.read_text()
+            
+            # Set up template variables for handlebars processing
+            template_variables = {
+                "FRAMEWORK_VERSION": "4.5.1",
+                "DEPLOYMENT_DATE": datetime.now().isoformat(),
+                "PLATFORM": platform.system().lower(),
+                "PYTHON_CMD": "python3",
+                "DEPLOYMENT_ID": str(int(datetime.now().timestamp() * 1000)),
+                "DEPLOYMENT_DIR": str(framework_path),
+                "WORKING_DIR": str(Path.cwd()),
+                "TARGET_DIR": str(target_directory),
+                "AI_TRACKDOWN_PATH": "/Users/masa/.nvm/versions/node/v20.19.0/lib/node_modules/@bobmatnyc/ai-trackdown-tools/dist/index.js",
+                "PLATFORM_NOTES": "**macOS-specific:**\n- Use `.sh` files for scripts\n- CLI wrappers: `bin/aitrackdown` and `bin/atd`\n- Health check: `scripts/health-check.sh`\n- May require Xcode Command Line Tools",
+                "LAST_UPDATED": datetime.now().isoformat()
+            }
+            
+            console.print(f"🔧 [bold]Setting up CLAUDE.md Template[/bold]")
+            console.print(f"   • Framework Path: {framework_path}")
+            console.print(f"   • Template Path: {framework_template_path}")
+            console.print(f"   • Target Directory: {target_directory}")
+            
+            # Process handlebars variables
+            processed_content = template_content
+            for key, value in template_variables.items():
+                placeholder = f"{{{{{key}}}}}"
+                processed_content = processed_content.replace(placeholder, str(value))
+            
+            # Handle target file
+            target_file = target_directory / "CLAUDE.md"
+            
+            # Create backup if file exists and backup is enabled
+            if target_file.exists() and backup:
+                backup_filename = f"CLAUDE.md.backup.{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                backup_path = target_directory / backup_filename
+                shutil.copy2(target_file, backup_path)
+                console.print(f"   • Created backup: {backup_path}")
+            
+            # Check if file exists and get confirmation
+            if target_file.exists() and not force:
+                from rich.prompt import Confirm
+                if not Confirm.ask(f"CLAUDE.md already exists at {target_file}. Overwrite?"):
+                    console.print("❌ Setup cancelled")
+                    return
+            
+            # Write processed content
+            target_file.write_text(processed_content)
+            
+            console.print(f"✅ [bold green]CLAUDE.md setup completed![/bold green]")
+            console.print(f"   • Target: {target_file}")
+            console.print(f"   • Size: {len(processed_content)} characters")
+            console.print(f"   • Variables processed: {len(template_variables)}")
+            
+            await integration._cleanup()
+            
+        except Exception as e:
+            console.print(f"❌ Setup failed: {e}")
+            logger.error(f"Setup command failed: {e}")
+            
+    asyncio.run(run())
+
+
+@cli.command()
 @click.option('--detailed', is_flag=True, help='Show detailed subsystem information')
 @click.option('--service', type=click.Choice(['memory', 'indexing', 'projects', 'all']), default='all', help='Focus on specific service')
 @click.option('--export', type=click.Choice(['json', 'yaml']), help='Export health data')

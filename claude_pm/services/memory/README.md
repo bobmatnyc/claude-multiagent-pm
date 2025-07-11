@@ -90,7 +90,7 @@ async with workflow_trigger_context(
 config = {
     "enabled": True,
     "memory": {
-        "fallback_chain": ["mem0ai", "sqlite", "memory"],
+        "fallback_chain": ["mem0ai", "sqlite"],
         "circuit_breaker_threshold": 5,
         "detection_timeout": 2.0
     },
@@ -490,16 +490,14 @@ python claude_pm/services/memory/examples/framework_integration.py
 
 ```python
 "memory": {
-    "fallback_chain": ["mem0ai", "sqlite", "tinydb", "memory"],
+    "fallback_chain": ["mem0ai", "sqlite"],
     "circuit_breaker_threshold": 5,
     "circuit_breaker_recovery": 60,
     "detection_timeout": 2.0,
     "detection_retries": 3,
     "metrics_retention": 86400,
     "mem0ai_enabled": True,
-    "sqlite_enabled": True,
-    "tinydb_enabled": True,
-    "memory_enabled": True
+    "sqlite_enabled": True
 }
 ```
 

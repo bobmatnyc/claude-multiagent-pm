@@ -11,6 +11,13 @@ Comprehensive testing for error scenarios, resilience patterns, and recovery mec
 - Recovery and rollback mechanisms
 """
 
+"""
+# NOTE: InMemory backend tests have been disabled because the InMemory backend  # InMemory backend removed
+was removed from the Claude PM Framework memory system. The system now uses
+mem0ai → sqlite fallback chain only.
+"""
+
+
 import asyncio
 import pytest
 import time
@@ -114,7 +121,7 @@ class TestMemoryServiceFailureScenarios:
     async def resilient_memory_service(self, error_injector):
         """Create memory service with error injection capabilities."""
         config = {
-            "fallback_chain": ["memory"],
+            "fallback_chain": ["sqlite"],
             "memory_enabled": True
         }
         
@@ -160,7 +167,7 @@ class TestMemoryServiceFailureScenarios:
         
         # Create trigger service with resilient memory service
         trigger_service = create_memory_trigger_service({
-            "memory": {"fallback_chain": ["memory"]}
+            "memory": {"fallback_chain": ["sqlite"]}
         })
         trigger_service.memory_service = service
         
@@ -262,7 +269,7 @@ class TestMemoryServiceFailureScenarios:
         
         # Create trigger service
         trigger_service = create_memory_trigger_service({
-            "memory": {"fallback_chain": ["memory"]}
+            "memory": {"fallback_chain": ["sqlite"]}
         })
         trigger_service.memory_service = service
         
@@ -324,7 +331,7 @@ class TestMemoryServiceFailureScenarios:
         
         # Create services
         trigger_service = create_memory_trigger_service({
-            "memory": {"fallback_chain": ["memory"]}
+            "memory": {"fallback_chain": ["sqlite"]}
         })
         trigger_service.memory_service = service
         
@@ -454,7 +461,7 @@ class TestCircuitBreakerPatterns:
         """Test circuit breaker integration with memory service operations."""
         # Create memory service with circuit breaker
         config = {
-            "fallback_chain": ["memory"],
+            "fallback_chain": ["sqlite"],
             "circuit_breaker": {
                 "enabled": True,
                 "failure_threshold": 2,
@@ -510,7 +517,7 @@ class TestConcurrentFailureScenarios:
     async def concurrent_test_system(self):
         """Create system for concurrent failure testing."""
         config = {
-            "memory": {"fallback_chain": ["memory"]},
+            "memory": {"fallback_chain": ["sqlite"]},
             "performance": {
                 "max_concurrent_operations": 10,
                 "batch_size": 20
@@ -691,7 +698,7 @@ class TestRecoveryMechanisms:
     async def recovery_test_system(self):
         """Create system for recovery testing."""
         config = {
-            "memory": {"fallback_chain": ["memory"]},
+            "memory": {"fallback_chain": ["sqlite"]},
             "recovery": {
                 "enabled": True,
                 "retry_attempts": 3,
@@ -946,7 +953,7 @@ async def test_comprehensive_error_scenario_suite():
     
     # Create test system
     config = {
-        "memory": {"fallback_chain": ["memory"]},
+        "memory": {"fallback_chain": ["sqlite"]},
         "performance": {"max_concurrent_operations": 5}
     }
     

@@ -10,6 +10,13 @@ This module tests the automatic memory recall system including:
 - Integration with existing framework components
 """
 
+"""
+# NOTE: InMemory backend tests have been disabled because the InMemory backend  # InMemory backend removed
+was removed from the Claude PM Framework memory system. The system now uses
+mem0ai → sqlite fallback chain only.
+"""
+
+
 import asyncio
 import pytest
 import time
@@ -655,12 +662,12 @@ class TestIntegration:
     async def test_end_to_end_recall(self):
         """Test complete end-to-end recall workflow."""
         # Create in-memory backend for testing
-        from claude_pm.services.memory.backends.memory_backend import InMemoryBackend
+        # # from claude_pm.services.memory.backends.memory_backend import InMemoryBackend  # InMemory backend removed  # InMemory backend removed
         from claude_pm.services.memory.services.unified_service import FlexibleMemoryService
         
         # Setup memory service with in-memory backend
         memory_service = FlexibleMemoryService({
-            "fallback_chain": ["memory"],
+            "fallback_chain": ["sqlite"],
             "memory_enabled": True
         })
         await memory_service.initialize()
@@ -712,7 +719,7 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_performance_under_load(self):
         """Test system performance under concurrent load."""
-        from claude_pm.services.memory.backends.memory_backend import InMemoryBackend
+        # # from claude_pm.services.memory.backends.memory_backend import InMemoryBackend  # InMemory backend removed  # InMemory backend removed
         from claude_pm.services.memory.services.unified_service import FlexibleMemoryService
         
         # Setup optimized configuration
@@ -727,7 +734,7 @@ class TestIntegration:
             max_concurrent_recalls=10
         )
         
-        memory_service = FlexibleMemoryService({"fallback_chain": ["memory"]})
+        memory_service = FlexibleMemoryService({"fallback_chain": ["sqlite"]})
         await memory_service.initialize()
         
         recall_service = MemoryRecallService(memory_service, config)

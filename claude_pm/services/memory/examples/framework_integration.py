@@ -520,7 +520,7 @@ async def run_memory_trigger_demo():
     config = {
         "enabled": True,
         "memory": {
-            "fallback_chain": ["memory", "sqlite"],  # Use in-memory for demo
+            "fallback_chain": ["sqlite"],  # Use sqlite for demo
         }
     }
     

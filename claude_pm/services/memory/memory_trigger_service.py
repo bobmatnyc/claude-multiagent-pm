@@ -381,7 +381,7 @@ def load_memory_trigger_config(config_path: str) -> Dict[str, Any]:
 DEFAULT_CONFIG = {
     "enabled": True,
     "memory": {
-        "fallback_chain": ["mem0ai", "sqlite", "tinydb", "memory"],
+        "fallback_chain": ["mem0ai", "sqlite"],
         "circuit_breaker_threshold": 5,
         "circuit_breaker_recovery": 60,
         "detection_timeout": 2.0,

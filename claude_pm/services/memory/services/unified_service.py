@@ -22,8 +22,6 @@ from ..interfaces.exceptions import (
 )
 from ..backends.mem0ai_backend import Mem0AIBackend
 from ..backends.sqlite_backend import SQLiteBackend
-from ..backends.tinydb_backend import TinyDBBackend
-from ..backends.memory_backend import InMemoryBackend
 from .circuit_breaker import CircuitBreaker, CircuitBreakerConfig, CircuitBreakerManager
 from .auto_detection import AutoDetectionEngine
 from ..monitoring.performance import PerformanceMonitor
@@ -59,7 +57,7 @@ class FlexibleMemoryService:
         
         # Fallback chain configuration
         self.fallback_chain: List[str] = self.config.get("fallback_chain", [
-            "mem0ai", "sqlite", "tinydb", "memory"
+            "mem0ai", "sqlite"
         ])
         
         # Circuit breaker manager
@@ -116,16 +114,6 @@ class FlexibleMemoryService:
                     "enable_fts": self.config.get("sqlite_fts", True),
                     "enable_wal": self.config.get("sqlite_wal", True)
                 })
-            
-            # TinyDB Backend
-            if self.config.get("tinydb_enabled", True):
-                self.backends["tinydb"] = TinyDBBackend({
-                    "db_path": self.config.get("tinydb_path", "memory.json")
-                })
-            
-            # In-Memory Backend
-            if self.config.get("memory_enabled", True):
-                self.backends["memory"] = InMemoryBackend()
             
             # Filter fallback chain to only include enabled backends
             self.fallback_chain = [

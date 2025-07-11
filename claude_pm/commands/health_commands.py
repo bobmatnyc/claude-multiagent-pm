@@ -209,16 +209,38 @@ class CMPMHealthMonitor(CMPMCommandBase):
     async def get_memory_system_health(self) -> Dict[str, Any]:
         """Get memory system connectivity status."""
         try:
-            memory_service = MemoryService()
+            # Use the new FlexibleMemoryService with optimized config
+            from ..services.memory import FlexibleMemoryService
             
-            # Test memory service connectivity
-            health_check = await memory_service.health_check()
+            # Configure service for fast health checks
+            config = {
+                "detection_timeout": 1.0,
+                "detection_retries": 1,
+                "fallback_chain": ["mem0ai"],  # Only test mem0ai for health check
+                "circuit_breaker_threshold": 2,
+                "circuit_breaker_recovery": 30
+            }
+            
+            memory_service = FlexibleMemoryService(config)
+            
+            # Initialize with timeout
+            start_time = time.time()
+            await memory_service.initialize()
+            response_time = (time.time() - start_time) * 1000  # Convert to ms
+            
+            # Check if mem0ai backend is available and healthy
+            mem0ai_connected = (
+                memory_service.active_backend_name == "mem0ai" and 
+                memory_service._is_healthy
+            )
             
             return {
-                "status": "operational" if health_check.get("status") == "healthy" else "degraded",
+                "status": "operational" if mem0ai_connected else "degraded",
                 "service": "memory_system",
-                "mem0ai_connected": health_check.get("mem0ai_connected", False),
-                "response_time": health_check.get("response_time_ms", 0),
+                "mem0ai_connected": mem0ai_connected,
+                "response_time": int(response_time),
+                "active_backend": memory_service.active_backend_name,
+                "available_backends": list(memory_service.backends.keys()),
                 "last_check": datetime.now().isoformat()
             }
             

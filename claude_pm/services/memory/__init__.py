@@ -3,8 +3,8 @@ Unified Memory Service Module
 
 This module provides a flexible, backend-agnostic memory management system
 for the Claude PM Framework. It supports multiple memory backends including
-mem0AI, SQLite, TinyDB, and in-memory storage with automatic detection,
-circuit breaker patterns, and graceful degradation.
+mem0AI and SQLite with automatic detection, circuit breaker patterns, and
+graceful degradation.
 
 Key Features:
 - Backend auto-detection and selection
@@ -21,8 +21,6 @@ Key Features:
 Supported Backends:
 - mem0AI: Advanced memory service with similarity search
 - SQLite: Lightweight file-based storage with FTS
-- TinyDB: JSON-based storage for simple deployments
-- In-Memory: Fast temporary storage for testing
 
 Usage:
     from claude_pm.services.memory import (
@@ -88,8 +86,6 @@ from .services.auto_detection import AutoDetectionEngine
 
 from .backends.mem0ai_backend import Mem0AIBackend
 from .backends.sqlite_backend import SQLiteBackend
-from .backends.tinydb_backend import TinyDBBackend
-from .backends.memory_backend import InMemoryBackend
 
 from .monitoring.performance import PerformanceMonitor
 from .monitoring.health import HealthMonitor
@@ -225,9 +221,7 @@ __all__ = [
     
     # Backends
     "Mem0AIBackend",
-    "SQLiteBackend", 
-    "TinyDBBackend",
-    "InMemoryBackend",
+    "SQLiteBackend",
     
     # Monitoring
     "PerformanceMonitor",

@@ -69,18 +69,6 @@ class AutoDetectionEngine:
                 "features": ["full_text_search", "backup", "transactions"],
                 "min_response_time": 0.01,
                 "max_response_time": 1.0
-            },
-            "tinydb": {
-                "priority": 2,
-                "features": ["simplicity", "json_storage"],
-                "min_response_time": 0.01,
-                "max_response_time": 0.5
-            },
-            "memory": {
-                "priority": 1,
-                "features": ["speed", "testing"],
-                "min_response_time": 0.001,
-                "max_response_time": 0.1
             }
         }
     

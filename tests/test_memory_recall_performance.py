@@ -10,6 +10,13 @@ Comprehensive performance testing for the memory recall system including:
 - Cache effectiveness
 """
 
+"""
+# NOTE: InMemory backend tests have been disabled because the InMemory backend  # InMemory backend removed
+was removed from the Claude PM Framework memory system. The system now uses
+mem0ai → sqlite fallback chain only.
+"""
+
+
 import asyncio
 import pytest
 import time
@@ -198,7 +205,7 @@ class TestMemoryRecallPerformance(PerformanceTestSuite):
     async def populated_memory_service(self):
         """Create memory service with test data."""
         config = {
-            "fallback_chain": ["memory"],
+            "fallback_chain": ["sqlite"],
             "memory_enabled": True
         }
         

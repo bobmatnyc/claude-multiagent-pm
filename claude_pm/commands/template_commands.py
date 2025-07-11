@@ -47,7 +47,7 @@ async def status(ctx, deployment_info, template_sources, validation):
     try:
         # Initialize template deployment integration
         integration = TemplateDeploymentIntegration()
-        await integration.initialize()
+        await integration._initialize()
         
         console.print("\n" + "="*70)
         console.print("🗂️  [bold blue]Template Management Status[/bold blue]")
@@ -111,7 +111,7 @@ async def status(ctx, deployment_info, template_sources, validation):
         else:
             console.print(f"\n❌ No templates found")
         
-        await integration.cleanup()
+        await integration._cleanup()
         
     except Exception as e:
         console.print(f"❌ Error: {e}")
@@ -132,7 +132,7 @@ async def create(ctx, template_id, template_type, source, content, content_file,
     try:
         # Initialize template deployment integration
         integration = TemplateDeploymentIntegration()
-        await integration.initialize()
+        await integration._initialize()
         
         # Get content
         if content_file:
@@ -178,7 +178,7 @@ async def create(ctx, template_id, template_type, source, content, content_file,
         console.print(f"   • Source: {source}")
         console.print(f"   • Checksum: {version.checksum[:8]}...")
         
-        await integration.cleanup()
+        await integration._cleanup()
         
     except Exception as e:
         console.print(f"❌ Error: {e}")
@@ -198,7 +198,7 @@ async def update(ctx, template_id, content, content_file, variables, metadata, c
     try:
         # Initialize template deployment integration
         integration = TemplateDeploymentIntegration()
-        await integration.initialize()
+        await integration._initialize()
         
         # Get content
         if content_file:
@@ -243,7 +243,7 @@ async def update(ctx, template_id, content, content_file, variables, metadata, c
         if version.backup_path:
             console.print(f"   • Backup: {version.backup_path}")
         
-        await integration.cleanup()
+        await integration._cleanup()
         
     except Exception as e:
         console.print(f"❌ Error: {e}")
@@ -261,7 +261,7 @@ async def get(ctx, template_id, version, output, show_metadata):
     try:
         # Initialize template deployment integration
         integration = TemplateDeploymentIntegration()
-        await integration.initialize()
+        await integration._initialize()
         
         # Get template
         template_data = await integration.get_template(template_id, version)
@@ -295,7 +295,7 @@ async def get(ctx, template_id, version, output, show_metadata):
         else:
             console.print(content)
         
-        await integration.cleanup()
+        await integration._cleanup()
         
     except Exception as e:
         console.print(f"❌ Error: {e}")
@@ -314,7 +314,7 @@ async def render(ctx, template_id, variables, variables_file, output, version):
     try:
         # Initialize template deployment integration
         integration = TemplateDeploymentIntegration()
-        await integration.initialize()
+        await integration._initialize()
         
         # Get variables
         template_variables = {}
@@ -345,7 +345,7 @@ async def render(ctx, template_id, variables, variables_file, output, version):
         else:
             console.print(rendered_content)
         
-        await integration.cleanup()
+        await integration._cleanup()
         
     except Exception as e:
         console.print(f"❌ Error: {e}")
@@ -361,7 +361,7 @@ async def validate(ctx, template_id, version):
     try:
         # Initialize template deployment integration
         integration = TemplateDeploymentIntegration()
-        await integration.initialize()
+        await integration._initialize()
         
         # Validate template
         result = await integration.validate_template(template_id, version)
@@ -384,7 +384,7 @@ async def validate(ctx, template_id, version):
             for suggestion in result.suggestions:
                 console.print(f"     - {suggestion}")
         
-        await integration.cleanup()
+        await integration._cleanup()
         
     except Exception as e:
         console.print(f"❌ Error: {e}")
@@ -399,7 +399,7 @@ async def backup(ctx, template_id):
     try:
         # Initialize template deployment integration
         integration = TemplateDeploymentIntegration()
-        await integration.initialize()
+        await integration._initialize()
         
         # Create backup
         backup_path = await integration.backup_template(template_id)
@@ -409,7 +409,7 @@ async def backup(ctx, template_id):
         else:
             console.print(f"❌ Failed to create backup for template: {template_id}")
         
-        await integration.cleanup()
+        await integration._cleanup()
         
     except Exception as e:
         console.print(f"❌ Error: {e}")
@@ -426,7 +426,7 @@ async def restore(ctx, template_id, version, confirm):
     try:
         # Initialize template deployment integration
         integration = TemplateDeploymentIntegration()
-        await integration.initialize()
+        await integration._initialize()
         
         # Confirm restoration
         if not confirm:
@@ -442,7 +442,7 @@ async def restore(ctx, template_id, version, confirm):
         else:
             console.print(f"❌ Failed to restore template: {template_id} v{version}")
         
-        await integration.cleanup()
+        await integration._cleanup()
         
     except Exception as e:
         console.print(f"❌ Error: {e}")
@@ -457,7 +457,7 @@ async def history(ctx, template_id):
     try:
         # Initialize template deployment integration
         integration = TemplateDeploymentIntegration()
-        await integration.initialize()
+        await integration._initialize()
         
         # Get history
         history_data = await integration.get_template_history(template_id)
@@ -487,7 +487,7 @@ async def history(ctx, template_id):
         
         console.print(table)
         
-        await integration.cleanup()
+        await integration._cleanup()
         
     except Exception as e:
         console.print(f"❌ Error: {e}")
@@ -504,7 +504,7 @@ async def list(ctx, template_type, source, deployment_context):
     try:
         # Initialize template deployment integration
         integration = TemplateDeploymentIntegration()
-        await integration.initialize()
+        await integration._initialize()
         
         # Get templates
         if deployment_context:
@@ -548,7 +548,7 @@ async def list(ctx, template_type, source, deployment_context):
         
         console.print(table)
         
-        await integration.cleanup()
+        await integration._cleanup()
         
     except Exception as e:
         console.print(f"❌ Error: {e}")
@@ -565,7 +565,7 @@ async def recommend(ctx, project_type, requirements, show_reasons):
     try:
         # Initialize template deployment integration
         integration = TemplateDeploymentIntegration()
-        await integration.initialize()
+        await integration._initialize()
         
         # Parse requirements
         req_list = []
@@ -612,11 +612,113 @@ async def recommend(ctx, project_type, requirements, show_reasons):
         
         console.print(table)
         
-        await integration.cleanup()
+        await integration._cleanup()
         
     except Exception as e:
         console.print(f"❌ Error: {e}")
         logger.error(f"Template recommend command failed: {e}")
+
+
+@template.command()
+@click.option('--target-dir', type=click.Path(), help='Target directory (defaults to parent of current working directory)')
+@click.option('--backup/--no-backup', default=True, help='Create backup of existing CLAUDE.md file')
+@click.option('--force', is_flag=True, help='Force overwrite without confirmation')
+@click.pass_context
+async def deploy_claude_md(ctx, target_dir, backup, force):
+    """Deploy CLAUDE.md template to parent directory with handlebars processing."""
+    try:
+        import platform
+        import shutil
+        from datetime import datetime
+        
+        # Initialize template deployment integration
+        integration = TemplateDeploymentIntegration()
+        await integration._initialize()
+        
+        # Get deployment config
+        deployment_config = await integration.get_deployment_aware_template_config()
+        
+        # Determine target directory
+        if target_dir:
+            target_directory = Path(target_dir)
+        else:
+            target_directory = Path.cwd().parent
+        
+        # Ensure target directory exists
+        target_directory.mkdir(parents=True, exist_ok=True)
+        
+        # Check for framework CLAUDE.md template
+        # Use explicit framework path to avoid deployment detection issues
+        framework_path = Path(__file__).parent.parent.parent  # Go up to project root
+        framework_template_path = framework_path / "framework" / "CLAUDE.md"
+        
+        if not framework_template_path.exists():
+            console.print(f"❌ Framework CLAUDE.md template not found at: {framework_template_path}")
+            return
+        
+        # Read template content
+        template_content = framework_template_path.read_text()
+        
+        # Set up template variables for handlebars processing
+        template_variables = {
+            "FRAMEWORK_VERSION": "4.5.1",
+            "DEPLOYMENT_DATE": datetime.now().isoformat(),
+            "PLATFORM": platform.system().lower(),
+            "PYTHON_CMD": "python3",
+            "DEPLOYMENT_ID": str(int(datetime.now().timestamp() * 1000)),
+            "DEPLOYMENT_DIR": str(framework_path),
+            "WORKING_DIR": str(Path.cwd()),
+            "TARGET_DIR": str(target_directory),
+            "AI_TRACKDOWN_PATH": "/Users/masa/.nvm/versions/node/v20.19.0/lib/node_modules/@bobmatnyc/ai-trackdown-tools/dist/index.js",
+            "PLATFORM_NOTES": "**macOS-specific:**\n- Use `.sh` files for scripts\n- CLI wrappers: `bin/aitrackdown` and `bin/atd`\n- Health check: `scripts/health-check.sh`\n- May require Xcode Command Line Tools",
+            "LAST_UPDATED": datetime.now().isoformat()
+        }
+        
+        console.print(f"🔧 [bold]Deploying CLAUDE.md Template[/bold]")
+        console.print(f"   • Framework Path: {framework_path}")
+        console.print(f"   • Template Path: {framework_template_path}")
+        console.print(f"   • Target Directory: {target_directory}")
+        
+        # Process handlebars variables
+        processed_content = template_content
+        for key, value in template_variables.items():
+            placeholder = f"{{{{{key}}}}}"
+            processed_content = processed_content.replace(placeholder, str(value))
+        
+        # Handle target file
+        target_file = target_directory / "CLAUDE.md"
+        
+        # Create backup if file exists and backup is enabled
+        if target_file.exists() and backup:
+            backup_filename = f"CLAUDE.md.backup.{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            backup_path = target_directory / backup_filename
+            shutil.copy2(target_file, backup_path)
+            console.print(f"   • Created backup: {backup_path}")
+        
+        # Check if file exists and get confirmation
+        if target_file.exists() and not force:
+            if not Confirm.ask(f"CLAUDE.md already exists at {target_file}. Overwrite?"):
+                console.print("❌ Deployment cancelled")
+                return
+        
+        # Write processed content
+        target_file.write_text(processed_content)
+        
+        console.print(f"✅ [bold green]CLAUDE.md deployed successfully![/bold green]")
+        console.print(f"   • Target: {target_file}")
+        console.print(f"   • Size: {len(processed_content)} characters")
+        console.print(f"   • Variables processed: {len(template_variables)}")
+        
+        # Show processed variables
+        console.print(f"\n🔍 [bold]Template Variables:[/bold]")
+        for key, value in template_variables.items():
+            console.print(f"   • {key}: {value}")
+        
+        await integration._cleanup()
+        
+    except Exception as e:
+        console.print(f"❌ Error: {e}")
+        logger.error(f"Template deploy-claude-md command failed: {e}")
 
 
 # Add the template command group to the main CLI

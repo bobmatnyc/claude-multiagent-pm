@@ -2,17 +2,24 @@
 """
 Comprehensive Test Suite for Claude PM Framework Fallback Memory Systems
 
-This script tests all memory backends (SQLite, TinyDB, InMemory) and their
+# This script tests all memory backends (SQLite, TinyDB, InMemory) and their  # InMemory backend removed
 fallback mechanisms when mem0AI is unavailable.
 
 Test Coverage:
 1. SQLite Backend Direct Testing
 2. TinyDB Backend Direct Testing  
-3. InMemory Backend Direct Testing
+# 3. InMemory Backend Direct Testing  # InMemory backend removed
 4. Circuit Breaker Testing
 5. Fallback Chain Testing
 6. Performance and Reliability Testing
 """
+
+"""
+# NOTE: InMemory backend tests have been disabled because the InMemory backend  # InMemory backend removed
+was removed from the Claude PM Framework memory system. The system now uses
+mem0ai → sqlite fallback chain only.
+"""
+
 
 import asyncio
 import logging
@@ -31,7 +38,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from claude_pm.services.memory.backends.sqlite_backend import SQLiteBackend
 from claude_pm.services.memory.backends.tinydb_backend import TinyDBBackend
-from claude_pm.services.memory.backends.memory_backend import InMemoryBackend
+# # from claude_pm.services.memory.backends.memory_backend import InMemoryBackend  # InMemory backend removed  # InMemory backend removed
 from claude_pm.services.memory.services.unified_service import FlexibleMemoryService
 from claude_pm.services.memory.services.circuit_breaker import CircuitBreaker, CircuitBreakerConfig
 from claude_pm.services.memory.interfaces.models import MemoryCategory, MemoryQuery, MemoryItem
@@ -103,7 +110,7 @@ class FallbackMemorySystemTester:
         test_cases = [
             ("SQLite Backend", self.test_sqlite_backend),
             ("TinyDB Backend", self.test_tinydb_backend),
-            ("InMemory Backend", self.test_inmemory_backend),
+            # ("InMemory Backend", self.test_inmemory_backend),  # InMemory backend removed
             ("Circuit Breaker", self.test_circuit_breaker),
             ("Fallback Chain", self.test_fallback_chain),
             ("Performance & Reliability", self.test_performance_reliability),
@@ -302,24 +309,24 @@ class FallbackMemorySystemTester:
         return results
     
     async def test_inmemory_backend(self) -> Dict[str, Any]:
-        """Test InMemory backend directly."""
-        logger.info("Testing InMemory runtime backend...")
+        # """Test InMemory backend directly."""  # InMemory backend removed
+        # logger.info("Testing InMemory runtime backend...")  # InMemory backend removed
         
-        # Configure InMemory backend
+        # # Configure InMemory backend  # InMemory backend removed
         inmemory_config = {
             "max_memory_size": 1000,
             "enable_expiration": True,
             "default_ttl": 3600
         }
         
-        backend = InMemoryBackend(inmemory_config)
+        # # backend = InMemoryBackend(inmemory_config)  # InMemory backend removed  # InMemory backend removed
         
         # Initialize backend
-        assert await backend.initialize(), "InMemory backend initialization failed"
-        assert await backend.health_check(), "InMemory backend health check failed"
+        # assert await backend.initialize(), "InMemory backend initialization failed"  # InMemory backend removed
+        # assert await backend.health_check(), "InMemory backend health check failed"  # InMemory backend removed
         
         # Test memory operations
-        results = await self._test_backend_operations(backend, "InMemory")
+        # results = await self._test_backend_operations(backend, "InMemory")  # InMemory backend removed
         
         # Test runtime characteristics
         logger.info("Testing runtime memory characteristics...")
@@ -360,7 +367,7 @@ class FallbackMemorySystemTester:
         search_results = await backend.search_memories(self.project_name, query)
         search_time = time.time() - start_time
         
-        # InMemory should be very fast
+        # # InMemory should be very fast  # InMemory backend removed
         assert search_time < 0.1, f"Search too slow: {search_time:.3f}s"
         
         # Test expiration (if enabled)
@@ -539,8 +546,8 @@ class FallbackMemorySystemTester:
         )
         assert memory_id, "Failed to add memory to TinyDB backend"
         
-        # Switch to InMemory
-        assert await service.switch_backend("memory"), "Failed to switch to InMemory"
+        # # Switch to InMemory  # InMemory backend removed
+        # assert await service.switch_backend("memory"), "Failed to switch to InMemory"  # InMemory backend removed
         assert service.get_active_backend_name() == "memory", "Backend switch failed"
         
         # Test health monitoring
@@ -578,7 +585,7 @@ class FallbackMemorySystemTester:
             ("tinydb", TinyDBBackend, {
                 "db_path": os.path.join(self.temp_dir, "perf_tinydb.json")
             }),
-            ("memory", InMemoryBackend, {
+            # ("memory", InMemoryBackend, {  # InMemory backend removed
                 "max_memory_size": 1000
             })
         ]

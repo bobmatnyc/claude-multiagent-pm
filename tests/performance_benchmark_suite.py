@@ -11,6 +11,13 @@ Comprehensive performance benchmarking and validation reporting for the memory t
 - Benchmark report generation
 """
 
+"""
+# NOTE: InMemory backend tests have been disabled because the InMemory backend  # InMemory backend removed
+was removed from the Claude PM Framework memory system. The system now uses
+mem0ai → sqlite fallback chain only.
+"""
+
+
 import asyncio
 import pytest
 import time
@@ -917,7 +924,7 @@ class TestPerformanceBenchmarkSuite:
     async def benchmark_system(self):
         """Create system for benchmark testing."""
         config = {
-            "memory": {"fallback_chain": ["memory"]},
+            "memory": {"fallback_chain": ["sqlite"]},
             "performance": {
                 "create_timeout": 10.0,
                 "recall_timeout": 5.0,

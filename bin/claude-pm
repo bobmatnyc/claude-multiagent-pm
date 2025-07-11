@@ -622,6 +622,111 @@ https://github.com/bobmatnyc/claude-pm
 }
 
 /**
+ * Display comprehensive system information
+ */
+function displaySystemInfo() {
+    const deploymentConfig = getDeploymentConfig();
+    const today = new Date().toISOString().split('T')[0]; // 2025-07-11 format
+    
+    console.log('\n' + '='.repeat(70));
+    console.log('🚀 CLAUDE PM FRAMEWORK - SYSTEM INFORMATION');
+    console.log('='.repeat(70));
+    console.log(`📅 System Status as of ${today}`);
+    console.log('');
+    
+    // Framework Version
+    console.log(`📦 Claude PM Framework Version: v${CLAUDE_PM_VERSION}`);
+    
+    // CLI Version display removed to clean up startup output
+    // try {
+    //     if (deploymentConfig && deploymentConfig.config && deploymentConfig.config.found) {
+    //         const config = deploymentConfig.config;
+    //         
+    //         if (config.deploymentType === 'deployed' && config.metadata?.deployedConfig) {
+    //             console.log(`🔧 CLI Version (Deployment Config): v${config.metadata.deployedConfig.version}`);
+    //         } else {
+    //             console.log(`🔧 CLI Version (Deployment Config): v${CLAUDE_PM_VERSION}`);
+    //         }
+    //     } else {
+    //         console.log(`🔧 CLI Version (Deployment Config): v${CLAUDE_PM_VERSION}`);
+    //     }
+    // } catch (error) {
+    //     console.log(`🔧 CLI Version (Deployment Config): v${CLAUDE_PM_VERSION}`);
+    // }
+    
+    // Install Path
+    if (deploymentConfig && deploymentConfig.config && deploymentConfig.config.found) {
+        console.log(`📁 Install Path: ${deploymentConfig.config.frameworkPath}`);
+    } else {
+        console.log(`📁 Install Path: Not detected`);
+    }
+    
+    // Working Path
+    console.log(`📂 Working Path: ${process.cwd()}`);
+    
+    // AI-trackdown-tools Version
+    try {
+        const { execSync } = require('child_process');
+        const version = execSync('aitrackdown --version', { encoding: 'utf8' }).trim();
+        console.log(`🔍 AI-trackdown-tools Version: v${version}`);
+    } catch (error) {
+        console.log(`🔍 AI-trackdown-tools Version: Not installed or not accessible`);
+    }
+    
+    // Install Type
+    if (deploymentConfig && deploymentConfig.config && deploymentConfig.config.found) {
+        const deploymentType = deploymentConfig.config.deploymentType;
+        let installType = 'Unknown';
+        
+        switch (deploymentType) {
+            case 'deployed':
+                installType = 'Deployed Instance';
+                break;
+            case 'npm_global':
+                installType = 'Global NPM Installation';
+                break;
+            case 'npm_local':
+                installType = 'Local NPM Installation';
+                break;
+            case 'npx':
+                installType = 'NPX Execution';
+                break;
+            case 'local_source':
+                installType = 'Local Source Development';
+                break;
+            default:
+                installType = deploymentType;
+        }
+        
+        console.log(`⚙️  Install Type: ${installType}`);
+    } else {
+        console.log(`⚙️  Install Type: Not detected`);
+    }
+    
+    // Memory System Status
+    try {
+        const memoryConfigPath = path.join(process.cwd(), '.claude-pm', 'memory.json');
+        const globalMemoryPath = path.join(os.homedir(), '.claude-pm', 'memory.json');
+        
+        if (fs.existsSync(memoryConfigPath)) {
+            console.log(`🧠 Memory System Status: Local memory system active`);
+        } else if (fs.existsSync(globalMemoryPath)) {
+            console.log(`🧠 Memory System Status: Global memory system active`);
+        } else {
+            console.log(`🧠 Memory System Status: No memory system detected`);
+        }
+    } catch (error) {
+        console.log(`🧠 Memory System Status: Unable to determine`);
+    }
+    
+    console.log('');
+    console.log('='.repeat(70));
+    console.log('🎯 Launching Claude with optimized settings...');
+    console.log('='.repeat(70));
+    console.log('');
+}
+
+/**
  * Enhanced main execution function with deployment detection
  */
 async function main() {
@@ -676,9 +781,38 @@ async function main() {
         process.exit(0);
     }
     
-    if (args.includes('--help') || args.includes('-h') || args.length === 0) {
+    if (args.includes('--help') || args.includes('-h')) {
         showHelp();
         process.exit(0);
+    }
+    
+    // Handle no arguments case - display system info then launch Claude
+    if (args.length === 0) {
+        // Display comprehensive system information
+        displaySystemInfo();
+        
+        try {
+            const claudeProcess = spawn('claude', ['--dangerously-skip-permissions', '--model', 'sonnet'], {
+                stdio: 'inherit',
+                env: process.env
+            });
+            
+            claudeProcess.on('close', (code) => {
+                process.exit(code);
+            });
+            
+            claudeProcess.on('error', (error) => {
+                console.error('❌ Failed to launch Claude:', error.message);
+                console.error('Make sure Claude CLI is installed and available in your PATH');
+                process.exit(1);
+            });
+            
+            return;
+        } catch (error) {
+            console.error('❌ Failed to launch Claude:', error.message);
+            console.error('Make sure Claude CLI is installed and available in your PATH');
+            process.exit(1);
+        }
     }
     
     // Handle deployment detection debug flag

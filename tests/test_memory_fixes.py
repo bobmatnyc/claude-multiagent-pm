@@ -5,6 +5,13 @@ Memory Backend Fixes and Comprehensive Testing
 This script tests the corrected memory backends and fallback mechanisms.
 """
 
+"""
+# NOTE: InMemory backend tests have been disabled because the InMemory backend  # InMemory backend removed
+was removed from the Claude PM Framework memory system. The system now uses
+mem0ai → sqlite fallback chain only.
+"""
+
+
 import asyncio
 import logging
 import os
@@ -21,8 +28,8 @@ from datetime import datetime
 sys.path.insert(0, str(Path(__file__).parent))
 
 from claude_pm.services.memory.backends.sqlite_backend import SQLiteBackend
-from claude_pm.services.memory.backends.tinydb_backend import TinyDBBackend
-from claude_pm.services.memory.backends.memory_backend import InMemoryBackend
+# TinyDB_REMOVED backend removed from framework
+# # from claude_pm.services.memory.backends.memory_backend import InMemoryBackend  # InMemory backend removed  # InMemory backend removed
 from claude_pm.services.memory.services.unified_service import FlexibleMemoryService
 from claude_pm.services.memory.interfaces.models import MemoryCategory, MemoryQuery
 
@@ -167,8 +174,8 @@ class MemoryBackendTester:
         
         test_cases = [
             ("Fixed SQLite Backend", self.test_corrected_sqlite),
-            ("TinyDB Backend", self.test_tinydb_backend),
-            ("InMemory Backend", self.test_inmemory_backend),
+            # TinyDB_REMOVED backend removed from framework
+            # ("InMemory Backend", self.test_inmemory_backend),  # InMemory backend removed
             ("Fallback System", self.test_fallback_system),
             ("Performance Comparison", self.test_performance_comparison),
             ("Reliability Testing", self.test_reliability)
@@ -291,76 +298,21 @@ class MemoryBackendTester:
             "memory_count": len(memory_ids)
         }
     
-    async def test_tinydb_backend(self) -> Dict[str, Any]:
-        """Test TinyDB backend."""
-        logger.info("Testing TinyDB backend...")
-        
-        tinydb_config = {
-            "db_path": os.path.join(self.temp_dir, "fixed_tinydb.json"),
-            "indent": 2,
-            "ensure_ascii": False
-        }
-        
-        backend = TinyDBBackend(tinydb_config)
-        
-        # Initialize backend
-        assert await backend.initialize(), "TinyDB backend initialization failed"
-        assert await backend.health_check(), "TinyDB backend health check failed"
-        
-        # Test basic operations
-        memory_ids = []
-        for i, memory_data in enumerate(self.test_memories):
-            memory_id = await backend.add_memory(
-                self.project_name,
-                memory_data["content"],
-                memory_data["category"],
-                memory_data["tags"],
-                memory_data["metadata"]
-            )
-            assert memory_id, f"Failed to add memory {i}"
-            memory_ids.append(memory_id)
-        
-        # Test search operations
-        query = MemoryQuery(query="architecture", limit=10)
-        search_results = await backend.search_memories(self.project_name, query)
-        assert len(search_results) >= 1, "TinyDB search failed"
-        
-        # Test update
-        first_memory_id = memory_ids[0]
-        update_success = await backend.update_memory(
-            self.project_name,
-            first_memory_id,
-            content="Updated TinyDB content"
-        )
-        assert update_success, "TinyDB update failed"
-        
-        # Test statistics
-        stats = await backend.get_memory_stats(self.project_name)
-        
-        await backend.cleanup()
-        
-        return {
-            "basic_operations": True,
-            "search_operations": True,
-            "update_operations": True,
-            "statistics": stats,
-            "memory_count": len(memory_ids)
-        }
-    
+    # TinyDB backend test removed - TinyDB no longer supported
     async def test_inmemory_backend(self) -> Dict[str, Any]:
-        """Test InMemory backend."""
-        logger.info("Testing InMemory backend...")
+        # """Test InMemory backend."""  # InMemory backend removed
+        # logger.info("Testing InMemory backend...")  # InMemory backend removed
         
         inmemory_config = {
             "max_memory_size": 1000,
             "enable_expiration": False
         }
         
-        backend = InMemoryBackend(inmemory_config)
+        # # backend = InMemoryBackend(inmemory_config)  # InMemory backend removed  # InMemory backend removed
         
         # Initialize backend
-        assert await backend.initialize(), "InMemory backend initialization failed"
-        assert await backend.health_check(), "InMemory backend health check failed"
+        # assert await backend.initialize(), "InMemory backend initialization failed"  # InMemory backend removed
+        # assert await backend.health_check(), "InMemory backend health check failed"  # InMemory backend removed
         
         # Test basic operations
         memory_ids = []
@@ -378,7 +330,7 @@ class MemoryBackendTester:
         # Test search
         query = MemoryQuery(query="architecture", limit=10)
         search_results = await backend.search_memories(self.project_name, query)
-        assert len(search_results) >= 1, "InMemory search failed"
+        # assert len(search_results) >= 1, "InMemory search failed"  # InMemory backend removed
         
         # Test performance
         start_time = time.time()
@@ -486,10 +438,10 @@ class MemoryBackendTester:
                 "db_path": os.path.join(self.temp_dir, "perf_sqlite.db"),
                 "enable_fts": True
             }),
-            ("TinyDB", TinyDBBackend, {
+            ("TinyDB_REMOVED", TinyDB_REMOVED_Backend, {
                 "db_path": os.path.join(self.temp_dir, "perf_tinydb.json")
             }),
-            ("InMemory", InMemoryBackend, {
+            # ("InMemory", InMemoryBackend, {  # InMemory backend removed
                 "max_memory_size": 1000
             })
         ]
@@ -614,19 +566,19 @@ class MemoryBackendTester:
             else:
                 analysis.append("❌ SQLite backend still has issues")
         
-        if "TinyDB Backend" in self.test_results:
-            tinydb_result = self.test_results["TinyDB Backend"]
+        if "TinyDB_REMOVED Backend" in self.test_results:
+            tinydb_result = self.test_results["TinyDB_REMOVED Backend"]
             if tinydb_result["status"] == "PASSED":
-                analysis.append("✅ TinyDB backend is operational for lightweight deployments")
+                analysis.append("✅ TinyDB_REMOVED backend is operational for lightweight deployments")
             else:
-                analysis.append("❌ TinyDB backend has issues")
+                analysis.append("❌ TinyDB_REMOVED backend has issues")
         
-        if "InMemory Backend" in self.test_results:
-            inmemory_result = self.test_results["InMemory Backend"]
+        # if "InMemory Backend" in self.test_results:  # InMemory backend removed
+            # inmemory_result = self.test_results["InMemory Backend"]  # InMemory backend removed
             if inmemory_result["status"] == "PASSED":
-                analysis.append("✅ InMemory backend provides excellent performance for testing")
+                # analysis.append("✅ InMemory backend provides excellent performance for testing")  # InMemory backend removed
             else:
-                analysis.append("❌ InMemory backend has issues")
+                # analysis.append("❌ InMemory backend has issues")  # InMemory backend removed
         
         if "Fallback System" in self.test_results:
             fallback_result = self.test_results["Fallback System"]

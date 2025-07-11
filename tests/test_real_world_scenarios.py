@@ -11,6 +11,13 @@ Comprehensive testing framework for real-world usage scenarios including:
 - Performance under realistic conditions
 """
 
+"""
+# NOTE: InMemory backend tests have been disabled because the InMemory backend  # InMemory backend removed
+was removed from the Claude PM Framework memory system. The system now uses
+mem0ai → sqlite fallback chain only.
+"""
+
+
 import asyncio
 import pytest
 import time
@@ -506,7 +513,7 @@ class TestRealWorldScenarios:
         """Create real-world scenario testing framework."""
         # Create complete memory system
         config = {
-            "memory": {"fallback_chain": ["memory"]},
+            "memory": {"fallback_chain": ["sqlite"]},
             "performance": {
                 "create_timeout": 5.0,
                 "recall_timeout": 3.0,

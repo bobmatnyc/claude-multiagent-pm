@@ -15,6 +15,7 @@ from .agent_commands import cmpm_agents, cmpm_index
 from .qa_commands import cmpm_qa_status, cmpm_qa_test, cmpm_qa_results
 from .integration_commands import cmpm_integration, cmpm_ai_ops
 from .dashboard_commands import cmpm_dashboard
+from .template_commands import template
 
 console = Console()
 
@@ -37,6 +38,7 @@ Available commands:
 • [green]cmpm:qa-results[/green] - View test results and patterns
 • [green]cmpm:integration[/green] - Integration management
 • [green]cmpm:ai-ops[/green] - AI operations management
+• [green]template[/green] - Template management with versioning
 
 Usage:
 • [dim]python -m claude_pm.cmpm_commands cmpm:health[/dim]
@@ -48,6 +50,7 @@ Usage:
 • [dim]python -m claude_pm.cmpm_commands cmpm:qa-results[/dim]
 • [dim]python -m claude_pm.cmpm_commands cmpm:integration[/dim]
 • [dim]python -m claude_pm.cmpm_commands cmpm:ai-ops[/dim]
+• [dim]python -m claude_pm.cmpm_commands template deploy-claude-md[/dim]
         """)
 
 
@@ -61,6 +64,7 @@ main.add_command(cmpm_qa_test)
 main.add_command(cmpm_qa_results)
 main.add_command(cmpm_integration)
 main.add_command(cmpm_ai_ops)
+main.add_command(template)
 
 
 __all__ = [
@@ -73,5 +77,6 @@ __all__ = [
     'cmpm_qa_test',
     'cmpm_qa_results',
     'cmpm_integration',
-    'cmpm_ai_ops'
+    'cmpm_ai_ops',
+    'template'
 ]

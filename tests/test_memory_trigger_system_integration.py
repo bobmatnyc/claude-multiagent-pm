@@ -5,6 +5,13 @@ This module provides comprehensive testing for the complete memory trigger syste
 validating end-to-end workflows, cross-component integration, and production readiness.
 """
 
+"""
+# NOTE: InMemory backend tests have been disabled because the InMemory backend  # InMemory backend removed
+was removed from the Claude PM Framework memory system. The system now uses
+mem0ai → sqlite fallback chain only.
+"""
+
+
 import asyncio
 import pytest
 import time
@@ -114,7 +121,7 @@ class TestMemoryTriggerSystemIntegration:
             
             # Create memory services
             memory_service_config = {
-                "fallback_chain": ["memory"],  # Use in-memory for testing
+                "fallback_chain": ["sqlite"],  # Use in-memory for testing
                 "memory_enabled": True
             }
             
@@ -561,7 +568,7 @@ class TestMemorySystemPerformance:
                 "rate_limit_per_second": 1000
             },
             "memory": {
-                "fallback_chain": ["memory"],
+                "fallback_chain": ["sqlite"],
                 "memory_enabled": True
             }
         }
@@ -776,7 +783,7 @@ class TestMemorySystemResilience:
                 "max_concurrent_operations": 5
             },
             "memory": {
-                "fallback_chain": ["memory"]
+                "fallback_chain": ["sqlite"]
             }
         }
         

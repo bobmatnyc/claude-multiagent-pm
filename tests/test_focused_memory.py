@@ -5,6 +5,13 @@ Focused Memory Backend Testing
 This script tests specific memory backend issues identified in the comprehensive test.
 """
 
+"""
+# NOTE: InMemory backend tests have been disabled because the InMemory backend  # InMemory backend removed
+was removed from the Claude PM Framework memory system. The system now uses
+mem0ai → sqlite fallback chain only.
+"""
+
+
 import asyncio
 import logging
 import os
@@ -17,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from claude_pm.services.memory.backends.sqlite_backend import SQLiteBackend
 from claude_pm.services.memory.backends.tinydb_backend import TinyDBBackend
-from claude_pm.services.memory.backends.memory_backend import InMemoryBackend
+# # from claude_pm.services.memory.backends.memory_backend import InMemoryBackend  # InMemory backend removed  # InMemory backend removed
 from claude_pm.services.memory.interfaces.models import MemoryCategory, MemoryQuery
 
 # Configure logging
@@ -165,11 +172,11 @@ async def test_sqlite_isolated():
             pass
 
 async def test_inmemory_isolated():
-    """Test InMemory backend in isolation."""
-    logger.info("Testing InMemory backend isolation...")
+    # """Test InMemory backend in isolation."""  # InMemory backend removed
+    # logger.info("Testing InMemory backend isolation...")  # InMemory backend removed
     
     try:
-        backend = InMemoryBackend({
+        # backend = InMemoryBackend({  # InMemory backend removed
             "max_memory_size": 100,
             "enable_expiration": False
         })
@@ -208,7 +215,7 @@ async def test_inmemory_isolated():
         await backend.cleanup()
         
     except Exception as e:
-        logger.error(f"❌ InMemory test failed: {e}")
+        # logger.error(f"❌ InMemory test failed: {e}")  # InMemory backend removed
         import traceback
         traceback.print_exc()
 

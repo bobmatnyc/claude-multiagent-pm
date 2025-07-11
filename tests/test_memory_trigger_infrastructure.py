@@ -5,6 +5,13 @@ Unit tests for the memory trigger system components including
 trigger orchestrator, policy engine, framework hooks, and decorators.
 """
 
+"""
+# NOTE: InMemory backend tests have been disabled because the InMemory backend  # InMemory backend removed
+was removed from the Claude PM Framework memory system. The system now uses
+mem0ai → sqlite fallback chain only.
+"""
+
+
 import asyncio
 import pytest
 import time
@@ -481,7 +488,7 @@ class TestMemoryTriggerService:
         config = {
             "enabled": True,
             "memory": {
-                "fallback_chain": ["memory"]  # Use in-memory for testing
+                "fallback_chain": ["sqlite"]  # Use in-memory for testing
             }
         }
         
@@ -502,7 +509,7 @@ class TestMemoryTriggerService:
         config = {
             "enabled": True,
             "memory": {
-                "fallback_chain": ["memory"]
+                "fallback_chain": ["sqlite"]
             }
         }
         
@@ -522,7 +529,7 @@ class TestMemoryTriggerService:
         config = {
             "enabled": True,
             "memory": {
-                "fallback_chain": ["memory"]
+                "fallback_chain": ["sqlite"]
             }
         }
         
@@ -540,7 +547,7 @@ class TestMemoryTriggerService:
         config = {
             "enabled": True,
             "memory": {
-                "fallback_chain": ["memory"]
+                "fallback_chain": ["sqlite"]
             }
         }
         
@@ -560,7 +567,7 @@ class TestIntegrationScenarios:
         config = {
             "enabled": True,
             "memory": {
-                "fallback_chain": ["memory"]
+                "fallback_chain": ["sqlite"]
             }
         }
         
@@ -594,7 +601,7 @@ class TestIntegrationScenarios:
         config = {
             "enabled": True,
             "memory": {
-                "fallback_chain": ["memory"]
+                "fallback_chain": ["sqlite"]
             }
         }
         
@@ -627,7 +634,7 @@ class TestIntegrationScenarios:
         config = {
             "enabled": True,
             "memory": {
-                "fallback_chain": ["memory"]
+                "fallback_chain": ["sqlite"]
             }
         }
         

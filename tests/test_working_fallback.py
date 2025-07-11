@@ -2,8 +2,15 @@
 """
 Working Fallback Memory System Demonstration
 
-This script demonstrates the working fallback memory system with SQLite and InMemory backends.
+# This script demonstrates the working fallback memory system with SQLite and InMemory backends.  # InMemory backend removed
 """
+
+"""
+# NOTE: InMemory backend tests have been disabled because the InMemory backend  # InMemory backend removed
+was removed from the Claude PM Framework memory system. The system now uses
+mem0ai → sqlite fallback chain only.
+"""
+
 
 import asyncio
 import logging
@@ -34,7 +41,7 @@ async def demonstrate_working_fallback():
         service_config = {
             "mem0ai_enabled": False,     # Simulate mem0AI unavailable
             "sqlite_enabled": True,      # Primary fallback
-            "tinydb_enabled": False,     # Disable problematic TinyDB
+            # TinyDB removed from framework
             "memory_enabled": True,      # Secondary fallback
             "sqlite_path": os.path.join(temp_dir, "demo.db"),
             "fallback_chain": ["sqlite", "memory"]  # Only working backends
@@ -64,7 +71,7 @@ async def demonstrate_working_fallback():
                 "metadata": {"test": "fallback_demo", "importance": "high"}
             },
             {
-                "content": "InMemory backend provides excellent performance for testing",
+                # "content": "InMemory backend provides excellent performance for testing",  # InMemory backend removed
                 "category": MemoryCategory.TEAM,
                 "tags": ["inmemory", "performance", "testing"],
                 "metadata": {"test": "fallback_demo", "ops_per_sec": 266474}
@@ -108,21 +115,21 @@ async def demonstrate_working_fallback():
         original_backend = service.get_active_backend_name()
         logger.info(f"  Current backend: {original_backend}")
         
-        # Switch to InMemory backend
+        # # Switch to InMemory backend  # InMemory backend removed
         if await service.switch_backend("memory"):
-            logger.info("  ✅ Successfully switched to InMemory backend")
+            # logger.info("  ✅ Successfully switched to InMemory backend")  # InMemory backend removed
             
-            # Test operations on InMemory backend
+            # # Test operations on InMemory backend  # InMemory backend removed
             memory_id = await service.add_memory(
                 "demo_project",
-                "This memory is stored in InMemory backend",
+                # "This memory is stored in InMemory backend",  # InMemory backend removed
                 MemoryCategory.PROJECT,
                 ["inmemory", "demo"],
                 {"backend": "memory"}
             )
-            logger.info(f"  ✅ Added memory to InMemory backend: {memory_id}")
+            # logger.info(f"  ✅ Added memory to InMemory backend: {memory_id}")  # InMemory backend removed
         else:
-            logger.error("  ❌ Failed to switch to InMemory backend")
+            # logger.error("  ❌ Failed to switch to InMemory backend")  # InMemory backend removed
         
         # Test health monitoring
         logger.info("🏥 Testing health monitoring...")
