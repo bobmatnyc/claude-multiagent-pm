@@ -37,7 +37,8 @@ from datetime import datetime
 sys.path.insert(0, str(Path(__file__).parent))
 
 from claude_pm.services.memory.backends.sqlite_backend import SQLiteBackend
-from claude_pm.services.memory.backends.tinydb_backend import TinyDBBackend
+# TinyDB backend removed from framework - import disabled
+# from claude_pm.services.memory.backends.tinydb_backend import TinyDBBackend
 
 # # from claude_pm.services.memory.backends.memory_backend import InMemoryBackend  # InMemory backend removed  # InMemory backend removed
 from claude_pm.services.memory.services.unified_service import FlexibleMemoryService
@@ -224,77 +225,18 @@ class FallbackMemorySystemTester:
         return results
 
     async def test_tinydb_backend(self) -> Dict[str, Any]:
-        """Test TinyDB backend directly."""
-        logger.info("Testing TinyDB JSON-based backend...")
-
-        # Configure TinyDB backend
-        tinydb_config = {
-            "db_path": os.path.join(self.temp_dir, "test_tinydb.json"),
-            "indent": 2,
-            "ensure_ascii": False,
+        """Test TinyDB backend directly - DISABLED (TinyDB backend removed from framework)."""
+        logger.info("TinyDB backend test skipped - backend removed from framework")
+        
+        # Return mock results since TinyDB is no longer available
+        return {
+            "status": "SKIPPED",
+            "backend": "tinydb",
+            "reason": "TinyDB backend removed from framework",
+            "operations_tested": 0,
+            "memories_added": 0,
+            "search_results": 0,
         }
-
-        backend = TinyDBBackend(tinydb_config)
-
-        # Initialize backend
-        assert await backend.initialize(), "TinyDB backend initialization failed"
-        assert await backend.health_check(), "TinyDB backend health check failed"
-
-        # Test memory operations
-        results = await self._test_backend_operations(backend, "TinyDB")
-
-        # Test JSON storage
-        logger.info("Testing JSON document storage...")
-
-        # Add test memories
-        memory_ids = []
-        for memory_data in self.test_memories:
-            memory_id = await backend.add_memory(
-                self.project_name,
-                memory_data["content"],
-                memory_data["category"],
-                memory_data["tags"],
-                memory_data["metadata"],
-            )
-            assert memory_id, "Failed to add memory"
-            memory_ids.append(memory_id)
-
-        # Verify JSON file exists and is readable
-        json_path = tinydb_config["db_path"]
-        assert os.path.exists(json_path), "JSON database file not created"
-
-        with open(json_path, "r") as f:
-            data = json.load(f)
-            assert isinstance(data, dict), "JSON data format invalid"
-            assert "_default" in data, "TinyDB table structure missing"
-
-        # Test text search (simple contains)
-        query = MemoryQuery(query="architecture", limit=10)
-
-        search_results = await backend.search_memories(self.project_name, query)
-        assert len(search_results) > 0, "Text search returned no results"
-
-        # Test backup/restore
-        backup_path = os.path.join(self.temp_dir, "tinydb_backup.json")
-        assert await backend.create_backup(backup_path), "Backup creation failed"
-        assert os.path.exists(backup_path), "Backup file not created"
-
-        # Test statistics
-        stats = await backend.get_memory_stats(self.project_name)
-        assert stats["total"] == len(self.test_memories), "Statistics count mismatch"
-        assert stats["backend"] == "tinydb", "Backend name mismatch"
-
-        await backend.cleanup()
-
-        results.update(
-            {
-                "json_storage": True,
-                "text_search": True,
-                "backup_restore": True,
-                "statistics": stats,
-                "memory_count": len(memory_ids),
-            }
-        )
 
         return results
 

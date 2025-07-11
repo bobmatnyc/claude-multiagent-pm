@@ -42,7 +42,7 @@ class CMPMHealthMonitor(CMPMCommandBase):
             # Initialize health dashboard orchestrator with aggressive timeouts
             dashboard = HealthDashboardOrchestrator(
                 cache_ttl_seconds=10.0,  # Faster for real-time slash commands
-                global_timeout_seconds=8.0,  # Reduced from 15s to 8s to prevent CLI timeout
+                global_timeout_seconds=5.0,  # Optimized for sub-3s performance target
             )
 
             try:

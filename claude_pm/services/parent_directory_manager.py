@@ -144,6 +144,9 @@ class ParentDirectoryManager(BaseService):
         self.parent_directory_manager_dir = (
             self.working_dir / ".claude-pm" / "parent_directory_manager"
         )
+        
+        # Framework template backup directory
+        self.framework_backups_dir = self.working_dir / ".claude-pm" / "framework_backups"
 
         # Initialize paths
         self._initialize_paths()
@@ -218,6 +221,7 @@ class ParentDirectoryManager(BaseService):
             self.configs_dir,
             self.versions_dir,
             self.logs_dir,
+            self.framework_backups_dir,
         ]
 
         for directory in directories:
@@ -457,7 +461,19 @@ class ParentDirectoryManager(BaseService):
             # Add CLAUDE_MD_VERSION to template variables if not present
             if "CLAUDE_MD_VERSION" not in merged_variables:
                 # Generate temporary content for comparison first
-                framework_version = merged_variables.get("FRAMEWORK_VERSION", "4.5.1")
+                # Get framework version
+                try:
+                    version_file = self.framework_path / "VERSION"
+                    if version_file.exists():
+                        default_version = version_file.read_text().strip()
+                    else:
+                        import claude_pm
+                        default_version = claude_pm.__version__
+                except:
+                    import claude_pm
+                    default_version = claude_pm.__version__
+                
+                framework_version = merged_variables.get("FRAMEWORK_VERSION", default_version)
                 temp_variables = merged_variables.copy()
                 temp_variables["CLAUDE_MD_VERSION"] = "TEMP"  # Placeholder for template rendering
 
@@ -1372,6 +1388,9 @@ class ParentDirectoryManager(BaseService):
                     # PROTECTION: Ensure framework/CLAUDE.md is never deleted or removed
                     self._protect_framework_template(framework_template_path)
                     
+                    # BACKUP: Create backup before reading (in case of corruption during read)
+                    self._backup_framework_template(framework_template_path)
+                    
                     content = framework_template_path.read_text()
 
                     # Create a simple template version object
@@ -1410,13 +1429,22 @@ class ParentDirectoryManager(BaseService):
 
         # Get framework version
         try:
+            # Try VERSION file first
             version_file = self.framework_path / "VERSION"
             if version_file.exists():
                 framework_version = version_file.read_text().strip()
             else:
-                framework_version = "4.5.1"
+                # Fall back to package version
+                import claude_pm
+                framework_version = claude_pm.__version__
         except:
-            framework_version = "4.5.1"
+            # Import package version as last resort
+            try:
+                import claude_pm
+                framework_version = claude_pm.__version__
+            except:
+                # This should never happen in a proper installation
+                raise RuntimeError("Could not determine framework version - installation may be corrupted")
 
         # Get deployment date from config or use current time
         try:
@@ -1583,3 +1611,127 @@ class ParentDirectoryManager(BaseService):
         except Exception as e:
             self.logger.error(f"Failed to validate framework template integrity: {e}")
             return False
+    
+    def _backup_framework_template(self, framework_template_path: Path) -> Optional[Path]:
+        """
+        Create a backup of the framework template, maintaining only 2 most recent copies.
+        
+        Args:
+            framework_template_path: Path to the framework template file
+            
+        Returns:
+            Path to the created backup or None if failed
+        """
+        try:
+            if not framework_template_path.exists() or not framework_template_path.is_file():
+                self.logger.warning(f"Cannot backup non-existent framework template: {framework_template_path}")
+                return None
+            
+            # Verify this is actually the framework template
+            if framework_template_path.name != "CLAUDE.md" or "framework" not in str(framework_template_path):
+                self.logger.warning(f"Backup requested for non-framework template: {framework_template_path}")
+                return None
+            
+            # Ensure backup directory exists
+            self.framework_backups_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Generate backup filename with timestamp
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # Include milliseconds
+            backup_filename = f"framework_CLAUDE_md_{timestamp}.backup"
+            backup_path = self.framework_backups_dir / backup_filename
+            
+            # Handle duplicate timestamps (very unlikely but possible)
+            counter = 1
+            while backup_path.exists():
+                backup_filename = f"framework_CLAUDE_md_{timestamp}_{counter:02d}.backup"
+                backup_path = self.framework_backups_dir / backup_filename
+                counter += 1
+            
+            # Create the backup
+            shutil.copy2(framework_template_path, backup_path)
+            
+            # Rotate backups - keep only 2 most recent
+            self._rotate_framework_backups()
+            
+            self.logger.info(f"Framework template backup created: {backup_path}")
+            return backup_path
+            
+        except Exception as e:
+            self.logger.error(f"Failed to backup framework template: {e}")
+            return None
+    
+    def _rotate_framework_backups(self) -> None:
+        """
+        Rotate framework template backups, keeping only the 2 most recent copies.
+        """
+        try:
+            if not self.framework_backups_dir.exists():
+                return
+            
+            # Find all framework backup files
+            backup_pattern = "framework_CLAUDE_md_*.backup"
+            backup_files = list(self.framework_backups_dir.glob(backup_pattern))
+            
+            if len(backup_files) <= 2:
+                return  # No rotation needed
+            
+            # Sort by modification time (newest first)
+            backup_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+            
+            # Keep only the 2 most recent, remove the rest
+            files_to_remove = backup_files[2:]
+            
+            for old_backup in files_to_remove:
+                try:
+                    old_backup.unlink()
+                    self.logger.debug(f"Removed old framework backup: {old_backup}")
+                except Exception as remove_error:
+                    self.logger.error(f"Failed to remove old framework backup {old_backup}: {remove_error}")
+            
+            if files_to_remove:
+                self.logger.info(f"Rotated framework backups: kept 2 most recent, removed {len(files_to_remove)} old backups")
+                
+        except Exception as e:
+            self.logger.error(f"Failed to rotate framework backups: {e}")
+    
+    def get_framework_backup_status(self) -> Dict[str, Any]:
+        """
+        Get status information about framework template backups.
+        
+        Returns:
+            Dictionary with backup status information
+        """
+        try:
+            framework_template_path = self.framework_path / "framework" / "CLAUDE.md"
+            
+            status = {
+                "framework_template_exists": framework_template_path.exists(),
+                "framework_template_path": str(framework_template_path),
+                "backup_directory": str(self.framework_backups_dir),
+                "backup_directory_exists": self.framework_backups_dir.exists(),
+                "backup_count": 0,
+                "backups": []
+            }
+            
+            if self.framework_backups_dir.exists():
+                backup_pattern = "framework_CLAUDE_md_*.backup"
+                backup_files = list(self.framework_backups_dir.glob(backup_pattern))
+                backup_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+                
+                status["backup_count"] = len(backup_files)
+                
+                for backup_file in backup_files:
+                    backup_stat = backup_file.stat()
+                    status["backups"].append({
+                        "filename": backup_file.name,
+                        "path": str(backup_file),
+                        "size": backup_stat.st_size,
+                        "created": datetime.fromtimestamp(backup_stat.st_mtime).isoformat(),
+                        "age_hours": round((datetime.now().timestamp() - backup_stat.st_mtime) / 3600, 2)
+                    })
+            
+            return status
+            
+        except Exception as e:
+            self.logger.error(f"Failed to get framework backup status: {e}")
+            return {"error": str(e)}

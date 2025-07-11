@@ -10,7 +10,7 @@ Provides project management capabilities including:
 
 import asyncio
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
@@ -183,44 +183,58 @@ class ProjectService(BaseService):
             self.logger.debug(f"Ensured path exists: {path}")
 
     async def _discover_projects(self) -> None:
-        """Discover projects in the filesystem."""
+        """Discover projects in the filesystem with timeout protection."""
         self.logger.info("Discovering projects...")
 
         discovered_count = 0
+        discovery_timeout = 30.0  # 30 second timeout for discovery
 
-        # Discover managed projects
-        if self.managed_path.exists():
-            for project_path in self.managed_path.iterdir():
-                if project_path.is_dir() and not project_path.name.startswith("."):
-                    project_info = await self._analyze_project(project_path, "managed")
-                    if project_info:
-                        self._projects[project_info.name] = project_info
+        try:
+            # Use asyncio timeout to prevent blocking
+            async def _discover_with_timeout():
+                # Discover managed projects
+                if self.managed_path.exists():
+                    for project_path in self.managed_path.iterdir():
+                        if project_path.is_dir() and not project_path.name.startswith("."):
+                            project_info = await self._analyze_project(project_path, "managed")
+                            if project_info:
+                                self._projects[project_info.name] = project_info
+                                nonlocal discovered_count
+                                discovered_count += 1
+
+                # Discover other projects in base path
+                excluded_dirs = {"managed", "Claude-PM", "node_modules", ".git", "__pycache__"}
+                if self.base_path.exists():
+                    for project_path in self.base_path.iterdir():
+                        if (
+                            project_path.is_dir()
+                            and not project_path.name.startswith(".")
+                            and project_path.name not in excluded_dirs
+                        ):
+                            project_info = await self._analyze_project(project_path, "standalone")
+                            if project_info:
+                                self._projects[project_info.name] = project_info
+                                discovered_count += 1
+
+                # Add Claude PM framework as a special project
+                if self.claude_pm_path.exists():
+                    framework_info = await self._analyze_project(self.claude_pm_path, "framework")
+                    if framework_info:
+                        framework_info.name = "Claude-PM-Framework"
+                        self._projects[framework_info.name] = framework_info
                         discovered_count += 1
 
-        # Discover other projects in base path
-        excluded_dirs = {"managed", "Claude-PM", "node_modules", ".git", "__pycache__"}
-        if self.base_path.exists():
-            for project_path in self.base_path.iterdir():
-                if (
-                    project_path.is_dir()
-                    and not project_path.name.startswith(".")
-                    and project_path.name not in excluded_dirs
-                ):
+                return discovered_count
 
-                    project_info = await self._analyze_project(project_path, "standalone")
-                    if project_info:
-                        self._projects[project_info.name] = project_info
-                        discovered_count += 1
+            # Run discovery with timeout
+            discovered_count = await asyncio.wait_for(_discover_with_timeout(), timeout=discovery_timeout)
+            self.logger.info(f"Discovered {discovered_count} projects")
 
-        # Add Claude PM framework as a special project
-        if self.claude_pm_path.exists():
-            framework_info = await self._analyze_project(self.claude_pm_path, "framework")
-            if framework_info:
-                framework_info.name = "Claude-PM-Framework"
-                self._projects[framework_info.name] = framework_info
-                discovered_count += 1
-
-        self.logger.info(f"Discovered {discovered_count} projects")
+        except asyncio.TimeoutError:
+            self.logger.warning(f"Project discovery timed out after {discovery_timeout}s, discovered {discovered_count} projects so far")
+        except Exception as e:
+            self.logger.error(f"Error during project discovery: {e}")
+            self.logger.info(f"Discovered {discovered_count} projects before error")
 
     async def _analyze_project(
         self, project_path: Path, project_type: str
@@ -354,26 +368,69 @@ class ProjectService(BaseService):
                 )
 
                 if result.returncode == 0 and result.stdout.strip():
-                    git_time = datetime.fromisoformat(result.stdout.strip().replace(" ", "T"))
-                    latest_time = git_time
+                    git_time_str = result.stdout.strip().replace(" ", "T")
+                    try:
+                        git_time = datetime.fromisoformat(git_time_str)
+                        # Ensure timezone awareness
+                        if git_time.tzinfo is None:
+                            git_time = git_time.replace(tzinfo=timezone.utc)
+                        latest_time = git_time
+                    except ValueError:
+                        # If git time parsing fails, continue without git time
+                        pass
 
             except Exception:
                 pass
 
-            # Check file modifications
-            for file_path in project_path.rglob("*"):
-                if file_path.is_file() and not any(
-                    part.startswith(".") for part in file_path.parts
-                ):
-                    mtime = datetime.fromtimestamp(file_path.stat().st_mtime)
-                    if latest_time is None or mtime > latest_time:
-                        latest_time = mtime
+            # Check file modifications (optimized - limited scope for performance)
+            # Only check important files, not ALL files recursively
+            important_patterns = [
+                "*.md", "*.py", "*.js", "*.ts", "*.json", "*.yaml", "*.yml", 
+                "package.json", "requirements.txt", "Makefile", "Dockerfile"
+            ]
+            
+            files_checked = 0
+            max_files = 100  # Limit for performance
+            
+            # Check root directory files first
+            for pattern in important_patterns:
+                for file_path in project_path.glob(pattern):
+                    if files_checked >= max_files:
+                        break
+                    if file_path.is_file():
+                        mtime = datetime.fromtimestamp(file_path.stat().st_mtime, tz=timezone.utc)
+                        if latest_time is None or mtime > latest_time:
+                            latest_time = mtime
+                        files_checked += 1
+                
+                if files_checked >= max_files:
+                    break
+            
+            # If we haven't hit the limit, check one level deep
+            if files_checked < max_files:
+                for subdir in project_path.iterdir():
+                    if subdir.is_dir() and not subdir.name.startswith('.') and subdir.name not in {'node_modules', '__pycache__', '.git'}:
+                        for pattern in important_patterns:
+                            for file_path in subdir.glob(pattern):
+                                if files_checked >= max_files:
+                                    break
+                                if file_path.is_file():
+                                    mtime = datetime.fromtimestamp(file_path.stat().st_mtime, tz=timezone.utc)
+                                    if latest_time is None or mtime > latest_time:
+                                        latest_time = mtime
+                                    files_checked += 1
+                            
+                            if files_checked >= max_files:
+                                break
+                    
+                    if files_checked >= max_files:
+                        break
 
-            return latest_time.isoformat() if latest_time else datetime.min.isoformat()
+            return latest_time.isoformat() if latest_time else datetime.min.replace(tzinfo=timezone.utc).isoformat()
 
         except Exception as e:
             self.logger.warning(f"Failed to get last activity for {project_path}: {e}")
-            return datetime.min.isoformat()
+            return datetime.min.replace(tzinfo=timezone.utc).isoformat()
 
     async def _get_git_info(self, project_path: Path) -> Optional[Dict[str, Any]]:
         """Get git information for a project."""

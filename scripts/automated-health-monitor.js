@@ -29,6 +29,48 @@ const { execSync, exec } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
 
+// Memory management and leak prevention
+const MEMORY_THRESHOLD = 512 * 1024 * 1024; // 512MB threshold for health monitor
+let memoryMonitorInterval = null;
+
+function setupMemoryMonitoring() {
+    memoryMonitorInterval = setInterval(() => {
+        const usage = process.memoryUsage();
+        if (usage.heapUsed > MEMORY_THRESHOLD) {
+            console.log(`⚠️  High memory usage detected: ${Math.round(usage.heapUsed / 1024 / 1024)}MB`);
+            if (global.gc) {
+                global.gc();
+                console.log(`🔄 Garbage collection triggered, new usage: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`);
+            }
+        }
+    }, 30000); // Check every 30 seconds
+}
+
+function cleanupMemoryMonitoring() {
+    if (memoryMonitorInterval) {
+        clearInterval(memoryMonitorInterval);
+        memoryMonitorInterval = null;
+    }
+    // Force garbage collection on cleanup
+    if (global.gc) {
+        global.gc();
+    }
+}
+
+// Setup memory monitoring immediately
+setupMemoryMonitoring();
+
+// Cleanup on process exit
+process.on('exit', cleanupMemoryMonitoring);
+process.on('SIGINT', () => {
+    cleanupMemoryMonitoring();
+    process.exit(0);
+});
+process.on('SIGTERM', () => {
+    cleanupMemoryMonitoring();
+    process.exit(0);
+});
+
 class ClaudePMHealthMonitor {
   constructor(options = {}) {
     this.basePath = path.join(process.env.HOME, 'Projects');
@@ -971,6 +1013,22 @@ ${Object.entries(this.healthReport.projects)
     this.log('info', 'Starting comprehensive health check...');
     
     try {
+      // Clear previous health report to prevent memory accumulation
+      if (this.healthReport) {
+        // Clear large objects
+        this.healthReport.services = null;
+        this.healthReport.projects = null;
+        this.healthReport.framework = null;
+        this.healthReport.recommendations = null;
+        this.healthReport.alerts = null;
+        this.healthReport = null;
+      }
+      
+      // Force garbage collection before creating new report
+      if (global.gc) {
+        global.gc();
+      }
+      
       // Reset health report
       this.healthReport = {
         timestamp: new Date().toISOString(),

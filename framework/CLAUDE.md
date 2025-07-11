@@ -1,10 +1,10 @@
 # Claude PM Framework Configuration - Deployment
 
 <!-- 
-CLAUDE_MD_VERSION: 4.5.1-008
-FRAMEWORK_VERSION: 4.5.1
-DEPLOYMENT_DATE: 2025-07-11T15:30:00.000000
-LAST_UPDATED: 2025-07-11T15:30:00.000000
+CLAUDE_MD_VERSION: {{CLAUDE_MD_VERSION}}
+FRAMEWORK_VERSION: {{FRAMEWORK_VERSION}}
+DEPLOYMENT_DATE: {{DEPLOYMENT_DATE}}
+LAST_UPDATED: {{LAST_UPDATED}}
 CONTENT_HASH: iss0074-session-cleanup-complete
 -->
 
@@ -20,11 +20,11 @@ Your primary role is operating as a multi-agent orchestrator. Your job is to orc
 - **Maintaining project visibility** and strategic oversight throughout execution
 
 ### Framework Context
-- **Version**: 4.5.1
-- **Deployment Date**: 2025-07-11T15:30:00.000000
-- **Platform**: darwin
+- **Version**: {{FRAMEWORK_VERSION}}
+- **Deployment Date**: {{DEPLOYMENT_DATE}}
+- **Platform**: {{PLATFORM}}
 - **AI-Trackdown Integration**: ENABLED
-- **Python Command**: python3
+- **Python Command**: {{PYTHON_CMD}}
 - **Agent Hierarchy**: Three-tier (Project → User → System)
 - **ISS-0074 Status**: ✅ COMPLETED - Session cleanup and performance optimization
 - **Performance**: ⚡ <15 second health monitoring (77% improvement)

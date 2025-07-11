@@ -165,6 +165,26 @@ def _detect_memory_manager_info():
         return "error"
 
 
+def _get_framework_version():
+    """Get framework version from VERSION file or package info."""
+    try:
+        from pathlib import Path
+        import claude_pm
+        
+        # Try VERSION file first (for source development)
+        try:
+            version_file = Path(__file__).parent.parent / "VERSION"
+            if version_file.exists():
+                return version_file.read_text().strip()
+        except:
+            pass
+        
+        # Fall back to package version
+        return claude_pm.__version__
+    except:
+        # Last resort - should never happen in normal installs
+        return "unknown"
+
 def _detect_claude_md_version():
     """Detect CLAUDE.md version and provide concise information."""
     try:
@@ -179,6 +199,9 @@ def _detect_claude_md_version():
         if not claude_md_path.exists():
             return "Not found"
 
+        # Get framework version using our utility function
+        framework_version = _get_framework_version()
+
         # Read and parse CLAUDE.md content
         try:
             with open(claude_md_path, "r", encoding="utf-8") as f:
@@ -189,12 +212,12 @@ def _detect_claude_md_version():
             if version_match:
                 version = version_match.group(1)
 
-                # Format display based on version type
+                # Format display using VERSION file for framework part
                 if "-" in version:
-                    framework_ver, serial = version.split("-", 1)
-                    return f"v{version} (Framework: v{framework_ver}, Serial: {serial})"
+                    _, serial = version.split("-", 1)
+                    return f"v{framework_version}-{serial}"
                 else:
-                    return f"v{version} (Legacy format)"
+                    return f"v{framework_version} (Legacy format)"
             else:
                 return "Found (no version detected)"
 
@@ -261,7 +284,7 @@ def _display_directory_context():
 
 
 @click.group()
-@click.version_option(version="3.0.0", prog_name="Claude Multi-Agent PM Framework")
+@click.version_option(prog_name="Claude Multi-Agent PM Framework")
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
 @click.option("--config", "-c", type=click.Path(exists=True), help="Configuration file path")
 @click.pass_context
@@ -353,7 +376,7 @@ def setup(ctx, target_dir, backup, force):
 
             # Set up template variables for handlebars processing
             template_variables = {
-                "FRAMEWORK_VERSION": "4.5.1",
+                "FRAMEWORK_VERSION": _get_framework_version(),
                 "DEPLOYMENT_DATE": datetime.now().isoformat(),
                 "PLATFORM": platform.system().lower(),
                 "PYTHON_CMD": "python3",

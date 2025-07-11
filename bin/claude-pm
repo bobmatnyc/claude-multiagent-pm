@@ -13,7 +13,73 @@ const path = require('path');
 const os = require('os');
 const { spawn } = require('child_process');
 
-const CLAUDE_PM_VERSION = require('../package.json').version;
+// Universal version resolution for all deployment scenarios
+function resolveVersion() {
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Strategy 1: Try to find package.json relative to this script
+    // Works for: source, npm global, npm local, deployed scenarios
+    const packagePaths = [
+        path.join(__dirname, '../package.json'),  // From bin/ directory (source, npm)
+        path.join(__dirname, '../../package.json'), // One level up if needed
+        path.join(__dirname, '../../../package.json') // Two levels up for deep npm installs
+    ];
+    
+    for (const packagePath of packagePaths) {
+        try {
+            if (fs.existsSync(packagePath)) {
+                const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+                if (pkg.name === '@bobmatnyc/claude-multiagent-pm' && pkg.version) {
+                    return pkg.version;
+                }
+            }
+        } catch (e) {
+            // Continue to next path
+        }
+    }
+    
+    // Strategy 2: Try VERSION file (source development scenario)
+    const versionPaths = [
+        path.join(__dirname, '../VERSION'),  // From bin/ directory (source)
+        path.join(__dirname, '../../VERSION') // One level up
+    ];
+    
+    for (const versionPath of versionPaths) {
+        try {
+            if (fs.existsSync(versionPath)) {
+                return fs.readFileSync(versionPath, 'utf8').trim();
+            }
+        } catch (e) {
+            // Continue to next path
+        }
+    }
+    
+    // Strategy 3: Use npm to resolve package version (if available)
+    try {
+        const { execSync } = require('child_process');
+        const result = execSync('npm list @bobmatnyc/claude-multiagent-pm --depth=0 --json', { 
+            encoding: 'utf8', 
+            stdio: 'pipe',
+            timeout: 5000 
+        });
+        const npmData = JSON.parse(result);
+        if (npmData.dependencies && npmData.dependencies['@bobmatnyc/claude-multiagent-pm']) {
+            return npmData.dependencies['@bobmatnyc/claude-multiagent-pm'].version;
+        }
+    } catch (e) {
+        // npm command failed, continue
+    }
+    
+    // If all strategies fail, throw error with helpful message
+    throw new Error(
+        'Could not resolve Claude PM Framework version. ' +
+        'This may indicate a corrupted installation or unsupported deployment scenario. ' +
+        'Please reinstall using: npm install -g @bobmatnyc/claude-multiagent-pm'
+    );
+}
+
+const CLAUDE_PM_VERSION = resolveVersion();
 
 /**
  * Claude PM Framework Deployment Detection System
@@ -26,6 +92,52 @@ class DeploymentDetector {
         this.platform = os.platform();
         this.detectionResults = null;
         this.detectionCache = new Map();
+        this.maxCacheSize = 10; // Limit cache size to prevent memory growth
+        this.cacheCleanupTimer = null;
+        this._setupMemoryCleanup();
+    }
+
+    /**
+     * Setup automatic memory cleanup to prevent memory leaks
+     */
+    _setupMemoryCleanup() {
+        // Clear cache periodically to prevent memory accumulation
+        this.cacheCleanupTimer = setInterval(() => {
+            if (this.detectionCache.size > this.maxCacheSize) {
+                // Keep only the most recent entries
+                const entries = Array.from(this.detectionCache.entries());
+                const keepEntries = entries.slice(-this.maxCacheSize);
+                this.detectionCache.clear();
+                keepEntries.forEach(([key, value]) => {
+                    this.detectionCache.set(key, value);
+                });
+            }
+        }, 30000); // Clean up every 30 seconds
+
+        // Cleanup on process exit
+        process.on('exit', () => {
+            this.cleanup();
+        });
+        process.on('SIGINT', () => {
+            this.cleanup();
+            process.exit(0);
+        });
+        process.on('SIGTERM', () => {
+            this.cleanup();
+            process.exit(0);
+        });
+    }
+
+    /**
+     * Clean up resources to prevent memory leaks
+     */
+    cleanup() {
+        if (this.cacheCleanupTimer) {
+            clearInterval(this.cacheCleanupTimer);
+            this.cacheCleanupTimer = null;
+        }
+        this.detectionCache.clear();
+        this.detectionResults = null;
     }
 
     /**
@@ -753,14 +865,12 @@ function displaySystemInfo() {
             const versionMatch = claudeMdContent.match(/CLAUDE_MD_VERSION:\s*([\d\.-]+)/);
             if (versionMatch) {
                 const version = versionMatch[1];
-                console.log(`📄 CLAUDE.md (Current): v${version}`);
-                
-                // Show version format info
+                // Use framework version + serial format
                 if (version.includes('-')) {
-                    const [frameworkVer, serial] = version.split('-');
-                    console.log(`   • Framework: v${frameworkVer} | Serial: ${serial}`);
+                    const [, serial] = version.split('-', 2);
+                    console.log(`📄 CLAUDE.md (Current): v${CLAUDE_PM_VERSION}-${serial}`);
                 } else {
-                    console.log(`   • Legacy format (pre-serial versioning)`);
+                    console.log(`📄 CLAUDE.md (Current): v${CLAUDE_PM_VERSION} (Legacy format)`);
                 }
             } else {
                 console.log(`📄 CLAUDE.md (Current): Found (no version detected)`);
@@ -806,7 +916,14 @@ function displaySystemInfo() {
                         const versionMatch = content.match(/CLAUDE_MD_VERSION:\s*([\d\.-]+)/);
                         
                         if (versionMatch) {
-                            console.log(`📋 Framework CLAUDE.md: ${displayPath} (${versionMatch[1]})`);
+                            const version = versionMatch[1];
+                            // Use framework version + serial format
+                            if (version.includes('-')) {
+                                const [, serial] = version.split('-', 2);
+                                console.log(`📋 Framework CLAUDE.md: ${displayPath} (${CLAUDE_PM_VERSION}-${serial})`);
+                            } else {
+                                console.log(`📋 Framework CLAUDE.md: ${displayPath} (${CLAUDE_PM_VERSION})`);
+                            }
                         } else {
                             console.log(`📋 Framework CLAUDE.md: ${displayPath}`);
                         }
@@ -1057,10 +1174,62 @@ async function manageFrameworkClaudeMd() {
 }
 
 /**
- * Enhanced main execution function with deployment detection
+ * Enhanced main execution function with deployment detection and memory management
  */
 async function main() {
     const args = process.argv.slice(2);
+    
+    // Memory monitoring and early exit for memory exhaustion
+    const memoryThreshold = 3.5 * 1024 * 1024 * 1024; // 3.5GB threshold
+    const checkMemory = () => {
+        const usage = process.memoryUsage();
+        if (usage.heapUsed > memoryThreshold) {
+            console.error(`❌ Memory usage critical: ${Math.round(usage.heapUsed / 1024 / 1024)}MB`);
+            console.error('Triggering garbage collection and cleanup...');
+            if (global.gc) {
+                global.gc();
+            }
+            // Force cleanup of deployment detector
+            if (deploymentDetector) {
+                deploymentDetector.cleanup();
+            }
+            return true;
+        }
+        return false;
+    };
+    
+    // Monitor memory every 10 seconds during execution
+    const memoryMonitor = setInterval(checkMemory, 10000);
+    
+    // Cleanup function for proper resource management
+    const cleanup = () => {
+        if (memoryMonitor) {
+            clearInterval(memoryMonitor);
+        }
+        if (deploymentDetector) {
+            deploymentDetector.cleanup();
+        }
+        // Force garbage collection if available
+        if (global.gc) {
+            global.gc();
+        }
+    };
+    
+    // Setup cleanup handlers
+    process.on('exit', cleanup);
+    process.on('SIGINT', () => {
+        cleanup();
+        process.exit(0);
+    });
+    process.on('SIGTERM', () => {
+        cleanup();
+        process.exit(0);
+    });
+    
+    // Check memory immediately
+    if (checkMemory()) {
+        console.error('❌ Starting with high memory usage - may indicate memory leak');
+    }
     
     // Handle special flags
     if (args.includes('--version') || args.includes('-v')) {
@@ -1133,31 +1302,73 @@ async function main() {
                 console.log(`⚠️  Framework cleanup warning: ${frameworkResult.reason}`);
             }
             
-            // Show which framework CLAUDE.md is active
-            if (frameworkResult.topLevelFile) {
-                console.log(`📋 Active framework CLAUDE.md: ${frameworkResult.topLevelFile}`);
-            } else if (frameworkResult.activeFrameworkFile) {
-                console.log(`📋 Active framework CLAUDE.md: ${frameworkResult.activeFrameworkFile}`);
-            } else if (frameworkResult.frameworkFiles === 0) {
-                console.log(`📋 Framework CLAUDE.md: None detected (normal for non-framework contexts)`);
+            // Show project CLAUDE.md info
+            try {
+                const projectClaudePath = path.join(process.cwd(), 'CLAUDE.md');
+                if (require('fs').existsSync(projectClaudePath)) {
+                    const content = require('fs').readFileSync(projectClaudePath, 'utf8');
+                    const lineCount = content.split('\n').length;
+                    console.log(`📋 Project CLAUDE.md: CLAUDE.md ${lineCount} lines`);
+                } else {
+                    console.log(`📋 Project CLAUDE.md: None found`);
+                }
+            } catch (error) {
+                console.log(`📋 Project CLAUDE.md: Error reading file`);
             }
         } catch (error) {
             console.log(`⚠️  Framework cleanup error: ${error.message}`);
         }
         
         try {
+            // Add memory optimization to Claude launch
+            const claudeEnv = {
+                ...process.env,
+                NODE_OPTIONS: '--max-old-space-size=4096'
+            };
+            
             const claudeProcess = spawn('claude', ['--dangerously-skip-permissions', '--model', 'sonnet'], {
                 stdio: 'inherit',
-                env: process.env
+                env: claudeEnv
+            });
+            
+            // Track Claude process for cleanup
+            const claudeCleanup = () => {
+                cleanup(); // Original cleanup
+                if (claudeProcess && !claudeProcess.killed) {
+                    try {
+                        claudeProcess.kill('SIGTERM');
+                        setTimeout(() => {
+                            if (!claudeProcess.killed) {
+                                claudeProcess.kill('SIGKILL');
+                            }
+                        }, 5000);
+                    } catch (error) {
+                        // Ignore cleanup errors
+                    }
+                }
+            };
+            
+            // Update cleanup handlers for Claude process
+            process.removeAllListeners('SIGINT');
+            process.removeAllListeners('SIGTERM');
+            process.on('SIGINT', () => {
+                claudeCleanup();
+                process.exit(0);
+            });
+            process.on('SIGTERM', () => {
+                claudeCleanup();
+                process.exit(0);
             });
             
             claudeProcess.on('close', (code) => {
+                claudeCleanup();
                 process.exit(code);
             });
             
             claudeProcess.on('error', (error) => {
                 console.error('❌ Failed to launch Claude:', error.message);
                 console.error('Make sure Claude CLI is installed and available in your PATH');
+                claudeCleanup();
                 process.exit(1);
             });
             
@@ -1165,6 +1376,7 @@ async function main() {
         } catch (error) {
             console.error('❌ Failed to launch Claude:', error.message);
             console.error('Make sure Claude CLI is installed and available in your PATH');
+            cleanup();
             process.exit(1);
         }
     }
@@ -1253,7 +1465,7 @@ async function main() {
         process.exit(1);
     }
     
-    // Enhanced environment setup based on deployment strategy
+    // Enhanced environment setup based on deployment strategy with memory optimization
     const enhancedEnv = {
         ...process.env,
         ...deploymentStrategy.environmentSetup,
@@ -1262,7 +1474,11 @@ async function main() {
         CLAUDE_PM_DEPLOYMENT_CONFIDENCE: deploymentStrategy.config.confidence,
         // FIXED: Add explicit deployment directory for Python integration
         CLAUDE_PM_DEPLOYMENT_DIR: frameworkPath,
-        CLAUDE_PM_WORKING_DIR: process.cwd()
+        CLAUDE_PM_WORKING_DIR: process.cwd(),
+        // Memory optimization flags
+        NODE_OPTIONS: '--max-old-space-size=4096',
+        // Enable garbage collection if available
+        NODE_GC: '1'
     };
     
     // Ensure proper PYTHONPATH setup
@@ -1279,14 +1495,52 @@ async function main() {
     // FIXED: Handle project deployment completion
     await handleProjectDeployment(deploymentStrategy, args);
     
-    // Execute Python CLI module with enhanced environment
+    // Execute Python CLI module with enhanced environment and memory management
     const pythonProcess = spawn(pythonCmd, ['-m', 'claude_pm.cli', ...args], {
         stdio: 'inherit',
         env: enhancedEnv,
         cwd: frameworkPath
     });
     
+    // Track spawned process for cleanup
+    const spawnedProcesses = [pythonProcess];
+    
+    // Enhanced cleanup function that includes spawned processes
+    const enhancedCleanup = () => {
+        cleanup(); // Original cleanup
+        
+        // Kill any spawned processes
+        spawnedProcesses.forEach(proc => {
+            if (proc && !proc.killed) {
+                try {
+                    proc.kill('SIGTERM');
+                    // Force kill after timeout
+                    setTimeout(() => {
+                        if (!proc.killed) {
+                            proc.kill('SIGKILL');
+                        }
+                    }, 5000);
+                } catch (error) {
+                    // Ignore errors when killing processes
+                }
+            }
+        });
+    };
+    
+    // Update cleanup handlers to include process cleanup
+    process.removeAllListeners('SIGINT');
+    process.removeAllListeners('SIGTERM');
+    process.on('SIGINT', () => {
+        enhancedCleanup();
+        process.exit(0);
+    });
+    process.on('SIGTERM', () => {
+        enhancedCleanup();
+        process.exit(0);
+    });
+    
     pythonProcess.on('close', (code) => {
+        enhancedCleanup();
         process.exit(code);
     });
     
@@ -1296,6 +1550,7 @@ async function main() {
         console.error(`   Framework path: ${frameworkPath}`);
         console.error(`   Python command: ${pythonCmd}`);
         console.error(`   Try running: claude-pm --deployment-info`);
+        enhancedCleanup();
         process.exit(1);
     });
 }

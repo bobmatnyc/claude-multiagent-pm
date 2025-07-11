@@ -83,6 +83,59 @@ class ScriptDeploymentManager:
             logger.error(f"Failed to calculate checksum for {file_path}: {e}")
             return ""
     
+    def _inject_version_into_script(self, source_path: Path, target_path: Path):
+        """Inject VERSION file content into script for local deployment."""
+        try:
+            # Read VERSION file
+            version_file = self.framework_root / "VERSION"
+            if not version_file.exists():
+                logger.warning("VERSION file not found, using package.json fallback")
+                # Try package.json as fallback
+                package_file = self.framework_root / "package.json"
+                if package_file.exists():
+                    import json
+                    with open(package_file) as f:
+                        pkg_data = json.load(f)
+                        version_content = pkg_data.get('version', 'unknown')
+                else:
+                    version_content = 'unknown'
+            else:
+                version_content = version_file.read_text().strip()
+            
+            # Read source script
+            with open(source_path, 'r') as f:
+                script_content = f.read()
+            
+            # Replace the version resolution function with embedded version
+            version_injection = f'''// Embedded version for local deployment
+const CLAUDE_PM_VERSION = '{version_content}';'''
+            
+            # Find and replace the version resolution section
+            import re
+            
+            # Pattern to match the entire version resolution section
+            pattern = r'// Universal version resolution.*?const CLAUDE_PM_VERSION = resolveVersion\(\);'
+            replacement = version_injection
+            
+            updated_content = re.sub(pattern, replacement, script_content, flags=re.DOTALL)
+            
+            # If pattern not found, try simpler pattern
+            if updated_content == script_content:
+                pattern = r'const CLAUDE_PM_VERSION = resolveVersion\(\);'
+                replacement = f"const CLAUDE_PM_VERSION = '{version_content}';"
+                updated_content = re.sub(pattern, replacement, script_content)
+            
+            # Write processed script to target
+            with open(target_path, 'w') as f:
+                f.write(updated_content)
+            
+            logger.info(f"Injected version '{version_content}' into deployed script")
+            
+        except Exception as e:
+            logger.error(f"Failed to inject version into script: {e}")
+            # Fall back to normal copy
+            shutil.copy2(source_path, target_path)
+    
     def get_script_version(self, script_path: Path, script_type: str) -> str:
         """Extract version information from script."""
         try:
@@ -254,8 +307,13 @@ class ScriptDeploymentManager:
                 shutil.copy2(target_path, backup_path)
                 logger.info(f"Created backup: {backup_path}")
             
-            # Copy script
-            shutil.copy2(source_path, target_path)
+            # Process script content before deploying
+            if script_info["type"] == "node" and script_name == "claude-pm":
+                # Inject VERSION file content into Node.js script
+                self._inject_version_into_script(source_path, target_path)
+            else:
+                # Copy script as-is for other scripts
+                shutil.copy2(source_path, target_path)
             
             # Make executable
             os.chmod(target_path, 0o755)

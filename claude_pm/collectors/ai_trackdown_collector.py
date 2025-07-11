@@ -143,28 +143,42 @@ class AITrackdownHealthCollector(HealthCollector):
                 )
 
         except Exception as e:
-            # Fallback: Check if CLI exists and is executable
-            if self.cli_path.exists() and self.cli_path.is_file():
-                # CLI exists but may have runtime issues
+            # Fallback: For global CLI command, check if it's available via which
+            try:
+                # Try to find the CLI command
+                import shutil
+                cli_path_found = shutil.which(self.cli_path)
+                
+                if cli_path_found:
+                    # CLI command found in PATH but execution failed
+                    return create_service_health_report(
+                        name="ai_trackdown_cli",
+                        status=HealthStatus.DEGRADED,
+                        message=f"CLI found in PATH but execution failed: {str(e)}",
+                        error=str(e),
+                        metrics={
+                            "cli_exists": True,
+                            "cli_path": str(self.cli_path),
+                            "resolved_path": cli_path_found,
+                        },
+                    )
+                else:
+                    # CLI command not found in PATH
+                    return create_service_health_report(
+                        name="ai_trackdown_cli",
+                        status=HealthStatus.DOWN,
+                        message="CLI command not found in PATH",
+                        error=str(e),
+                        metrics={"cli_exists": False, "cli_path": str(self.cli_path)},
+                    )
+            except Exception as fallback_error:
+                # If fallback check fails too
                 return create_service_health_report(
                     name="ai_trackdown_cli",
-                    status=HealthStatus.DEGRADED,
-                    message=f"CLI exists but execution failed: {str(e)}",
+                    status=HealthStatus.ERROR,
+                    message=f"CLI check failed: {str(e)}",
                     error=str(e),
-                    metrics={
-                        "cli_exists": True,
-                        "cli_path": str(self.cli_path),
-                        "executable": self.cli_path.stat().st_mode & 0o111 != 0,
-                    },
-                )
-            else:
-                # CLI is missing
-                return create_service_health_report(
-                    name="ai_trackdown_cli",
-                    status=HealthStatus.DOWN,
-                    message="CLI binary not found or not executable",
-                    error=str(e),
-                    metrics={"cli_exists": False, "cli_path": str(self.cli_path)},
+                    metrics={"cli_path": str(self.cli_path)},
                 )
 
     async def _check_task_system(self) -> ServiceHealthReport:

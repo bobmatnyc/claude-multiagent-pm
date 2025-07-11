@@ -43,7 +43,7 @@ class HealthDashboardOrchestrator:
         self,
         cache_ttl_seconds: float = 60.0,
         max_parallel_collectors: int = 8,
-        global_timeout_seconds: float = 15.0,  # Reduced from 30 to 15 seconds
+        global_timeout_seconds: float = 8.0,  # Optimized for <3s total target
         version: str = "3.0.0",
     ):
         """
@@ -52,7 +52,7 @@ class HealthDashboardOrchestrator:
         Args:
             cache_ttl_seconds: Cache TTL for health reports (default 60s)
             max_parallel_collectors: Maximum parallel collector execution
-            global_timeout_seconds: Global timeout for health collection (2.5s for 3s total target)
+            global_timeout_seconds: Global timeout for health collection (optimized for <3s total target)
             version: Framework version for reports
         """
         self.cache_ttl_seconds = cache_ttl_seconds
@@ -79,24 +79,24 @@ class HealthDashboardOrchestrator:
         """Initialize default health collectors."""
         # Legacy health monitor adapter
         legacy_adapter = HealthMonitorServiceAdapter(
-            timeout_seconds=5.0
-        )  # Reduced from 10 to 5 seconds
+            timeout_seconds=2.5
+        )  # Optimized for sub-3s performance target
         self.add_collector(legacy_adapter)
 
         # Framework services collector
         from ..collectors.framework_services import FrameworkServicesCollector
 
         framework_collector = FrameworkServicesCollector(
-            timeout_seconds=5.0
-        )  # Reduced from 10 to 5 seconds
+            timeout_seconds=2.5
+        )  # Optimized for sub-3s performance target
         self.add_collector(framework_collector)
 
         # AI-trackdown tools collector
         from ..collectors.ai_trackdown_collector import AITrackdownHealthCollector
 
         ai_trackdown_collector = AITrackdownHealthCollector(
-            timeout_seconds=5.0
-        )  # Reduced from 10 to 5 seconds
+            timeout_seconds=2.5
+        )  # Optimized for sub-3s performance target
         self.add_collector(ai_trackdown_collector)
 
     def add_collector(self, collector: HealthCollector) -> None:

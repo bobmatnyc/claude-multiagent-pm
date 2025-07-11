@@ -23,7 +23,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from claude_pm.services.memory.backends.sqlite_backend import SQLiteBackend
-from claude_pm.services.memory.backends.tinydb_backend import TinyDBBackend
+# TinyDB backend removed from framework - import disabled
+# from claude_pm.services.memory.backends.tinydb_backend import TinyDBBackend
 
 # # from claude_pm.services.memory.backends.memory_backend import InMemoryBackend  # InMemory backend removed  # InMemory backend removed
 from claude_pm.services.memory.interfaces.models import MemoryCategory, MemoryQuery
@@ -34,68 +35,12 @@ logger = logging.getLogger(__name__)
 
 
 async def test_tinydb_isolated():
-    """Test TinyDB backend in isolation."""
-    logger.info("Testing TinyDB backend isolation...")
-
-    temp_dir = tempfile.mkdtemp()
-    tinydb_path = os.path.join(temp_dir, "isolated_test.json")
-
-    try:
-        # Try to import TinyDB directly
-        from tinydb import TinyDB
-
-        logger.info("✅ TinyDB import successful")
-
-        # Create TinyDB instance directly
-        db = TinyDB(tinydb_path)
-        logger.info("✅ TinyDB instance created")
-
-        # Test basic operations
-        doc_id = db.insert({"test": "data"})
-        logger.info(f"✅ Document inserted with ID: {doc_id}")
-
-        docs = db.all()
-        logger.info(f"✅ Retrieved {len(docs)} documents")
-
-        db.close()
-
-        # Now test our backend
-        backend = TinyDBBackend({"db_path": tinydb_path})
-
-        # Check initialization
-        success = await backend.initialize()
-        logger.info(f"Backend initialization: {success}")
-
-        # Check health
-        health = await backend.health_check()
-        logger.info(f"Backend health check: {health}")
-
-        if success and health:
-            # Test memory operations
-            memory_id = await backend.add_memory(
-                "test_project", "Test content", MemoryCategory.PROJECT, ["test"], {"test": True}
-            )
-            logger.info(f"✅ Memory added: {memory_id}")
-
-            memory = await backend.get_memory("test_project", memory_id)
-            logger.info(f"✅ Memory retrieved: {memory.content if memory else 'None'}")
-
-        await backend.cleanup()
-
-    except Exception as e:
-        logger.error(f"❌ TinyDB test failed: {e}")
-        import traceback
-
-        traceback.print_exc()
-
-    finally:
-        # Cleanup
-        try:
-            import shutil
-
-            shutil.rmtree(temp_dir)
-        except:
-            pass
+    """Test TinyDB backend in isolation - DISABLED (TinyDB backend removed from framework)."""
+    logger.info("TinyDB backend test skipped - backend removed from framework")
+    
+    # TinyDB backend has been removed from the framework
+    # This test is now disabled to prevent import errors
+    logger.info("✅ TinyDB isolated test skipped (backend removed)")
 
 
 async def test_sqlite_isolated():
