@@ -820,9 +820,13 @@ function displaySystemInfo() {
     // Memory System Status - Use dedicated Python detection function
     try {
         const { execSync } = require('child_process');
+        const frameworkPath = deploymentConfig && deploymentConfig.config && deploymentConfig.config.found 
+            ? deploymentConfig.config.frameworkPath 
+            : process.cwd();
+        
         // Call the Python _detect_memory_manager_info() function directly
-        const memoryInfo = execSync('python3 -c "import sys; sys.path.insert(0, \'.\'); from claude_pm.cli import _detect_memory_manager_info; print(_detect_memory_manager_info())"', {
-            cwd: process.cwd(),
+        const memoryInfo = execSync(`python3 -c "import sys; sys.path.insert(0, '${frameworkPath}'); from claude_pm.cli import _detect_memory_manager_info; print(_detect_memory_manager_info())"`, {
+            cwd: frameworkPath,
             timeout: 2000,
             encoding: 'utf8',
             stdio: 'pipe'
@@ -861,11 +865,18 @@ function displaySystemInfo() {
         if (fs.existsSync(currentDirClaudeMd)) {
             const claudeMdContent = fs.readFileSync(currentDirClaudeMd, 'utf8');
             
-            // Extract CLAUDE_MD_VERSION using regex that supports both formats
-            const versionMatch = claudeMdContent.match(/CLAUDE_MD_VERSION:\s*([\d\.-]+)/);
-            if (versionMatch) {
-                const version = versionMatch[1];
-                // Use framework version + serial format
+            // Extract CLAUDE_MD_VERSION and FRAMEWORK_VERSION to combine them
+            const claudeMdVersionMatch = claudeMdContent.match(/CLAUDE_MD_VERSION:\s*([\d\.-]+)/);
+            const frameworkVersionMatch = claudeMdContent.match(/FRAMEWORK_VERSION:\s*(\d+)/);
+            
+            if (claudeMdVersionMatch && frameworkVersionMatch) {
+                const claudeMdVersion = claudeMdVersionMatch[1];
+                const frameworkVersion = frameworkVersionMatch[1];
+                // Combine versions in format: CLAUDE_MD_VERSION-FRAMEWORK_VERSION
+                console.log(`📄 CLAUDE.md (Current): v${claudeMdVersion}-${frameworkVersion}`);
+            } else if (claudeMdVersionMatch) {
+                const version = claudeMdVersionMatch[1];
+                // Use framework version + serial format (legacy)
                 if (version.includes('-')) {
                     const [, serial] = version.split('-', 2);
                     console.log(`📄 CLAUDE.md (Current): v${CLAUDE_PM_VERSION}-${serial}`);
@@ -873,7 +884,9 @@ function displaySystemInfo() {
                     console.log(`📄 CLAUDE.md (Current): v${CLAUDE_PM_VERSION} (Legacy format)`);
                 }
             } else {
-                console.log(`📄 CLAUDE.md (Current): Found (no version detected)`);
+                // No version metadata - treat as project documentation, show line count
+                const lines = claudeMdContent.split('\n').length;
+                console.log(`📄 Project CLAUDE.md: ${lines} lines`);
             }
             foundCurrentDir = true;
         }
@@ -913,11 +926,17 @@ function displaySystemInfo() {
                     if (isFramework) {
                         // Format path with ~ for home directory
                         const displayPath = frameworkPath.replace('/Users/masa', '~');
-                        const versionMatch = content.match(/CLAUDE_MD_VERSION:\s*([\d\.-]+)/);
+                        const claudeMdVersionMatch = content.match(/CLAUDE_MD_VERSION:\s*([\d\.-]+)/);
+                        const frameworkVersionMatch = content.match(/FRAMEWORK_VERSION:\s*(\d+)/);
                         
-                        if (versionMatch) {
-                            const version = versionMatch[1];
-                            // Use framework version + serial format
+                        if (claudeMdVersionMatch && frameworkVersionMatch) {
+                            const claudeMdVersion = claudeMdVersionMatch[1];
+                            const frameworkVersion = frameworkVersionMatch[1];
+                            // Combine versions in format: CLAUDE_MD_VERSION-FRAMEWORK_VERSION
+                            console.log(`📋 Framework CLAUDE.md: ${displayPath} (${claudeMdVersion}-${frameworkVersion})`);
+                        } else if (claudeMdVersionMatch) {
+                            const version = claudeMdVersionMatch[1];
+                            // Use framework version + serial format (legacy)
                             if (version.includes('-')) {
                                 const [, serial] = version.split('-', 2);
                                 console.log(`📋 Framework CLAUDE.md: ${displayPath} (${CLAUDE_PM_VERSION}-${serial})`);
@@ -1141,25 +1160,31 @@ async function manageFrameworkClaudeMd() {
             };
         }
         
-        // Remove duplicate framework files (VERY CAREFULLY)
-        const removedFiles = [];
+        // Add 'old' suffix to duplicate framework files (VERY CAREFULLY)
+        const processedFiles = [];
         for (const file of filesToRemove) {
             try {
+                // CRITICAL PROTECTION: NEVER MODIFY framework/CLAUDE.md
+                if (file.path.includes('framework/CLAUDE.md')) {
+                    continue;
+                }
+                
                 // Extra safety check - make sure it's really a framework file
                 if (file.content.includes('Claude PM Framework') || 
                     file.content.includes('CLAUDE_MD_VERSION:')) {
-                    fs.unlinkSync(file.path);
-                    removedFiles.push(file.relativePath);
+                    const oldPath = file.path + '.old';
+                    fs.renameSync(file.path, oldPath);
+                    processedFiles.push(file.relativePath + ' → ' + path.basename(oldPath));
                 }
             } catch (error) {
-                console.error(`Warning: Could not remove ${file.path}: ${error.message}`);
+                console.error(`Warning: Could not rename ${file.path}: ${error.message}`);
             }
         }
         
         return {
             action: 'cleaned',
-            reason: `Removed ${removedFiles.length} duplicate framework CLAUDE.md files`,
-            removedFiles,
+            reason: `Added 'old' suffix to ${processedFiles.length} duplicate framework CLAUDE.md files`,
+            processedFiles,
             frameworkFiles: frameworkFiles.length,
             userFiles: userFiles.length,
             topLevelFile: path.relative(searchRoot, targetFrameworkFile)
@@ -1294,27 +1319,16 @@ async function main() {
         try {
             const frameworkResult = await manageFrameworkClaudeMd();
             if (frameworkResult.action === 'cleaned') {
-                console.log(`🧹 Framework cleanup: ${frameworkResult.reason}`);
-                if (frameworkResult.removedFiles.length > 0) {
-                    console.log(`   Removed files: ${frameworkResult.removedFiles.join(', ')}`);
+                if (frameworkResult.processedFiles && frameworkResult.processedFiles.length > 0) {
+                    console.log(`🧹 Framework cleanup: ${frameworkResult.reason}`);
+                    console.log(`   Processed files: ${frameworkResult.processedFiles.join(', ')}`);
                 }
             } else if (frameworkResult.action === 'error') {
                 console.log(`⚠️  Framework cleanup warning: ${frameworkResult.reason}`);
             }
             
-            // Show project CLAUDE.md info
-            try {
-                const projectClaudePath = path.join(process.cwd(), 'CLAUDE.md');
-                if (require('fs').existsSync(projectClaudePath)) {
-                    const content = require('fs').readFileSync(projectClaudePath, 'utf8');
-                    const lineCount = content.split('\n').length;
-                    console.log(`📋 Project CLAUDE.md: CLAUDE.md ${lineCount} lines`);
-                } else {
-                    console.log(`📋 Project CLAUDE.md: None found`);
-                }
-            } catch (error) {
-                console.log(`📋 Project CLAUDE.md: Error reading file`);
-            }
+            // Note: Project CLAUDE.md info is already shown in the main system info section above
+            // This section was creating duplicate display - removing to fix duplicate issue
         } catch (error) {
             console.log(`⚠️  Framework cleanup error: ${error.message}`);
         }
@@ -1411,8 +1425,8 @@ async function main() {
             if (result.userFiles !== undefined) {
                 console.log(`User files preserved: ${result.userFiles}`);
             }
-            if (result.removedFiles) {
-                console.log(`Removed files: ${result.removedFiles.join(', ')}`);
+            if (result.processedFiles) {
+                console.log(`Processed files: ${result.processedFiles.join(', ')}`);
             }
             if (result.topLevelFile) {
                 console.log(`Top-level framework file: ${result.topLevelFile}`);
@@ -1491,6 +1505,9 @@ async function main() {
     
     // FIXED: Handle Python script updates and deployment
     await handlePythonScriptDeployment(frameworkPath, enhancedEnv);
+    
+    // FIXED: Handle agent profile deployment
+    await handleAgentProfileDeployment(frameworkPath, enhancedEnv);
     
     // FIXED: Handle project deployment completion
     await handleProjectDeployment(deploymentStrategy, args);
@@ -1827,6 +1844,119 @@ async function handleProjectDeployment(deploymentConfig, args) {
     }
 }
 
+/**
+ * CMPM-105 Integration: Handle agent profile deployment
+ */
+async function handleAgentProfileDeployment(frameworkPath, environment) {
+    try {
+        const workingDir = process.cwd();
+        
+        // Check if agent profile loader service exists
+        const profileLoaderPath = path.join(frameworkPath, 'claude_pm', 'services', 'agent_profile_loader.py');
+        
+        if (!fs.existsSync(profileLoaderPath)) {
+            // Profile loader not available, skip deployment
+            return;
+        }
+        
+        // Validate Python environment
+        const pythonCmd = validatePython();
+        
+        // Execute profile deployment
+        const { spawn } = require('child_process');
+        const profileProcess = spawn(pythonCmd, ['-c', `
+import sys
+sys.path.insert(0, '${frameworkPath}')
+from claude_pm.services.agent_profile_loader import AgentProfileLoader
+import asyncio
+import json
+from pathlib import Path
+
+async def deploy_profiles():
+    try:
+        loader = AgentProfileLoader(working_directory=Path('${workingDir}'))
+        await loader.initialize()
+        
+        # Create profile deployment structure
+        structure_results = await loader.create_profile_deployment_structure()
+        
+        # Deploy system profiles as project defaults
+        deployment_results = await loader.deploy_system_profiles()
+        
+        # List available profiles
+        available_profiles = await loader.list_available_profiles()
+        
+        results = {
+            "structure_created": structure_results,
+            "profiles_deployed": deployment_results,
+            "available_profiles": {tier.value: profiles for tier, profiles in available_profiles.items()},
+            "deployment_successful": True
+        }
+        
+        print(json.dumps(results, indent=2, default=str))
+        
+    except Exception as e:
+        error_result = {
+            "deployment_successful": False,
+            "error": str(e),
+            "fallback": "Profile deployment skipped - will use runtime loading"
+        }
+        print(json.dumps(error_result, indent=2))
+
+asyncio.run(deploy_profiles())
+        `], {
+            stdio: 'pipe',
+            env: environment,
+            cwd: frameworkPath,
+            timeout: 15000  // 15 second timeout
+        });
+        
+        return new Promise((resolve) => {
+            let output = '';
+            let errorOutput = '';
+            
+            profileProcess.stdout.on('data', (data) => {
+                output += data.toString();
+            });
+            
+            profileProcess.stderr.on('data', (data) => {
+                errorOutput += data.toString();
+            });
+            
+            profileProcess.on('close', (code) => {
+                try {
+                    if (code === 0 && output.trim()) {
+                        const results = JSON.parse(output.trim());
+                        
+                        if (results.deployment_successful) {
+                            const deployedCount = Object.values(results.profiles_deployed || {}).filter(Boolean).length;
+                            if (deployedCount > 0) {
+                                console.log(`🤖 Agent profiles deployed: ${deployedCount} system profiles available`);
+                            }
+                        }
+                    }
+                } catch (parseError) {
+                    // Silent fallback - profile deployment is non-critical
+                }
+                
+                resolve();
+            });
+            
+            // Timeout fallback
+            setTimeout(() => {
+                if (!profileProcess.killed) {
+                    profileProcess.kill();
+                }
+                resolve();
+            }, 15000);
+        });
+        
+    } catch (error) {
+        // Silent failure - don't break CLI if profile deployment fails
+        return;
+    }
+}
+
 module.exports = { 
     main, 
     getFrameworkPath, 
@@ -1837,5 +1967,6 @@ module.exports = {
     handleDependencyStatus,
     handleParentDirectoryStatus,
     handlePythonScriptDeployment,
-    handleProjectDeployment
+    handleProjectDeployment,
+    handleAgentProfileDeployment
 };

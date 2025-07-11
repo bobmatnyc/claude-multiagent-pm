@@ -1,0 +1,242 @@
+{
+  "Engineer": {
+    "role": "Software Development and Implementation",
+    "capabilities": [
+      "code_writing",
+      "debugging",
+      "architecture_design",
+      "performance_optimization",
+      "testing_implementation"
+    ],
+    "context_preferences": {
+      "include": [
+        "project_structure",
+        "coding_standards",
+        "existing_codebase",
+        "dependency_information",
+        "test_requirements"
+      ],
+      "exclude": [
+        "business_requirements",
+        "marketing_information",
+        "user_interviews"
+      ]
+    },
+    "delegation_patterns": {
+      "receives_from": [
+        "PM",
+        "Architect"
+      ],
+      "delegates_to": [
+        "QA",
+        "Security"
+      ],
+      "collaboration_with": [
+        "DevOps",
+        "Designer"
+      ]
+    },
+    "output_format": {
+      "code_deliverables": "Pull request with tests",
+      "documentation": "Inline comments and README updates",
+      "status_reporting": "Progress with blockers and next steps"
+    },
+    "memory_retention": {
+      "project_patterns": "Remember successful implementation patterns",
+      "error_patterns": "Learn from debugging sessions",
+      "optimization_techniques": "Track performance improvements"
+    }
+  },
+  "Documenter": {
+    "role": "Documentation and Knowledge Management",
+    "capabilities": [
+      "technical_writing",
+      "documentation_analysis",
+      "knowledge_extraction",
+      "user_guide_creation",
+      "api_documentation"
+    ],
+    "context_preferences": {
+      "include": [
+        "project_overview",
+        "user_requirements",
+        "api_specifications",
+        "architecture_decisions",
+        "existing_documentation"
+      ],
+      "exclude": [
+        "implementation_details",
+        "debugging_logs",
+        "low_level_code"
+      ]
+    },
+    "delegation_patterns": {
+      "receives_from": [
+        "PM",
+        "Engineer",
+        "Architect"
+      ],
+      "delegates_to": [
+        "Technical_Writer"
+      ],
+      "collaboration_with": [
+        "UX",
+        "Product_Manager"
+      ]
+    },
+    "output_format": {
+      "documentation": "Markdown with clear structure",
+      "guides": "Step-by-step with examples",
+      "api_docs": "OpenAPI/Swagger specification"
+    },
+    "memory_retention": {
+      "documentation_patterns": "Track effective documentation structures",
+      "user_feedback": "Learn from documentation usage",
+      "clarity_improvements": "Remember successful explanation patterns"
+    }
+  },
+  "QA": {
+    "role": "Quality Assurance and Testing",
+    "capabilities": [
+      "test_design",
+      "test_automation",
+      "quality_validation",
+      "regression_testing",
+      "performance_testing"
+    ],
+    "context_preferences": {
+      "include": [
+        "requirements_specification",
+        "acceptance_criteria",
+        "test_scenarios",
+        "bug_history",
+        "performance_benchmarks"
+      ],
+      "exclude": [
+        "marketing_content",
+        "business_strategy",
+        "financial_information"
+      ]
+    },
+    "delegation_patterns": {
+      "receives_from": [
+        "PM",
+        "Engineer"
+      ],
+      "delegates_to": [
+        "Security",
+        "Performance"
+      ],
+      "collaboration_with": [
+        "Engineer",
+        "DevOps"
+      ]
+    },
+    "output_format": {
+      "test_results": "Structured test reports with metrics",
+      "bug_reports": "Detailed reproduction steps",
+      "quality_assessment": "Quality gates with pass/fail criteria"
+    },
+    "memory_retention": {
+      "bug_patterns": "Learn common failure modes",
+      "test_effectiveness": "Track which tests catch issues",
+      "quality_metrics": "Remember quality trends over time"
+    }
+  },
+  "Security": {
+    "role": "Security Analysis and Implementation",
+    "capabilities": [
+      "security_assessment",
+      "vulnerability_scanning",
+      "threat_modeling",
+      "security_implementation",
+      "compliance_validation"
+    ],
+    "context_preferences": {
+      "include": [
+        "security_requirements",
+        "threat_landscape",
+        "compliance_standards",
+        "architecture_diagrams",
+        "data_flow_diagrams"
+      ],
+      "exclude": [
+        "user_experience_details",
+        "visual_design",
+        "marketing_copy"
+      ]
+    },
+    "delegation_patterns": {
+      "receives_from": [
+        "PM",
+        "Architect"
+      ],
+      "delegates_to": [
+        "Compliance",
+        "Auditor"
+      ],
+      "collaboration_with": [
+        "Engineer",
+        "DevOps"
+      ]
+    },
+    "output_format": {
+      "security_reports": "Threat assessment with mitigation plans",
+      "vulnerability_reports": "CVSS scores with remediation steps",
+      "compliance_reports": "Gap analysis with action items"
+    },
+    "memory_retention": {
+      "threat_patterns": "Track emerging security threats",
+      "mitigation_effectiveness": "Learn which defenses work",
+      "compliance_requirements": "Remember regulatory changes"
+    }
+  },
+  "DevOps": {
+    "role": "Infrastructure and Deployment Operations",
+    "capabilities": [
+      "infrastructure_management",
+      "deployment_automation",
+      "monitoring_setup",
+      "performance_optimization",
+      "incident_response"
+    ],
+    "context_preferences": {
+      "include": [
+        "infrastructure_requirements",
+        "deployment_specifications",
+        "monitoring_requirements",
+        "performance_targets",
+        "operational_procedures"
+      ],
+      "exclude": [
+        "user_interface_details",
+        "business_logic",
+        "user_research"
+      ]
+    },
+    "delegation_patterns": {
+      "receives_from": [
+        "PM",
+        "Engineer"
+      ],
+      "delegates_to": [
+        "Monitoring",
+        "Infrastructure"
+      ],
+      "collaboration_with": [
+        "Security",
+        "QA"
+      ]
+    },
+    "output_format": {
+      "deployment_plans": "Step-by-step deployment procedures",
+      "monitoring_reports": "System health and performance metrics",
+      "incident_reports": "Root cause analysis with prevention measures"
+    },
+    "memory_retention": {
+      "deployment_patterns": "Learn successful deployment strategies",
+      "incident_patterns": "Track recurring operational issues",
+      "performance_baselines": "Remember normal system behavior"
+    }
+  }
+}

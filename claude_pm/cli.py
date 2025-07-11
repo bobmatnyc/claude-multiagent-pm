@@ -124,9 +124,10 @@ def _detect_aitrackdown_info():
 
 
 def _detect_memory_manager_info():
-    """Detect Memory Manager type, version, and status."""
+    """Detect Memory Manager type, version, and status with memory count."""
     import subprocess
     import socket
+    import json
 
     try:
         # Check for mem0AI package version (optimized)
@@ -143,8 +144,9 @@ def _detect_memory_manager_info():
         except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
             pass
 
-        # Check mem0AI service status (faster socket check)
+        # Check mem0AI service status and memory count
         service_status = "inactive"
+        memory_count = 0
         try:
             # Quick socket check instead of HTTP request
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -153,13 +155,36 @@ def _detect_memory_manager_info():
             sock.close()
             if result == 0:
                 service_status = "active"
+                
+                # If service is active, get memory count
+                try:
+                    import urllib.request
+                    import urllib.error
+                    
+                    with urllib.request.urlopen("http://localhost:8002/memories", timeout=2) as response:
+                        if response.status == 200:
+                            data = json.loads(response.read().decode('utf-8'))
+                            memory_count = data.get('count', 0)
+                except (urllib.error.URLError, json.JSONDecodeError, KeyError):
+                    pass  # Keep memory_count as 0 if we can't retrieve it
         except Exception:
             service_status = "inactive"
 
+        # Format output with memory count when service is active
         if mem0_version:
-            return f"mem0AI v{mem0_version} ({service_status})"
+            if service_status == "active" and memory_count > 0:
+                return f"mem0AI v{mem0_version} ({service_status}, {memory_count} memories)"
+            elif service_status == "active":
+                return f"mem0AI v{mem0_version} ({service_status}, 0 memories)"
+            else:
+                return f"mem0AI v{mem0_version} ({service_status})"
         else:
-            return f"mem0AI not available ({service_status})"
+            if service_status == "active" and memory_count > 0:
+                return f"mem0AI not available ({service_status}, {memory_count} memories)"
+            elif service_status == "active":
+                return f"mem0AI not available ({service_status}, 0 memories)"
+            else:
+                return f"mem0AI not available ({service_status})"
 
     except Exception:
         return "error"
@@ -375,8 +400,17 @@ def setup(ctx, target_dir, backup, force):
             template_content = framework_template_path.read_text()
 
             # Set up template variables for handlebars processing
+            # Get framework template serial for FRAMEWORK_VERSION
+            framework_version_file = framework_path / "framework" / "VERSION"
+            if framework_version_file.exists():
+                framework_version = framework_version_file.read_text().strip()  # This is the serial (008)
+            else:
+                # Fallback to default serial
+                framework_version = "001"
+            
             template_variables = {
-                "FRAMEWORK_VERSION": _get_framework_version(),
+                "FRAMEWORK_VERSION": framework_version,  # Serial from framework/VERSION (008)
+                "CLAUDE_MD_VERSION": _get_framework_version(),  # Main version from VERSION (0.4.6)
                 "DEPLOYMENT_DATE": datetime.now().isoformat(),
                 "PLATFORM": platform.system().lower(),
                 "PYTHON_CMD": "python3",

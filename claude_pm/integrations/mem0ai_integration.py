@@ -327,8 +327,8 @@ class Mem0AIIntegration:
 
         try:
             memory_data = {
-                "content": content,
-                "space_name": project_name,
+                "messages": [{"role": "user", "content": content}],
+                "user_id": project_name,
                 "metadata": {
                     "category": category,
                     "category_description": self.categories.get(category, ""),
@@ -378,7 +378,7 @@ class Mem0AIIntegration:
                 "query": query,
                 "space_name": project_name,
                 "limit": limit,
-                "include_metadata": True,
+                "include_metadata": "true",
             }
 
             if category:

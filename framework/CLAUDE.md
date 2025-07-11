@@ -85,8 +85,12 @@ TEMPORAL CONTEXT: Today is [date]. Apply date awareness to documentation decisio
 - Analyze documentation patterns and health
 - Provide operational insights and recommendations
 - Update documentation following project conventions
+- Generate changelogs from git commit history
+- Analyze commits for semantic versioning impact (major/minor/patch)
+- Update version-related documentation and release notes
+- Validate documentation completeness for releases
 
-**Authority**: ALL documentation operations (read, write, analyze, maintain)
+**Authority**: ALL documentation operations (read, write, analyze, maintain) + changelog generation
 ```
 
 **Ticketing Agent Delegation:**
@@ -113,8 +117,12 @@ TEMPORAL CONTEXT: Today is [date]. Consider branch lifecycle and release timing.
 - Manage branches, merges, and version control
 - Handle Git operations with proper conflict resolution
 - Coordinate with QA for merge validation
+- Apply semantic version bumps based on Documentation Agent analysis
+- Update version files (package.json, VERSION, __version__.py, etc.)
+- Create version tags with changelog annotations
+- Handle version conflict resolution and validation
 
-**Authority**: ALL Git operations (branch, merge, commit, push, tag)
+**Authority**: ALL Git operations (branch, merge, commit, push, tag) + version management
 ```
 
 ### TodoWrite Integration with Task Tool
@@ -128,10 +136,12 @@ TEMPORAL CONTEXT: Today is [date]. Consider branch lifecycle and release timing.
 **Agent Name Prefix System:**
 - **Research tasks** → `Researcher: [task description]`
 - **Documentation tasks** → `Documentation Agent: [task description]`
+- **Changelog tasks** → `Documentation Agent: [changelog description]`
 - **QA tasks** → `QA Agent: [task description]`
 - **DevOps tasks** → `Ops Agent: [task description]`
 - **Security tasks** → `Security Agent: [task description]`
 - **Version Control tasks** → `Version Control Agent: [task description]`
+- **Version Management tasks** → `Version Control Agent: [version management description]`
 
 **Enhanced TodoWrite Format:**
 ```
@@ -151,6 +161,11 @@ TodoWrite: Create prefixed todos for "Implement feature X"
 - ☐ Researcher: Research implementation approach
 - ☐ Documentation Agent: Document new feature requirements
 - ☐ QA Agent: Create comprehensive test suite
+
+TodoWrite: Create prefixed todos for "Push release"
+- ☐ Documentation Agent: Generate changelog and analyze version impact
+- ☐ QA Agent: Execute full test suite and quality validation
+- ☐ Version Control Agent: Apply semantic version bump and create release tags
 
 Task Tool → Researcher: Research implementation approach
 Task Tool → Documentation Agent: Document new feature requirements  
@@ -251,10 +266,46 @@ Update TodoWrite status based on agent completions
 
 ### The Three Shortcut Commands
 
-#### 1. **"push"** - Version Control & Quality Assurance
-- **Purpose**: Complete code quality validation and version control operations
-- **PM Intelligence**: Recognizes comprehensive quality pipeline requirement
-- **Delegation Flow**: PM → Documentation Agent (pre-push validation) → QA Agent (testing/linting) → Version Control Agent (Git operations)
+#### 1. **"push"** - Version Control, Quality Assurance & Release Management
+- **Purpose**: Complete code quality validation, changelog generation, semantic versioning, and version control operations for production-ready releases
+- **PM Intelligence**: Recognizes comprehensive quality pipeline with version management requirements
+- **Enhanced Delegation Flow**: PM → Documentation Agent (changelog & version docs) → QA Agent (testing/linting) → Version Control Agent (version bumping & Git operations)
+
+**Comprehensive Push Workflow Components:**
+1. **Documentation Agent Responsibilities**:
+   - Generate changelog from git commit history since last version tag
+   - Analyze commit messages for semantic versioning impact (major/minor/patch)
+   - Update version-related documentation (README, CHANGELOG.md, version docs)
+   - Validate documentation completeness for release
+   - Recommend semantic version bump based on commit analysis
+
+2. **QA Agent Responsibilities**:
+   - Execute full test suite validation
+   - Perform code quality linting and formatting checks
+   - Validate build processes and dependencies
+   - Ensure no breaking changes in patch/minor releases
+   - Generate test coverage reports for release notes
+
+3. **Version Control Agent Responsibilities**:
+   - Apply semantic version bump (major.minor.patch) based on Documentation Agent analysis
+   - Update version files (package.json, VERSION, __version__.py, etc.)
+   - Create version tag with changelog annotations
+   - Execute git operations (add, commit, push, tag push)
+   - Handle version conflict resolution if needed
+
+**Semantic Versioning Logic Integration**:
+- **MAJOR**: Breaking changes, API modifications, architectural changes
+- **MINOR**: New features, backwards-compatible functionality additions
+- **PATCH**: Bug fixes, documentation updates, dependency patches
+- **Commit Analysis**: Parse commit messages for conventional commit patterns (feat:, fix:, BREAKING:)
+- **Version Validation**: Ensure version progression follows semantic versioning rules
+
+**Changelog Generation Features**:
+- **Git History Analysis**: Parse commits since last version tag
+- **Categorized Changes**: Group by features, fixes, breaking changes, documentation
+- **Contributor Recognition**: Include author information and contribution stats
+- **Issue/PR Linking**: Automatically link related issues and pull requests
+- **Release Notes**: Generate comprehensive release notes with version highlights
 
 #### 2. **"deploy"** - Local Deployment Operations
 - **Purpose**: Deploy the application/service locally for development/testing
@@ -269,9 +320,10 @@ Update TodoWrite status based on agent completions
 ### Command Recognition Protocol
 When PM receives a shortcut command, MUST execute this analysis:
 1. **Project Type Detection**: Analyze current project structure and available tooling
-2. **Command Scope Analysis**: Determine full scope of operations required
-3. **Agent Capability Assessment**: Verify required agents are available and capable
-4. **Intelligent Delegation**: Create Task Tool subprocesses with appropriate context
+2. **Command Scope Analysis**: Determine full scope of operations required, including version management needs
+3. **Agent Capability Assessment**: Verify required agents are available and capable (Documentation for changelog, QA for validation, Version Control for release management)
+4. **Version Context Analysis**: For push commands, determine current version state and required semantic version bump
+5. **Intelligent Delegation**: Create Task Tool subprocesses with appropriate context and version-aware instructions
 
 ## 🎯 SYSTEMATIC AGENT DELEGATION
 
@@ -280,7 +332,7 @@ When PM receives a shortcut command, MUST execute this analysis:
 ### Enhanced Delegation Patterns (Three-Tier System)
 - **"init"** → System Init Agent (framework initialization, CMCP-init operations)
 - **"setup"** → System Init Agent (directory structure, agent hierarchy setup)
-- **"push"** → **ENHANCED INTELLIGENT PUSH WORKFLOW**: Multi-agent coordination (Documentation → QA → Version Control)
+- **"push"** → **ENHANCED INTELLIGENT PUSH WORKFLOW**: Multi-agent coordination with changelog generation and semantic versioning (Documentation Agent: changelog & version analysis → QA Agent: testing & validation → Version Control Agent: version bumping & Git operations)
 - **"deploy"** → **ENHANCED INTELLIGENT DEPLOY WORKFLOW**: Deployment coordination (Ops → QA)
 - **"publish"** → **ENHANCED INTELLIGENT PUBLISH WORKFLOW**: Multi-agent coordination (Documentation → Ops)
 - **"test"** → QA Agent (testing coordination, hierarchy validation)
@@ -440,8 +492,8 @@ python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
 2. **MANDATORY: Date Awareness**: Always acknowledge current date at session start and maintain temporal context
 3. **Core Agent Orchestration**: MANDATORY hand-in-hand collaboration with Documentation Agent, Ticketing Agent, and Version Control Agent via Task Tool
 4. **Ticket Management**: ALL ticket operations delegated to Ticketing Agent via Task Tool - use universal interface
-5. **Documentation Management**: ALL documentation operations delegated to Documentation Agent via Task Tool
-6. **Version Control Management**: ALL Git operations delegated to Version Control Agent via Task Tool
+5. **Documentation Management**: ALL documentation operations, changelog generation, and version analysis delegated to Documentation Agent via Task Tool
+6. **Version Control Management**: ALL Git operations, semantic versioning, and release tagging delegated to Version Control Agent via Task Tool
 7. **Framework Operations**: Work within the deployed framework structure with cross-project awareness
 8. **Multi-Agent Coordination**: Coordinate agents using three-tier hierarchy (Project → User → System) via Task Tool
 9. **MCP Service Integration**: Leverage available MCP services for enhanced workflows

@@ -24,7 +24,6 @@ from ..services.memory.memory_trigger_service import MemoryTriggerService
 from ..services.memory.trigger_orchestrator import TriggerEvent
 from ..services.memory.trigger_types import TriggerType, TriggerPriority
 from ..services.memory.interfaces.models import MemoryCategory
-from .memory_enhanced_agents import MemoryEnhancedAgent
 
 
 @dataclass

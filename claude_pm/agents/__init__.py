@@ -7,20 +7,16 @@ Agents are organized in a three-tier hierarchy: Project → User → System.
 
 from .documentation_agent import DocumentationAgent
 from .ticketing_agent import TicketingAgent
-from .pm_agent import PMAgent
-from .scaffolding_agent import ScaffoldingAgent
-from .system_init_agent import SystemInitAgent
+# Removed agents - replaced by profile system:
+# from .pm_agent import PMAgent
+# from .scaffolding_agent import ScaffoldingAgent
+# from .system_init_agent import SystemInitAgent
+# from .version_control_agent import VersionControlAgent
+# from .ai_ops_agent import AIOpsAgent
 from .hierarchical_agent_loader import HierarchicalAgentLoader
-from .version_control_agent import VersionControlAgent
-from .ai_ops_agent import AIOpsAgent
 
 __all__ = [
     "DocumentationAgent",
     "TicketingAgent",
-    "PMAgent",
-    "ScaffoldingAgent",
-    "SystemInitAgent",
     "HierarchicalAgentLoader",
-    "VersionControlAgent",
-    "AIOpsAgent",
 ]

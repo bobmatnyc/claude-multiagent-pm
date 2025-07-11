@@ -86,7 +86,7 @@ class ScriptDeploymentManager:
     def _inject_version_into_script(self, source_path: Path, target_path: Path):
         """Inject VERSION file content into script for local deployment."""
         try:
-            # Read VERSION file
+            # Read main VERSION file
             version_file = self.framework_root / "VERSION"
             if not version_file.exists():
                 logger.warning("VERSION file not found, using package.json fallback")
@@ -101,6 +101,21 @@ class ScriptDeploymentManager:
                     version_content = 'unknown'
             else:
                 version_content = version_file.read_text().strip()
+            
+            # Also deploy framework version for template management
+            framework_version_file = self.framework_root / "framework" / "VERSION"
+            if framework_version_file.exists():
+                framework_serial = framework_version_file.read_text().strip()
+                # Combined version: CLAUDE_MD_VERSION-FRAMEWORK_VERSION = main_version-serial
+                combined_framework_version = f"{version_content}-{framework_serial}"
+                
+                # Create framework version file in deployment directory
+                framework_version_target = self.target_dir / ".framework_version"
+                with open(framework_version_target, 'w') as f:
+                    f.write(combined_framework_version)
+                logger.info(f"Deployed framework version: {combined_framework_version}")
+            else:
+                logger.warning("framework/VERSION not found, skipping framework version deployment")
             
             # Read source script
             with open(source_path, 'r') as f:
