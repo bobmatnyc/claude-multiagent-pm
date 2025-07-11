@@ -1,6 +1,6 @@
 {
-  "version": "4.0.0",
-  "deployedAt": "2025-07-09T00:17:59.080Z",
+  "version": "4.5.1",
+  "deployedAt": "2025-07-11T08:09:10.182Z",
   "platform": "darwin",
   "deploymentDir": "/Users/masa/Projects/claude-multiagent-pm",
   "pythonCmd": "python3",

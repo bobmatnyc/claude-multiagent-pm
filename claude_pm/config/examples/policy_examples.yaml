@@ -1,0 +1,485 @@
+# Memory Trigger Policy Examples
+# Comprehensive examples of policy rules for different scenarios
+
+rules:
+  # Simple error handling policy
+  basic_error_handler:
+    name: "basic_error_handler"
+    description: "Create memory for all error events"
+    enabled: true
+    priority: 100
+    scope: "global"
+    
+    conditions:
+      - type: "equals"
+        field: "event_type"
+        value: "error"
+    
+    condition_operator: "AND"
+    
+    actions:
+      - type: "create_memory"
+        parameters:
+          content: "Error occurred: ${error_message}"
+          tags: ["error"]
+          metadata:
+            timestamp: "${timestamp}"
+            severity: "${severity}"
+    
+    max_executions: null
+    cooldown_period: 30
+
+  # Complex conditional policy
+  intelligent_error_handler:
+    name: "intelligent_error_handler"
+    description: "Smart error handling with conditions and rate limiting"
+    enabled: true
+    priority: 200
+    scope: "global"
+    
+    conditions:
+      - type: "composite_and"
+        sub_conditions:
+          - type: "equals"
+            field: "event_type"
+            value: "error"
+          - type: "composite_or"
+            sub_conditions:
+              - type: "contains"
+                field: "error_message"
+                value: "critical"
+              - type: "contains"
+                field: "error_message"
+                value: "fatal"
+              - type: "greater_than"
+                field: "severity"
+                value: 7
+          - type: "rate_limit"
+            field: "service_name"
+            rate_limit: 5
+            time_window: 300
+    
+    condition_operator: "AND"
+    
+    actions:
+      - type: "create_memory"
+        priority: 1
+        parameters:
+          content: "Critical error in ${service_name}: ${error_message}"
+          tags: ["error", "critical", "${service_name}"]
+          metadata:
+            severity: "${severity}"
+            service: "${service_name}"
+            timestamp: "${timestamp}"
+            error_code: "${error_code}"
+      
+      - type: "trigger_alert"
+        priority: 2
+        condition:
+          type: "equals"
+          field: "environment"
+          value: "production"
+        parameters:
+          alert_type: "critical"
+          message: "Critical error detected in ${service_name}"
+          channels: ["pagerduty", "slack"]
+      
+      - type: "execute_webhook"
+        priority: 3
+        async_execution: true
+        parameters:
+          url: "https://monitoring.company.com/api/incidents"
+          method: "POST"
+          headers:
+            "Content-Type": "application/json"
+            "Authorization": "Bearer ${MONITORING_API_TOKEN}"
+          data:
+            incident_type: "critical_error"
+            service: "${service_name}"
+            message: "${error_message}"
+            severity: "${severity}"
+    
+    max_executions: 100
+    cooldown_period: 60
+
+  # Time-based policy
+  business_hours_memory:
+    name: "business_hours_memory"
+    description: "Create memories only during business hours"
+    enabled: true
+    priority: 50
+    scope: "workflow"
+    
+    conditions:
+      - type: "composite_and"
+        sub_conditions:
+          - type: "equals"
+            field: "event_type"
+            value: "user_interaction"
+          - type: "time_range"
+            start_time: "09:00"
+            end_time: "17:00"
+          - type: "not_in_list"
+            field: "day_of_week"
+            values: ["saturday", "sunday"]
+    
+    condition_operator: "AND"
+    
+    actions:
+      - type: "create_memory"
+        parameters:
+          content: "Business hours interaction: ${interaction_type}"
+          tags: ["business_hours", "user_interaction"]
+          metadata:
+            user_id: "${user_id}"
+            interaction_type: "${interaction_type}"
+            business_context: true
+
+  # Pattern-based learning policy
+  learning_pattern_detector:
+    name: "learning_pattern_detector"
+    description: "Detect and remember learning patterns"
+    enabled: true
+    priority: 75
+    scope: "agent"
+    
+    conditions:
+      - type: "composite_and"
+        sub_conditions:
+          - type: "equals"
+            field: "event_type"
+            value: "learning_event"
+          - type: "greater_than"
+            field: "confidence_score"
+            value: 0.8
+          - type: "matches_regex"
+            field: "learning_domain"
+            regex_pattern: "^(technical|business|creative)_.*"
+          - type: "probability"
+            probability: 0.3  # Sample 30% of learning events
+    
+    condition_operator: "AND"
+    
+    actions:
+      - type: "create_memory"
+        parameters:
+          content: "Learning pattern detected in ${learning_domain}: ${learning_content}"
+          tags: ["learning", "pattern", "${learning_domain}"]
+          metadata:
+            confidence: "${confidence_score}"
+            domain: "${learning_domain}"
+            agent: "${agent_name}"
+            pattern_type: "${pattern_type}"
+      
+      - type: "add_tag"
+        condition:
+          type: "greater_than"
+          field: "confidence_score"
+          value: 0.9
+        parameters:
+          memory_id: "${created_memory_id}"
+          tag: "high_confidence"
+      
+      - type: "chain_policy"
+        condition:
+          type: "contains"
+          field: "learning_domain"
+          value: "business"
+        parameters:
+          policy_name: "business_knowledge_enhancement"
+          context:
+            learning_event: "${learning_content}"
+            confidence: "${confidence_score}"
+
+  # Multi-action workflow policy
+  workflow_completion_handler:
+    name: "workflow_completion_handler"
+    description: "Handle workflow completion with multiple actions"
+    enabled: true
+    priority: 80
+    scope: "workflow"
+    
+    conditions:
+      - type: "composite_and"
+        sub_conditions:
+          - type: "equals"
+            field: "workflow_status"
+            value: "completed"
+          - type: "greater_than"
+            field: "duration_minutes"
+            value: 5
+          - type: "not_equals"
+            field: "completion_type"
+            value: "cancelled"
+    
+    condition_operator: "AND"
+    
+    actions:
+      - type: "create_memory"
+        priority: 1
+        parameters:
+          content: "Workflow ${workflow_name} completed successfully in ${duration_minutes} minutes"
+          tags: ["workflow", "completion", "${workflow_name}"]
+          metadata:
+            workflow_id: "${workflow_id}"
+            duration: "${duration_minutes}"
+            user_id: "${user_id}"
+            steps_completed: "${steps_completed}"
+            success_rate: "${success_rate}"
+      
+      - type: "set_quality_score"
+        priority: 2
+        condition:
+          type: "greater_than"
+          field: "success_rate"
+          value: 0.9
+        parameters:
+          memory_id: "${created_memory_id}"
+          score: 0.95
+      
+      - type: "log_event"
+        priority: 3
+        parameters:
+          level: "info"
+          message: "Workflow completion memory created for ${workflow_name}"
+      
+      - type: "update_memory"
+        priority: 4
+        condition:
+          type: "greater_than"
+          field: "duration_minutes"
+          value: 60
+        parameters:
+          memory_id: "${created_memory_id}"
+          updates:
+            tags: ["${existing_tags}", "long_running"]
+            metadata:
+              performance_flag: "review_needed"
+
+  # Conditional memory recall policy
+  context_aware_recall:
+    name: "context_aware_recall"
+    description: "Intelligently recall relevant memories based on context"
+    enabled: true
+    priority: 60
+    scope: "agent"
+    
+    conditions:
+      - type: "composite_and"
+        sub_conditions:
+          - type: "equals"
+            field: "operation_type"
+            value: "user_query"
+          - type: "greater_than"
+            field: "context_similarity"
+            value: 0.7
+          - type: "in_list"
+            field: "query_category"
+            values: ["technical", "business", "process"]
+    
+    condition_operator: "AND"
+    
+    actions:
+      - type: "recall_memory"
+        priority: 1
+        parameters:
+          query: "${user_query}"
+          limit: 5
+          filters:
+            tags: ["${query_category}"]
+            min_quality_score: 0.6
+          sort_by: "relevance"
+      
+      - type: "create_memory"
+        priority: 2
+        condition:
+          type: "greater_than"
+          field: "recalled_memories_count"
+          value: 0
+        parameters:
+          content: "Context-aware recall for query: ${user_query}"
+          tags: ["recall", "context_aware", "${query_category}"]
+          metadata:
+            original_query: "${user_query}"
+            recalled_count: "${recalled_memories_count}"
+            context_similarity: "${context_similarity}"
+            agent: "${agent_name}"
+
+  # Performance monitoring policy
+  performance_monitor:
+    name: "performance_monitor"
+    description: "Monitor and react to performance issues"
+    enabled: true
+    priority: 90
+    scope: "global"
+    
+    conditions:
+      - type: "composite_or"
+        sub_conditions:
+          - type: "greater_than"
+            field: "response_time_ms"
+            value: 5000
+          - type: "greater_than"
+            field: "memory_usage_mb"
+            value: 1000
+          - type: "greater_than"
+            field: "cpu_usage_percent"
+            value: 80
+          - type: "less_than"
+            field: "success_rate"
+            value: 0.95
+    
+    condition_operator: "OR"
+    
+    actions:
+      - type: "create_memory"
+        priority: 1
+        parameters:
+          content: "Performance issue detected: ${performance_metric} = ${metric_value}"
+          tags: ["performance", "monitoring", "${performance_metric}"]
+          metadata:
+            metric: "${performance_metric}"
+            value: "${metric_value}"
+            threshold_exceeded: true
+            timestamp: "${timestamp}"
+      
+      - type: "trigger_alert"
+        priority: 2
+        condition:
+          type: "greater_than"
+          field: "severity_level"
+          value: 7
+        parameters:
+          alert_type: "performance"
+          message: "Performance threshold exceeded: ${performance_metric}"
+          urgency: "high"
+      
+      - type: "log_event"
+        priority: 3
+        parameters:
+          level: "warning"
+          message: "Performance monitoring triggered for ${performance_metric}"
+
+  # Data quality policy
+  data_quality_validator:
+    name: "data_quality_validator"
+    description: "Validate and handle data quality issues"
+    enabled: true
+    priority: 70
+    scope: "global"
+    
+    conditions:
+      - type: "composite_and"
+        sub_conditions:
+          - type: "equals"
+            field: "data_validation_event"
+            value: true
+          - type: "composite_or"
+            sub_conditions:
+              - type: "less_than"
+                field: "data_quality_score"
+                value: 0.7
+              - type: "greater_than"
+                field: "missing_fields_count"
+                value: 0
+              - type: "contains"
+                field: "validation_errors"
+                value: "critical"
+    
+    condition_operator: "AND"
+    
+    actions:
+      - type: "create_memory"
+        priority: 1
+        parameters:
+          content: "Data quality issue: Score ${data_quality_score}, Errors: ${validation_errors}"
+          tags: ["data_quality", "validation", "issue"]
+          metadata:
+            quality_score: "${data_quality_score}"
+            missing_fields: "${missing_fields_count}"
+            validation_errors: "${validation_errors}"
+            data_source: "${data_source}"
+      
+      - type: "set_quality_score"
+        priority: 2
+        parameters:
+          memory_id: "${created_memory_id}"
+          score: "${data_quality_score}"
+      
+      - type: "remove_tag"
+        priority: 3
+        condition:
+          type: "less_than"
+          field: "data_quality_score"
+          value: 0.5
+        parameters:
+          memory_id: "${created_memory_id}"
+          tag: "trusted_data"
+
+  # User behavior analysis policy
+  user_behavior_analyzer:
+    name: "user_behavior_analyzer"
+    description: "Analyze and remember significant user behavior patterns"
+    enabled: true
+    priority: 65
+    scope: "user"
+    
+    conditions:
+      - type: "composite_and"
+        sub_conditions:
+          - type: "equals"
+            field: "event_type"
+            value: "user_behavior"
+          - type: "composite_or"
+            sub_conditions:
+              - type: "greater_than"
+                field: "session_duration_minutes"
+                value: 30
+              - type: "greater_than"
+                field: "actions_per_minute"
+                value: 10
+              - type: "contains"
+                field: "behavior_flags"
+                value: "anomaly"
+          - type: "rate_limit"
+            field: "user_id"
+            rate_limit: 3
+            time_window: 3600  # Max 3 behavior memories per hour per user
+    
+    condition_operator: "AND"
+    
+    actions:
+      - type: "create_memory"
+        priority: 1
+        parameters:
+          content: "User behavior pattern: ${behavior_description}"
+          tags: ["user_behavior", "pattern", "${behavior_type}"]
+          metadata:
+            user_id: "${user_id}"
+            session_duration: "${session_duration_minutes}"
+            actions_count: "${actions_count}"
+            behavior_type: "${behavior_type}"
+            anomaly_score: "${anomaly_score}"
+      
+      - type: "add_tag"
+        priority: 2
+        condition:
+          type: "greater_than"
+          field: "anomaly_score"
+          value: 0.8
+        parameters:
+          memory_id: "${created_memory_id}"
+          tag: "high_anomaly"
+      
+      - type: "chain_policy"
+        priority: 3
+        condition:
+          type: "contains"
+          field: "behavior_flags"
+          value: "security_concern"
+        parameters:
+          policy_name: "security_incident_handler"
+          context:
+            incident_type: "user_behavior_anomaly"
+            user_id: "${user_id}"
+            risk_level: "${anomaly_score}"

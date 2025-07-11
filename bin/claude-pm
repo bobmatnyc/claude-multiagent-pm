@@ -10,35 +10,533 @@
 
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { spawn } = require('child_process');
 
 const CLAUDE_PM_VERSION = require('../package.json').version;
 
 /**
- * Get the framework installation path
+ * Claude PM Framework Deployment Detection System
+ * 
+ * Provides comprehensive detection and resolution of all deployment scenarios
+ * including local source, npm global, npx, npm local, and deployed instances.
+ */
+class DeploymentDetector {
+    constructor() {
+        this.platform = os.platform();
+        this.detectionResults = null;
+        this.detectionCache = new Map();
+    }
+
+    /**
+     * Detect deployment type and return configuration
+     */
+    detectDeployment() {
+        // Check cache first
+        const cacheKey = `${process.cwd()}_${__dirname}`;
+        if (this.detectionCache.has(cacheKey)) {
+            return this.detectionCache.get(cacheKey);
+        }
+
+        const deploymentConfig = this._performDetection();
+        this.detectionCache.set(cacheKey, deploymentConfig);
+        return deploymentConfig;
+    }
+
+    /**
+     * Perform deployment detection logic
+     */
+    _performDetection() {
+        // Strategy 1: Deployed instance (from install/deploy.js) - Check first to prioritize over local source
+        const deployedResult = this._detectDeployedInstance();
+        if (deployedResult.found) {
+            return this._buildConfig('deployed', deployedResult);
+        }
+
+        // Strategy 2: Local source development (bin/claude-pm in source repo)
+        const localSourceResult = this._detectLocalSource();
+        if (localSourceResult.found) {
+            return this._buildConfig('local_source', localSourceResult);
+        }
+
+        // Strategy 3: NPM global installation
+        const npmGlobalResult = this._detectNpmGlobal();
+        if (npmGlobalResult.found) {
+            return this._buildConfig('npm_global', npmGlobalResult);
+        }
+
+        // Strategy 4: NPX execution
+        const npxResult = this._detectNpxExecution();
+        if (npxResult.found) {
+            return this._buildConfig('npx', npxResult);
+        }
+
+        // Strategy 5: NPM local installation (node_modules)
+        const npmLocalResult = this._detectNpmLocal();
+        if (npmLocalResult.found) {
+            return this._buildConfig('npm_local', npmLocalResult);
+        }
+
+        // Strategy 6: Environment-based detection
+        const envResult = this._detectEnvironmentBased();
+        if (envResult.found) {
+            return this._buildConfig('environment', envResult);
+        }
+
+        // Strategy 7: Fallback detection
+        const fallbackResult = this._detectFallback();
+        if (fallbackResult.found) {
+            return this._buildConfig('fallback', fallbackResult);
+        }
+
+        // No valid deployment found
+        return this._buildConfig('not_found', { found: false, error: 'No valid Claude PM Framework deployment found' });
+    }
+
+    /**
+     * Detect local source development scenario
+     */
+    _detectLocalSource() {
+        try {
+            // Check if we're in the source repository
+            const sourceRoot = path.join(__dirname, '..');
+            const claudePmPath = path.join(sourceRoot, 'claude_pm');
+            const packageJsonPath = path.join(sourceRoot, 'package.json');
+            
+            if (fs.existsSync(claudePmPath) && fs.existsSync(packageJsonPath)) {
+                const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+                if (packageJson.name === '@bobmatnyc/claude-multiagent-pm') {
+                    return {
+                        found: true,
+                        frameworkPath: sourceRoot,
+                        claudePmPath: claudePmPath,
+                        packageJson: packageJson,
+                        confidence: 'high'
+                    };
+                }
+            }
+        } catch (error) {
+            // Silent failure for detection
+        }
+        return { found: false };
+    }
+
+    /**
+     * Detect NPM global installation
+     */
+    _detectNpmGlobal() {
+        try {
+            const { execSync } = require('child_process');
+            
+            // Try to find global installation
+            const globalPath = execSync('npm root -g', { encoding: 'utf8' }).trim();
+            const globalClaudePm = path.join(globalPath, '@bobmatnyc', 'claude-multiagent-pm');
+            const globalFrameworkPath = path.join(globalClaudePm, 'claude_pm');
+            
+            if (fs.existsSync(globalFrameworkPath)) {
+                return {
+                    found: true,
+                    frameworkPath: globalClaudePm,
+                    claudePmPath: globalFrameworkPath,
+                    globalPath: globalPath,
+                    confidence: 'high'
+                };
+            }
+        } catch (error) {
+            // Silent failure for detection
+        }
+        return { found: false };
+    }
+
+    /**
+     * Detect NPX execution scenario
+     */
+    _detectNpxExecution() {
+        try {
+            // Check if we're running via npx
+            const npxCache = process.env.npm_config_cache;
+            const npxPrefix = process.env.npm_config_prefix;
+            
+            if (npxCache && (process.env.npm_execpath || process.env.npm_command)) {
+                // Look for claude-pm in npx cache
+                const npxCachePath = path.join(npxCache, '_npx');
+                if (fs.existsSync(npxCachePath)) {
+                    // Find the most recent claude-pm installation
+                    const claudePmDirs = fs.readdirSync(npxCachePath)
+                        .filter(dir => dir.includes('claude-multiagent-pm'))
+                        .sort()
+                        .reverse();
+                    
+                    if (claudePmDirs.length > 0) {
+                        const latestDir = claudePmDirs[0];
+                        const npxFrameworkPath = path.join(npxCachePath, latestDir, 'node_modules', '@bobmatnyc', 'claude-multiagent-pm');
+                        const npxClaudePmPath = path.join(npxFrameworkPath, 'claude_pm');
+                        
+                        if (fs.existsSync(npxClaudePmPath)) {
+                            return {
+                                found: true,
+                                frameworkPath: npxFrameworkPath,
+                                claudePmPath: npxClaudePmPath,
+                                npxCachePath: npxCachePath,
+                                confidence: 'medium'
+                            };
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            // Silent failure for detection
+        }
+        return { found: false };
+    }
+
+    /**
+     * Detect NPM local installation
+     */
+    _detectNpmLocal() {
+        try {
+            // Check current directory and parents for node_modules
+            let currentDir = process.cwd();
+            
+            while (currentDir !== path.dirname(currentDir)) {
+                const nodeModulesPath = path.join(currentDir, 'node_modules', '@bobmatnyc', 'claude-multiagent-pm');
+                const localClaudePmPath = path.join(nodeModulesPath, 'claude_pm');
+                
+                if (fs.existsSync(localClaudePmPath)) {
+                    return {
+                        found: true,
+                        frameworkPath: nodeModulesPath,
+                        claudePmPath: localClaudePmPath,
+                        projectRoot: currentDir,
+                        confidence: 'medium'
+                    };
+                }
+                
+                currentDir = path.dirname(currentDir);
+            }
+        } catch (error) {
+            // Silent failure for detection
+        }
+        return { found: false };
+    }
+
+    /**
+     * Detect deployed instance (from install/deploy.js)
+     */
+    _detectDeployedInstance() {
+        try {
+            // Check standard deployment locations first
+            const deploymentLocations = [
+                path.join(os.homedir(), '.local'),
+                path.join(os.homedir(), '.claude-pm'),
+                process.cwd()
+            ];
+
+            for (const deploymentDir of deploymentLocations) {
+                const deployedConfigPath = path.join(deploymentDir, '.claude-pm', 'config.json');
+                const deployedClaudePmPath = path.join(deploymentDir, 'claude_pm');
+                
+                if (fs.existsSync(deployedConfigPath) && fs.existsSync(deployedClaudePmPath)) {
+                    const deployedConfig = JSON.parse(fs.readFileSync(deployedConfigPath, 'utf8'));
+                    
+                    return {
+                        found: true,
+                        frameworkPath: deploymentDir,
+                        claudePmPath: deployedClaudePmPath,
+                        deployedConfig: deployedConfig,
+                        confidence: deploymentDir === path.join(os.homedir(), '.local') ? 'high' : 'medium'
+                    };
+                }
+            }
+
+            // Check current directory for deployed instance
+            const deployedConfigPath = path.join(process.cwd(), '.claude-pm', 'config.json');
+            const deployedClaudePmPath = path.join(process.cwd(), 'claude_pm');
+            
+            if (fs.existsSync(deployedConfigPath) && fs.existsSync(deployedClaudePmPath)) {
+                const deployedConfig = JSON.parse(fs.readFileSync(deployedConfigPath, 'utf8'));
+                
+                return {
+                    found: true,
+                    frameworkPath: process.cwd(),
+                    claudePmPath: deployedClaudePmPath,
+                    deployedConfig: deployedConfig,
+                    confidence: 'high'
+                };
+            }
+
+            // Check parent directories for deployed instances
+            let currentDir = process.cwd();
+            while (currentDir !== path.dirname(currentDir)) {
+                const parentConfigPath = path.join(currentDir, '.claude-pm', 'config.json');
+                const parentClaudePmPath = path.join(currentDir, 'claude_pm');
+                
+                if (fs.existsSync(parentConfigPath) && fs.existsSync(parentClaudePmPath)) {
+                    const parentConfig = JSON.parse(fs.readFileSync(parentConfigPath, 'utf8'));
+                    
+                    return {
+                        found: true,
+                        frameworkPath: currentDir,
+                        claudePmPath: parentClaudePmPath,
+                        deployedConfig: parentConfig,
+                        confidence: 'medium'
+                    };
+                }
+                
+                currentDir = path.dirname(currentDir);
+            }
+        } catch (error) {
+            // Silent failure for detection
+        }
+        return { found: false };
+    }
+
+    /**
+     * Detect environment-based configuration
+     */
+    _detectEnvironmentBased() {
+        try {
+            // Check environment variables
+            const envPaths = [
+                process.env.CLAUDE_MULTIAGENT_PM_ROOT,
+                process.env.CLAUDE_PM_ROOT,
+                process.env.CLAUDE_PM_FRAMEWORK_PATH
+            ].filter(Boolean);
+            
+            for (const envPath of envPaths) {
+                const envClaudePmPath = path.join(envPath, 'claude_pm');
+                if (fs.existsSync(envClaudePmPath)) {
+                    return {
+                        found: true,
+                        frameworkPath: envPath,
+                        claudePmPath: envClaudePmPath,
+                        environmentSource: envPath,
+                        confidence: 'medium'
+                    };
+                }
+            }
+        } catch (error) {
+            // Silent failure for detection
+        }
+        return { found: false };
+    }
+
+    /**
+     * Detect fallback scenarios
+     */
+    _detectFallback() {
+        try {
+            // Common fallback locations
+            const fallbackPaths = [
+                path.join(os.homedir(), '.claude-pm'),
+                path.join(os.homedir(), 'Projects', 'claude-multiagent-pm'),
+                path.join(os.homedir(), 'Projects', 'claude-pm'),
+                '/usr/local/lib/claude-pm',
+                '/opt/claude-pm'
+            ];
+            
+            for (const fallbackPath of fallbackPaths) {
+                const fallbackClaudePmPath = path.join(fallbackPath, 'claude_pm');
+                if (fs.existsSync(fallbackClaudePmPath)) {
+                    return {
+                        found: true,
+                        frameworkPath: fallbackPath,
+                        claudePmPath: fallbackClaudePmPath,
+                        fallbackPath: fallbackPath,
+                        confidence: 'low'
+                    };
+                }
+            }
+        } catch (error) {
+            // Silent failure for detection
+        }
+        return { found: false };
+    }
+
+    /**
+     * Build deployment configuration object
+     */
+    _buildConfig(type, detectionResult) {
+        const config = {
+            deploymentType: type,
+            found: detectionResult.found,
+            platform: this.platform,
+            detectedAt: new Date().toISOString(),
+            confidence: detectionResult.confidence || 'unknown'
+        };
+
+        if (detectionResult.found) {
+            config.frameworkPath = detectionResult.frameworkPath;
+            config.claudePmPath = detectionResult.claudePmPath;
+            config.paths = {
+                framework: detectionResult.frameworkPath,
+                claudePm: detectionResult.claudePmPath,
+                bin: path.join(detectionResult.frameworkPath, 'bin'),
+                config: path.join(detectionResult.frameworkPath, '.claude-pm'),
+                templates: path.join(detectionResult.frameworkPath, 'templates'),
+                schemas: path.join(detectionResult.frameworkPath, 'schemas')
+            };
+
+            // Add type-specific metadata
+            switch (type) {
+                case 'local_source':
+                    config.metadata = {
+                        packageJson: detectionResult.packageJson,
+                        isDevelopment: true
+                    };
+                    break;
+                case 'npm_global':
+                    config.metadata = {
+                        globalPath: detectionResult.globalPath,
+                        isGlobalInstall: true
+                    };
+                    break;
+                case 'npx':
+                    config.metadata = {
+                        npxCachePath: detectionResult.npxCachePath,
+                        isNpxExecution: true
+                    };
+                    break;
+                case 'npm_local':
+                    config.metadata = {
+                        projectRoot: detectionResult.projectRoot,
+                        isLocalInstall: true
+                    };
+                    break;
+                case 'deployed':
+                    config.metadata = {
+                        deployedConfig: detectionResult.deployedConfig,
+                        isDeployedInstance: true
+                    };
+                    break;
+                case 'environment':
+                    config.metadata = {
+                        environmentSource: detectionResult.environmentSource,
+                        isEnvironmentBased: true
+                    };
+                    break;
+                case 'fallback':
+                    config.metadata = {
+                        fallbackPath: detectionResult.fallbackPath,
+                        isFallback: true
+                    };
+                    break;
+            }
+        } else {
+            config.error = detectionResult.error;
+        }
+
+        return config;
+    }
+
+    /**
+     * Get deployment strategy for current context
+     */
+    getDeploymentStrategy() {
+        const config = this.detectDeployment();
+        
+        if (!config.found) {
+            return {
+                strategy: 'install_required',
+                recommendation: 'npm install -g @bobmatnyc/claude-multiagent-pm',
+                config: config
+            };
+        }
+
+        const strategies = {
+            local_source: {
+                strategy: 'development',
+                pythonPath: config.paths.claudePm,
+                environmentSetup: {
+                    PYTHONPATH: config.paths.framework,
+                    CLAUDE_PM_FRAMEWORK_PATH: config.paths.framework
+                }
+            },
+            npm_global: {
+                strategy: 'global_npm',
+                pythonPath: config.paths.claudePm,
+                environmentSetup: {
+                    PYTHONPATH: config.paths.framework,
+                    CLAUDE_PM_FRAMEWORK_PATH: config.paths.framework
+                }
+            },
+            npx: {
+                strategy: 'npx_execution',
+                pythonPath: config.paths.claudePm,
+                environmentSetup: {
+                    PYTHONPATH: config.paths.framework,
+                    CLAUDE_PM_FRAMEWORK_PATH: config.paths.framework
+                }
+            },
+            npm_local: {
+                strategy: 'local_npm',
+                pythonPath: config.paths.claudePm,
+                environmentSetup: {
+                    PYTHONPATH: config.paths.framework,
+                    CLAUDE_PM_FRAMEWORK_PATH: config.paths.framework
+                }
+            },
+            deployed: {
+                strategy: 'deployed_instance',
+                pythonPath: config.paths.claudePm,
+                environmentSetup: {
+                    PYTHONPATH: config.paths.framework,
+                    CLAUDE_PM_FRAMEWORK_PATH: config.paths.framework
+                }
+            },
+            environment: {
+                strategy: 'environment_configured',
+                pythonPath: config.paths.claudePm,
+                environmentSetup: {
+                    PYTHONPATH: config.paths.framework,
+                    CLAUDE_PM_FRAMEWORK_PATH: config.paths.framework
+                }
+            },
+            fallback: {
+                strategy: 'fallback_detected',
+                pythonPath: config.paths.claudePm,
+                environmentSetup: {
+                    PYTHONPATH: config.paths.framework,
+                    CLAUDE_PM_FRAMEWORK_PATH: config.paths.framework
+                }
+            }
+        };
+
+        return {
+            ...strategies[config.deploymentType],
+            config: config
+        };
+    }
+}
+
+// Create global detector instance
+const deploymentDetector = new DeploymentDetector();
+
+/**
+ * Enhanced framework path detection with comprehensive deployment support
  */
 function getFrameworkPath() {
-    // First check for direct claude_pm directory (correct structure)
-    const directPath = path.join(__dirname, '..');
-    if (fs.existsSync(path.join(directPath, 'claude_pm'))) {
-        return directPath;
+    const deploymentStrategy = deploymentDetector.getDeploymentStrategy();
+    
+    if (deploymentStrategy.strategy === 'install_required') {
+        console.error('❌ Claude PM Framework not found');
+        console.error('Please install the framework:');
+        console.error(`   ${deploymentStrategy.recommendation}`);
+        console.error('');
+        console.error('Detected deployment scenarios:');
+        console.error('- No valid framework installation found');
+        console.error('- Checked: local source, npm global, npx, npm local, deployed instances');
+        process.exit(1);
     }
     
-    // Check for local installation
-    const localPath = path.join(process.cwd(), 'claude_pm');
-    if (fs.existsSync(localPath)) {
-        return process.cwd();
-    }
-    
-    // Check for global installation in user home
-    const homePath = path.join(require('os').homedir(), '.claude-pm');
-    if (fs.existsSync(homePath)) {
-        return homePath;
-    }
-    
-    console.error('❌ Claude PM Framework not found');
-    console.error('Please run: npm install -g claude-pm');
-    process.exit(1);
+    return deploymentStrategy.config.frameworkPath;
+}
+
+/**
+ * Get deployment configuration for advanced usage
+ */
+function getDeploymentConfig() {
+    return deploymentDetector.getDeploymentStrategy();
 }
 
 /**
@@ -74,9 +572,11 @@ function validatePython() {
 }
 
 /**
- * Show help message
+ * Show enhanced help message with deployment detection
  */
 function showHelp() {
+    const deploymentConfig = deploymentDetector.getDeploymentStrategy();
+    
     console.log(`
 Claude Multi-Agent PM Framework v${CLAUDE_PM_VERSION}
 Universal CLI for AI-driven project management
@@ -91,17 +591,30 @@ Commands:
   workflow            Workflow orchestration
   enforcement         Framework enforcement
   --version           Show version information
+  --deployment-info   Show deployment detection results
+  --template-status   Show template management status (CMPM-102)
+  --dependency-status Show dependency management status (CMPM-103)
+  --parent-directory-status Show parent directory management status (CMPM-104)
   --help              Show this help message
 
 Framework Integration:
   This CLI provides universal access to the Claude PM Framework
   regardless of installation location or platform.
 
+Current Deployment:
+  Type: ${deploymentConfig.config.found ? deploymentConfig.config.deploymentType : 'not_found'}
+  Path: ${deploymentConfig.config.found ? deploymentConfig.config.frameworkPath : 'N/A'}
+  Confidence: ${deploymentConfig.config.found ? deploymentConfig.config.confidence : 'N/A'}
+
 Examples:
   claude-pm health status
   claude-pm project create my-project
   claude-pm memory init
   claude-pm service start all
+  claude-pm --deployment-info
+  claude-pm --template-status
+  claude-pm --dependency-status
+  claude-pm --parent-directory-status
 
 For more information, visit:
 https://github.com/bobmatnyc/claude-pm
@@ -109,14 +622,57 @@ https://github.com/bobmatnyc/claude-pm
 }
 
 /**
- * Main execution function
+ * Enhanced main execution function with deployment detection
  */
-function main() {
+async function main() {
     const args = process.argv.slice(2);
     
     // Handle special flags
     if (args.includes('--version') || args.includes('-v')) {
         console.log(`Claude Multi-Agent PM Framework v${CLAUDE_PM_VERSION}`);
+        
+        // Also show deployment config version if available
+        try {
+            const deploymentConfig = getDeploymentConfig();
+            
+            // Check if we have a deployed instance with config
+            if (deploymentConfig && deploymentConfig.config && 
+                deploymentConfig.config.deploymentType === 'deployed' && 
+                deploymentConfig.config.metadata && 
+                deploymentConfig.config.metadata.deployedConfig) {
+                
+                const deployedConfig = deploymentConfig.config.metadata.deployedConfig;
+                console.log(`Deployment Config Version: v${deployedConfig.version}`);
+                if (deployedConfig.deployedAt) {
+                    console.log(`Deployed: ${new Date(deployedConfig.deployedAt).toLocaleString()}`);
+                }
+                console.log(`Deployment Type: ${deploymentConfig.config.deploymentType}`);
+                console.log(`Framework Path: ${deploymentConfig.config.frameworkPath}`);
+            } else {
+                // Try to read deployment config directly from standard locations
+                const deploymentConfigPaths = [
+                    path.join(os.homedir(), '.local', '.claude-pm', 'config.json'),
+                    path.join(os.homedir(), '.claude-pm', 'config.json'),
+                    path.join(process.cwd(), '.claude-pm', 'config.json')
+                ];
+                
+                for (const configPath of deploymentConfigPaths) {
+                    if (fs.existsSync(configPath)) {
+                        const deployedConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                        console.log(`Deployment Config Version: v${deployedConfig.version}`);
+                        if (deployedConfig.deployedAt) {
+                            console.log(`Deployed: ${new Date(deployedConfig.deployedAt).toLocaleString()}`);
+                        }
+                        console.log(`Deployment Type: ${deploymentConfig.config.deploymentType}`);
+                        console.log(`Framework Path: ${deploymentConfig.config.frameworkPath}`);
+                        break;
+                    }
+                }
+            }
+        } catch (error) {
+            // Silent fallback if deployment config is not available
+        }
+        
         process.exit(0);
     }
     
@@ -125,27 +681,87 @@ function main() {
         process.exit(0);
     }
     
+    // Handle deployment detection debug flag
+    if (args.includes('--deployment-info')) {
+        const deploymentConfig = getDeploymentConfig();
+        console.log('\n🔍 Claude PM Framework Deployment Detection Results:');
+        console.log('=' .repeat(60));
+        console.log(JSON.stringify(deploymentConfig, null, 2));
+        process.exit(0);
+    }
+    
+    // Handle CMPM-105 integrated commands
+    if (args.includes('--template-status')) {
+        const deploymentConfig = getDeploymentConfig();
+        handleTemplateStatus(deploymentConfig);
+        process.exit(0);
+    }
+    
+    if (args.includes('--dependency-status')) {
+        const deploymentConfig = getDeploymentConfig();
+        handleDependencyStatus(deploymentConfig);
+        process.exit(0);
+    }
+    
+    if (args.includes('--parent-directory-status')) {
+        const deploymentConfig = getDeploymentConfig();
+        handleParentDirectoryStatus(deploymentConfig);
+        process.exit(0);
+    }
+    
     // Validate environment
     const pythonCmd = validatePython();
-    const frameworkPath = getFrameworkPath();
+    const deploymentStrategy = deploymentDetector.getDeploymentStrategy();
     
-    // Construct path to Python CLI module
-    const cliModulePath = path.join(frameworkPath, 'claude_pm');
-    
-    if (!fs.existsSync(cliModulePath)) {
-        console.error(`❌ Framework CLI module not found at: ${cliModulePath}`);
+    if (deploymentStrategy.strategy === 'install_required') {
+        console.error('❌ Claude PM Framework not found');
+        console.error('Please install the framework:');
+        console.error(`   ${deploymentStrategy.recommendation}`);
         process.exit(1);
     }
     
-    // Execute Python CLI module with all arguments
+    const frameworkPath = deploymentStrategy.config.frameworkPath;
+    const cliModulePath = deploymentStrategy.config.claudePmPath;
+    
+    // Validate CLI module exists
+    if (!fs.existsSync(cliModulePath)) {
+        console.error(`❌ Framework CLI module not found at: ${cliModulePath}`);
+        console.error(`   Deployment type: ${deploymentStrategy.config.deploymentType}`);
+        console.error(`   Framework path: ${frameworkPath}`);
+        console.error(`   Try running: claude-pm --deployment-info`);
+        process.exit(1);
+    }
+    
+    // Enhanced environment setup based on deployment strategy
+    const enhancedEnv = {
+        ...process.env,
+        ...deploymentStrategy.environmentSetup,
+        CLAUDE_PM_VERSION: CLAUDE_PM_VERSION,
+        CLAUDE_PM_DEPLOYMENT_TYPE: deploymentStrategy.config.deploymentType,
+        CLAUDE_PM_DEPLOYMENT_CONFIDENCE: deploymentStrategy.config.confidence,
+        // FIXED: Add explicit deployment directory for Python integration
+        CLAUDE_PM_DEPLOYMENT_DIR: frameworkPath,
+        CLAUDE_PM_WORKING_DIR: process.cwd()
+    };
+    
+    // Ensure proper PYTHONPATH setup
+    const pythonPath = enhancedEnv.PYTHONPATH;
+    if (pythonPath && !pythonPath.includes(frameworkPath)) {
+        enhancedEnv.PYTHONPATH = frameworkPath + (pythonPath ? ':' + pythonPath : '');
+    } else if (!pythonPath) {
+        enhancedEnv.PYTHONPATH = frameworkPath;
+    }
+    
+    // FIXED: Handle Python script updates and deployment
+    await handlePythonScriptDeployment(frameworkPath, enhancedEnv);
+    
+    // FIXED: Handle project deployment completion
+    await handleProjectDeployment(deploymentStrategy, args);
+    
+    // Execute Python CLI module with enhanced environment
     const pythonProcess = spawn(pythonCmd, ['-m', 'claude_pm.cli', ...args], {
         stdio: 'inherit',
-        env: {
-            ...process.env,
-            PYTHONPATH: frameworkPath + (process.env.PYTHONPATH ? ':' + process.env.PYTHONPATH : ''),
-            CLAUDE_PM_FRAMEWORK_PATH: frameworkPath,
-            CLAUDE_PM_VERSION: CLAUDE_PM_VERSION
-        },
+        env: enhancedEnv,
         cwd: frameworkPath
     });
     
@@ -155,13 +771,295 @@ function main() {
     
     pythonProcess.on('error', (error) => {
         console.error('❌ Failed to execute Claude PM Framework:', error.message);
+        console.error(`   Deployment type: ${deploymentStrategy.config.deploymentType}`);
+        console.error(`   Framework path: ${frameworkPath}`);
+        console.error(`   Python command: ${pythonCmd}`);
+        console.error(`   Try running: claude-pm --deployment-info`);
         process.exit(1);
     });
 }
 
 // Execute main function
 if (require.main === module) {
-    main();
+    main().catch((error) => {
+        console.error('❌ CLI execution error:', error.message);
+        process.exit(1);
+    });
 }
 
-module.exports = { main, getFrameworkPath, validatePython };
+/**
+ * CMPM-105 Integration: Handle template management status
+ */
+function handleTemplateStatus(deploymentConfig) {
+    console.log('\n📄 Template Management Status (CMPM-102):');
+    console.log('=' .repeat(60));
+    
+    try {
+        const pythonCmd = validatePython();
+        const frameworkPath = deploymentConfig.config.frameworkPath;
+        
+        // Execute template manager status command
+        const { spawn } = require('child_process');
+        const templateProcess = spawn(pythonCmd, ['-c', `
+import sys
+sys.path.insert(0, '${frameworkPath}')
+from claude_pm.services.template_manager import TemplateManager
+import asyncio
+import json
+
+async def get_status():
+    try:
+        manager = TemplateManager()
+        await manager._initialize()
+        templates = await manager.list_templates()
+        status = {
+            "initialized": True,
+            "template_count": len(templates),
+            "templates": templates[:5],  # Show first 5
+            "deployment_type": "${deploymentConfig.config.deploymentType}"
+        }
+        print(json.dumps(status, indent=2, default=str))
+    except Exception as e:
+        print(json.dumps({"error": str(e), "initialized": False}, indent=2))
+
+asyncio.run(get_status())
+        `], {
+            stdio: 'inherit',
+            env: {
+                ...process.env,
+                PYTHONPATH: frameworkPath,
+                CLAUDE_PM_FRAMEWORK_PATH: frameworkPath
+            },
+            cwd: frameworkPath
+        });
+        
+        templateProcess.on('error', (error) => {
+            console.error('❌ Template Manager Error:', error.message);
+        });
+        
+    } catch (error) {
+        console.error('❌ Template Status Error:', error.message);
+    }
+}
+
+/**
+ * CMPM-105 Integration: Handle dependency management status
+ */
+function handleDependencyStatus(deploymentConfig) {
+    console.log('\n📦 Dependency Management Status (CMPM-103):');
+    console.log('=' .repeat(60));
+    
+    try {
+        const pythonCmd = validatePython();
+        const frameworkPath = deploymentConfig.config.frameworkPath;
+        
+        // Execute dependency manager status command
+        const { spawn } = require('child_process');
+        const dependencyProcess = spawn(pythonCmd, ['-c', `
+import sys
+sys.path.insert(0, '${frameworkPath}')
+from claude_pm.services.dependency_manager import DependencyManager
+import asyncio
+import json
+
+async def get_status():
+    try:
+        manager = DependencyManager()
+        await manager._initialize()
+        dependencies = manager.get_dependencies()
+        report = await manager.generate_dependency_report()
+        status = {
+            "initialized": True,
+            "dependencies_tracked": len(dependencies),
+            "health_score": report.health_score,
+            "missing_dependencies": report.missing_dependencies,
+            "deployment_type": "${deploymentConfig.config.deploymentType}"
+        }
+        print(json.dumps(status, indent=2, default=str))
+    except Exception as e:
+        print(json.dumps({"error": str(e), "initialized": False}, indent=2))
+
+asyncio.run(get_status())
+        `], {
+            stdio: 'inherit',
+            env: {
+                ...process.env,
+                PYTHONPATH: frameworkPath,
+                CLAUDE_PM_FRAMEWORK_PATH: frameworkPath
+            },
+            cwd: frameworkPath
+        });
+        
+        dependencyProcess.on('error', (error) => {
+            console.error('❌ Dependency Manager Error:', error.message);
+        });
+        
+    } catch (error) {
+        console.error('❌ Dependency Status Error:', error.message);
+    }
+}
+
+/**
+ * CMPM-105 Integration: Handle parent directory management status
+ */
+function handleParentDirectoryStatus(deploymentConfig) {
+    console.log('\n📁 Parent Directory Management Status (CMPM-104):');
+    console.log('=' .repeat(60));
+    
+    try {
+        const pythonCmd = validatePython();
+        const frameworkPath = deploymentConfig.config.frameworkPath;
+        
+        // Execute parent directory manager status command
+        const { spawn } = require('child_process');
+        const parentDirProcess = spawn(pythonCmd, ['-c', `
+import sys
+sys.path.insert(0, '${frameworkPath}')
+from claude_pm.services.parent_directory_manager import ParentDirectoryManager
+import asyncio
+import json
+
+async def get_status():
+    try:
+        manager = ParentDirectoryManager()
+        await manager._initialize()
+        directories = await manager.list_managed_directories()
+        status = {
+            "initialized": True,
+            "managed_directories": len(directories),
+            "directories": directories[:3],  # Show first 3
+            "deployment_type": "${deploymentConfig.config.deploymentType}"
+        }
+        print(json.dumps(status, indent=2, default=str))
+    except Exception as e:
+        print(json.dumps({"error": str(e), "initialized": False}, indent=2))
+
+asyncio.run(get_status())
+        `], {
+            stdio: 'inherit',
+            env: {
+                ...process.env,
+                PYTHONPATH: frameworkPath,
+                CLAUDE_PM_FRAMEWORK_PATH: frameworkPath
+            },
+            cwd: frameworkPath
+        });
+        
+        parentDirProcess.on('error', (error) => {
+            console.error('❌ Parent Directory Manager Error:', error.message);
+        });
+        
+    } catch (error) {
+        console.error('❌ Parent Directory Status Error:', error.message);
+    }
+}
+
+/**
+ * CMPM-105 Integration: Handle Python script deployment
+ */
+async function handlePythonScriptDeployment(frameworkPath, environment) {
+    try {
+        // Check if Python scripts need updates
+        const pythonScriptPath = path.join(frameworkPath, 'claude_pm');
+        
+        if (!fs.existsSync(pythonScriptPath)) {
+            console.log('⚠️  Python scripts not found, may need installation');
+            return;
+        }
+        
+        // Validate Python environment
+        const pythonCmd = validatePython();
+        
+        // Check if Python dependencies are installed
+        const { spawn } = require('child_process');
+        const checkProcess = spawn(pythonCmd, ['-c', 'import claude_pm; print("OK")'], {
+            env: environment,
+            cwd: frameworkPath,
+            stdio: 'pipe'
+        });
+        
+        return new Promise((resolve) => {
+            let output = '';
+            
+            checkProcess.stdout.on('data', (data) => {
+                output += data.toString();
+            });
+            
+            checkProcess.on('close', (code) => {
+                if (code === 0 && output.includes('OK')) {
+                    // Python integration is working
+                    resolve();
+                } else {
+                    console.log('⚠️  Python integration may need setup');
+                    resolve();
+                }
+            });
+            
+            // Timeout after 5 seconds
+            setTimeout(() => {
+                checkProcess.kill();
+                resolve();
+            }, 5000);
+        });
+        
+    } catch (error) {
+        // Silent failure - don't break CLI
+        return;
+    }
+}
+
+/**
+ * CMPM-105 Integration: Handle project deployment completion
+ */
+async function handleProjectDeployment(deploymentConfig, args) {
+    try {
+        // Check if this is a project-specific operation
+        const isProjectSpecific = args.some(arg => 
+            ['project', 'init', 'setup', 'deploy'].includes(arg)
+        );
+        
+        if (!isProjectSpecific) {
+            return;
+        }
+        
+        const frameworkPath = deploymentConfig.config.frameworkPath;
+        const workingDir = process.cwd();
+        
+        // Create project-specific deployment structure if needed
+        const projectClaudePmDir = path.join(workingDir, '.claude-pm');
+        
+        if (!fs.existsSync(projectClaudePmDir)) {
+            fs.mkdirSync(projectClaudePmDir, { recursive: true });
+            
+            // Create basic project configuration
+            const projectConfig = {
+                project_type: "managed",
+                framework_path: frameworkPath,
+                deployment_date: new Date().toISOString(),
+                version: deploymentConfig.config.version || "4.5.1"
+            };
+            
+            fs.writeFileSync(
+                path.join(projectClaudePmDir, 'config.json'),
+                JSON.stringify(projectConfig, null, 2)
+            );
+        }
+        
+    } catch (error) {
+        // Silent failure - don't break CLI
+        return;
+    }
+}
+
+module.exports = { 
+    main, 
+    getFrameworkPath, 
+    getDeploymentConfig, 
+    validatePython, 
+    DeploymentDetector,
+    handleTemplateStatus,
+    handleDependencyStatus,
+    handleParentDirectoryStatus,
+    handlePythonScriptDeployment,
+    handleProjectDeployment
+};

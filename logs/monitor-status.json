@@ -1,13 +1,7 @@
 {
-  "pid": 10200,
-  "startTime": "2025-07-07T03:13:21.336Z",
-  "lastCheck": "2025-07-07T03:13:21.337Z",
-  "checksRun": 1,
-  "alertsSent": 2,
-  "documentation_sync": {
-    "enabled": true,
-    "last_check": "2025-07-07T17:56:09.377086",
-    "status": "healthy",
-    "next_check": "continuous"
-  }
+  "pid": 98261,
+  "start_time": "2025-07-11T00:14:35.352791",
+  "last_check": "2025-07-11T00:14:35.353817",
+  "checks_run": 1,
+  "alerts_sent": 1
 }

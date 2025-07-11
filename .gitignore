@@ -155,3 +155,6 @@ Thumbs.db
 .ai-trackdown-index
 backups/
 sync/
+
+# Archive directory
+_archive/

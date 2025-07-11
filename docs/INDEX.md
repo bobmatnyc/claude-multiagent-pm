@@ -282,6 +282,7 @@ from claude_pm.services.multi_agent_orchestrator import MultiAgentOrchestrator
 #### Development Setup
 - [Python Standards](PYTHON_STANDARDS.md) - Coding standards and practices
 - [Requirements](../requirements/base.txt) - Setup and dependencies
+- [Testing Guide](TESTING_GUIDE.md) - Comprehensive testing documentation and CLI testing
 - [Testing](../tests/) - Test structure and coverage
 
 #### Contribution Workflow

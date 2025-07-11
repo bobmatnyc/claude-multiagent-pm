@@ -27,6 +27,10 @@ from ..core.config import Config
 from ..services.memory_service import MemoryService
 from ..services.multi_agent_orchestrator import MultiAgentOrchestrator
 from ..services.health_dashboard import HealthDashboardOrchestrator
+from ..services.memory.memory_trigger_service import MemoryTriggerService
+from ..services.memory.trigger_orchestrator import TriggerEvent
+from ..services.memory.trigger_types import TriggerType, TriggerPriority
+from ..services.memory.interfaces.models import MemoryCategory
 
 logger = logging.getLogger(__name__)
 
@@ -235,6 +239,10 @@ class EnhancedQAAgent:
         self.test_timeout = self.config.get("qa.test_timeout", 300)  # 5 minutes
         self.parallel_tests = self.config.get("qa.parallel_tests", True)
         
+        # Memory integration
+        self.memory_trigger_service: Optional[MemoryTriggerService] = None
+        self.memory_enhanced = False
+        
         logger.info(f"Enhanced QA Agent initialized (v{self.agent_version})")
     
     async def execute_browser_tests(self, test_config: Dict[str, Any]) -> Dict[str, Any]:
@@ -262,7 +270,7 @@ class EnhancedQAAgent:
                 test_results = [extension_response.get("result", {})]
                 patterns = await self.memory_testing.analyze_test_patterns(test_results)
                 
-                return {
+                result = {
                     "status": "success",
                     "test_results": extension_response.get("result"),
                     "pattern_analysis": patterns,
@@ -273,6 +281,15 @@ class EnhancedQAAgent:
                         "screenshots_captured": len(test_results[0].get("screenshots", []))
                     }
                 }
+                
+                # Create memory trigger for browser testing
+                await self._create_memory_trigger("browser_testing", {
+                    "project_name": test_config.get("project_name", "unknown"),
+                    "test_type": "browser",
+                    "test_scenarios": test_config.get("scenarios", [])
+                }, result)
+                
+                return result
             else:
                 return {
                     "status": "error",
@@ -342,7 +359,7 @@ class EnhancedQAAgent:
             # Store results in memory for pattern analysis
             patterns = await self.memory_testing.analyze_test_patterns(results)
             
-            return {
+            result = {
                 "status": "success" if passed_tests == total_tests else "partial_failure",
                 "summary": {
                     "total_tests": total_tests,
@@ -353,6 +370,15 @@ class EnhancedQAAgent:
                 "detailed_results": results,
                 "pattern_analysis": patterns
             }
+            
+            # Create memory trigger for test execution
+            await self._create_memory_trigger("test_execution", {
+                "project_name": self.framework_path.name,
+                "test_type": test_type,
+                "execution_time": sum(r.get("execution_time", 0) for r in results)
+            }, result)
+            
+            return result
             
         except Exception as e:
             logger.error(f"Framework test execution failed: {e}")
@@ -516,6 +542,100 @@ Agent Version: {self.agent_version}
         except Exception as e:
             logger.error(f"Test report generation failed: {e}")
             return f"Error generating test report: {str(e)}"
+    
+    # Memory Integration Methods
+    
+    def enable_memory_integration(self, memory_service: MemoryTriggerService):
+        """Enable memory integration for the QA Agent."""
+        self.memory_trigger_service = memory_service
+        self.memory_enhanced = True
+        logger.info("Enhanced QA Agent memory integration enabled")
+    
+    async def _create_memory_trigger(self, operation: str, context: Dict[str, Any], result: Dict[str, Any]):
+        """Create memory trigger for QA operations."""
+        if not self.memory_enhanced or not self.memory_trigger_service:
+            return
+        
+        try:
+            # Prepare memory content
+            memory_content = self._generate_memory_content(operation, context, result)
+            
+            # Prepare metadata
+            metadata = {
+                "agent_id": self.agent_id,
+                "agent_type": "qa",
+                "operation": operation,
+                "project_name": context.get("project_name", "unknown"),
+                "timestamp": datetime.now().isoformat(),
+                "success": result.get("status") == "success"
+            }
+            
+            # Add operation-specific metadata
+            if operation == "test_execution":
+                metadata.update({
+                    "test_type": context.get("test_type", "unknown"),
+                    "total_tests": result.get("summary", {}).get("total_tests", 0),
+                    "passed_tests": result.get("summary", {}).get("passed_tests", 0),
+                    "failed_tests": result.get("summary", {}).get("failed_tests", 0),
+                    "success_rate": result.get("summary", {}).get("success_rate", 0)
+                })
+            elif operation == "browser_testing":
+                metadata.update({
+                    "test_results": result.get("test_results", {}),
+                    "screenshots_count": result.get("execution_summary", {}).get("screenshots_captured", 0),
+                    "execution_time": result.get("execution_summary", {}).get("execution_time", 0)
+                })
+            elif operation == "quality_validation":
+                metadata.update({
+                    "validation_status": result.get("status", "unknown"),
+                    "quality_score": context.get("quality_score", 0)
+                })
+            
+            # Create trigger event
+            trigger_event = TriggerEvent(
+                trigger_type=TriggerType.OPERATION_COMPLETION,
+                priority=TriggerPriority.HIGH if operation == "test_execution" else TriggerPriority.MEDIUM,
+                project_name=context.get("project_name", "unknown"),
+                event_id=f"qa_agent_{operation}_{int(time.time())}",
+                content=memory_content,
+                category=MemoryCategory.WORKFLOW,
+                tags=["qa", operation, "testing"],
+                metadata=metadata,
+                source="enhanced_qa_agent",
+                context=context
+            )
+            
+            # Process trigger
+            orchestrator = self.memory_trigger_service.get_trigger_orchestrator()
+            if orchestrator:
+                await orchestrator.process_trigger(trigger_event)
+                logger.info(f"Created memory trigger for QA operation: {operation}")
+            
+        except Exception as e:
+            logger.error(f"Failed to create memory trigger for {operation}: {e}")
+    
+    def _generate_memory_content(self, operation: str, context: Dict[str, Any], result: Dict[str, Any]) -> str:
+        """Generate memory content for QA operations."""
+        project_name = context.get("project_name", "unknown")
+        
+        if operation == "test_execution":
+            test_type = context.get("test_type", "unknown")
+            total_tests = result.get("summary", {}).get("total_tests", 0)
+            passed_tests = result.get("summary", {}).get("passed_tests", 0)
+            success_rate = result.get("summary", {}).get("success_rate", 0)
+            return f"Test execution for {project_name}. Type: {test_type}, Results: {passed_tests}/{total_tests} passed ({success_rate:.1%})"
+        
+        elif operation == "browser_testing":
+            test_results = result.get("test_results", {})
+            screenshots_count = result.get("execution_summary", {}).get("screenshots_captured", 0)
+            return f"Browser testing for {project_name}. Results: {test_results}, Screenshots: {screenshots_count}"
+        
+        elif operation == "quality_validation":
+            validation_status = result.get("status", "unknown")
+            return f"Quality validation for {project_name}. Status: {validation_status}"
+        
+        else:
+            return f"QA operation {operation} completed for {project_name}"
 
 
 # Factory function for creating QA agent instances

@@ -1,0 +1,273 @@
+# Staging Environment Configuration
+# Production-like configuration for pre-production testing
+
+environment: "staging"
+debug_mode: false
+config_version: "1.0"
+global_enabled: true
+max_memory_operations_per_second: 200
+auto_reload: true  # Enabled for staging flexibility
+validation_strict: true
+
+# Performance configuration close to production
+performance:
+  create_timeout: 7.0
+  recall_timeout: 4.0
+  search_timeout: 12.0
+  batch_size: 40
+  max_concurrent_operations: 8
+  rate_limit_per_second: 200
+  
+  # Caching enabled with production-like settings
+  cache_enabled: true
+  cache_ttl_seconds: 180
+  cache_max_size: 500
+  
+  max_memory_size_mb: 75
+  memory_cleanup_threshold: 0.8
+  min_memory_quality_score: 0.6
+  max_memories_per_context: 75
+  
+  # Background processing enabled
+  background_processing_enabled: true
+  background_queue_size: 500
+  worker_thread_count: 3
+
+# Lifecycle configuration for staging
+lifecycle:
+  default_retention_days: 30  # Moderate retention for staging
+  important_memory_retention_days: 90
+  error_memory_retention_days: 14
+  workflow_memory_retention_days: 60
+  
+  auto_cleanup_enabled: true
+  cleanup_interval_hours: 12
+  cleanup_batch_size: 75
+  
+  quality_based_cleanup: true
+  min_quality_for_retention: 0.5
+  
+  # Archival testing enabled
+  archival_enabled: true
+  archive_after_days: 90
+  archive_backend: "local_archive"
+  
+  migration_enabled: false  # Disabled for staging stability
+  migration_schedule: null
+  
+  compression_enabled: true
+  compression_after_days: 3
+
+# Monitoring configuration for staging
+monitoring:
+  metrics_enabled: true
+  metrics_collection_interval: 45
+  metrics_retention_days: 14
+  
+  performance_monitoring_enabled: true
+  slow_operation_threshold_ms: 800
+  error_rate_threshold: 0.03
+  
+  health_check_enabled: true
+  health_check_interval: 20
+  health_check_timeout: 6
+  
+  # Balanced logging for staging
+  log_level: "INFO"
+  log_memory_operations: true
+  log_performance_metrics: false
+  structured_logging: true
+  
+  # Alerting enabled for staging monitoring
+  alerting_enabled: true
+  alert_channels: ["staging-alerts"]
+  error_alert_threshold: 20
+  performance_alert_threshold: 2.5
+
+# Backend configuration for staging
+backend:
+  backend_type: "mem0"  # Use mem0 backend for staging
+  connection_timeout: 8.0
+  read_timeout: 5.0
+  write_timeout: 8.0
+  max_retries: 3
+  retry_delay: 1.0
+  
+  backend_settings:
+    api_key_env: "MEM0_API_KEY_STAGING"
+    organization_id: "staging_org"
+    user_id: "staging_user"
+    host: "api-staging.mem0.ai"
+    timeout: 30
+    
+  # Connection pooling enabled
+  pool_enabled: true
+  pool_size: 5
+  pool_max_overflow: 10
+  
+  # Failover to local backend
+  failover_enabled: true
+  failover_backends: ["local"]
+  
+  encryption_enabled: true
+  encryption_key_path: "/etc/staging_memory_key.pem"
+
+# Feature toggles for staging
+features:
+  workflow_triggers: true
+  agent_triggers: true
+  error_triggers: true
+  pattern_detection: true
+  auto_recall: true
+  quality_assessment: true
+  background_processing: true
+  hot_reloading: true
+
+# Staging-specific trigger policies
+trigger_policies:
+  staging_workflow:
+    enabled: true
+    trigger_type: "workflow"
+    success_threshold: 0.8
+    failure_threshold: 0.3
+    create_on_success: true
+    create_on_failure: true
+    create_on_error: true
+    
+    pattern_detection_enabled: true
+    pattern_similarity_threshold: 0.7
+    
+    min_context_length: 15
+    max_context_length: 5000
+    context_required_fields: ["workflow_id", "environment"]
+    
+    require_quality_validation: true
+    min_trigger_confidence: 0.6
+    
+    max_triggers_per_minute: 40
+    cooldown_period_seconds: 15
+    
+    agent_name: null
+    agent_trigger_patterns: []
+  
+  staging_agent:
+    enabled: true
+    trigger_type: "agent"
+    success_threshold: 0.8
+    failure_threshold: 0.3
+    create_on_success: true
+    create_on_failure: true
+    create_on_error: true
+    
+    pattern_detection_enabled: true
+    pattern_similarity_threshold: 0.7
+    
+    min_context_length: 15
+    max_context_length: 3000
+    context_required_fields: ["agent_name", "operation", "environment"]
+    
+    require_quality_validation: true
+    min_trigger_confidence: 0.6
+    
+    max_triggers_per_minute: 25
+    cooldown_period_seconds: 10
+    
+    agent_name: null
+    agent_trigger_patterns:
+      - "agent_started"
+      - "agent_completed"
+      - "agent_failed"
+      - "operation_success"
+      - "operation_failure"
+      - "performance_issue"
+  
+  staging_error:
+    enabled: true
+    trigger_type: "error"
+    success_threshold: 0.0
+    failure_threshold: 0.0
+    create_on_success: false
+    create_on_failure: false
+    create_on_error: true
+    
+    pattern_detection_enabled: true
+    pattern_similarity_threshold: 0.85
+    
+    min_context_length: 25
+    max_context_length: 2000
+    context_required_fields: ["error_type", "error_message", "stack_trace"]
+    
+    require_quality_validation: true
+    min_trigger_confidence: 0.7
+    
+    max_triggers_per_minute: 30
+    cooldown_period_seconds: 5
+    
+    agent_name: null
+    agent_trigger_patterns:
+      - "database_error"
+      - "api_error"
+      - "timeout_error"
+      - "validation_error"
+      - "authentication_error"
+      - "permission_error"
+  
+  staging_performance:
+    enabled: true
+    trigger_type: "pattern"
+    success_threshold: 0.7
+    failure_threshold: 0.4
+    create_on_success: false
+    create_on_failure: true
+    create_on_error: true
+    
+    pattern_detection_enabled: true
+    pattern_similarity_threshold: 0.8
+    
+    min_context_length: 20
+    max_context_length: 1500
+    context_required_fields: ["performance_metric", "threshold"]
+    
+    require_quality_validation: true
+    min_trigger_confidence: 0.7
+    
+    max_triggers_per_minute: 15
+    cooldown_period_seconds: 30
+    
+    agent_name: null
+    agent_trigger_patterns:
+      - "slow_response"
+      - "high_memory_usage"
+      - "cpu_spike"
+      - "queue_backlog"
+      - "connection_pool_exhausted"
+  
+  staging_quality:
+    enabled: true
+    trigger_type: "pattern"
+    success_threshold: 0.9
+    failure_threshold: 0.2
+    create_on_success: true
+    create_on_failure: true
+    create_on_error: false
+    
+    pattern_detection_enabled: true
+    pattern_similarity_threshold: 0.75
+    
+    min_context_length: 30
+    max_context_length: 2000
+    context_required_fields: ["quality_score", "assessment_type"]
+    
+    require_quality_validation: true
+    min_trigger_confidence: 0.8
+    
+    max_triggers_per_minute: 10
+    cooldown_period_seconds: 60
+    
+    agent_name: null
+    agent_trigger_patterns:
+      - "high_quality_interaction"
+      - "knowledge_discovery"
+      - "successful_learning"
+      - "pattern_improvement"
+      - "quality_degradation"

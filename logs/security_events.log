@@ -58,3 +58,5 @@
 {'timestamp': '2025-07-08T22:34:29.213439', 'event_type': 'auth_success', 'service_host': 'http://localhost:8002', 'details': {'status_code': 200}, 'ip_address': None, 'user_agent': None}
 {'timestamp': '2025-07-08T22:34:52.501377', 'event_type': 'auth_success', 'service_host': 'http://localhost:8002', 'details': {'status_code': 200}, 'ip_address': None, 'user_agent': None}
 {'timestamp': '2025-07-09T00:17:33.068183', 'event_type': 'auth_success', 'service_host': 'http://localhost:8002', 'details': {'status_code': 200}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-11T00:03:15.908039', 'event_type': 'auth_success', 'service_host': 'http://localhost:8002', 'details': {'status_code': 200}, 'ip_address': None, 'user_agent': None}
+{'timestamp': '2025-07-11T00:03:58.998047', 'event_type': 'auth_failure', 'service_host': 'http://invalid_host:9999', 'details': {'failure_count': 1, 'error': 'Cannot connect to host invalid_host:9999 ssl:default [nodename nor servname provided, or not known]'}, 'ip_address': None, 'user_agent': None}

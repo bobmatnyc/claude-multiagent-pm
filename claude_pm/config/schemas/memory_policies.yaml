@@ -1,0 +1,818 @@
+# Memory Trigger Policy Configuration Schema
+# This file defines the structure and validation rules for memory trigger policies
+
+memory_trigger_config:
+  type: object
+  required:
+    - environment
+    - global_enabled
+  properties:
+    environment:
+      type: string
+      enum: ["development", "testing", "staging", "production"]
+      description: "Deployment environment"
+    
+    debug_mode:
+      type: boolean
+      default: false
+      description: "Enable debug mode for detailed logging"
+    
+    config_version:
+      type: string
+      pattern: "^\\d+\\.\\d+$"
+      description: "Configuration version"
+    
+    global_enabled:
+      type: boolean
+      default: true
+      description: "Global enable/disable for memory triggers"
+    
+    max_memory_operations_per_second:
+      type: integer
+      minimum: 1
+      maximum: 10000
+      default: 100
+      description: "Maximum memory operations per second"
+    
+    auto_reload:
+      type: boolean
+      default: true
+      description: "Enable automatic configuration reloading"
+    
+    validation_strict:
+      type: boolean
+      default: true
+      description: "Enable strict validation"
+    
+    performance:
+      $ref: "#/definitions/performance_config"
+    
+    lifecycle:
+      $ref: "#/definitions/lifecycle_config"
+    
+    monitoring:
+      $ref: "#/definitions/monitoring_config"
+    
+    backend:
+      $ref: "#/definitions/backend_config"
+    
+    trigger_policies:
+      type: object
+      additionalProperties:
+        $ref: "#/definitions/trigger_policy"
+    
+    features:
+      type: object
+      properties:
+        workflow_triggers:
+          type: boolean
+          default: true
+        agent_triggers:
+          type: boolean
+          default: true
+        error_triggers:
+          type: boolean
+          default: true
+        pattern_detection:
+          type: boolean
+          default: true
+        auto_recall:
+          type: boolean
+          default: true
+        quality_assessment:
+          type: boolean
+          default: true
+        background_processing:
+          type: boolean
+          default: true
+        hot_reloading:
+          type: boolean
+          default: true
+
+definitions:
+  performance_config:
+    type: object
+    properties:
+      create_timeout:
+        type: number
+        minimum: 0.1
+        maximum: 60
+        default: 5.0
+        description: "Memory creation timeout in seconds"
+      
+      recall_timeout:
+        type: number
+        minimum: 0.1
+        maximum: 60
+        default: 3.0
+        description: "Memory recall timeout in seconds"
+      
+      search_timeout:
+        type: number
+        minimum: 0.1
+        maximum: 120
+        default: 10.0
+        description: "Memory search timeout in seconds"
+      
+      batch_size:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 50
+        description: "Batch processing size"
+      
+      max_concurrent_operations:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+        description: "Maximum concurrent operations"
+      
+      rate_limit_per_second:
+        type: integer
+        minimum: 1
+        maximum: 10000
+        default: 100
+        description: "Rate limit per second"
+      
+      cache_enabled:
+        type: boolean
+        default: true
+        description: "Enable result caching"
+      
+      cache_ttl_seconds:
+        type: integer
+        minimum: 1
+        maximum: 86400
+        default: 300
+        description: "Cache TTL in seconds"
+      
+      cache_max_size:
+        type: integer
+        minimum: 1
+        maximum: 100000
+        default: 1000
+        description: "Maximum cache size"
+      
+      max_memory_size_mb:
+        type: integer
+        minimum: 1
+        maximum: 10000
+        default: 100
+        description: "Maximum memory size in MB"
+      
+      memory_cleanup_threshold:
+        type: number
+        minimum: 0.1
+        maximum: 1.0
+        default: 0.8
+        description: "Memory cleanup threshold"
+      
+      min_memory_quality_score:
+        type: number
+        minimum: 0.0
+        maximum: 1.0
+        default: 0.6
+        description: "Minimum memory quality score"
+      
+      max_memories_per_context:
+        type: integer
+        minimum: 1
+        maximum: 10000
+        default: 100
+        description: "Maximum memories per context"
+      
+      background_processing_enabled:
+        type: boolean
+        default: true
+        description: "Enable background processing"
+      
+      background_queue_size:
+        type: integer
+        minimum: 1
+        maximum: 100000
+        default: 1000
+        description: "Background queue size"
+      
+      worker_thread_count:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 3
+        description: "Worker thread count"
+
+  lifecycle_config:
+    type: object
+    properties:
+      default_retention_days:
+        type: integer
+        minimum: 1
+        maximum: 3650
+        default: 90
+        description: "Default retention period in days"
+      
+      important_memory_retention_days:
+        type: integer
+        minimum: 1
+        maximum: 3650
+        default: 365
+        description: "Important memory retention in days"
+      
+      error_memory_retention_days:
+        type: integer
+        minimum: 1
+        maximum: 365
+        default: 30
+        description: "Error memory retention in days"
+      
+      workflow_memory_retention_days:
+        type: integer
+        minimum: 1
+        maximum: 3650
+        default: 180
+        description: "Workflow memory retention in days"
+      
+      auto_cleanup_enabled:
+        type: boolean
+        default: true
+        description: "Enable automatic cleanup"
+      
+      cleanup_interval_hours:
+        type: integer
+        minimum: 1
+        maximum: 168
+        default: 24
+        description: "Cleanup interval in hours"
+      
+      cleanup_batch_size:
+        type: integer
+        minimum: 1
+        maximum: 10000
+        default: 100
+        description: "Cleanup batch size"
+      
+      quality_based_cleanup:
+        type: boolean
+        default: true
+        description: "Enable quality-based cleanup"
+      
+      min_quality_for_retention:
+        type: number
+        minimum: 0.0
+        maximum: 1.0
+        default: 0.4
+        description: "Minimum quality for retention"
+      
+      archival_enabled:
+        type: boolean
+        default: false
+        description: "Enable memory archival"
+      
+      archive_after_days:
+        type: integer
+        minimum: 1
+        maximum: 3650
+        default: 365
+        description: "Archive after days"
+      
+      archive_backend:
+        type: string
+        description: "Archive backend name"
+      
+      migration_enabled:
+        type: boolean
+        default: false
+        description: "Enable memory migration"
+      
+      migration_schedule:
+        type: string
+        description: "Migration schedule (cron expression)"
+      
+      compression_enabled:
+        type: boolean
+        default: true
+        description: "Enable memory compression"
+      
+      compression_after_days:
+        type: integer
+        minimum: 0
+        maximum: 365
+        default: 7
+        description: "Compress after days"
+
+  monitoring_config:
+    type: object
+    properties:
+      metrics_enabled:
+        type: boolean
+        default: true
+        description: "Enable metrics collection"
+      
+      metrics_collection_interval:
+        type: integer
+        minimum: 1
+        maximum: 3600
+        default: 60
+        description: "Metrics collection interval in seconds"
+      
+      metrics_retention_days:
+        type: integer
+        minimum: 1
+        maximum: 365
+        default: 30
+        description: "Metrics retention in days"
+      
+      performance_monitoring_enabled:
+        type: boolean
+        default: true
+        description: "Enable performance monitoring"
+      
+      slow_operation_threshold_ms:
+        type: integer
+        minimum: 1
+        maximum: 60000
+        default: 1000
+        description: "Slow operation threshold in milliseconds"
+      
+      error_rate_threshold:
+        type: number
+        minimum: 0.0
+        maximum: 1.0
+        default: 0.05
+        description: "Error rate threshold"
+      
+      health_check_enabled:
+        type: boolean
+        default: true
+        description: "Enable health checks"
+      
+      health_check_interval:
+        type: integer
+        minimum: 1
+        maximum: 3600
+        default: 30
+        description: "Health check interval in seconds"
+      
+      health_check_timeout:
+        type: integer
+        minimum: 1
+        maximum: 300
+        default: 5
+        description: "Health check timeout in seconds"
+      
+      log_level:
+        type: string
+        enum: ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+        default: "INFO"
+        description: "Logging level"
+      
+      log_memory_operations:
+        type: boolean
+        default: true
+        description: "Log memory operations"
+      
+      log_performance_metrics:
+        type: boolean
+        default: false
+        description: "Log performance metrics"
+      
+      structured_logging:
+        type: boolean
+        default: true
+        description: "Enable structured logging"
+      
+      alerting_enabled:
+        type: boolean
+        default: false
+        description: "Enable alerting"
+      
+      alert_channels:
+        type: array
+        items:
+          type: string
+        description: "Alert channels"
+      
+      error_alert_threshold:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 10
+        description: "Error alert threshold"
+      
+      performance_alert_threshold:
+        type: number
+        minimum: 0.1
+        maximum: 100.0
+        default: 2.0
+        description: "Performance alert threshold"
+
+  backend_config:
+    type: object
+    properties:
+      backend_type:
+        type: string
+        enum: ["mem0", "local", "redis", "postgresql", "hybrid"]
+        default: "mem0"
+        description: "Memory backend type"
+      
+      connection_timeout:
+        type: number
+        minimum: 0.1
+        maximum: 300
+        default: 10.0
+        description: "Connection timeout in seconds"
+      
+      read_timeout:
+        type: number
+        minimum: 0.1
+        maximum: 300
+        default: 5.0
+        description: "Read timeout in seconds"
+      
+      write_timeout:
+        type: number
+        minimum: 0.1
+        maximum: 300
+        default: 10.0
+        description: "Write timeout in seconds"
+      
+      max_retries:
+        type: integer
+        minimum: 0
+        maximum: 10
+        default: 3
+        description: "Maximum retries"
+      
+      retry_delay:
+        type: number
+        minimum: 0.0
+        maximum: 60.0
+        default: 1.0
+        description: "Retry delay in seconds"
+      
+      backend_settings:
+        type: object
+        description: "Backend-specific settings"
+      
+      pool_enabled:
+        type: boolean
+        default: true
+        description: "Enable connection pooling"
+      
+      pool_size:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+        description: "Connection pool size"
+      
+      pool_max_overflow:
+        type: integer
+        minimum: 0
+        maximum: 100
+        default: 20
+        description: "Pool max overflow"
+      
+      failover_enabled:
+        type: boolean
+        default: false
+        description: "Enable failover"
+      
+      failover_backends:
+        type: array
+        items:
+          type: string
+        description: "Failover backends"
+      
+      encryption_enabled:
+        type: boolean
+        default: false
+        description: "Enable encryption"
+      
+      encryption_key_path:
+        type: string
+        description: "Encryption key file path"
+
+  trigger_policy:
+    type: object
+    required:
+      - enabled
+      - trigger_type
+    properties:
+      enabled:
+        type: boolean
+        default: true
+        description: "Enable this trigger policy"
+      
+      trigger_type:
+        type: string
+        enum: ["workflow", "agent", "task", "error", "success", "pattern", "context", "lifecycle"]
+        description: "Type of trigger"
+      
+      success_threshold:
+        type: number
+        minimum: 0.0
+        maximum: 1.0
+        default: 0.8
+        description: "Success threshold"
+      
+      failure_threshold:
+        type: number
+        minimum: 0.0
+        maximum: 1.0
+        default: 0.3
+        description: "Failure threshold"
+      
+      create_on_success:
+        type: boolean
+        default: true
+        description: "Create memory on success"
+      
+      create_on_failure:
+        type: boolean
+        default: true
+        description: "Create memory on failure"
+      
+      create_on_error:
+        type: boolean
+        default: true
+        description: "Create memory on error"
+      
+      pattern_detection_enabled:
+        type: boolean
+        default: true
+        description: "Enable pattern detection"
+      
+      pattern_similarity_threshold:
+        type: number
+        minimum: 0.0
+        maximum: 1.0
+        default: 0.7
+        description: "Pattern similarity threshold"
+      
+      min_context_length:
+        type: integer
+        minimum: 0
+        maximum: 100000
+        default: 10
+        description: "Minimum context length"
+      
+      max_context_length:
+        type: integer
+        minimum: 1
+        maximum: 1000000
+        default: 10000
+        description: "Maximum context length"
+      
+      context_required_fields:
+        type: array
+        items:
+          type: string
+        description: "Required context fields"
+      
+      require_quality_validation:
+        type: boolean
+        default: true
+        description: "Require quality validation"
+      
+      min_trigger_confidence:
+        type: number
+        minimum: 0.0
+        maximum: 1.0
+        default: 0.6
+        description: "Minimum trigger confidence"
+      
+      max_triggers_per_minute:
+        type: integer
+        minimum: 1
+        maximum: 10000
+        default: 60
+        description: "Maximum triggers per minute"
+      
+      cooldown_period_seconds:
+        type: integer
+        minimum: 0
+        maximum: 86400
+        default: 30
+        description: "Cooldown period in seconds"
+      
+      agent_name:
+        type: string
+        description: "Specific agent name (for agent triggers)"
+      
+      agent_trigger_patterns:
+        type: array
+        items:
+          type: string
+        description: "Agent-specific trigger patterns"
+
+# Policy Engine Schema
+policy_engine_config:
+  type: object
+  properties:
+    rules:
+      type: object
+      additionalProperties:
+        $ref: "#/definitions/policy_rule"
+
+policy_rule:
+  type: object
+  required:
+    - name
+    - conditions
+    - actions
+  properties:
+    name:
+      type: string
+      minLength: 1
+      maxLength: 255
+      description: "Rule name"
+    
+    description:
+      type: string
+      maxLength: 1000
+      description: "Rule description"
+    
+    enabled:
+      type: boolean
+      default: true
+      description: "Enable this rule"
+    
+    priority:
+      type: integer
+      minimum: 0
+      maximum: 1000
+      default: 0
+      description: "Rule priority (higher = first)"
+    
+    scope:
+      type: string
+      enum: ["global", "agent", "workflow", "task", "user", "session"]
+      default: "global"
+      description: "Rule application scope"
+    
+    conditions:
+      type: array
+      minItems: 1
+      items:
+        $ref: "#/definitions/policy_condition"
+      description: "Rule conditions"
+    
+    condition_operator:
+      type: string
+      enum: ["AND", "OR"]
+      default: "AND"
+      description: "Condition operator"
+    
+    actions:
+      type: array
+      minItems: 1
+      items:
+        $ref: "#/definitions/policy_action"
+      description: "Rule actions"
+    
+    max_executions:
+      type: integer
+      minimum: 1
+      description: "Maximum rule executions"
+    
+    cooldown_period:
+      type: number
+      minimum: 0
+      description: "Cooldown period in seconds"
+    
+    tags:
+      type: array
+      items:
+        type: string
+      description: "Rule tags"
+    
+    metadata:
+      type: object
+      description: "Rule metadata"
+
+policy_condition:
+  type: object
+  required:
+    - type
+  properties:
+    type:
+      type: string
+      enum: [
+        "always", "never", "equals", "not_equals", "contains", "not_contains",
+        "matches_regex", "greater_than", "less_than", "between", "in_list",
+        "not_in_list", "time_range", "rate_limit", "probability",
+        "composite_and", "composite_or"
+      ]
+      description: "Condition type"
+    
+    field:
+      type: string
+      description: "Field path (dot notation)"
+    
+    value:
+      description: "Comparison value"
+    
+    values:
+      type: array
+      description: "List of values"
+    
+    regex_pattern:
+      type: string
+      description: "Regular expression pattern"
+    
+    min_value:
+      type: number
+      description: "Minimum value for range"
+    
+    max_value:
+      type: number
+      description: "Maximum value for range"
+    
+    start_time:
+      type: string
+      pattern: "^\\d{2}:\\d{2}$"
+      description: "Start time (HH:MM)"
+    
+    end_time:
+      type: string
+      pattern: "^\\d{2}:\\d{2}$"
+      description: "End time (HH:MM)"
+    
+    rate_limit:
+      type: integer
+      minimum: 1
+      description: "Rate limit count"
+    
+    time_window:
+      type: integer
+      minimum: 1
+      description: "Time window in seconds"
+    
+    probability:
+      type: number
+      minimum: 0.0
+      maximum: 1.0
+      description: "Probability (0.0-1.0)"
+    
+    sub_conditions:
+      type: array
+      items:
+        $ref: "#/definitions/policy_condition"
+      description: "Sub-conditions for composite types"
+    
+    negate:
+      type: boolean
+      default: false
+      description: "Negate condition result"
+
+policy_action:
+  type: object
+  required:
+    - type
+  properties:
+    type:
+      type: string
+      enum: [
+        "create_memory", "recall_memory", "update_memory", "delete_memory",
+        "archive_memory", "set_quality_score", "add_tag", "remove_tag",
+        "trigger_alert", "log_event", "execute_webhook", "chain_policy",
+        "abort", "skip"
+      ]
+      description: "Action type"
+    
+    parameters:
+      type: object
+      description: "Action parameters"
+    
+    condition:
+      $ref: "#/definitions/policy_condition"
+      description: "Optional action condition"
+    
+    priority:
+      type: integer
+      minimum: 0
+      default: 0
+      description: "Action priority"
+    
+    async_execution:
+      type: boolean
+      default: false
+      description: "Execute asynchronously"
+    
+    retry_count:
+      type: integer
+      minimum: 0
+      default: 0
+      description: "Retry count on failure"
+    
+    retry_delay:
+      type: number
+      minimum: 0.0
+      default: 1.0
+      description: "Retry delay in seconds"
+    
+    timeout:
+      type: number
+      minimum: 0.1
+      description: "Action timeout in seconds"

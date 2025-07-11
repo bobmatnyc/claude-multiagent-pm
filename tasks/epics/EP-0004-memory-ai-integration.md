@@ -6,7 +6,7 @@ status: completed
 priority: critical
 assignee: masa
 created_date: 2025-07-08T15:34:40.821Z
-updated_date: 2025-07-09T04:20:38.950Z
+updated_date: 2025-07-11T03:54:57.599Z
 estimated_tokens: 0
 actual_tokens: 0
 ai_context:
@@ -17,6 +17,7 @@ ai_context:
 sync_status: local
 related_issues:
   - ISS-0022
+  - ISS-0072
 dependencies: []
 completion_percentage: 100
 content: |-

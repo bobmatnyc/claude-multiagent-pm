@@ -8,7 +8,7 @@ status: completed
 priority: medium
 assignee: masa
 created_date: 2025-07-10T15:55:01.369Z
-updated_date: 2025-07-10T17:28:35.692Z
+updated_date: 2025-07-10T22:02:26.691Z
 estimated_tokens: 0
 actual_tokens: 0
 ai_context:
@@ -23,6 +23,7 @@ related_issues:
   - ISS-0067
   - ISS-0068
   - ISS-0069
+  - ISS-0071
 dependencies: []
 completion_percentage: 100
 content: >-

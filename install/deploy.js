@@ -444,6 +444,20 @@ echo "3. The orchestrator will auto-detect available services"
             await fs.chmod(atdPath, '755');
         }
         
+        // Copy the main claude-pm binary
+        const sourceBin = path.join(this.packageDir, 'bin', 'claude-pm');
+        const targetBin = path.join(binDir, 'claude-pm');
+        await fs.copyFile(sourceBin, targetBin);
+        
+        // Copy package.json for version info
+        const sourcePackageJson = path.join(this.packageDir, 'package.json');
+        const targetPackageJson = path.join(this.targetDir, 'package.json');
+        await fs.copyFile(sourcePackageJson, targetPackageJson);
+        
+        if (this.platform !== 'win32') {
+            await fs.chmod(targetBin, '755');
+        }
+        
         this.log(`✓ AI-trackdown CLI wrappers created in ${binDir}`);
     }
 
@@ -561,7 +575,7 @@ node "${this.aiTrackdownPath}" "$@"
         
         try {
             // Read template
-            const templatePath = path.join(this.packageDir, 'templates', 'deployment-claude.md');
+            const templatePath = path.join(this.packageDir, 'framework', 'CLAUDE.md');
             let claudeTemplate = await fs.readFile(templatePath, 'utf8');
             
             // Replace placeholders

@@ -48,6 +48,163 @@ def get_managed_path():
     config = get_framework_config()
     return Path(config.get("managed_path"))
 
+def _detect_aitrackdown_info():
+    """Detect AI-Trackdown-Tools version and deployment method with optimized performance."""
+    import subprocess
+    import os
+    from pathlib import Path
+    
+    try:
+        # Check for global aitrackdown command (most common case first)
+        try:
+            result = subprocess.run(['aitrackdown', '--version'], 
+                                  capture_output=True, text=True, timeout=3)
+            if result.returncode == 0:
+                version = result.stdout.strip()
+                # Quick path detection without which command for performance
+                try:
+                    which_result = subprocess.run(['which', 'aitrackdown'], 
+                                                capture_output=True, text=True, timeout=1)
+                    if which_result.returncode == 0:
+                        path = which_result.stdout.strip()
+                        if '.nvm' in path:
+                            deployment = 'global (nvm)'
+                        elif '/usr/' in path or '/opt/' in path:
+                            deployment = 'global (system)'
+                        elif 'npm' in path:
+                            deployment = 'global (npm)'
+                        else:
+                            deployment = 'global'
+                    else:
+                        deployment = 'global'
+                except:
+                    deployment = 'global'
+                return f"v{version} ({deployment})"
+        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
+            pass
+        
+        # Check for framework local CLI (second priority)
+        framework_cli = Path(__file__).parent.parent / "bin" / "aitrackdown"
+        if framework_cli.exists():
+            try:
+                result = subprocess.run([str(framework_cli), '--version'], 
+                                      capture_output=True, text=True, timeout=3)
+                if result.returncode == 0:
+                    version = result.stdout.strip()
+                    return f"v{version} (framework CLI)"
+            except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
+                # Try reading as file if execution fails
+                try:
+                    # Framework CLI might be a wrapper, check if it's accessible
+                    return "detected (framework CLI)"
+                except:
+                    pass
+        
+        # Check for atd alias (last priority)
+        try:
+            result = subprocess.run(['atd', '--version'], 
+                                  capture_output=True, text=True, timeout=2)
+            if result.returncode == 0:
+                version = result.stdout.strip()
+                return f"v{version} (atd alias)"
+        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
+            pass
+        
+        return "not found"
+        
+    except Exception as e:
+        # Return more specific error information for debugging
+        return "error"
+
+
+def _detect_memory_manager_info():
+    """Detect Memory Manager type, version, and status."""
+    import subprocess
+    import socket
+    
+    try:
+        # Check for mem0AI package version (optimized)
+        mem0_version = None
+        try:
+            result = subprocess.run(['python3', '-c', 'import mem0; print(mem0.__version__)'], 
+                                  capture_output=True, text=True, timeout=3)
+            if result.returncode == 0:
+                mem0_version = result.stdout.strip()
+        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
+            pass
+        
+        # Check mem0AI service status (faster socket check)
+        service_status = "inactive"
+        try:
+            # Quick socket check instead of HTTP request
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(1)  # 1 second timeout
+            result = sock.connect_ex(('localhost', 8002))
+            sock.close()
+            if result == 0:
+                service_status = "active"
+        except Exception:
+            service_status = "inactive"
+        
+        if mem0_version:
+            return f"mem0AI v{mem0_version} ({service_status})"
+        else:
+            return f"mem0AI not available ({service_status})"
+            
+    except Exception:
+        return "error"
+
+
+def _display_directory_context():
+    """Display deployment and working directories with enhanced system information."""
+    import os
+    from pathlib import Path
+    
+    try:
+        # Get deployment directory (framework path) with improved detection
+        deployment_dir = (
+            os.environ.get("CLAUDE_PM_DEPLOYMENT_DIR") or
+            os.environ.get("CLAUDE_PM_FRAMEWORK_PATH") or
+            None
+        )
+        
+        if not deployment_dir:
+            # Try to detect from current structure
+            current_path = Path(__file__).parent.parent
+            if (current_path / "claude_pm").exists():
+                deployment_dir = str(current_path)
+            else:
+                deployment_dir = "Not detected"
+        
+        # Get working directory with fallback
+        working_dir = os.environ.get("CLAUDE_PM_WORKING_DIR", os.getcwd())
+        
+        # Get AI-Trackdown-Tools information
+        aitrackdown_info = _detect_aitrackdown_info()
+        
+        # Get Memory Manager information
+        memory_info = _detect_memory_manager_info()
+        
+        # Create enhanced display
+        console.print(f"[dim]📁 Deployment: {deployment_dir}[/dim]")
+        console.print(f"[dim]📂 Working: {working_dir}[/dim]")
+        console.print(f"[dim]🔧 AI-Trackdown: {aitrackdown_info}[/dim]")
+        console.print(f"[dim]🧠 Memory: {memory_info}[/dim]")
+        console.print("")  # Add spacing
+        
+    except Exception as e:
+        # Fallback to basic display if enhanced detection fails
+        try:
+            # Basic fallback
+            deployment_dir = os.environ.get("CLAUDE_PM_DEPLOYMENT_DIR", "Not detected")
+            working_dir = os.environ.get("CLAUDE_PM_WORKING_DIR", os.getcwd())
+            console.print(f"[dim]📁 Deployment: {deployment_dir}[/dim]")
+            console.print(f"[dim]📂 Working: {working_dir}[/dim]")
+            console.print("")
+        except:
+            # Silent failure - don't break CLI if directory detection fails completely
+            pass
+
 
 @click.group()
 @click.version_option(version="3.0.0", prog_name="Claude Multi-Agent PM Framework")
@@ -64,6 +221,9 @@ def cli(ctx, verbose, config):
     ctx.ensure_object(dict)
     ctx.obj['verbose'] = verbose
     ctx.obj['config'] = config
+    
+    # FIXED: Display deployment and working directories on every call
+    _display_directory_context()
     
     if verbose:
         console.print("[dim]Claude Multi-Agent PM Framework v3.0.0 - Python Edition[/dim]")
@@ -1995,6 +2155,135 @@ def status():
     console.print(Panel(summary_text.strip(), title="Agent Summary"))
 
 
+# Testing Commands
+@cli.command()
+@click.option('--unit', is_flag=True, help='Run unit tests only')
+@click.option('--integration', is_flag=True, help='Run integration tests only')
+@click.option('--coverage', is_flag=True, help='Generate coverage report')
+@click.option('--watch', is_flag=True, help='Watch for changes and re-run tests')
+@click.option('--pattern', help='Run tests matching pattern')
+@click.option('--verbose', '-v', is_flag=True, help='Verbose output')
+@click.option('--quiet', '-q', is_flag=True, help='Quiet output')
+@click.option('--failfast', is_flag=True, help='Stop on first failure')
+@click.option('--html', is_flag=True, help='Generate HTML coverage report')
+@click.option('--xml', is_flag=True, help='Generate XML coverage report')
+@click.option('--json', is_flag=True, help='Output results in JSON format')
+@click.option('--parallel', is_flag=True, help='Run tests in parallel')
+@click.option('--workers', type=int, default=4, help='Number of parallel workers')
+@click.argument('pytest_args', nargs=-1, type=click.UNPROCESSED)
+def test(unit, integration, coverage, watch, pattern, verbose, quiet, failfast, 
+         html, xml, json, parallel, workers, pytest_args):
+    """
+    🧪 Run tests with pytest integration.
+    
+    This command provides a unified interface for running tests with pytest,
+    supporting all major testing scenarios and options.
+    
+    Examples:
+        claude-pm test                      # Run all tests
+        claude-pm test --unit               # Run unit tests only
+        claude-pm test --integration        # Run integration tests only
+        claude-pm test --coverage           # Run with coverage
+        claude-pm test --watch              # Watch mode
+        claude-pm test --pattern "test_cli" # Run tests matching pattern
+        claude-pm test --verbose            # Verbose output
+        claude-pm test --parallel           # Run in parallel
+        
+    Advanced usage:
+        claude-pm test -- --pdb             # Pass args to pytest
+        claude-pm test -- -k "test_health"  # Use pytest's -k selector
+    """
+    import subprocess
+    import sys
+    import os
+    from pathlib import Path
+    
+    # Build pytest command
+    cmd = [sys.executable, "-m", "pytest"]
+    
+    # Add test markers
+    if unit:
+        cmd.extend(["-m", "unit"])
+    elif integration:
+        cmd.extend(["-m", "integration"])
+    
+    # Add coverage options
+    if coverage:
+        cmd.extend(["--cov=claude_pm", "--cov-report=term-missing"])
+        if html:
+            cmd.extend(["--cov-report=html"])
+        if xml:
+            cmd.extend(["--cov-report=xml"])
+    
+    # Add output options
+    if verbose:
+        cmd.append("--verbose")
+    elif quiet:
+        cmd.append("--quiet")
+    
+    # Add behavior options
+    if failfast:
+        cmd.append("--maxfail=1")
+    
+    # Add pattern matching
+    if pattern:
+        cmd.extend(["-k", pattern])
+    
+    # Add parallel execution
+    if parallel:
+        try:
+            import pytest_xdist
+            cmd.extend(["-n", str(workers)])
+        except ImportError:
+            console.print("[yellow]⚠️ pytest-xdist not installed. Run: pip install pytest-xdist[/yellow]")
+    
+    # Add watch mode
+    if watch:
+        try:
+            import pytest_watch
+            cmd = [sys.executable, "-m", "pytest_watch", "--", *cmd[3:]]
+        except ImportError:
+            console.print("[yellow]⚠️ pytest-watch not installed. Run: pip install pytest-watch[/yellow]")
+            console.print("[yellow]Running tests once instead of watching...[/yellow]")
+    
+    # Add any additional pytest arguments
+    if pytest_args:
+        cmd.extend(pytest_args)
+    
+    # Show command being run
+    if verbose:
+        console.print(f"[dim]Running: {' '.join(cmd)}[/dim]")
+    
+    # Set environment variables
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(Path.cwd())
+    
+    try:
+        # Run pytest
+        result = subprocess.run(cmd, env=env)
+        
+        # Handle coverage report generation
+        if coverage and html:
+            coverage_dir = Path("coverage_html_report")
+            if coverage_dir.exists():
+                console.print(f"[green]📊 HTML coverage report generated: {coverage_dir}/index.html[/green]")
+        
+        if coverage and xml:
+            coverage_file = Path("coverage.xml")
+            if coverage_file.exists():
+                console.print(f"[green]📊 XML coverage report generated: {coverage_file}[/green]")
+        
+        # Exit with pytest's exit code
+        sys.exit(result.returncode)
+        
+    except KeyboardInterrupt:
+        console.print("\n[yellow]⚠️ Tests interrupted by user[/yellow]")
+        sys.exit(130)
+    except Exception as e:
+        console.print(f"[red]❌ Error running tests: {e}[/red]")
+        sys.exit(1)
+
+
 # Utility Commands
 # Add enforcement commands
 cli.add_command(enforcement_cli)
@@ -2046,7 +2335,7 @@ def migrate():
 npm run health-check → claude-pm health check
 npm run monitor:health → claude-pm health monitor
 npm run monitor:status → claude-pm health status
-npm test → make test
+npm test → claude-pm test
 npm run lint → make lint
 
 [bold yellow]New Python-specific commands:[/bold yellow]
@@ -2056,13 +2345,14 @@ make type-check → Run type checking
 claude-pm service start → Start all services
 claude-pm project list → List all projects
 claude-pm memory search → Search project memories
+claude-pm test → Run tests with pytest integration
 
 [bold yellow]Development workflow:[/bold yellow]
 1. source .venv/bin/activate (activate virtual environment)
 2. make install-dev (install dependencies)
 3. claude-pm service start (start services)
 4. claude-pm health check (verify health)
-5. make test (run tests)
+5. claude-pm test (run tests)
 
 [bold yellow]Build system:[/bold yellow]
 • Makefile replaces package.json scripts

@@ -12,6 +12,7 @@ from .scaffolding_agent import ScaffoldingAgent
 from .system_init_agent import SystemInitAgent
 from .hierarchical_agent_loader import HierarchicalAgentLoader
 from .version_control_agent import VersionControlAgent
+from .ai_ops_agent import AIOpsAgent
 
 __all__ = [
     "DocumentationAgent",
@@ -20,5 +21,6 @@ __all__ = [
     "ScaffoldingAgent",
     "SystemInitAgent",
     "HierarchicalAgentLoader",
-    "VersionControlAgent"
+    "VersionControlAgent",
+    "AIOpsAgent"
 ]

@@ -12,6 +12,7 @@ This agent specializes in:
 import os
 import re
 import json
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple, Set
@@ -19,6 +20,11 @@ from dataclasses import dataclass, field
 
 from ..core.base_agent import BaseAgent
 from ..core.config import Config
+from ..services.memory.memory_trigger_service import MemoryTriggerService
+from ..services.memory.trigger_orchestrator import TriggerEvent
+from ..services.memory.trigger_types import TriggerType, TriggerPriority
+from ..services.memory.interfaces.models import MemoryCategory
+from .memory_enhanced_agents import MemoryEnhancedAgent
 
 
 @dataclass
@@ -594,7 +600,8 @@ class DocumentationAgent(BaseAgent):
                 "pm_collaboration",
                 "content_quality_assessment",
                 "maintenance_recommendations",
-                "documentation_health_monitoring"
+                "documentation_health_monitoring",
+                "memory_integration"  # New memory capability
             ],
             config=config,
             tier="system"  # Core agent
@@ -604,6 +611,10 @@ class DocumentationAgent(BaseAgent):
         self.pattern_scanner = DocumentationPatternScanner(self.logger)
         self.maintenance_engine = DocumentationMaintenanceEngine(self.logger)
         self.pm_collaboration = PMCollaborationInterface(self, self.logger)
+        
+        # Memory integration
+        self.memory_service: Optional[MemoryTriggerService] = None
+        self.memory_enhanced = False
         
         # State
         self.current_project_profile: Optional[ProjectDocumentationProfile] = None
@@ -694,7 +705,8 @@ class DocumentationAgent(BaseAgent):
             # Report to PM
             await self.pm_collaboration.report_documentation_status(profile)
             
-            return {
+            # Create memory trigger for successful scan
+            result = {
                 "success": True,
                 "project_root": project_root,
                 "patterns_found": len(profile.documentation_patterns),
@@ -702,6 +714,16 @@ class DocumentationAgent(BaseAgent):
                 "recommendations": len(profile.maintenance_recommendations),
                 "scan_timestamp": profile.scan_timestamp.isoformat()
             }
+            
+            # Create memory trigger
+            await self._create_memory_trigger("scan_project_patterns", {
+                "project_name": Path(project_root).name,
+                "patterns_found": len(profile.documentation_patterns),
+                "health_score": profile.documentation_health.get("score", 0),
+                "recommendations": profile.maintenance_recommendations
+            }, result)
+            
+            return result
             
         except Exception as e:
             self.logger.error(f"Error scanning project patterns: {e}")
@@ -788,7 +810,7 @@ class DocumentationAgent(BaseAgent):
         
         health = self.current_project_profile.documentation_health
         
-        return {
+        result = {
             "success": True,
             "health_score": health.get("score", 0),
             "coverage": health.get("coverage", {}),
@@ -796,6 +818,16 @@ class DocumentationAgent(BaseAgent):
             "freshness": health.get("freshness", {}),
             "validation_timestamp": datetime.now().isoformat()
         }
+        
+        # Create memory trigger for documentation validation
+        await self._create_memory_trigger("validate_documentation_health", {
+            "project_name": Path(project_root).name if project_root else Path(self.current_project_profile.project_root).name,
+            "validation_status": "healthy" if health.get("score", 0) >= 70 else "degraded",
+            "issues_count": len(health.get("coverage", {}).get("missing_required", [])),
+            "health_score": health.get("score", 0)
+        }, result)
+        
+        return result
     
     async def _is_project_directory(self, path: Path) -> bool:
         """Check if directory appears to be a project directory."""
@@ -819,3 +851,130 @@ class DocumentationAgent(BaseAgent):
             "validate_documentation_health"
         ]
         return operation in pm_notify_operations
+    
+    # Memory Integration Methods
+    
+    def enable_memory_integration(self, memory_service: MemoryTriggerService):
+        """Enable memory integration for the Documentation Agent."""
+        self.memory_service = memory_service
+        self.memory_enhanced = True
+        self.logger.info("Documentation Agent memory integration enabled")
+    
+    async def _create_memory_trigger(self, operation: str, context: Dict[str, Any], result: Any):
+        """Create memory trigger for documentation operations."""
+        if not self.memory_enhanced or not self.memory_service:
+            return
+        
+        try:
+            # Prepare memory content based on operation
+            memory_content = self._generate_memory_content(operation, context, result)
+            
+            # Prepare metadata
+            metadata = {
+                "agent_id": self.agent_id,
+                "agent_type": self.agent_type,
+                "operation": operation,
+                "project_name": context.get("project_name", "unknown"),
+                "timestamp": datetime.now().isoformat(),
+                "success": self._is_operation_successful(result)
+            }
+            
+            # Add operation-specific metadata
+            if operation == "scan_project_patterns":
+                metadata.update({
+                    "patterns_found": context.get("patterns_found", 0),
+                    "health_score": context.get("health_score", 0),
+                    "recommendations": len(context.get("recommendations", []))
+                })
+            elif operation == "validate_documentation_health":
+                metadata.update({
+                    "validation_status": context.get("validation_status", "unknown"),
+                    "issues_count": context.get("issues_count", 0)
+                })
+            elif operation == "maintain_documentation":
+                metadata.update({
+                    "actions_taken": len(context.get("actions_taken", [])),
+                    "files_updated": len(context.get("files_updated", []))
+                })
+            
+            # Create trigger event
+            trigger_event = TriggerEvent(
+                trigger_type=TriggerType.OPERATION_COMPLETION,
+                priority=TriggerPriority.MEDIUM,
+                project_name=context.get("project_name", "unknown"),
+                event_id=f"doc_agent_{operation}_{int(time.time())}",
+                content=memory_content,
+                category=MemoryCategory.WORKFLOW,
+                tags=["documentation", operation, self.agent_type],
+                metadata=metadata,
+                source="documentation_agent",
+                context=context
+            )
+            
+            # Process trigger
+            orchestrator = self.memory_service.get_trigger_orchestrator()
+            if orchestrator:
+                await orchestrator.process_trigger(trigger_event)
+                self.logger.info(f"Created memory trigger for operation: {operation}")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to create memory trigger for {operation}: {e}")
+    
+    def _generate_memory_content(self, operation: str, context: Dict[str, Any], result: Any) -> str:
+        """Generate memory content for documentation operations."""
+        project_name = context.get("project_name", "unknown")
+        
+        if operation == "scan_project_patterns":
+            patterns_found = context.get("patterns_found", 0)
+            health_score = context.get("health_score", 0)
+            return f"Documentation scan completed for {project_name}. Found {patterns_found} patterns with health score {health_score}."
+        
+        elif operation == "validate_documentation_health":
+            validation_status = context.get("validation_status", "unknown")
+            issues_count = context.get("issues_count", 0)
+            return f"Documentation validation for {project_name}. Status: {validation_status}, Issues: {issues_count}."
+        
+        elif operation == "maintain_documentation":
+            actions_taken = len(context.get("actions_taken", []))
+            files_updated = len(context.get("files_updated", []))
+            return f"Documentation maintenance for {project_name}. Actions: {actions_taken}, Files updated: {files_updated}."
+        
+        else:
+            return f"Documentation operation {operation} completed for {project_name}."
+    
+    def _is_operation_successful(self, result: Any) -> bool:
+        """Determine if operation was successful."""
+        if isinstance(result, dict):
+            return result.get("success", True)
+        return True
+    
+    async def _recall_operation_memories(self, operation: str, context: Dict[str, Any]) -> List[Any]:
+        """Recall relevant memories for documentation operations."""
+        if not self.memory_enhanced or not self.memory_service:
+            return []
+        
+        try:
+            memory_service = self.memory_service.get_memory_service()
+            if not memory_service:
+                return []
+            
+            # Build search query
+            search_query = f"documentation {operation} {context.get('project_name', '')}"
+            
+            # Search for relevant memories
+            memories = await memory_service.search_memories(
+                query=search_query,
+                filters={
+                    "agent_type": self.agent_type,
+                    "operation": operation,
+                    "project_name": context.get("project_name")
+                },
+                limit=5
+            )
+            
+            self.logger.info(f"Recalled {len(memories)} memories for operation: {operation}")
+            return memories
+            
+        except Exception as e:
+            self.logger.error(f"Failed to recall memories for {operation}: {e}")
+            return []

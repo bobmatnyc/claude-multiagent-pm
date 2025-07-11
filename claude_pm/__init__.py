@@ -5,6 +5,19 @@ A comprehensive project management framework for AI-driven development
 with integrated memory management and multi-agent orchestration.
 """
 
+# Load environment variables from .env file
+import os
+from pathlib import Path
+
+try:
+    from dotenv import load_dotenv
+    # Load .env file from project root
+    env_path = Path(__file__).parent.parent / '.env'
+    if env_path.exists():
+        load_dotenv(env_path)
+except ImportError:
+    pass  # dotenv not available, skip loading
+
 __version__ = "4.0.0"
 __title__ = "Claude Multi-Agent PM Framework"
 __description__ = "Claude Multi-Agent Project Management Framework for AI-driven orchestration"

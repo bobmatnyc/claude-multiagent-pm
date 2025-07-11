@@ -28,3 +28,5 @@
   • Story Points: 334/724 (46.1%)
   • Phase 1: 75.0% complete
 ==================================================
+[2025-07-11T00:14:35.368331] WARNING: Framework compliance is 62% (below 80% threshold)
+[2025-07-11T00:14:35.542511] CRITICAL: Overall health 45% is below alert threshold 60%
