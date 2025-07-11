@@ -1109,3 +1109,225 @@
 2025-07-11 04:51:18,966 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:167 - Broken link: [User Guide: Troubleshooting](user-guide/07-troubleshooting-faq.md#ai-trackdown-tools-integration-issues) -> /Users/masa/Projects/claude-multiagent-pm/docs/user-guide/07-troubleshooting-faq.md#ai-trackdown-tools-integration-issues
 2025-07-11 04:51:18,966 - EnhancedDocSync - WARNING -   ... and 23 more
 2025-07-11 04:51:18,966 - EnhancedDocSync - ERROR - Error during enhanced documentation synchronization: division by zero
+2025-07-11 04:51:31,910 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-11 04:51:31,910 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-11 04:51:31,910 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-11 04:51:31,910 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-11 04:51:31,910 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-11 04:51:31,910 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-11 04:51:32,362 - EnhancedDocSync - INFO - Found 411 path reference issues
+2025-07-11 04:51:32,363 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-11 04:51:32,363 - EnhancedDocSync - INFO - Files validated: 41
+2025-07-11 04:51:32,363 - EnhancedDocSync - INFO - Links checked: 28
+2025-07-11 04:51:32,363 - EnhancedDocSync - INFO - Validation issues: 411
+2025-07-11 04:51:32,363 - EnhancedDocSync - INFO - Broken links: 28
+2025-07-11 04:51:32,363 - EnhancedDocSync - INFO - Path errors: 379
+2025-07-11 04:51:32,363 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-11 04:51:32,363 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (28):
+2025-07-11 04:51:32,363 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:72 - Broken link: [Current Status](../trackdown/CURRENT-STATUS.md) -> /Users/masa/Projects/claude-multiagent-pm/trackdown/CURRENT-STATUS.md
+2025-07-11 04:51:32,363 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:95 - Broken link: [Claude PM Memory README](CLAUDE_PM_MEMORY_README.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/CLAUDE_PM_MEMORY_README.md
+2025-07-11 04:51:32,363 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:132 - Broken link: [Memory Integration Guide](CLAUDE_PM_MEMORY_INTEGRATION.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/CLAUDE_PM_MEMORY_INTEGRATION.md
+2025-07-11 04:51:32,363 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:165 - Broken link: [User Guide: Getting Started](user-guide/01-getting-started.md#ai-trackdown-tools-essential-dependency) -> /Users/masa/Projects/claude-multiagent-pm/docs/user-guide/01-getting-started.md#ai-trackdown-tools-essential-dependency
+2025-07-11 04:51:32,363 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:167 - Broken link: [User Guide: Troubleshooting](user-guide/07-troubleshooting-faq.md#ai-trackdown-tools-integration-issues) -> /Users/masa/Projects/claude-multiagent-pm/docs/user-guide/07-troubleshooting-faq.md#ai-trackdown-tools-integration-issues
+2025-07-11 04:51:32,363 - EnhancedDocSync - WARNING -   ... and 23 more
+2025-07-11 04:51:32,365 - EnhancedDocSync - INFO - Updated TICKETING_SYSTEM.md with enhanced statistics
+2025-07-11 04:51:32,365 - EnhancedDocSync - INFO - Integrated documentation health with monitoring system
+2025-07-11 04:51:32,366 - EnhancedDocSync - ERROR - Error during enhanced documentation synchronization: division by zero
+2025-07-11 10:09:12,075 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-11 10:09:12,075 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-11 10:09:12,075 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-11 10:09:12,075 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-11 10:09:12,075 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-11 10:09:12,075 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-11 10:09:12,520 - EnhancedDocSync - INFO - Found 413 path reference issues
+2025-07-11 10:09:12,521 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-11 10:09:12,521 - EnhancedDocSync - INFO - Files validated: 42
+2025-07-11 10:09:12,521 - EnhancedDocSync - INFO - Links checked: 30
+2025-07-11 10:09:12,521 - EnhancedDocSync - INFO - Validation issues: 413
+2025-07-11 10:09:12,521 - EnhancedDocSync - INFO - Broken links: 30
+2025-07-11 10:09:12,521 - EnhancedDocSync - INFO - Path errors: 379
+2025-07-11 10:09:12,521 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-11 10:09:12,521 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (30):
+2025-07-11 10:09:12,521 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:72 - Broken link: [Current Status](../trackdown/CURRENT-STATUS.md) -> /Users/masa/Projects/claude-multiagent-pm/trackdown/CURRENT-STATUS.md
+2025-07-11 10:09:12,521 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:95 - Broken link: [Claude PM Memory README](CLAUDE_PM_MEMORY_README.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/CLAUDE_PM_MEMORY_README.md
+2025-07-11 10:09:12,521 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:132 - Broken link: [Memory Integration Guide](CLAUDE_PM_MEMORY_INTEGRATION.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/CLAUDE_PM_MEMORY_INTEGRATION.md
+2025-07-11 10:09:12,521 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:165 - Broken link: [User Guide: Getting Started](user-guide/01-getting-started.md#ai-trackdown-tools-essential-dependency) -> /Users/masa/Projects/claude-multiagent-pm/docs/user-guide/01-getting-started.md#ai-trackdown-tools-essential-dependency
+2025-07-11 10:09:12,521 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:167 - Broken link: [User Guide: Troubleshooting](user-guide/07-troubleshooting-faq.md#ai-trackdown-tools-integration-issues) -> /Users/masa/Projects/claude-multiagent-pm/docs/user-guide/07-troubleshooting-faq.md#ai-trackdown-tools-integration-issues
+2025-07-11 10:09:12,521 - EnhancedDocSync - WARNING -   ... and 25 more
+2025-07-11 10:09:12,521 - EnhancedDocSync - ERROR - Error during enhanced documentation synchronization: division by zero
+2025-07-11 10:09:31,065 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-11 10:09:31,066 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-11 10:09:31,066 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-11 10:09:31,066 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-11 10:09:31,066 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-11 10:09:31,066 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-11 10:09:31,463 - EnhancedDocSync - INFO - Found 413 path reference issues
+2025-07-11 10:09:31,463 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-11 10:09:31,463 - EnhancedDocSync - INFO - Files validated: 42
+2025-07-11 10:09:31,463 - EnhancedDocSync - INFO - Links checked: 30
+2025-07-11 10:09:31,463 - EnhancedDocSync - INFO - Validation issues: 413
+2025-07-11 10:09:31,463 - EnhancedDocSync - INFO - Broken links: 30
+2025-07-11 10:09:31,463 - EnhancedDocSync - INFO - Path errors: 379
+2025-07-11 10:09:31,463 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-11 10:09:31,463 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (30):
+2025-07-11 10:09:31,463 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:72 - Broken link: [Current Status](../trackdown/CURRENT-STATUS.md) -> /Users/masa/Projects/claude-multiagent-pm/trackdown/CURRENT-STATUS.md
+2025-07-11 10:09:31,463 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:95 - Broken link: [Claude PM Memory README](CLAUDE_PM_MEMORY_README.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/CLAUDE_PM_MEMORY_README.md
+2025-07-11 10:09:31,463 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:132 - Broken link: [Memory Integration Guide](CLAUDE_PM_MEMORY_INTEGRATION.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/CLAUDE_PM_MEMORY_INTEGRATION.md
+2025-07-11 10:09:31,463 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:165 - Broken link: [User Guide: Getting Started](user-guide/01-getting-started.md#ai-trackdown-tools-essential-dependency) -> /Users/masa/Projects/claude-multiagent-pm/docs/user-guide/01-getting-started.md#ai-trackdown-tools-essential-dependency
+2025-07-11 10:09:31,463 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:167 - Broken link: [User Guide: Troubleshooting](user-guide/07-troubleshooting-faq.md#ai-trackdown-tools-integration-issues) -> /Users/masa/Projects/claude-multiagent-pm/docs/user-guide/07-troubleshooting-faq.md#ai-trackdown-tools-integration-issues
+2025-07-11 10:09:31,463 - EnhancedDocSync - WARNING -   ... and 25 more
+2025-07-11 10:09:31,463 - EnhancedDocSync - ERROR - Error during enhanced documentation synchronization: division by zero
+2025-07-11 11:39:42,757 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-11 11:39:42,757 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-11 11:39:42,757 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-11 11:39:42,757 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-11 11:39:42,757 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-11 11:39:42,757 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-11 11:39:43,196 - EnhancedDocSync - INFO - Found 362 path reference issues
+2025-07-11 11:39:43,197 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-11 11:39:43,197 - EnhancedDocSync - INFO - Files validated: 34
+2025-07-11 11:39:43,197 - EnhancedDocSync - INFO - Links checked: 41
+2025-07-11 11:39:43,197 - EnhancedDocSync - INFO - Validation issues: 362
+2025-07-11 11:39:43,197 - EnhancedDocSync - INFO - Broken links: 41
+2025-07-11 11:39:43,197 - EnhancedDocSync - INFO - Path errors: 316
+2025-07-11 11:39:43,197 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-11 11:39:43,197 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (41):
+2025-07-11 11:39:43,197 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:569 - Broken link: [Framework Overview](./docs/FRAMEWORK_OVERVIEW.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md
+2025-07-11 11:39:43,197 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:571 - Broken link: [MCP Service Integration](./docs/MCP_SERVICE_INTEGRATION.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MCP_SERVICE_INTEGRATION.md
+2025-07-11 11:39:43,197 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:572 - Broken link: [Security Agent Instructions](./docs/SECURITY_AGENT_INSTRUCTIONS.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/SECURITY_AGENT_INSTRUCTIONS.md
+2025-07-11 11:39:43,197 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:573 - Broken link: [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_GUIDE.md
+2025-07-11 11:39:43,197 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:57 - Broken link: [Security Configuration](MEM0AI_SECURITY_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MEM0AI_SECURITY_GUIDE.md
+2025-07-11 11:39:43,197 - EnhancedDocSync - WARNING -   ... and 36 more
+2025-07-11 11:39:43,197 - EnhancedDocSync - ERROR - Error during enhanced documentation synchronization: division by zero
+2025-07-11 11:42:11,790 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-11 11:42:11,790 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-11 11:42:11,790 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-11 11:42:11,790 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-11 11:42:11,790 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-11 11:42:11,790 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-11 11:42:12,250 - EnhancedDocSync - INFO - Found 356 path reference issues
+2025-07-11 11:42:12,251 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-11 11:42:12,251 - EnhancedDocSync - INFO - Files validated: 32
+2025-07-11 11:42:12,251 - EnhancedDocSync - INFO - Links checked: 40
+2025-07-11 11:42:12,251 - EnhancedDocSync - INFO - Validation issues: 356
+2025-07-11 11:42:12,251 - EnhancedDocSync - INFO - Broken links: 40
+2025-07-11 11:42:12,251 - EnhancedDocSync - INFO - Path errors: 311
+2025-07-11 11:42:12,251 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-11 11:42:12,251 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (40):
+2025-07-11 11:42:12,251 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:569 - Broken link: [Framework Overview](./docs/FRAMEWORK_OVERVIEW.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md
+2025-07-11 11:42:12,251 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:571 - Broken link: [MCP Service Integration](./docs/MCP_SERVICE_INTEGRATION.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MCP_SERVICE_INTEGRATION.md
+2025-07-11 11:42:12,251 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:572 - Broken link: [Security Agent Instructions](./docs/SECURITY_AGENT_INSTRUCTIONS.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/SECURITY_AGENT_INSTRUCTIONS.md
+2025-07-11 11:42:12,251 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:573 - Broken link: [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_GUIDE.md
+2025-07-11 11:42:12,251 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:57 - Broken link: [Security Configuration](MEM0AI_SECURITY_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MEM0AI_SECURITY_GUIDE.md
+2025-07-11 11:42:12,251 - EnhancedDocSync - WARNING -   ... and 35 more
+2025-07-11 11:42:12,251 - EnhancedDocSync - ERROR - Error during enhanced documentation synchronization: division by zero
+2025-07-11 11:42:40,410 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-11 11:42:40,410 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-11 11:42:40,410 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-11 11:42:40,410 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-11 11:42:40,410 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-11 11:42:40,410 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-11 11:42:40,845 - EnhancedDocSync - INFO - Found 356 path reference issues
+2025-07-11 11:42:40,845 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-11 11:42:40,845 - EnhancedDocSync - INFO - Files validated: 32
+2025-07-11 11:42:40,845 - EnhancedDocSync - INFO - Links checked: 40
+2025-07-11 11:42:40,845 - EnhancedDocSync - INFO - Validation issues: 356
+2025-07-11 11:42:40,845 - EnhancedDocSync - INFO - Broken links: 40
+2025-07-11 11:42:40,845 - EnhancedDocSync - INFO - Path errors: 311
+2025-07-11 11:42:40,845 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-11 11:42:40,845 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (40):
+2025-07-11 11:42:40,845 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:569 - Broken link: [Framework Overview](./docs/FRAMEWORK_OVERVIEW.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md
+2025-07-11 11:42:40,845 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:571 - Broken link: [MCP Service Integration](./docs/MCP_SERVICE_INTEGRATION.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MCP_SERVICE_INTEGRATION.md
+2025-07-11 11:42:40,845 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:572 - Broken link: [Security Agent Instructions](./docs/SECURITY_AGENT_INSTRUCTIONS.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/SECURITY_AGENT_INSTRUCTIONS.md
+2025-07-11 11:42:40,845 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:573 - Broken link: [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_GUIDE.md
+2025-07-11 11:42:40,845 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:57 - Broken link: [Security Configuration](MEM0AI_SECURITY_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MEM0AI_SECURITY_GUIDE.md
+2025-07-11 11:42:40,845 - EnhancedDocSync - WARNING -   ... and 35 more
+2025-07-11 11:42:40,845 - EnhancedDocSync - ERROR - Error during enhanced documentation synchronization: division by zero
+2025-07-11 11:43:05,947 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-11 11:43:05,947 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-11 11:43:05,947 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-11 11:43:05,947 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-11 11:43:05,947 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-11 11:43:05,947 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-11 11:43:06,373 - EnhancedDocSync - INFO - Found 356 path reference issues
+2025-07-11 11:43:06,374 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-11 11:43:06,374 - EnhancedDocSync - INFO - Files validated: 32
+2025-07-11 11:43:06,374 - EnhancedDocSync - INFO - Links checked: 40
+2025-07-11 11:43:06,374 - EnhancedDocSync - INFO - Validation issues: 356
+2025-07-11 11:43:06,374 - EnhancedDocSync - INFO - Broken links: 40
+2025-07-11 11:43:06,374 - EnhancedDocSync - INFO - Path errors: 311
+2025-07-11 11:43:06,374 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-11 11:43:06,374 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (40):
+2025-07-11 11:43:06,374 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:569 - Broken link: [Framework Overview](./docs/FRAMEWORK_OVERVIEW.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md
+2025-07-11 11:43:06,374 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:571 - Broken link: [MCP Service Integration](./docs/MCP_SERVICE_INTEGRATION.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MCP_SERVICE_INTEGRATION.md
+2025-07-11 11:43:06,374 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:572 - Broken link: [Security Agent Instructions](./docs/SECURITY_AGENT_INSTRUCTIONS.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/SECURITY_AGENT_INSTRUCTIONS.md
+2025-07-11 11:43:06,374 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:573 - Broken link: [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_GUIDE.md
+2025-07-11 11:43:06,374 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md:57 - Broken link: [Security Configuration](MEM0AI_SECURITY_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MEM0AI_SECURITY_GUIDE.md
+2025-07-11 11:43:06,374 - EnhancedDocSync - WARNING -   ... and 35 more
+2025-07-11 11:43:06,374 - EnhancedDocSync - ERROR - Error during enhanced documentation synchronization: division by zero
+2025-07-11 11:43:37,604 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-11 11:43:37,604 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-11 11:43:37,604 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-11 11:43:37,604 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-11 11:43:37,604 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-11 11:43:37,604 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-11 11:43:37,964 - EnhancedDocSync - INFO - Found 357 path reference issues
+2025-07-11 11:43:37,964 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-11 11:43:37,964 - EnhancedDocSync - INFO - Files validated: 30
+2025-07-11 11:43:37,964 - EnhancedDocSync - INFO - Links checked: 38
+2025-07-11 11:43:37,964 - EnhancedDocSync - INFO - Validation issues: 357
+2025-07-11 11:43:37,964 - EnhancedDocSync - INFO - Broken links: 38
+2025-07-11 11:43:37,964 - EnhancedDocSync - INFO - Path errors: 314
+2025-07-11 11:43:37,964 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-11 11:43:37,964 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (38):
+2025-07-11 11:43:37,964 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:569 - Broken link: [Framework Overview](./docs/FRAMEWORK_OVERVIEW.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md
+2025-07-11 11:43:37,964 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:571 - Broken link: [MCP Service Integration](./docs/MCP_SERVICE_INTEGRATION.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MCP_SERVICE_INTEGRATION.md
+2025-07-11 11:43:37,964 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:572 - Broken link: [Security Agent Instructions](./docs/SECURITY_AGENT_INSTRUCTIONS.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/SECURITY_AGENT_INSTRUCTIONS.md
+2025-07-11 11:43:37,964 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:573 - Broken link: [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_GUIDE.md
+2025-07-11 11:43:37,964 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:576 - Broken link: [Agent Delegation Guide](./docs/AGENT_DELEGATION_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/AGENT_DELEGATION_GUIDE.md
+2025-07-11 11:43:37,964 - EnhancedDocSync - WARNING -   ... and 33 more
+2025-07-11 11:43:37,964 - EnhancedDocSync - ERROR - Error during enhanced documentation synchronization: division by zero
+2025-07-11 11:44:05,062 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-11 11:44:05,062 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-11 11:44:05,062 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-11 11:44:05,062 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-11 11:44:05,062 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-11 11:44:05,062 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-11 11:44:05,395 - EnhancedDocSync - INFO - Found 357 path reference issues
+2025-07-11 11:44:05,395 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-11 11:44:05,395 - EnhancedDocSync - INFO - Files validated: 30
+2025-07-11 11:44:05,395 - EnhancedDocSync - INFO - Links checked: 38
+2025-07-11 11:44:05,395 - EnhancedDocSync - INFO - Validation issues: 357
+2025-07-11 11:44:05,395 - EnhancedDocSync - INFO - Broken links: 38
+2025-07-11 11:44:05,395 - EnhancedDocSync - INFO - Path errors: 314
+2025-07-11 11:44:05,395 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-11 11:44:05,395 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (38):
+2025-07-11 11:44:05,395 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:569 - Broken link: [Framework Overview](./docs/FRAMEWORK_OVERVIEW.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md
+2025-07-11 11:44:05,395 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:571 - Broken link: [MCP Service Integration](./docs/MCP_SERVICE_INTEGRATION.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MCP_SERVICE_INTEGRATION.md
+2025-07-11 11:44:05,395 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:572 - Broken link: [Security Agent Instructions](./docs/SECURITY_AGENT_INSTRUCTIONS.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/SECURITY_AGENT_INSTRUCTIONS.md
+2025-07-11 11:44:05,395 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:573 - Broken link: [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_GUIDE.md
+2025-07-11 11:44:05,395 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:576 - Broken link: [Agent Delegation Guide](./docs/AGENT_DELEGATION_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/AGENT_DELEGATION_GUIDE.md
+2025-07-11 11:44:05,395 - EnhancedDocSync - WARNING -   ... and 33 more
+2025-07-11 11:44:05,395 - EnhancedDocSync - ERROR - Error during enhanced documentation synchronization: division by zero
+2025-07-11 11:44:22,148 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-11 11:44:22,148 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-11 11:44:22,148 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-11 11:44:22,148 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-11 11:44:22,148 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-11 11:44:22,148 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-11 11:44:22,494 - EnhancedDocSync - INFO - Found 357 path reference issues
+2025-07-11 11:44:22,494 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-11 11:44:22,494 - EnhancedDocSync - INFO - Files validated: 30
+2025-07-11 11:44:22,495 - EnhancedDocSync - INFO - Links checked: 38
+2025-07-11 11:44:22,495 - EnhancedDocSync - INFO - Validation issues: 357
+2025-07-11 11:44:22,495 - EnhancedDocSync - INFO - Broken links: 38
+2025-07-11 11:44:22,495 - EnhancedDocSync - INFO - Path errors: 314
+2025-07-11 11:44:22,495 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-11 11:44:22,495 - EnhancedDocSync - WARNING - BROKEN LINKS FOUND (38):
+2025-07-11 11:44:22,495 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:569 - Broken link: [Framework Overview](./docs/FRAMEWORK_OVERVIEW.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md
+2025-07-11 11:44:22,495 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:571 - Broken link: [MCP Service Integration](./docs/MCP_SERVICE_INTEGRATION.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MCP_SERVICE_INTEGRATION.md
+2025-07-11 11:44:22,495 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:572 - Broken link: [Security Agent Instructions](./docs/SECURITY_AGENT_INSTRUCTIONS.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/SECURITY_AGENT_INSTRUCTIONS.md
+2025-07-11 11:44:22,495 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:573 - Broken link: [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_GUIDE.md
+2025-07-11 11:44:22,495 - EnhancedDocSync - WARNING -   - /Users/masa/Projects/claude-multiagent-pm/README.md:576 - Broken link: [Agent Delegation Guide](./docs/AGENT_DELEGATION_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/AGENT_DELEGATION_GUIDE.md
+2025-07-11 11:44:22,495 - EnhancedDocSync - WARNING -   ... and 33 more
+2025-07-11 11:44:22,495 - EnhancedDocSync - ERROR - Error during enhanced documentation synchronization: division by zero

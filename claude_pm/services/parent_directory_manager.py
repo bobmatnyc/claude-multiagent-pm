@@ -24,6 +24,7 @@ import os
 import json
 import shutil
 import hashlib
+import re
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Union, Tuple
 from dataclasses import dataclass, field
@@ -383,13 +384,13 @@ class ParentDirectoryManager(BaseService):
         force: bool = False
     ) -> ParentDirectoryOperation:
         """
-        Install a template to a parent directory.
+        Install a template to a parent directory with version checking.
         
         Args:
             target_directory: Directory to install template to
             template_id: Template to install
             template_variables: Variables for template rendering
-            force: Force installation even if file exists
+            force: Force installation even if version is current (overrides version checking)
             
         Returns:
             ParentDirectoryOperation result
@@ -414,6 +415,9 @@ class ParentDirectoryManager(BaseService):
             # Initialize backup_path
             backup_path = None
             
+            # Version checking is now done after template rendering
+            # to ensure we have the complete template with variables
+            
             # Check if file exists and handle conflicts
             if target_file.exists() and not force:
                 existing_content = target_file.read_text()
@@ -429,11 +433,45 @@ class ParentDirectoryManager(BaseService):
                 merged_variables.update(template_version.variables)
             merged_variables.update(template_variables or {})
             
+            # Add CLAUDE_MD_VERSION to template variables if not present
+            if 'CLAUDE_MD_VERSION' not in merged_variables:
+                # Generate temporary content for comparison first
+                framework_version = merged_variables.get('FRAMEWORK_VERSION', '4.5.1')
+                temp_variables = merged_variables.copy()
+                temp_variables['CLAUDE_MD_VERSION'] = 'TEMP'  # Placeholder for template rendering
+                
+                # Render template with placeholder to get content for comparison
+                temp_content = await self._render_template_content(content, temp_variables)
+                
+                # Generate version based on content comparison
+                claude_md_version = self._generate_next_claude_md_version(target_file, framework_version, temp_content)
+                merged_variables['CLAUDE_MD_VERSION'] = claude_md_version
+                
+                self.logger.info(f"🔢 Generated CLAUDE.md version: {claude_md_version}")
+                self.logger.info(f"   • Framework version: {framework_version}")
+                self.logger.info(f"   • Target file: {target_file}")
+            
             # Direct template rendering with handlebars substitution
             rendered_content = await self._render_template_content(content, merged_variables)
             
             if not rendered_content:
                 raise RuntimeError("Failed to render template")
+            
+            # Check if deployment should be skipped based on version comparison
+            should_skip, skip_reason = self._should_skip_deployment(target_file, rendered_content, force)
+            if should_skip:
+                # Return successful operation but with warning about skipping
+                operation = ParentDirectoryOperation(
+                    action=ParentDirectoryAction.INSTALL,
+                    target_path=target_file,
+                    success=True,
+                    template_id=template_id,
+                    version=template_version.version if template_version else None,
+                    warnings=[f"Deployment skipped: {skip_reason}"]
+                )
+                
+                self.logger.info(f"Skipped template installation: {skip_reason}")
+                return operation
             
             # Write the rendered content
             target_file.write_text(rendered_content)
@@ -893,6 +931,229 @@ class ParentDirectoryManager(BaseService):
             return []
     
     # Helper Methods
+    
+    def _extract_claude_md_version(self, content: str) -> Optional[str]:
+        """
+        Extract CLAUDE_MD_VERSION from file content.
+        Supports both old format (4.5.1) and new format (4.5.1-001).
+        
+        Args:
+            content: File content to parse
+            
+        Returns:
+            Version string or None if not found
+        """
+        try:
+            # Look for CLAUDE_MD_VERSION in HTML comment or frontmatter
+            # Updated patterns to support both formats: 4.5.1 and 4.5.1-001
+            patterns = [
+                r'CLAUDE_MD_VERSION:\s*([\d\.-]+)',
+                r'<!-- CLAUDE_MD_VERSION:\s*([\d\.-]+)\s*-->',
+                r'CLAUDE_MD_VERSION"?:\s*"?([\d\.-]+)"?'
+            ]
+            
+            for pattern in patterns:
+                match = re.search(pattern, content, re.IGNORECASE)
+                if match:
+                    return match.group(1)
+            
+            return None
+            
+        except Exception as e:
+            self.logger.error(f"Failed to extract CLAUDE_MD_VERSION: {e}")
+            return None
+    
+    def _compare_versions(self, version1: str, version2: str) -> int:
+        """
+        Compare two version strings supporting both formats:
+        - Old format: 4.5.1
+        - New format: 4.5.1-001
+        
+        Args:
+            version1: First version string
+            version2: Second version string
+            
+        Returns:
+            -1 if version1 < version2
+             0 if version1 == version2
+             1 if version1 > version2
+        """
+        try:
+            def parse_claude_md_version(version_str):
+                """Parse CLAUDE.md version in format framework_version-serial_number"""
+                if '-' in version_str:
+                    # New format: 4.5.1-001
+                    framework_part, serial_part = version_str.split('-', 1)
+                    framework_parts = [int(x) for x in framework_part.split('.')]
+                    serial_number = int(serial_part)
+                    return framework_parts, serial_number
+                else:
+                    # Old format: 4.5.1 (treat as 4.5.1-000)
+                    framework_parts = [int(x) for x in version_str.split('.')]
+                    serial_number = 0
+                    return framework_parts, serial_number
+            
+            v1_framework, v1_serial = parse_claude_md_version(version1)
+            v2_framework, v2_serial = parse_claude_md_version(version2)
+            
+            # Pad shorter framework version with zeros
+            max_len = max(len(v1_framework), len(v2_framework))
+            v1_framework.extend([0] * (max_len - len(v1_framework)))
+            v2_framework.extend([0] * (max_len - len(v2_framework)))
+            
+            # First compare framework versions
+            for i in range(max_len):
+                if v1_framework[i] < v2_framework[i]:
+                    return -1
+                elif v1_framework[i] > v2_framework[i]:
+                    return 1
+            
+            # Framework versions are equal, compare serial numbers
+            if v1_serial < v2_serial:
+                return -1
+            elif v1_serial > v2_serial:
+                return 1
+            else:
+                return 0
+            
+        except Exception as e:
+            self.logger.error(f"Failed to compare versions {version1} vs {version2}: {e}")
+            # If comparison fails, assume versions are different
+            return -1 if version1 != version2 else 0
+    
+    def _generate_next_claude_md_version(self, target_file: Path, framework_version: str, new_content: str = None) -> str:
+        """
+        Generate the next CLAUDE.md version number in format framework_version-serial.
+        Only increments version if content would actually change.
+        
+        Args:
+            target_file: Target CLAUDE.md file to check for existing version
+            framework_version: Current framework version (e.g., "4.5.1")
+            new_content: New content to compare against existing (optional)
+            
+        Returns:
+            Next version string (e.g., "4.5.1-001")
+        """
+        try:
+            # Check if target file exists and extract current version
+            if target_file.exists():
+                existing_content = target_file.read_text()
+                existing_version = self._extract_claude_md_version(existing_content)
+                
+                # If we have new content, check if it would actually be different
+                if new_content:
+                    # Remove version-specific and timestamp lines for content comparison
+                    def normalize_content(content):
+                        lines = content.split('\n')
+                        filtered_lines = []
+                        for line in lines:
+                            # Skip lines containing dynamic metadata
+                            if any(marker in line for marker in [
+                                'CLAUDE_MD_VERSION:', 'DEPLOYMENT_DATE:', 'LAST_UPDATED:', 
+                                'DEPLOYMENT_ID:', '**Deployment Date**:', '**Last Updated**:'
+                            ]):
+                                continue
+                            # Skip lines with deployment-specific content that changes each time
+                            if ('Deployment Date' in line and '2025-' in line) or \
+                               ('Last Updated' in line and '2025-' in line) or \
+                               ('Deployment ID' in line and line.strip().endswith('**')):
+                                continue
+                            filtered_lines.append(line)
+                        return '\n'.join(filtered_lines)
+                    
+                    existing_normalized = normalize_content(existing_content)
+                    new_normalized = normalize_content(new_content)
+                    
+                    # If content is the same (excluding version metadata), return existing version
+                    if existing_normalized == new_normalized and existing_version:
+                        self.logger.info(f"📋 Content unchanged, keeping existing version: {existing_version}")
+                        return existing_version
+                
+                if existing_version and '-' in existing_version:
+                    # Existing version is in new format
+                    existing_framework, existing_serial = existing_version.split('-', 1)
+                    
+                    if existing_framework == framework_version:
+                        # Same framework version, increment serial
+                        next_serial = int(existing_serial) + 1
+                        return f"{framework_version}-{next_serial:03d}"
+                    else:
+                        # Different framework version, start with serial 001
+                        return f"{framework_version}-001"
+                else:
+                    # Existing version is old format or no version, start with serial 001
+                    return f"{framework_version}-001"
+            else:
+                # No existing file, start with serial 001
+                return f"{framework_version}-001"
+                
+        except Exception as e:
+            self.logger.error(f"Failed to generate next CLAUDE.md version: {e}")
+            # Fallback to serial 001
+            return f"{framework_version}-001"
+    
+    def _should_skip_deployment(self, target_file: Path, template_content: str, force: bool = False) -> Tuple[bool, Optional[str]]:
+        """
+        Check if deployment should be skipped based on version comparison.
+        
+        Args:
+            target_file: Target CLAUDE.md file
+            template_content: New template content to deploy
+            force: Force deployment even if versions match
+            
+        Returns:
+            Tuple of (should_skip, reason)
+        """
+        try:
+            self.logger.info(f"🔍 Checking deployment for: {target_file}")
+            
+            if force:
+                self.logger.info("⚡ Force flag enabled - skipping version checks")
+                return False, "Force deployment requested"
+            
+            if not target_file.exists():
+                self.logger.info(f"📝 No existing CLAUDE.md found at: {target_file}")
+                return False, "Target file does not exist"
+            
+            # Get existing file content and version
+            existing_content = target_file.read_text()
+            existing_version = self._extract_claude_md_version(existing_content)
+            
+            # Get template version
+            template_version = self._extract_claude_md_version(template_content)
+            
+            # Get framework template source path for logging
+            framework_template_path = self.framework_path / "framework" / "CLAUDE.md"
+            
+            self.logger.info(f"📋 Version comparison:")
+            self.logger.info(f"   • Source: {framework_template_path}")
+            self.logger.info(f"   • Target: {target_file}")
+            self.logger.info(f"   • Framework version: {template_version or 'None found'}")
+            self.logger.info(f"   • Existing version: {existing_version or 'None found'}")
+            
+            if not existing_version:
+                self.logger.info("⚠️  No version found in existing file - proceeding with deployment")
+                return False, "No version found in existing file"
+            
+            if not template_version:
+                self.logger.info("⚠️  No version found in template - proceeding with deployment")
+                return False, "No version found in template"
+            
+            # Compare versions
+            comparison = self._compare_versions(existing_version, template_version)
+            
+            if comparison >= 0:
+                reason = f"Existing version {existing_version} is current or newer than template version {template_version}"
+                self.logger.info(f"⏭️  Skipping deployment: {reason}")
+                return True, reason
+            
+            self.logger.info(f"✅ Template version {template_version} is newer than existing version {existing_version} - proceeding with deployment")
+            return False, f"Template version {template_version} is newer than existing version {existing_version}"
+            
+        except Exception as e:
+            self.logger.error(f"Error in version check: {e}")
+            # If version checking fails, proceed with deployment
+            return False, f"Version checking failed: {e}"
     
     async def _create_backup(self, file_path: Path) -> Optional[Path]:
         """Create a backup of a file."""

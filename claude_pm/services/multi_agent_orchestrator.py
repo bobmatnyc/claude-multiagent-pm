@@ -18,7 +18,8 @@ from .mcp_service_detector import MCPServiceDetector, get_mcp_service_recommenda
 from ..core.logging_config import get_logger
 from ..core.enforcement import (
     get_enforcement_engine, EnforcementEngine, Agent as EnforcementAgent,
-    Action as EnforcementAction, ActionType, AgentType as EnforcementAgentType
+    Action as EnforcementAction, ActionType, AgentType as EnforcementAgentType,
+    AgentDisplayNames
 )
 import sys
 from pathlib import Path
@@ -50,6 +51,7 @@ class AgentType(str, Enum):
     ENGINEER = "engineer"
     QA = "qa"
     RESEARCHER = "researcher"
+    OPERATIONS = "operations"
     
     # Specialist Agents
     SECURITY_ENGINEER = "security_engineer"
@@ -86,6 +88,36 @@ class AgentTask:
     timeout_minutes: int = 30
     retry_count: int = 0
     max_retries: int = 2
+    
+    def get_display_name(self) -> str:
+        """Get the standardized display name for this task's agent."""
+        # Import here to avoid circular imports
+        from ..core.enforcement import AgentDisplayNames, AgentType as EnforcementAgentType
+        
+        # Convert AgentType to EnforcementAgentType for display name lookup
+        try:
+            enforcement_type = EnforcementAgentType(self.agent_type.value)
+            return AgentDisplayNames.get_display_name(enforcement_type)
+        except ValueError:
+            # Fallback for unknown types
+            return self.agent_type.value.title()
+    
+    def get_task_prefix(self) -> str:
+        """Get the task prefix for this agent task."""
+        # Import here to avoid circular imports
+        from ..core.enforcement import AgentDisplayNames, AgentType as EnforcementAgentType
+        
+        # Convert AgentType to EnforcementAgentType for prefix generation
+        try:
+            enforcement_type = EnforcementAgentType(self.agent_type.value)
+            return AgentDisplayNames.get_task_prefix(enforcement_type)
+        except ValueError:
+            # Fallback for unknown types
+            return f"[{self.agent_type.value.title()}]"
+    
+    def get_prefixed_description(self) -> str:
+        """Get the task description with agent prefix."""
+        return f"{self.get_task_prefix()} {self.description}"
 
 
 @dataclass 
@@ -193,6 +225,13 @@ class MultiAgentOrchestrator:
                 "memory_categories": [MemoryCategory.PATTERN, MemoryCategory.PROJECT],
                 "specializations": ["technology_research", "requirements_analysis", "market_research"],
                 "context_keywords": ["research", "analysis", "requirements", "investigation", "exploration"]
+            },
+            AgentType.OPERATIONS: {
+                "name": "Operations Agent",
+                "description": "Manages deployments, configuration, and operational tasks",
+                "memory_categories": [MemoryCategory.PATTERN, MemoryCategory.ERROR, MemoryCategory.TEAM],
+                "specializations": ["deployment", "configuration", "operations", "maintenance"],
+                "context_keywords": ["deployment", "configuration", "operations", "maintenance", "infrastructure"]
             },
             
             # Specialist Agents

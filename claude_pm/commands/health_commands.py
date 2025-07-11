@@ -39,14 +39,18 @@ class CMPMHealthMonitor(CMPMCommandBase):
     async def get_framework_health(self) -> Dict[str, Any]:
         """Get comprehensive framework health status."""
         try:
-            # Initialize health dashboard orchestrator
+            # Initialize health dashboard orchestrator with aggressive timeouts
             dashboard = HealthDashboardOrchestrator(
                 cache_ttl_seconds=10.0,  # Faster for real-time slash commands
-                global_timeout_seconds=2.0
+                global_timeout_seconds=8.0  # Reduced from 15s to 8s to prevent CLI timeout
             )
             
-            # Collect health data
-            health_data = await dashboard._collect_fresh_health()
+            try:
+                # Collect health data
+                health_data = await dashboard._collect_fresh_health()
+            finally:
+                # Ensure cleanup happens regardless of success/failure
+                await dashboard.cleanup()
             
             return {
                 "status": "healthy" if health_data.overall_status.value == "healthy" else "degraded",
@@ -70,7 +74,7 @@ class CMPMHealthMonitor(CMPMCommandBase):
             # Use health dashboard orchestrator for consistent status reporting
             dashboard = HealthDashboardOrchestrator(
                 cache_ttl_seconds=10.0,
-                global_timeout_seconds=2.0
+                global_timeout_seconds=15.0
             )
             
             # Collect health data from orchestrator
@@ -212,11 +216,11 @@ class CMPMHealthMonitor(CMPMCommandBase):
             # Use the new FlexibleMemoryService with optimized config
             from ..services.memory import FlexibleMemoryService
             
-            # Configure service for fast health checks
+            # Configure service for fast health checks with both backends
             config = {
                 "detection_timeout": 1.0,
                 "detection_retries": 1,
-                "fallback_chain": ["mem0ai"],  # Only test mem0ai for health check
+                "fallback_chain": ["mem0ai", "sqlite"],  # Test both backends
                 "circuit_breaker_threshold": 2,
                 "circuit_breaker_recovery": 30
             }
@@ -228,19 +232,36 @@ class CMPMHealthMonitor(CMPMCommandBase):
             await memory_service.initialize()
             response_time = (time.time() - start_time) * 1000  # Convert to ms
             
-            # Check if mem0ai backend is available and healthy
-            mem0ai_connected = (
-                memory_service.active_backend_name == "mem0ai" and 
-                memory_service._is_healthy
-            )
+            # Get backend status information
+            active_backend = memory_service.active_backend_name
+            available_backends = list(memory_service.backends.keys())
+            is_healthy = memory_service._is_healthy
+            
+            # Determine backend-specific status
+            mem0ai_available = "mem0ai" in available_backends
+            sqlite_available = "sqlite" in available_backends
+            mem0ai_active = active_backend == "mem0ai"
+            sqlite_active = active_backend == "sqlite"
             
             return {
-                "status": "operational" if mem0ai_connected else "degraded",
+                "status": "operational" if is_healthy else "degraded",
                 "service": "memory_system",
-                "mem0ai_connected": mem0ai_connected,
+                "active_backend": active_backend,
+                "backend_health": {
+                    "mem0ai": {
+                        "available": mem0ai_available,
+                        "active": mem0ai_active,
+                        "status": "operational" if mem0ai_active and is_healthy else "standby" if mem0ai_available else "unavailable"
+                    },
+                    "sqlite": {
+                        "available": sqlite_available,
+                        "active": sqlite_active,
+                        "status": "operational" if sqlite_active and is_healthy else "standby" if sqlite_available else "unavailable"
+                    }
+                },
                 "response_time": int(response_time),
-                "active_backend": memory_service.active_backend_name,
-                "available_backends": list(memory_service.backends.keys()),
+                "available_backends": available_backends,
+                "system_healthy": is_healthy,
                 "last_check": datetime.now().isoformat()
             }
             
@@ -383,10 +404,17 @@ class CMPMHealthMonitor(CMPMCommandBase):
         # Add memory system health
         if isinstance(memory_health, dict):
             status_color = "green" if memory_health.get("status") == "operational" else "red"
+            active_backend = memory_health.get("active_backend", "unknown")
+            backend_health = memory_health.get("backend_health", {})
+            
+            # Create backend status summary
+            mem0ai_status = "✓" if backend_health.get("mem0ai", {}).get("available", False) else "✗"
+            sqlite_status = "✓" if backend_health.get("sqlite", {}).get("available", False) else "✗"
+            
             table.add_row(
                 "Memory System",
                 f"[{status_color}]{memory_health.get('status', 'unknown').upper()}[/{status_color}]",
-                f"mem0AI: {'✓' if memory_health.get('mem0ai_connected') else '✗'} | {memory_health.get('response_time', 0)}ms"
+                f"Active: {active_backend} | mem0AI: {mem0ai_status} | SQLite: {sqlite_status} | {memory_health.get('response_time', 0)}ms"
             )
         
         # Add QA system health - EXCLUDED (not ready)
@@ -401,10 +429,13 @@ class CMPMHealthMonitor(CMPMCommandBase):
         console.print()
         
         # System summary
+        active_backend = memory_health.get('active_backend', 'unknown') if isinstance(memory_health, dict) else 'unknown'
+        memory_status = memory_health.get('status', 'unknown') if isinstance(memory_health, dict) else 'unknown'
+        
         summary_text = f"""
 🚀 **Framework Status**: Claude PM Framework v4.5.0 operational
 📊 **Task Management**: {task_health.get('total_items', 0)} total items managed
-🧠 **Memory Integration**: mem0AI connectivity {'active' if memory_health.get('mem0ai_connected') else 'inactive'}
+🧠 **Memory Integration**: {active_backend} backend active, system {memory_status}
 🧪 **Enhanced QA Agent**: Excluded from monitoring (development in progress)
 ⚡ **Performance**: {total_time:.2f}s response time | {reliability_score}% reliability
         """

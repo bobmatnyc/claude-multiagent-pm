@@ -65,10 +65,38 @@ class SubTask:
     priority: int = 5  # 1-10 scale
     validation_steps: List[str] = field(default_factory=list)
     
+    # Agent assignment fields
+    assigned_agent_type: Optional[str] = None  # Agent type for this subtask
+    agent_display_name: Optional[str] = None   # Display name for task prefixing
+    
     # Memory-augmented fields
     similar_tasks: List[str] = field(default_factory=list)
     pattern_confidence: float = 0.0
     historical_success_rate: float = 0.0
+    
+    def get_task_prefix(self) -> str:
+        """Get the agent prefix for this subtask."""
+        if self.agent_display_name:
+            return f"[{self.agent_display_name}]"
+        elif self.assigned_agent_type:
+            # Import here to avoid circular imports
+            from ..core.enforcement import AgentDisplayNames
+            return AgentDisplayNames.get_task_prefix(self.assigned_agent_type)
+        return ""
+    
+    def get_prefixed_title(self) -> str:
+        """Get the task title with agent prefix."""
+        prefix = self.get_task_prefix()
+        if prefix:
+            return f"{prefix} {self.title}"
+        return self.title
+    
+    def get_prefixed_description(self) -> str:
+        """Get the task description with agent prefix."""
+        prefix = self.get_task_prefix()
+        if prefix:
+            return f"{prefix} {self.description}"
+        return self.description
 
 
 @dataclass
@@ -129,6 +157,7 @@ class IntelligentTaskPlanner:
         self.complexity_indicators = self._initialize_complexity_indicators()
         self.strategy_patterns = self._initialize_strategy_patterns()
         self.similarity_weights = self._initialize_similarity_weights()
+        self.agent_assignment_patterns = self._initialize_agent_assignment_patterns()
         
         # Learning system
         self.decomposition_history: List[TaskDecomposition] = []
@@ -221,6 +250,58 @@ class IntelligentTaskPlanner:
             "complexity_level": 0.1,
             "task_type": 0.15,
             "semantic_similarity": 0.1
+        }
+    
+    def _initialize_agent_assignment_patterns(self) -> Dict[str, List[str]]:
+        """Initialize patterns for intelligent agent assignment based on task content."""
+        return {
+            "researcher": [
+                "research", "investigate", "analyze", "study", "explore", "evaluation", "assessment",
+                "literature review", "market research", "competitive analysis", "requirements gathering",
+                "feasibility study", "discovery", "analysis", "examination", "survey"
+            ],
+            "engineer": [
+                "implement", "code", "develop", "build", "create", "program", "write code",
+                "refactor", "optimize", "debug", "fix", "patch", "enhancement", "feature",
+                "algorithm", "function", "method", "class", "module", "component", "api",
+                "endpoint", "database", "integration", "backend", "frontend"
+            ],
+            "qa": [
+                "test", "testing", "validate", "verification", "quality assurance", "qa",
+                "unit test", "integration test", "e2e test", "acceptance test", "performance test",
+                "load test", "security test", "regression test", "smoke test", "bug fix validation",
+                "test case", "test plan", "test strategy", "automated testing"
+            ],
+            "architect": [
+                "design", "architecture", "system design", "technical design", "blueprint",
+                "specification", "technical specification", "architecture review", "design pattern",
+                "system architecture", "solution design", "technical planning", "scalability design"
+            ],
+            "operations": [
+                "deploy", "deployment", "devops", "infrastructure", "ci/cd", "pipeline",
+                "docker", "kubernetes", "aws", "cloud", "server", "environment", "configuration",
+                "monitoring", "logging", "alerting", "provisioning", "automation", "orchestration"
+            ],
+            "security_engineer": [
+                "security", "secure", "authentication", "authorization", "encryption", "vulnerability",
+                "security audit", "penetration test", "security review", "compliance", "privacy",
+                "security scan", "threat analysis", "risk assessment", "security policy"
+            ],
+            "performance_engineer": [
+                "performance", "optimization", "profiling", "benchmarking", "load testing",
+                "performance tuning", "scalability", "latency", "throughput", "capacity planning",
+                "performance monitoring", "bottleneck analysis", "memory optimization"
+            ],
+            "ui_ux_engineer": [
+                "ui", "ux", "user interface", "user experience", "frontend", "design system",
+                "component library", "styling", "css", "responsive design", "accessibility",
+                "usability", "wireframe", "mockup", "prototype", "user flow"
+            ],
+            "data_engineer": [
+                "data", "database", "etl", "data pipeline", "data processing", "analytics",
+                "data warehouse", "data lake", "sql", "nosql", "mongodb", "postgresql",
+                "data migration", "data modeling", "data transformation"
+            ]
         }
     
     async def decompose_task(self, task_description: str, project_name: str = None,
@@ -367,6 +448,95 @@ class IntelligentTaskPlanner:
                 keywords.append(action)
         
         return list(set(keywords))  # Remove duplicates
+    
+    def _assign_agent_type(self, task_title: str, task_description: str, skills_required: List[str] = None) -> str:
+        """
+        Intelligently assign an agent type based on task content analysis.
+        
+        Args:
+            task_title: The task title
+            task_description: The task description
+            skills_required: Optional list of required skills
+            
+        Returns:
+            Agent type string (e.g., 'engineer', 'researcher', 'qa')
+        """
+        # Combine all text for analysis
+        combined_text = f"{task_title} {task_description}".lower()
+        if skills_required:
+            combined_text += " " + " ".join(skills_required).lower()
+        
+        # Score each agent type based on keyword matches
+        agent_scores = {}
+        
+        for agent_type, keywords in self.agent_assignment_patterns.items():
+            score = 0
+            for keyword in keywords:
+                if keyword.lower() in combined_text:
+                    # Weight longer keywords more heavily
+                    weight = len(keyword.split()) * 1.5
+                    score += weight
+            
+            # Normalize score by number of keywords for that agent type
+            if keywords:
+                agent_scores[agent_type] = score / len(keywords)
+        
+        # Find the agent type with the highest score
+        if agent_scores:
+            best_agent = max(agent_scores.items(), key=lambda x: x[1])
+            if best_agent[1] > 0:  # Only return if there's at least some match
+                return best_agent[0]
+        
+        # Default fallback based on common patterns
+        if any(word in combined_text for word in ["implement", "code", "develop", "build", "create"]):
+            return "engineer"
+        elif any(word in combined_text for word in ["test", "testing", "validate", "verify"]):
+            return "qa"
+        elif any(word in combined_text for word in ["research", "analyze", "investigate", "study"]):
+            return "researcher"
+        elif any(word in combined_text for word in ["design", "architecture", "plan"]):
+            return "architect"
+        elif any(word in combined_text for word in ["deploy", "infrastructure", "devops"]):
+            return "operations"
+        
+        # Final fallback
+        return "engineer"
+    
+    def _get_agent_display_name(self, agent_type: str) -> str:
+        """
+        Get the display name for an agent type.
+        
+        Args:
+            agent_type: Agent type string
+            
+        Returns:
+            Display name for the agent
+        """
+        # Import here to avoid circular imports
+        from ..core.enforcement import AgentDisplayNames, AgentType as EnforcementAgentType
+        
+        # Map our internal agent types to enforcement agent types
+        agent_type_mapping = {
+            "researcher": EnforcementAgentType.RESEARCHER,
+            "engineer": EnforcementAgentType.ENGINEER,
+            "qa": EnforcementAgentType.QA,
+            "architect": EnforcementAgentType.ARCHITECT,
+            "operations": EnforcementAgentType.OPERATIONS,
+            "security_engineer": EnforcementAgentType.SECURITY_ENGINEER,
+            "performance_engineer": EnforcementAgentType.PERFORMANCE_ENGINEER,
+            "ui_ux_engineer": EnforcementAgentType.UI_UX_ENGINEER,
+            "data_engineer": EnforcementAgentType.DATA_ENGINEER
+        }
+        
+        try:
+            enforcement_type = agent_type_mapping.get(agent_type)
+            if enforcement_type:
+                return AgentDisplayNames.get_display_name(enforcement_type)
+            else:
+                # Fallback for unknown types
+                return agent_type.replace("_", "").title()
+        except Exception:
+            return agent_type.replace("_", "").title()
     
     async def _find_similar_tasks(self, task_description: str, context: Any) -> List[SimilarTask]:
         """Find similar tasks from memory with decomposition history."""
@@ -668,6 +838,10 @@ class IntelligentTaskPlanner:
             current_task.split()[0]
         )
         
+        # Assign agent type based on adapted content
+        agent_type = self._assign_agent_type(adapted_title, original_desc, historical_subtask.get("skills_required", []))
+        agent_display_name = self._get_agent_display_name(agent_type)
+        
         return SubTask(
             id=subtask_id,
             title=adapted_title,
@@ -679,6 +853,8 @@ class IntelligentTaskPlanner:
             success_criteria=historical_subtask.get("success_criteria", []),
             risk_level=historical_subtask.get("risk_level", "low"),
             priority=int(historical_subtask.get("priority", 5)),
+            assigned_agent_type=agent_type,
+            agent_display_name=agent_display_name,
             similar_tasks=[similar_task.task_id],
             pattern_confidence=similar_task.similarity_score,
             historical_success_rate=1.0 if similar_task.outcome == "success" else 0.5

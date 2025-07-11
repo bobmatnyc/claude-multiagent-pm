@@ -5,14 +5,14 @@
     "warning_threshold_ms": 200,
     "error_threshold_ms": 1000,
     "health_check_optimizations": {
-      "cache_ttl_seconds": 30,
+      "cache_ttl_seconds": 60,
       "max_parallel_collectors": 8,
-      "global_timeout_seconds": 2.0,
+      "global_timeout_seconds": 4.0,
       "circuit_breaker_threshold": 3,
       "circuit_breaker_timeout": 30
     },
     "framework_core_optimizations": {
-      "service_timeout_seconds": 1.5,
+      "service_timeout_seconds": 3.0,
       "memory_manager_target_ms": 50,
       "memory_manager_warning_ms": 200,
       "cache_hit_rate_target": 70,

@@ -2,12 +2,20 @@
 Ticketing Agent - Specialized Issue Management and Ticket Operations
 
 This agent specializes in:
-1. All ticket operations (read/write) across multiple platforms
-2. Support for internal AI tracking tools and external systems (Jira, etc.)
-3. Abstract ticket management from PM
-4. Collaborate hand-in-hand with PM for ticket needs
-5. Handle ticket lifecycle management across different platforms
-6. Core agent functionality for issue management
+1. All ticket operations using ai-trackdown-cli commands as primary interface
+2. Support for ai-trackdown-tools CLI: `./bin/aitrackdown` or `aitrackdown`
+3. Universal ticketing interface with fallback to external systems (Jira, etc.)
+4. Abstract ticket management from PM via CLI operations
+5. Handle complete ticket lifecycle management using CLI commands
+6. Core agent functionality for issue management via ai-trackdown-cli
+
+CRITICAL: Always use ai-trackdown-cli commands for ticket operations:
+- `aitrackdown issue create --title "..." --description "..."`
+- `aitrackdown issue show ISS-001`
+- `aitrackdown issue update ISS-001 --status completed`
+- `aitrackdown issue list --status todo`
+- `aitrackdown task create --epic EP-001 --title "..."`
+- `aitrackdown epic create --title "..."`
 """
 
 import os
@@ -669,13 +677,24 @@ class TicketingAgent(BaseAgent):
     """
     Ticketing Agent - Core agent for specialized issue management and ticket operations.
     
+    PRIMARY INTERFACE: ai-trackdown-cli commands
+    
     Responsibilities:
-    1. All ticket operations (read/write) across multiple platforms
-    2. Support for internal AI tracking tools and external systems (Jira, etc.)
-    3. Abstract ticket management from PM
-    4. Collaborate hand-in-hand with PM for ticket needs
-    5. Handle ticket lifecycle management across different platforms
-    6. Core agent functionality for issue management
+    1. ALL ticket operations via ai-trackdown-cli as primary interface
+    2. Use `./bin/aitrackdown` or `aitrackdown` commands for all ticket operations
+    3. Support universal ticketing with fallback to external systems (Jira, etc.)
+    4. Abstract CLI ticket management from PM via command execution
+    5. Handle complete ticket lifecycle management using CLI workflows
+    6. Core agent functionality prioritizing ai-trackdown-cli integration
+    
+    Key CLI Commands:
+    - Issue Operations: `aitrackdown issue [create|show|update|list|delete]`
+    - Task Operations: `aitrackdown task [create|show|update|list]`
+    - Epic Operations: `aitrackdown epic [create|show|update|list]`
+    - Status Management: `--status [todo|in_progress|blocked|review|testing|done|cancelled]`
+    - Priority Management: `--priority [low|medium|high|urgent|critical]`
+    
+    CRITICAL: Always prefer ai-trackdown-cli over direct file manipulation
     """
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):

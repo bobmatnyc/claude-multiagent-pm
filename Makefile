@@ -284,45 +284,22 @@ db-migrate: ## Run database migrations
 # Environment file management
 env-example: ## Create example environment file
 	@echo "Creating .env.example..."
-	@cat > .env.example << 'EOF'
-# Claude PM Framework Environment Variables
-# Copy to .env and customize for your environment
-
-# Core settings (NEW variable names)
-CLAUDE_MULTIAGENT_PM_LOG_LEVEL=INFO
-CLAUDE_MULTIAGENT_PM_DEBUG=false
-CLAUDE_MULTIAGENT_PM_ENABLE_ALERTING=true
-
-# mem0AI integration (NEW variable names)
-CLAUDE_MULTIAGENT_PM_MEM0AI_HOST=localhost
-CLAUDE_MULTIAGENT_PM_MEM0AI_PORT=8002
-CLAUDE_MULTIAGENT_PM_MEM0AI_TIMEOUT=30
-
-# OpenAI API (for mem0AI)
-OPENAI_API_KEY=your_openai_api_key_here
-
-# Monitoring (NEW variable names)
-CLAUDE_MULTIAGENT_PM_HEALTH_CHECK_INTERVAL=30
-CLAUDE_MULTIAGENT_PM_ALERT_THRESHOLD=60
-
-# Paths (NEW variable names)
-CLAUDE_MULTIAGENT_PM_BASE_PATH=/Users/$$USER/Projects
-CLAUDE_MULTIAGENT_PM_CLAUDE_PM_PATH=/Users/$$USER/Projects/Claude-PM
-CLAUDE_MULTIAGENT_PM_MANAGED_PATH=/Users/$$USER/Projects/managed
-
-# Legacy support (backward compatibility - will be deprecated in v4.0)
-# CLAUDE_PM_LOG_LEVEL=INFO
-# CLAUDE_PM_DEBUG=false
-# CLAUDE_PM_ENABLE_ALERTING=true
-# CLAUDE_PM_MEM0AI_HOST=localhost
-# CLAUDE_PM_MEM0AI_PORT=8002
-# CLAUDE_PM_MEM0AI_TIMEOUT=30
-# CLAUDE_PM_HEALTH_CHECK_INTERVAL=30
-# CLAUDE_PM_ALERT_THRESHOLD=60
-# CLAUDE_PM_BASE_PATH=/Users/$$USER/Projects
-# CLAUDE_PM_CLAUDE_PM_PATH=/Users/$$USER/Projects/Claude-PM
-# CLAUDE_PM_MANAGED_PATH=/Users/$$USER/Projects/managed
-EOF
+	@echo "# Claude PM Framework Environment Variables" > .env.example
+	@echo "# Copy to .env and customize for your environment" >> .env.example
+	@echo "" >> .env.example
+	@echo "# Core settings (NEW variable names)" >> .env.example
+	@echo "CLAUDE_MULTIAGENT_PM_LOG_LEVEL=INFO" >> .env.example
+	@echo "CLAUDE_MULTIAGENT_PM_DEBUG=false" >> .env.example
+	@echo "CLAUDE_MULTIAGENT_PM_ENABLE_ALERTING=true" >> .env.example
+	@echo "" >> .env.example
+	@echo "# mem0AI integration (NEW variable names)" >> .env.example
+	@echo "CLAUDE_MULTIAGENT_PM_MEM0AI_HOST=localhost" >> .env.example
+	@echo "CLAUDE_MULTIAGENT_PM_MEM0AI_PORT=8002" >> .env.example
+	@echo "CLAUDE_MULTIAGENT_PM_MEM0AI_TIMEOUT=30" >> .env.example
+	@echo "" >> .env.example
+	@echo "# OpenAI API (for mem0AI)" >> .env.example
+	@echo "OPENAI_API_KEY=your_openai_api_key_here" >> .env.example
+	@echo "" >> .env.example
 	@echo ".env.example created"
 
 # Quick setup for new developers
@@ -356,6 +333,35 @@ update-deps: ## Update all dependencies
 check-outdated: ## Check for outdated packages
 	@echo "Checking for outdated packages..."
 	pip list --outdated
+
+# Script deployment management
+deploy-scripts: ## Deploy all scripts to ~/.local/bin/
+	@echo "Deploying all scripts..."
+	python3 scripts/deploy_scripts.py --deploy
+
+deploy-script: ## Deploy specific script (usage: make deploy-script SCRIPT=claude-pm)
+	@echo "Deploying script: $(SCRIPT)"
+	python3 scripts/deploy_scripts.py --deploy-script $(SCRIPT)
+
+check-script-drift: ## Check for script drift without deploying
+	@echo "Checking for script drift..."
+	python3 scripts/deploy_scripts.py --check
+
+verify-scripts: ## Verify deployed scripts are working
+	@echo "Verifying deployed scripts..."
+	python3 scripts/deploy_scripts.py --verify
+
+script-status: ## Show comprehensive script deployment status
+	@echo "Script deployment status:"
+	python3 scripts/deploy_scripts.py --status
+
+rollback-script: ## Rollback specific script (usage: make rollback-script SCRIPT=claude-pm)
+	@echo "Rolling back script: $(SCRIPT)"
+	python3 scripts/deploy_scripts.py --rollback $(SCRIPT)
+
+deployment-history: ## Show deployment history
+	@echo "Deployment history:"
+	python3 scripts/deploy_scripts.py --history
 
 # GitHub integration
 create-pr: ## Helper to create pull request
