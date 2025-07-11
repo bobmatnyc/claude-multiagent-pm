@@ -123,5 +123,12 @@
     "total_issues": 186,
     "broken_links": 10,
     "inconsistencies": 4
+  },
+  {
+    "timestamp": "2025-07-11 12:09:43",
+    "completion_percentage": 0,
+    "total_issues": 140,
+    "broken_links": 43,
+    "inconsistencies": 0
   }
 ]

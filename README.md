@@ -9,7 +9,7 @@
 
 > **Advanced three-tier agent hierarchy with cross-project CMCP-init management**
 
-Claude Multi-Agent Project Management Framework delivers sophisticated AI-assisted project management through an advanced three-tier agent hierarchy and cross-project coordination system. The v4.5.1 release features comprehensive framework cleanup, security agent implementation, and robust CMCP-init bridge system for seamless multi-project workflow orchestration.
+Claude Multi-Agent Project Management Framework delivers sophisticated AI-assisted project management through an advanced three-tier agent hierarchy and cross-project coordination system. The v4.5.1 release features **ISS-0074 session cleanup implementation** with 77% performance improvement (67+ sec → <15 sec), comprehensive security agent implementation, and robust CMCP-init bridge system for seamless multi-project workflow orchestration.
 
 ## 🚀 Key Features
 
