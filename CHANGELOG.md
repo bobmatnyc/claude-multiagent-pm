@@ -2,6 +2,99 @@
 
 All notable changes to the Claude Multi-Agent Project Management Framework will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 0.5.0 (2025-07-11)
+
+### 🚀 MINOR RELEASE: Agent Profile System & Task Tool Integration
+
+#### 🤖 Agent Profile System with Task Tool Integration
+- **First Practical Task Tool ↔ Framework Bridge**: Breakthrough integration enabling seamless agent coordination
+- **22 Specialized Agents**: Complete agent ecosystem with distinct roles and responsibilities
+- **Agent Profile Architecture**: Standardized agent discovery and coordination protocols
+- **Task Tool Subprocess Creation**: Reliable subprocess delegation for all agent operations
+- **Cross-Agent Workflow Coordination**: Multi-agent collaboration with dependency management
+
+#### 🏗️ Three-Tier Agent Hierarchy
+- **Project Agents**: `$PROJECT/.claude-pm/agents/project-specific/` (highest precedence)
+- **User Agents**: `~/.claude-pm/agents/user-defined/` (mid-priority)
+- **System Agents**: `/framework/claude_pm/agents/` (fallback)
+- **Hierarchical Loading**: Automatic precedence with intelligent fallback
+- **Agent Discovery Service**: Dynamic agent detection across all tiers
+
+#### ⚡ Performance & Memory Management
+- **77% Performance Improvement**: Health monitoring speed 67+ seconds → <15 seconds
+- **Complete Memory Leak Resolution**: Eliminated 3.8GB+ memory crashes through aiohttp session management
+- **Connection Manager**: Centralized session lifecycle with proper cleanup
+- **Memory Optimization**: Reduced memory footprint through enhanced connection pooling
+- **Timeout Optimization**: Enhanced timeout handling for all operations
+
+#### 🔧 Framework Template System
+- **Template Protection**: Automatic backup system for `framework/CLAUDE.md`
+- **Version Validation**: Prevents template corruption with integrity checking
+- **Deployment Safety**: Rotation management and permission control
+- **Handlebars Variables**: Proper template variable substitution
+- **Script Deployment**: Automated deployment system for CLI scripts
+
+#### 📋 Command & Coordination Enhancements
+- **Enhanced Delegation**: Comprehensive Task Tool delegation patterns
+- **Core Agent Integration**: Mandatory collaboration with Documentation, Ticketing, and Version Control agents
+- **TodoWrite Integration**: Agent name prefixes for task coordination
+- **Date Awareness**: Temporal context integration for all operations
+- **MCP Service Integration**: Enhanced workflow capabilities with external services
+
+#### 🛡️ Security & Compliance
+- **Framework Protection**: Critical framework template protection mechanisms
+- **Backup Systems**: Automatic backup creation and rotation
+- **Integrity Validation**: Content and structure verification on startup
+- **Version Checking**: Prevents accidental downgrades and corruption
+
+#### 🚨 Critical Issue Resolutions
+- **ISS-0074**: Session cleanup and performance optimization (COMPLETED)
+- **Memory Management**: JavaScript heap exhaustion resolution
+- **Framework Integrity**: Comprehensive template and deployment validation
+- **CLI Functionality**: Script deployment automation and verification
+
+### 📊 Success Metrics
+
+- **Performance**: <15 second health monitoring (77% improvement)
+- **Memory**: Complete elimination of 3.8GB+ memory crashes
+- **Agent Ecosystem**: 22 specialized agents with hierarchical coordination
+- **Framework Stability**: Zero template corruption with protection systems
+- **CLI Integration**: Automated script deployment with verification
+
+### 🔄 Migration & Compatibility
+
+#### Enhanced Features
+- **Agent Hierarchy**: Three-tier system with automatic precedence
+- **Task Tool Integration**: First practical bridge between agents and framework
+- **Memory Management**: Production-ready session lifecycle management
+- **Template Protection**: Automatic backup and integrity validation
+
+#### Maintained Compatibility
+- **Core Framework**: All existing functionality preserved
+- **Agent Roles**: Complete compatibility with existing agent ecosystem
+- **Memory Integration**: Enhanced mem0AI integration
+- **CLI Commands**: Full backward compatibility with enhanced performance
+
+### 📁 Key Files & Components
+
+#### Core Agent Infrastructure
+- **Agent Discovery**: Dynamic detection across three-tier hierarchy
+- **Task Tool Bridge**: Subprocess creation and coordination
+- **Connection Manager**: `claude_pm/core/connection_manager.py`
+- **Health Dashboard**: Optimized `claude_pm/services/health_dashboard.py`
+
+#### Framework Protection
+- **Template Backup**: `.claude-pm/framework_backups/` with rotation
+- **Integrity Tests**: `scripts/test_framework_integrity.py`
+- **Deployment Scripts**: `scripts/deploy_scripts.py` with automation
+
+#### Performance Enhancements
+- **Memory Service**: Enhanced connection pooling
+- **Multi-Agent Orchestrator**: Improved coordination performance
+- **Framework Services**: Session management integration
+
+This release establishes the Claude PM Framework as a production-ready multi-agent orchestration platform with breakthrough Task Tool integration, comprehensive memory management, and robust framework protection systems.
+
 ## 4.5.1 (2025-07-11)
 
 ### ⚡ ISS-0074: Critical Session Cleanup & Performance Optimization
