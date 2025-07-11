@@ -19,41 +19,27 @@ This framework has been reset from version 0.4.6 to 0.4.6 to establish a cleaner
 
 ## 🚀 Quick Start
 
-### Installation
+### Two-Step Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/masa/claude-multiagent-pm.git
-cd claude-multiagent-pm
+# 1. Install via NPM
+npm install -g @bobmatnyc/claude-multiagent-pm
 
-# Install dependencies
-pip install -r requirements/production.txt
-
-# Initialize the framework
-python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup
-
-# Verify installation
-python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
-```
-
-### Basic Usage
-
-```bash
-# Start framework health check
-./scripts/health-check.sh
-
-# Check available agents
-python ~/.claude/commands/cmpm-bridge.py cmcp-init --show-index
-
-# Initialize in any project directory
+# 2. Run in any project directory
 cd /path/to/your/project
-python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup
-
-# Framework shortcut commands
-# push    - Complete quality validation and version control
-# deploy  - Local deployment operations
-# publish - Package publication pipeline
+claude-pm
 ```
+
+That's it! The framework auto-detects your environment and sets up the complete multi-agent system.
+
+### What You Can Do Next
+
+Once running, use these three powerful commands:
+- **`push`** - Complete quality validation and version control operations
+- **`deploy`** - Local deployment with automated testing and validation  
+- **`publish`** - Package publication to NPM, PyPI, and other registries
+
+> 💡 **Need more control?** See the [Advanced Installation](#-prerequisites--advanced-installation) section for development setup and customization options.
 
 ## 🚀 Key Features
 
