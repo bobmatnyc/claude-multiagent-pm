@@ -1430,18 +1430,86 @@ async function main() {
         process.exit(0);
     }
     
-    // Handle manual CLAUDE.md deployment command
+    // Handle manual CLAUDE.md deployment command with enhanced diagnostics
     if (args.includes('deploy-template') || args.includes('--deploy-template')) {
         console.log('🚀 Manually deploying CLAUDE.md template...');
+        const verbose = args.includes('--verbose') || args.includes('-v');
+        
         try {
             const deployed = await handleAutomaticClaudeMdDeployment();
             if (deployed) {
                 console.log('✅ CLAUDE.md template deployed successfully');
             } else {
-                console.log('ℹ️  No deployment needed - CLAUDE.md already exists or no global deployment info available');
+                console.log('ℹ️  No deployment needed - checking why...');
+                
+                // Enhanced diagnostics
+                const workingDir = process.cwd();
+                const claudeMdPath = path.join(workingDir, 'CLAUDE.md');
+                const globalConfigDir = path.join(os.homedir(), '.claude-pm');
+                const globalDeploymentInfoPath = path.join(globalConfigDir, 'global-deployment.json');
+                
+                console.log('\n📊 Deployment Diagnostics:');
+                console.log(`   • Working directory: ${workingDir}`);
+                console.log(`   • CLAUDE.md exists: ${fs.existsSync(claudeMdPath)}`);
+                console.log(`   • Global config exists: ${fs.existsSync(globalDeploymentInfoPath)}`);
+                console.log(`   • Is project directory: ${isProjectDirectory(workingDir)}`);
+                
+                if (fs.existsSync(claudeMdPath)) {
+                    const content = fs.readFileSync(claudeMdPath, 'utf8');
+                    const isFramework = content.includes('Claude PM Framework Configuration') || 
+                                       content.includes('AI ASSISTANT ROLE DESIGNATION');
+                    console.log(`   • CLAUDE.md type: ${isFramework ? 'Framework template' : 'Custom/User file'}`);
+                }
+                
+                if (fs.existsSync(globalDeploymentInfoPath)) {
+                    try {
+                        const globalInfo = JSON.parse(fs.readFileSync(globalDeploymentInfoPath, 'utf8'));
+                        console.log(`   • Global deployment version: ${globalInfo.version || 'Unknown'}`);
+                        console.log(`   • Framework template path: ${globalInfo.frameworkTemplatePath || 'Not set'}`);
+                        console.log(`   • Template exists: ${fs.existsSync(globalInfo.frameworkTemplatePath || '')}`);
+                    } catch (parseError) {
+                        console.log(`   • Global config parse error: ${parseError.message}`);
+                    }
+                }
+                
+                console.log('\n💡 Troubleshooting suggestions:');
+                if (!isProjectDirectory(workingDir)) {
+                    console.log('   • Try running this command in a project directory (contains package.json, .git, etc.)');
+                }
+                
+                if (fs.existsSync(claudeMdPath)) {
+                    const content = fs.readFileSync(claudeMdPath, 'utf8');
+                    const isFramework = content.includes('Claude PM Framework Configuration');
+                    if (!isFramework) {
+                        console.log('   • CLAUDE.md appears to be a custom file - deployment skipped to preserve it');
+                        console.log('   • To force deployment, backup and delete the existing CLAUDE.md first');
+                    } else {
+                        console.log('   • CLAUDE.md appears to be up-to-date framework template');
+                    }
+                }
+                
+                if (!fs.existsSync(globalDeploymentInfoPath)) {
+                    console.log('   • Global deployment info missing - try reinstalling: npm install -g @bobmatnyc/claude-multiagent-pm');
+                } else {
+                    const globalInfo = JSON.parse(fs.readFileSync(globalDeploymentInfoPath, 'utf8'));
+                    if (!fs.existsSync(globalInfo.frameworkTemplatePath || '')) {
+                        console.log('   • Framework template missing - try reinstalling: npm install -g @bobmatnyc/claude-multiagent-pm');
+                    }
+                }
+                
+                console.log('   • Try the failsafe script: ~/.claude-pm/deploy-claude-md.sh');
             }
         } catch (error) {
             console.error(`❌ Template deployment error: ${error.message}`);
+            console.error('\n🔧 Fallback options:');
+            console.error('   1. Try the failsafe script: ~/.claude-pm/deploy-claude-md.sh');
+            console.error('   2. Reinstall the package: npm install -g @bobmatnyc/claude-multiagent-pm');
+            console.error('   3. Check your npm global path: npm config get prefix');
+            
+            if (verbose) {
+                console.error('\n📊 Error details:');
+                console.error(`   • Error stack: ${error.stack}`);
+            }
         }
         process.exit(0);
     }
@@ -1787,7 +1855,7 @@ asyncio.run(get_status())
 }
 
 /**
- * Handle automatic CLAUDE.md deployment for global installations
+ * Enhanced automatic CLAUDE.md deployment for global installations
  */
 async function handleAutomaticClaudeMdDeployment() {
     try {
@@ -1796,34 +1864,34 @@ async function handleAutomaticClaudeMdDeployment() {
         
         // Check if we have global deployment info
         if (!fs.existsSync(globalDeploymentInfoPath)) {
+            // Try to create global deployment info from current deployment config
+            const deploymentConfig = deploymentDetector.getDeploymentStrategy();
+            if (deploymentConfig && deploymentConfig.config && deploymentConfig.config.found) {
+                if (deploymentConfig.config.deploymentType === 'npm_global') {
+                    await createGlobalDeploymentInfo(deploymentConfig.config.frameworkPath);
+                    // Retry with newly created info
+                    if (fs.existsSync(globalDeploymentInfoPath)) {
+                        return await handleAutomaticClaudeMdDeployment();
+                    }
+                }
+            }
             return false; // No global deployment info available
         }
         
         const globalInfo = JSON.parse(fs.readFileSync(globalDeploymentInfoPath, 'utf8'));
-        
-        // Only proceed if this is a global installation that needs first run deployment
-        if (!globalInfo.needsFirstRunDeployment || globalInfo.installationType !== 'global') {
-            return false;
-        }
-        
         const workingDir = process.cwd();
         const workingClaudemd = path.join(workingDir, 'CLAUDE.md');
         
-        // Check if CLAUDE.md already exists in working directory
-        if (fs.existsSync(workingClaudemd)) {
-            const content = fs.readFileSync(workingClaudemd, 'utf8');
-            const isFrameworkFile = content.includes('Claude PM Framework Configuration - Deployment') || 
-                                  content.includes('AI ASSISTANT ROLE DESIGNATION');
-            
-            if (!isFrameworkFile) {
-                // User has custom CLAUDE.md, don't override
-                return false;
-            }
+        // Enhanced logic: Deploy if needed regardless of needsFirstRunDeployment flag
+        const shouldDeploy = shouldDeployClaudemd(workingDir, workingClaudemd, globalInfo);
+        
+        if (!shouldDeploy) {
+            return false;
         }
         
-        // Check if framework template exists
-        const frameworkTemplate = globalInfo.frameworkTemplatePath;
-        if (!fs.existsSync(frameworkTemplate)) {
+        // Enhanced framework template path resolution
+        const frameworkTemplate = findFrameworkTemplate(globalInfo);
+        if (!frameworkTemplate) {
             console.log('⚠️  Framework template not found for auto-deployment');
             return false;
         }
@@ -1832,7 +1900,8 @@ async function handleAutomaticClaudeMdDeployment() {
         console.log('🚀 Auto-deploying CLAUDE.md from global installation...');
         
         let templateContent = fs.readFileSync(frameworkTemplate, 'utf8');
-        const packageJson = require(path.join(path.dirname(frameworkTemplate), '..', 'package.json'));
+        const packageJsonPath = findPackageJson(frameworkTemplate);
+        const packageJson = packageJsonPath ? require(packageJsonPath) : { version: '0.5.3' };
         
         const deploymentDate = new Date().toISOString();
         const deploymentId = Date.now();
@@ -1861,10 +1930,10 @@ async function handleAutomaticClaudeMdDeployment() {
         fs.writeFileSync(workingClaudemd, templateContent);
         console.log(`✅ Framework CLAUDE.md deployed to: ${workingClaudemd}`);
         
-        // Mark as deployed by removing the needsFirstRunDeployment flag
-        globalInfo.needsFirstRunDeployment = false;
+        // Update global deployment info
         globalInfo.lastDeploymentDate = deploymentDate;
         globalInfo.lastDeploymentDir = workingDir;
+        globalInfo.deploymentCount = (globalInfo.deploymentCount || 0) + 1;
         
         fs.writeFileSync(globalDeploymentInfoPath, JSON.stringify(globalInfo, null, 2));
         
@@ -1873,6 +1942,123 @@ async function handleAutomaticClaudeMdDeployment() {
     } catch (error) {
         console.log(`⚠️  Auto-deployment failed: ${error.message}`);
         return false;
+    }
+}
+
+/**
+ * Helper function to determine if CLAUDE.md should be deployed
+ */
+function shouldDeployClaudemd(workingDir, workingClaudemd, globalInfo) {
+    // Check if we're in a project directory
+    if (!isProjectDirectory(workingDir)) {
+        return false;
+    }
+    
+    // Check if CLAUDE.md already exists
+    if (fs.existsSync(workingClaudemd)) {
+        const content = fs.readFileSync(workingClaudemd, 'utf8');
+        const isFrameworkFile = content.includes('Claude PM Framework Configuration - Deployment') || 
+                              content.includes('AI ASSISTANT ROLE DESIGNATION');
+        
+        if (!isFrameworkFile) {
+            // User has custom CLAUDE.md, don't override
+            return false;
+        }
+        
+        // It's a framework file - check if it needs updating
+        const versionMatch = content.match(/CLAUDE_MD_VERSION:\s*([\d\.-]+)/);
+        const currentVersion = versionMatch ? versionMatch[1] : null;
+        const latestVersion = globalInfo.version || '0.5.3';
+        
+        if (currentVersion && currentVersion.startsWith(latestVersion)) {
+            // Already up to date
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+/**
+ * Helper function to check if directory is project-like
+ */
+function isProjectDirectory(dir) {
+    try {
+        const contents = fs.readdirSync(dir);
+        const projectIndicators = [
+            'package.json', '.git', 'README.md', 'src', 'lib', 'components', 
+            'pages', 'app', 'server', 'client', 'public', 'assets'
+        ];
+        
+        return projectIndicators.some(indicator => contents.includes(indicator));
+    } catch (error) {
+        return false;
+    }
+}
+
+/**
+ * Helper function to find framework template
+ */
+function findFrameworkTemplate(globalInfo) {
+    const possiblePaths = [
+        globalInfo.frameworkTemplatePath,
+        path.join(globalInfo.packageRoot || '', 'framework', 'CLAUDE.md'),
+        path.join(path.dirname(globalInfo.packageRoot || ''), 'framework', 'CLAUDE.md')
+    ].filter(Boolean);
+    
+    for (const templatePath of possiblePaths) {
+        if (fs.existsSync(templatePath)) {
+            return templatePath;
+        }
+    }
+    
+    return null;
+}
+
+/**
+ * Helper function to find package.json
+ */
+function findPackageJson(frameworkTemplatePath) {
+    const possiblePaths = [
+        path.join(path.dirname(frameworkTemplatePath), '..', 'package.json'),
+        path.join(path.dirname(frameworkTemplatePath), 'package.json'),
+        path.join(path.dirname(frameworkTemplatePath), '..', '..', 'package.json')
+    ];
+    
+    for (const packagePath of possiblePaths) {
+        if (fs.existsSync(packagePath)) {
+            return packagePath;
+        }
+    }
+    
+    return null;
+}
+
+/**
+ * Helper function to create global deployment info
+ */
+async function createGlobalDeploymentInfo(frameworkPath) {
+    try {
+        const globalConfigDir = path.join(os.homedir(), '.claude-pm');
+        const globalDeploymentInfoPath = path.join(globalConfigDir, 'global-deployment.json');
+        
+        await fs.promises.mkdir(globalConfigDir, { recursive: true });
+        
+        const globalDeploymentInfo = {
+            installationType: 'global',
+            packageRoot: frameworkPath,
+            npmPrefix: process.env.npm_config_prefix,
+            frameworkTemplatePath: path.join(frameworkPath, 'framework', 'CLAUDE.md'),
+            deploymentDate: new Date().toISOString(),
+            version: CLAUDE_PM_VERSION,
+            platform: os.platform(),
+            needsFirstRunDeployment: true
+        };
+        
+        fs.writeFileSync(globalDeploymentInfoPath, JSON.stringify(globalDeploymentInfo, null, 2));
+        
+    } catch (error) {
+        // Silent failure - don't break CLI
     }
 }
 

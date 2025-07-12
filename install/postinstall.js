@@ -31,7 +31,7 @@ class PostInstallSetup {
     }
 
     /**
-     * Check if we're in a global npm installation
+     * Check if we're in a global npm installation with enhanced detection
      */
     isGlobalInstall() {
         const npmConfigPrefix = process.env.npm_config_prefix;
@@ -45,15 +45,41 @@ class PostInstallSetup {
         this.log(`   • npm_root: ${process.env.npm_root || 'NOT_SET'}`);
         this.log(`   • Package path: ${packagePath}`);
         
-        // Check multiple indicators of global installation
+        // Enhanced global installation indicators
         const indicators = {
+            // Standard npm prefix detection
             npmPrefix: npmConfigPrefix && packagePath.includes(npmConfigPrefix),
+            
+            // Standard npm global directory detection
             npmGlobalDir: npmRoot && packagePath.includes(npmRoot),
-            nodeModulesGlobal: packagePath.includes('node_modules') && 
-                              (packagePath.includes('/.npm-global/') || 
-                               packagePath.includes('/lib/node_modules/') ||
-                               packagePath.includes('\\AppData\\Roaming\\npm\\')),
-            packageName: packagePath.includes('@bobmatnyc/claude-multiagent-pm')
+            
+            // Enhanced global node_modules patterns
+            nodeModulesGlobal: packagePath.includes('node_modules') && (
+                packagePath.includes('/.npm-global/') ||           // Custom npm global paths
+                packagePath.includes('/lib/node_modules/') ||      // Standard global node_modules
+                packagePath.includes('\\AppData\\Roaming\\npm\\') || // Windows global
+                packagePath.includes('/.npm-packages/') ||         // Alternative npm global
+                packagePath.includes('/npm-global/') ||            // Common custom global
+                packagePath.includes('/global/lib/node_modules/') ||
+                packagePath.includes('/usr/local/lib/node_modules/') ||
+                packagePath.includes('/opt/homebrew/lib/node_modules/')
+            ),
+            
+            // Package name in global path
+            packageName: packagePath.includes('@bobmatnyc/claude-multiagent-pm'),
+            
+            // Additional npm environment variables
+            npmExecPath: process.env.npm_execpath && 
+                        (process.env.npm_execpath.includes('global') || 
+                         process.env.npm_execpath.includes('.npm-global')),
+            
+            // Check for global installation markers
+            globalMarkers: packagePath.includes('global') && 
+                          packagePath.includes('node_modules'),
+            
+            // Try to detect using npm command patterns
+            npmCommand: process.env.npm_command === 'install' && 
+                       process.env.npm_config_global === 'true'
         };
         
         this.log('🎯 Global install indicators:');
@@ -63,6 +89,26 @@ class PostInstallSetup {
         
         const isGlobal = Object.values(indicators).some(Boolean);
         this.log(`📊 Global installation result: ${isGlobal ? '✅ GLOBAL' : '❌ LOCAL'}`);
+        
+        // Additional verification for borderline cases
+        if (!isGlobal && packagePath.includes('node_modules')) {
+            // Check if we're in a global-like path but missed it
+            const globalLikePatterns = [
+                /\/\.npm-global\//,
+                /\/npm-global\//,
+                /\/global\/.*\/node_modules\//,
+                /\/usr\/local\/lib\/node_modules\//,
+                /\/opt\/homebrew\/lib\/node_modules\//,
+                /C:\\Users\\.*\\AppData\\Roaming\\npm\\node_modules\\/
+            ];
+            
+            const matchesGlobalPattern = globalLikePatterns.some(pattern => pattern.test(packagePath));
+            if (matchesGlobalPattern) {
+                this.log('🔄 Pattern-based global detection: ✅ TRUE');
+                this.log(`📊 Updated global installation result: ✅ GLOBAL (pattern match)`);
+                return true;
+            }
+        }
         
         return isGlobal;
     }
@@ -360,12 +406,23 @@ class PostInstallSetup {
             // ENHANCED FIX: Handle both global and local installation CLAUDE.md deployment
             if (this.isGlobalInstall()) {
                 this.log('🌐 Global installation detected');
-                this.log('💡 CLAUDE.md deployment will be handled by CLI on first run in project directories');
-                this.log('💡 Or run "claude-pm deploy-template" to manually deploy framework template');
+                this.log('💡 Storing global deployment info for CLI auto-deployment');
                 
                 // Store deployment information for CLI to use later
                 await this.storeGlobalDeploymentInfo();
-                return;
+                
+                // For global installations, we'll deploy CLAUDE.md if we're in a suitable working directory
+                // Check if the working directory looks like a project directory that should get CLAUDE.md
+                const isProjectDirectory = this.isProjectDirectory(workingDir);
+                
+                if (isProjectDirectory) {
+                    this.log('📁 Working directory appears to be a project - attempting immediate deployment');
+                    // Continue with deployment below instead of returning
+                } else {
+                    this.log('📁 Working directory is not a project - deferring deployment to CLI first run');
+                    this.log('💡 Run "claude-pm deploy-template" in your project directory to deploy framework template');
+                    return;
+                }
             }
             
             this.log(`📍 Installation Context:`);
@@ -626,6 +683,109 @@ class PostInstallSetup {
                 return '**Windows-specific:**\n- Use `.bat` files for scripts\n- CLI wrappers: `bin/aitrackdown.bat` and `bin/atd.bat`\n- Health check: `scripts/health-check.bat`\n- Path separators: Use backslashes in Windows paths';
             default:
                 return `**Platform**: ${this.platform}\n- Use appropriate script extensions for your platform\n- Ensure proper file permissions on CLI wrappers`;
+        }
+    }
+    
+    /**
+     * Check if a directory looks like a project directory that should receive CLAUDE.md
+     */
+    isProjectDirectory(dir) {
+        try {
+            // Check for project indicators
+            const projectIndicators = [
+                'package.json',
+                '.git',
+                'README.md',
+                'src/',
+                'lib/',
+                'components/',
+                'pages/',
+                'app/',
+                'server/',
+                'client/',
+                'public/',
+                'assets/',
+                'docs/',
+                'test/',
+                'tests/',
+                '__tests__/',
+                'spec/',
+                'cypress/',
+                'jest.config.js',
+                'webpack.config.js',
+                'tsconfig.json',
+                'vite.config.js',
+                'next.config.js',
+                'nuxt.config.js',
+                'vue.config.js',
+                'angular.json',
+                'pom.xml',
+                'build.gradle',
+                'Cargo.toml',
+                'go.mod',
+                'pyproject.toml',
+                'requirements.txt',
+                'Gemfile',
+                'composer.json',
+                'Dockerfile',
+                'docker-compose.yml',
+                '.env',
+                '.env.example'
+            ];
+            
+            const contents = fsSync.readdirSync(dir);
+            const hasProjectIndicators = projectIndicators.some(indicator => 
+                contents.some(item => {
+                    if (indicator.endsWith('/')) {
+                        // Directory indicator
+                        return item === indicator.slice(0, -1) && 
+                               fsSync.statSync(path.join(dir, item)).isDirectory();
+                    } else {
+                        // File indicator
+                        return item === indicator;
+                    }
+                })
+            );
+            
+            // Also check if the directory name suggests it's a project
+            const dirName = path.basename(dir).toLowerCase();
+            const projectLikeNames = [
+                'project', 'app', 'application', 'service', 'api', 'web', 'site', 
+                'frontend', 'backend', 'client', 'server', 'bot', 'tool', 'cli',
+                'framework', 'library', 'package', 'module', 'plugin', 'extension'
+            ];
+            
+            const hasProjectLikeName = projectLikeNames.some(name => 
+                dirName.includes(name) || dirName.endsWith('-' + name) || dirName.startsWith(name + '-')
+            );
+            
+            // Exclude certain non-project directories
+            const excludePatterns = [
+                /node_modules/,
+                /\.npm/,
+                /\.cache/,
+                /tmp/,
+                /temp/,
+                /Downloads/,
+                /Desktop/,
+                /Documents$/,  // But allow subdirs
+                /Library/,
+                /System/,
+                /usr\/local/,
+                /opt/
+            ];
+            
+            const isExcluded = excludePatterns.some(pattern => pattern.test(dir));
+            
+            if (isExcluded) {
+                return false;
+            }
+            
+            return hasProjectIndicators || hasProjectLikeName;
+            
+        } catch (error) {
+            // If we can't read the directory, assume it's not a project
+            return false;
         }
     }
     
@@ -937,33 +1097,159 @@ echo "   https://github.com/bobmatnyc/claude-multiagent-pm#environment-setup"
     }
 
     /**
-     * Main post-install process
+     * Validate and install ai-trackdown-tools dependency if needed
+     */
+    async validateAndInstallDependencies() {
+        try {
+            this.log('Validating dependencies...');
+            
+            // Check if ai-trackdown-tools is available
+            const { execSync } = require('child_process');
+            
+            try {
+                const version = execSync('aitrackdown --version', { 
+                    encoding: 'utf8', 
+                    stdio: 'pipe',
+                    timeout: 5000 
+                });
+                this.log(`ai-trackdown-tools already available: ${version.trim()}`);
+                return;
+            } catch (checkError) {
+                this.log('ai-trackdown-tools not found, attempting installation...');
+            }
+            
+            // Try to install ai-trackdown-tools
+            try {
+                this.log('Installing ai-trackdown-tools dependency...');
+                execSync('npm install -g @bobmatnyc/ai-trackdown-tools', { 
+                    encoding: 'utf8',
+                    stdio: 'pipe',
+                    timeout: 60000 // 1 minute timeout
+                });
+                
+                // Verify installation
+                const version = execSync('aitrackdown --version', { 
+                    encoding: 'utf8', 
+                    stdio: 'pipe',
+                    timeout: 5000 
+                });
+                this.log(`ai-trackdown-tools installed successfully: ${version.trim()}`);
+                
+            } catch (installError) {
+                this.log(`Failed to install ai-trackdown-tools: ${installError.message}`, 'warn');
+                this.log('You may need to install it manually: npm install -g @bobmatnyc/ai-trackdown-tools');
+            }
+            
+        } catch (error) {
+            this.log(`Dependency validation failed: ${error.message}`, 'warn');
+        }
+    }
+    
+    /**
+     * Add failsafe mechanisms for deployment
+     */
+    async addFailsafeMechanisms() {
+        try {
+            this.log('Setting up failsafe mechanisms...');
+            
+            // Create a failsafe deployment script
+            const failsafeScript = `#!/bin/bash
+# Claude PM Framework - Failsafe CLAUDE.md Deployment
+# This script can be used to manually deploy CLAUDE.md if automatic deployment fails
+
+echo "🚀 Claude PM Framework - Manual CLAUDE.md Deployment"
+echo "=================================================="
+
+# Check if we're in a project directory
+if [ ! -f "package.json" ] && [ ! -d ".git" ] && [ ! -f "README.md" ]; then
+    echo "⚠️  Warning: This doesn't appear to be a project directory"
+    echo "   Consider running this in your project root"
+    echo ""
+fi
+
+# Check if CLAUDE.md already exists
+if [ -f "CLAUDE.md" ]; then
+    echo "📄 CLAUDE.md already exists in current directory"
+    echo "   Backing up existing file as CLAUDE.md.backup"
+    cp CLAUDE.md CLAUDE.md.backup
+fi
+
+# Try to deploy using claude-pm command
+if command -v claude-pm >/dev/null 2>&1; then
+    echo "🔧 Using claude-pm deploy-template command..."
+    claude-pm deploy-template
+    if [ $? -eq 0 ]; then
+        echo "✅ CLAUDE.md deployed successfully"
+        exit 0
+    fi
+fi
+
+# Manual fallback deployment
+echo "🔧 Attempting manual deployment..."
+GLOBAL_CONFIG="$HOME/.claude-pm/global-deployment.json"
+
+if [ -f "$GLOBAL_CONFIG" ]; then
+    # Extract framework template path from global config
+    TEMPLATE_PATH=$(node -e "
+        try {
+            const config = require('$GLOBAL_CONFIG');
+            console.log(config.frameworkTemplatePath || '');
+        } catch (e) {
+            console.log('');
+        }
+    ")
+    
+    if [ -f "$TEMPLATE_PATH" ]; then
+        echo "📋 Copying framework template from: $TEMPLATE_PATH"
+        cp "$TEMPLATE_PATH" CLAUDE.md
+        echo "✅ CLAUDE.md deployed manually"
+    else
+        echo "❌ Framework template not found at: $TEMPLATE_PATH"
+    fi
+else
+    echo "❌ Global deployment configuration not found"
+    echo "   Please reinstall: npm install -g @bobmatnyc/claude-multiagent-pm"
+fi
+`;
+            
+            const failsafePath = path.join(this.globalConfigDir, 'deploy-claude-md.sh');
+            await fs.writeFile(failsafePath, failsafeScript);
+            await fs.chmod(failsafePath, '755');
+            
+            this.log(`Failsafe deployment script created: ${failsafePath}`);
+            
+        } catch (error) {
+            this.log(`Failed to create failsafe mechanisms: ${error.message}`, 'warn');
+        }
+    }
+    
+    /**
+     * Main post-install process with enhanced error handling
      */
     async run() {
         try {
             this.log('Starting Claude PM Framework post-install setup');
             
-            await this.createGlobalConfig();
-            await this.prepareFrameworkLib();
-            await this.prepareTemplates();
-            await this.prepareSchemas();
-            await this.platformSetup();
-            await this.validateInstallation();
+            // Core setup with error recovery
+            await this.safeExecute('createGlobalConfig', () => this.createGlobalConfig());
+            await this.safeExecute('prepareFrameworkLib', () => this.prepareFrameworkLib());
+            await this.safeExecute('prepareTemplates', () => this.prepareTemplates());
+            await this.safeExecute('prepareSchemas', () => this.prepareSchemas());
+            await this.safeExecute('platformSetup', () => this.platformSetup());
+            await this.safeExecute('validateInstallation', () => this.validateInstallation());
             
-            // NEW: Environment variable migration
-            await this.migrateEnvironmentVariables();
-            
-            // NEW: Setup deployment configuration
-            await this.setupDeploymentConfiguration();
-            
-            // NEW: Create migration helper script
-            await this.createMigrationHelper();
+            // Enhanced setup
+            await this.safeExecute('migrateEnvironmentVariables', () => this.migrateEnvironmentVariables());
+            await this.safeExecute('setupDeploymentConfiguration', () => this.setupDeploymentConfiguration());
+            await this.safeExecute('createMigrationHelper', () => this.createMigrationHelper());
+            await this.safeExecute('validateAndInstallDependencies', () => this.validateAndInstallDependencies());
+            await this.safeExecute('addFailsafeMechanisms', () => this.addFailsafeMechanisms());
             
             // Deploy framework CLAUDE.md to working directory
-            await this.deployFrameworkToWorkingDirectory();
+            await this.safeExecute('deployFrameworkToWorkingDirectory', () => this.deployFrameworkToWorkingDirectory());
             
             // Update deployed instance version if exists
-            await this.updateDeployedInstanceVersion();
+            await this.safeExecute('updateDeployedInstanceVersion', () => this.updateDeployedInstanceVersion());
             
             this.log('Post-install setup completed successfully');
             this.showInstructions();
@@ -973,10 +1259,24 @@ echo "   https://github.com/bobmatnyc/claude-multiagent-pm#environment-setup"
             console.error('\nIf you encounter issues, please:');
             console.error('1. Check that Node.js 16+ and Python 3.8+ are installed');
             console.error('2. Ensure you have write permissions to the installation directory');
-            console.error('3. Report issues at: https://github.com/bobmatnyc/claude-multiagent-pm/issues');
+            console.error('3. Try the failsafe deployment script: ~/.claude-pm/deploy-claude-md.sh');
+            console.error('4. Report issues at: https://github.com/bobmatnyc/claude-multiagent-pm/issues');
             
             // Don't fail the installation, just warn
             process.exit(0);
+        }
+    }
+    
+    /**
+     * Safe execution wrapper for error recovery
+     */
+    async safeExecute(operationName, operation) {
+        try {
+            await operation();
+        } catch (error) {
+            this.log(`${operationName} failed: ${error.message}`, 'warn');
+            this.log(`Continuing with post-install setup...`);
+            // Don't throw - allow other operations to continue
         }
     }
 }
