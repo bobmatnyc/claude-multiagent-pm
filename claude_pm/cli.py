@@ -30,6 +30,14 @@ from .services.project_service import ProjectService
 from .scripts.service_manager import ClaudePMServiceManager
 from .cli_enforcement import enforcement_cli
 from .cmpm_commands import register_cmpm_commands
+from .commands.dependency_commands import dependencies
+from .modules.deployment_detector import (
+    detect_aitrackdown_info as _detect_aitrackdown_info,
+    detect_memory_manager_info as _detect_memory_manager_info,
+    get_framework_version as _get_framework_version,
+    detect_claude_md_version as _detect_claude_md_version,
+    display_directory_context as _display_directory_context
+)
 
 console = Console()
 logger = logging.getLogger(__name__)
@@ -52,260 +60,7 @@ def get_managed_path():
     return Path(config.get("managed_path"))
 
 
-def _detect_aitrackdown_info():
-    """Detect AI-Trackdown-Tools version and deployment method with optimized performance."""
-    import subprocess
-    import os
-    from pathlib import Path
-
-    try:
-        # Check for global aitrackdown command (most common case first)
-        try:
-            result = subprocess.run(
-                ["aitrackdown", "--version"], capture_output=True, text=True, timeout=3
-            )
-            if result.returncode == 0:
-                version = result.stdout.strip()
-                # Quick path detection without which command for performance
-                try:
-                    which_result = subprocess.run(
-                        ["which", "aitrackdown"], capture_output=True, text=True, timeout=1
-                    )
-                    if which_result.returncode == 0:
-                        path = which_result.stdout.strip()
-                        if ".nvm" in path:
-                            deployment = "global (nvm)"
-                        elif "/usr/" in path or "/opt/" in path:
-                            deployment = "global (system)"
-                        elif "npm" in path:
-                            deployment = "global (npm)"
-                        else:
-                            deployment = "global"
-                    else:
-                        deployment = "global"
-                except:
-                    deployment = "global"
-                return f"v{version} ({deployment})"
-        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
-            pass
-
-        # Check for framework local CLI (second priority)
-        framework_cli = Path(__file__).parent.parent / "bin" / "aitrackdown"
-        if framework_cli.exists():
-            try:
-                result = subprocess.run(
-                    [str(framework_cli), "--version"], capture_output=True, text=True, timeout=3
-                )
-                if result.returncode == 0:
-                    version = result.stdout.strip()
-                    return f"v{version} (framework CLI)"
-            except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
-                # Try reading as file if execution fails
-                try:
-                    # Framework CLI might be a wrapper, check if it's accessible
-                    return "detected (framework CLI)"
-                except:
-                    pass
-
-        # Check for atd alias (last priority)
-        try:
-            result = subprocess.run(["atd", "--version"], capture_output=True, text=True, timeout=2)
-            if result.returncode == 0:
-                version = result.stdout.strip()
-                return f"v{version} (atd alias)"
-        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
-            pass
-
-        return "not found"
-
-    except Exception as e:
-        # Return more specific error information for debugging
-        return "error"
-
-
-def _detect_memory_manager_info():
-    """Detect Memory Manager type, version, and status with memory count."""
-    import subprocess
-    import socket
-    import json
-
-    try:
-        # Check for mem0AI package version (optimized)
-        mem0_version = None
-        try:
-            result = subprocess.run(
-                ["python3", "-c", "import mem0; print(mem0.__version__)"],
-                capture_output=True,
-                text=True,
-                timeout=3,
-            )
-            if result.returncode == 0:
-                mem0_version = result.stdout.strip()
-        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
-            pass
-
-        # Check mem0AI service status and memory count
-        service_status = "inactive"
-        memory_count = 0
-        try:
-            # Quick socket check instead of HTTP request
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(1)  # 1 second timeout
-            result = sock.connect_ex(("localhost", 8002))
-            sock.close()
-            if result == 0:
-                service_status = "active"
-                
-                # If service is active, get memory count
-                try:
-                    import urllib.request
-                    import urllib.error
-                    
-                    with urllib.request.urlopen("http://localhost:8002/memories", timeout=2) as response:
-                        if response.status == 200:
-                            data = json.loads(response.read().decode('utf-8'))
-                            memory_count = data.get('count', 0)
-                except (urllib.error.URLError, json.JSONDecodeError, KeyError):
-                    pass  # Keep memory_count as 0 if we can't retrieve it
-        except Exception:
-            service_status = "inactive"
-
-        # Format output with memory count when service is active
-        if mem0_version:
-            if service_status == "active" and memory_count > 0:
-                return f"mem0AI v{mem0_version} ({service_status}, {memory_count} memories)"
-            elif service_status == "active":
-                return f"mem0AI v{mem0_version} ({service_status}, 0 memories)"
-            else:
-                return f"mem0AI v{mem0_version} ({service_status})"
-        else:
-            if service_status == "active" and memory_count > 0:
-                return f"mem0AI not available ({service_status}, {memory_count} memories)"
-            elif service_status == "active":
-                return f"mem0AI not available ({service_status}, 0 memories)"
-            else:
-                return f"mem0AI not available ({service_status})"
-
-    except Exception:
-        return "error"
-
-
-def _get_framework_version():
-    """Get framework version from VERSION file or package info."""
-    try:
-        from pathlib import Path
-        import claude_pm
-        
-        # Try VERSION file first (for source development)
-        try:
-            version_file = Path(__file__).parent.parent / "VERSION"
-            if version_file.exists():
-                return version_file.read_text().strip()
-        except:
-            pass
-        
-        # Fall back to package version
-        return claude_pm.__version__
-    except:
-        # Last resort - should never happen in normal installs
-        return "unknown"
-
-def _detect_claude_md_version():
-    """Detect CLAUDE.md version and provide concise information."""
-    try:
-        import os
-        import re
-        from pathlib import Path
-
-        # Check for CLAUDE.md in current directory
-        current_dir = Path.cwd()
-        claude_md_path = current_dir / "CLAUDE.md"
-
-        if not claude_md_path.exists():
-            return "Not found"
-
-        # Get framework version using our utility function
-        framework_version = _get_framework_version()
-
-        # Read and parse CLAUDE.md content
-        try:
-            with open(claude_md_path, "r", encoding="utf-8") as f:
-                content = f.read()
-
-            # Extract CLAUDE_MD_VERSION using regex that supports both formats
-            version_match = re.search(r"CLAUDE_MD_VERSION:\s*([\d\.-]+)", content)
-            if version_match:
-                version = version_match.group(1)
-
-                # Format display using VERSION file for framework part
-                if "-" in version:
-                    _, serial = version.split("-", 1)
-                    return f"v{framework_version}-{serial}"
-                else:
-                    return f"v{framework_version} (Legacy format)"
-            else:
-                return "Found (no version detected)"
-
-        except Exception as e:
-            return f"Error reading file: {str(e)}"
-
-    except Exception as e:
-        return f"Detection error: {str(e)}"
-
-
-def _display_directory_context():
-    """Display deployment and working directories with enhanced system information."""
-    import os
-    from pathlib import Path
-
-    try:
-        # Get deployment directory (framework path) with improved detection
-        deployment_dir = (
-            os.environ.get("CLAUDE_PM_DEPLOYMENT_DIR")
-            or os.environ.get("CLAUDE_PM_FRAMEWORK_PATH")
-            or None
-        )
-
-        if not deployment_dir:
-            # Try to detect from current structure
-            current_path = Path(__file__).parent.parent
-            if (current_path / "claude_pm").exists():
-                deployment_dir = str(current_path)
-            else:
-                deployment_dir = "Not detected"
-
-        # Get working directory with fallback
-        working_dir = os.environ.get("CLAUDE_PM_WORKING_DIR", os.getcwd())
-
-        # Get AI-Trackdown-Tools information
-        aitrackdown_info = _detect_aitrackdown_info()
-
-        # Get Memory Manager information
-        memory_info = _detect_memory_manager_info()
-
-        # Get CLAUDE.md version information
-        claude_md_info = _detect_claude_md_version()
-
-        # Create enhanced display
-        console.print(f"[dim]📁 Deployment: {deployment_dir}[/dim]")
-        console.print(f"[dim]📂 Working: {working_dir}[/dim]")
-        console.print(f"[dim]📄 CLAUDE.md: {claude_md_info}[/dim]")
-        console.print(f"[dim]🔧 AI-Trackdown: {aitrackdown_info}[/dim]")
-        console.print(f"[dim]🧠 Memory: {memory_info}[/dim]")
-        console.print("")  # Add spacing
-
-    except Exception as e:
-        # Fallback to basic display if enhanced detection fails
-        try:
-            # Basic fallback
-            deployment_dir = os.environ.get("CLAUDE_PM_DEPLOYMENT_DIR", "Not detected")
-            working_dir = os.environ.get("CLAUDE_PM_WORKING_DIR", os.getcwd())
-            console.print(f"[dim]📁 Deployment: {deployment_dir}[/dim]")
-            console.print(f"[dim]📂 Working: {working_dir}[/dim]")
-            console.print("")
-        except:
-            # Silent failure - don't break CLI if directory detection fails completely
-            pass
+# Deployment detector functions are now imported from modules.deployment_detector
 
 
 @click.group()
@@ -3338,6 +3093,10 @@ def main():
     try:
         # Register CMPM slash commands
         register_cmpm_commands(cli)
+        
+        # Register dependency management commands
+        cli.add_command(dependencies)
+        
         cli()
     except KeyboardInterrupt:
         console.print("\n[bold yellow]Operation cancelled by user[/bold yellow]")
