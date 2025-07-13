@@ -13,7 +13,7 @@
       "severity": "high",
       "issue_type": "broken_link",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/README.md",
-      "line_number": 91,
+      "line_number": 84,
       "description": "Broken link: [Framework Overview](./docs/FRAMEWORK_OVERVIEW.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md",
       "suggested_fix": "Suggested fix: Use 'backups/cleanup-backup-20250709-223332/framework/docs/FRAMEWORK_OVERVIEW.md' instead of './docs/FRAMEWORK_OVERVIEW.md'",
       "link_text": "Framework Overview",
@@ -1995,7 +1995,7 @@
       "severity": "high",
       "issue_type": "broken_link",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/README.md",
-      "line_number": 91,
+      "line_number": 84,
       "description": "Broken link: [Framework Overview](./docs/FRAMEWORK_OVERVIEW.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/FRAMEWORK_OVERVIEW.md",
       "suggested_fix": "Suggested fix: Use 'backups/cleanup-backup-20250709-223332/framework/docs/FRAMEWORK_OVERVIEW.md' instead of './docs/FRAMEWORK_OVERVIEW.md'",
       "link_text": "Framework Overview",
@@ -3905,7 +3905,7 @@
     }
   ],
   "inconsistencies_found": [],
-  "last_update": "2025-07-13 18:14:05",
+  "last_update": "2025-07-13 18:53:56",
   "files_validated": 30,
   "links_checked": 39
 }
