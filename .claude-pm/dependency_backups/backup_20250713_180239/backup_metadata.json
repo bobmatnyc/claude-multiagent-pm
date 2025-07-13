@@ -1,0 +1,10 @@
+{
+  "timestamp": "20250713_180239",
+  "files": [
+    "pyproject.toml",
+    "requirements/",
+    "package.json",
+    "package-lock.json"
+  ],
+  "project_root": "/Users/masa/Projects/claude-multiagent-pm"
+}

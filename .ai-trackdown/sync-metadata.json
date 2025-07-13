@@ -1,0 +1,14 @@
+{
+  "last_sync": "2025-07-13T20:08:06.908Z",
+  "last_result": {
+    "success": false,
+    "operations": [],
+    "errors": [],
+    "conflicts": [],
+    "pushed_count": 0,
+    "pulled_count": 0,
+    "skipped_count": 0,
+    "conflict_count": 0
+  },
+  "conflicts": 0
+}

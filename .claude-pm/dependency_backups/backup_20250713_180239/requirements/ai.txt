@@ -1,0 +1,24 @@
+# AI and ML requirements for Claude PM Framework
+# Install with: pip install -r requirements/ai.txt
+
+-r base.txt
+
+# Core AI integrations 
+# mem0ai>=0.1.0  # Uncomment when available
+
+# AI model APIs (direct integration, no LangChain dependencies)
+openai>=1.0.0
+anthropic>=0.7.0
+
+# Vector databases and embeddings
+chromadb>=0.4.0
+faiss-cpu>=1.7.0
+
+# Text processing and tokenization
+tiktoken>=0.5.0
+transformers>=4.35.0
+
+# Additional ML utilities
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0

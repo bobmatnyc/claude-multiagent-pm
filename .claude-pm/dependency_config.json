@@ -1,0 +1,13 @@
+{
+  "auto_update_minor": true,
+  "auto_update_patch": true,
+  "auto_update_major": false,
+  "run_tests_after_update": true,
+  "create_backup": true,
+  "skip_dev_dependencies": false,
+  "exclude_packages": null,
+  "update_schedule": null,
+  "max_concurrent_updates": 3,
+  "update_timeout": 300,
+  "dry_run": true
+}

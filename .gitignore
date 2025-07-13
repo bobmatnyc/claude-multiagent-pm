@@ -167,3 +167,46 @@ _archive/
 *_COMPLETION_REPORT.md
 *_IMPLEMENTATION_REPORT.md
 *_DEPLOYMENT_REPORT.md
+
+# Test files and temporary artifacts that should be in appropriate directories
+test_*.py
+*test_results*.json
+*poc_results*.json
+*validation_results*.json
+agent_profiles.json
+
+# Debug and temporary files
+claude_startup_debug.py
+debug_installation.py
+fallback_memory_test.log
+
+# Service files that should be in scripts/
+mem0_service.*
+start_mem0_service.sh
+
+# Temporary test directories
+test-npm-install/
+ai-trackdown-project/
+benchmark-project/
+trackdown/
+
+# Build/distribution artifacts
+package/
+*.tgz
+
+# Issue and report files that should be in tasks/
+ISS-*.md
+EP-*.md
+*QA_VALIDATION*.md
+*DEPLOYMENT*.md
+*VERSION_*.md
+*NPM_*.md
+*PUBLICATION*.md
+*COMPREHENSIVE*.md
+*USER_ONBOARDING*.md
+*POSTDEPLOYMENT*.md
+*POSTINSTALL*.md
+*README_RESTRUCTURE*.md
+*STARTUP_FIXES*.md
+*WSL2_*.md
+*DOCKER_*.md

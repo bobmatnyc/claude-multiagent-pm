@@ -1,0 +1,20 @@
+# Production requirements for Claude PM Framework
+# Install with: pip install -r requirements/production.txt
+
+-r base.txt
+
+# Production monitoring and observability
+sentry-sdk>=1.38.0
+prometheus-client>=0.18.0
+
+# Production web servers
+gunicorn>=21.2.0
+uvicorn[standard]>=0.24.0
+
+# Production databases and caching
+redis>=5.0.0
+psycopg2-binary>=2.9.0
+
+# Security and authentication
+cryptography>=41.0.0
+passlib[bcrypt]>=1.7.4

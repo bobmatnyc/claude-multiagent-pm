@@ -262,5 +262,5 @@ npm run docker:status
 ---
 
 **Integration completed**: 2025-07-13  
-**Framework version**: 0.5.4  
+**Framework version**: 0.6.0  
 **Docker validation**: Fully integrated with graceful fallback

@@ -22,3 +22,14 @@ automation:
   auto_update_timestamps: true
   auto_calculate_tokens: false
   auto_sync_status: true
+github_sync:
+  enabled: true
+  repository: bobmatnyc/ai-presidential-study
+  token: ${GITHUB_TOKEN:-""}
+  auto_sync: true
+  conflict_resolution: most_recent
+  sync_labels: true
+  sync_milestones: true
+  sync_assignees: true
+  batch_size: 50
+  rate_limit_delay: 100

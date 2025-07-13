@@ -36,10 +36,12 @@ Choose your learning path based on your role and experience:
 
 #### 🚀 Quick Start Path (30 minutes)
 Perfect for getting up and running quickly:
-1. [System Requirements](01-getting-started.md#system-requirements)
-2. [Installation Process](01-getting-started.md#installation-process)
-3. [Basic Configuration](01-getting-started.md#initial-configuration)
-4. [First Project Setup](01-getting-started.md#quick-start-example)
+1. **[📞 User Support Index](00-user-support-index.md)** - Quick access to all help resources
+2. **[❓ FAQ: Installation & Usage Questions](11-dirk-concerns-faq.md)** - Address common concerns
+3. [System Requirements](01-getting-started.md#system-requirements)
+4. [Installation Process](01-getting-started.md#installation-process)
+5. [Basic Configuration](01-getting-started.md#initial-configuration)
+6. [First Project Setup](01-getting-started.md#quick-start-example)
 
 #### 👩‍💻 Developer Path (2-3 hours)
 Comprehensive understanding for developers:
@@ -71,7 +73,16 @@ For users creating custom solutions:
 
 ### Core Sections
 
-#### 📖 [Section 0: Structure & Navigation](00-structure-navigation.md)
+#### 📞 [Section 0: User Support Index](00-user-support-index.md)
+Quick access index for all user support resources - perfect for addressing installation, safety, and usage questions.
+
+**Key Topics:**
+- Quick help for specific user concerns (installation, safety, mono-repos)
+- Scenario-based getting started guides for different user types
+- Emergency procedures and rollback instructions
+- Complete documentation library with time estimates and risk levels
+
+#### 📖 [Section 0.1: Structure & Navigation](00-structure-navigation.md)
 Complete navigation guide, glossary, and reference system for the entire user guide.
 
 **Key Topics:**
@@ -149,6 +160,56 @@ Comprehensive troubleshooting guide and frequently asked questions.
 - Health monitoring and diagnostic tools
 - Support resources and escalation procedures
 - Emergency recovery procedures
+
+### 🆕 User Support Resources (ISS-0091)
+
+#### 🏗️ [Installation Guide for Mono-Repos](08-installation-mono-repo-guide.md)
+Detailed installation and usage guide specifically for mono-repository environments.
+
+**Key Topics:**
+- Safe mono-repo installation without interference
+- Workspace-scoped usage patterns
+- Integration with existing build tools
+- Troubleshooting mono-repo specific issues
+
+#### 🛡️ [Safety and Risk Mitigation Guide](09-safety-risk-mitigation.md)
+Comprehensive safety guide addressing "How do I avoid messing everything up?"
+
+**Key Topics:**
+- Fundamental safety principles and guarantees
+- Progressive adoption strategy (read-only → suggestions → assisted)
+- Emergency procedures and rollback instructions
+- Safe project selection criteria
+
+#### 🎯 [Project Selection Guide](10-project-selection-guide.md)
+Framework for choosing appropriate starter projects to build confidence safely.
+
+**Key Topics:**
+- Risk-ranked project categories (personal → team → production)
+- Detailed project evaluation criteria
+- Progressive learning roadmap
+- Team coordination strategies
+
+#### ❓ [FAQ: Installation & Usage Questions](11-dirk-concerns-faq.md)
+Specific answers to common user concerns about installation, safety, and usage.
+
+**Key Topics:**
+- Mono-repo installation and compatibility
+- Safety measures and risk mitigation
+- Step-by-step getting started instructions
+- Team and enterprise considerations
+
+#### 📋 [Scenario-Based Getting Started](12-scenario-based-getting-started.md)
+Step-by-step guides for 7 different user scenarios and situations.
+
+**Key Topics:**
+- First-time user (complete beginner)
+- Mono-repo developer (workspace integration)
+- Legacy code maintainer (refactoring safety)
+- Team lead (evaluation and rollout)
+- Enterprise user (compliance requirements)
+- Solo developer (productivity maximization)
+- Skeptical developer (ultra-safe evaluation)
 
 ---
 
