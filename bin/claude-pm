@@ -704,6 +704,136 @@ function validatePython() {
 }
 
 /**
+ * Detect platform information including WSL2
+ */
+function detectPlatformInfo() {
+    const platform = os.platform();
+    let isWSL2 = false;
+    let wslDistro = null;
+    let display = platform;
+    
+    // WSL2 Detection
+    if (platform === 'linux') {
+        try {
+            // Check environment variables
+            wslDistro = process.env.WSL_DISTRO_NAME;
+            const wslEnv = process.env.WSLENV;
+            
+            if (wslDistro || wslEnv) {
+                // Check /proc/version for WSL2 specifically
+                if (fs.existsSync('/proc/version')) {
+                    const versionContent = fs.readFileSync('/proc/version', 'utf8');
+                    isWSL2 = versionContent.includes('WSL2') || versionContent.includes('microsoft');
+                    
+                    if (isWSL2) {
+                        display = `Linux (WSL2${wslDistro ? ` - ${wslDistro}` : ''})`;
+                    } else {
+                        display = `Linux (WSL1${wslDistro ? ` - ${wslDistro}` : ''})`;
+                    }
+                } else {
+                    display = `Linux (WSL${wslDistro ? ` - ${wslDistro}` : ''})`;
+                }
+            }
+        } catch (error) {
+            // Fallback to standard Linux detection
+        }
+    }
+    
+    return {
+        platform,
+        isWSL2,
+        wslDistro,
+        display
+    };
+}
+
+/**
+ * Get npm global bin directory
+ */
+function getNpmGlobalBin() {
+    try {
+        const { execSync } = require('child_process');
+        
+        // Try multiple methods to get npm global bin
+        const methods = [
+            () => execSync('npm bin -g', { encoding: 'utf8', timeout: 3000 }).trim(),
+            () => execSync('npm config get prefix', { encoding: 'utf8', timeout: 3000 }).trim() + '/bin',
+            () => {
+                // NVM-specific detection
+                const nvmDir = process.env.NVM_DIR || path.join(os.homedir(), '.nvm');
+                const nodeVersion = process.version;
+                return path.join(nvmDir, 'versions', 'node', nodeVersion, 'bin');
+            }
+        ];
+        
+        for (const method of methods) {
+            try {
+                const binDir = method();
+                if (binDir && fs.existsSync(binDir)) {
+                    return binDir;
+                }
+            } catch (methodError) {
+                // Try next method
+            }
+        }
+        
+        return null;
+    } catch (error) {
+        return null;
+    }
+}
+
+/**
+ * Analyze WSL2 PATH configuration for issues
+ */
+function analyzeWSL2Path() {
+    const issues = [];
+    let hasIssues = false;
+    
+    try {
+        const currentPath = process.env.PATH || '';
+        const npmGlobalBin = getNpmGlobalBin();
+        
+        // Check if npm global bin is in PATH
+        if (npmGlobalBin && !currentPath.includes(npmGlobalBin)) {
+            issues.push(`NPM global bin directory not in PATH: ${npmGlobalBin}`);
+            hasIssues = true;
+        }
+        
+        // Check for NVM-related PATH issues
+        const nvmDir = process.env.NVM_DIR;
+        if (nvmDir && !currentPath.includes('.nvm')) {
+            issues.push('NVM paths may not be properly configured in PATH');
+            hasIssues = true;
+        }
+        
+        // Check if claude-pm is accessible
+        try {
+            const { execSync } = require('child_process');
+            execSync('which claude-pm', { encoding: 'utf8', timeout: 3000 });
+        } catch (error) {
+            issues.push('claude-pm command not found in current PATH');
+            hasIssues = true;
+        }
+        
+        // Check if aitrackdown is accessible
+        try {
+            const { execSync } = require('child_process');
+            execSync('which aitrackdown', { encoding: 'utf8', timeout: 3000 });
+        } catch (error) {
+            issues.push('aitrackdown command not found in current PATH');
+            hasIssues = true;
+        }
+        
+    } catch (error) {
+        issues.push(`PATH analysis failed: ${error.message}`);
+        hasIssues = true;
+    }
+    
+    return { hasIssues, issues };
+}
+
+/**
  * Show enhanced help message with deployment detection
  */
 function showHelp() {
@@ -730,6 +860,9 @@ Commands:
   --template-status   Show template management status (CMPM-102)
   --dependency-status Show dependency management status (CMPM-103)
   --parent-directory-status Show parent directory management status (CMPM-104)
+  --claude-info       Show detailed Claude CLI validation and compatibility
+  --env-status        Show comprehensive environment validation status
+  --troubleshoot      Display troubleshooting guide for common issues
   --help              Show this help message
 
 Framework Integration:
@@ -750,6 +883,9 @@ Examples:
   claude-pm --template-status
   claude-pm --dependency-status
   claude-pm --parent-directory-status
+  claude-pm --claude-info
+  claude-pm --env-status
+  claude-pm --troubleshoot
 
 For more information, visit:
 https://github.com/bobmatnyc/claude-pm
@@ -798,13 +934,65 @@ function displaySystemInfo() {
     // Working Path
     console.log(`📂 Working Path: ${process.cwd()}`);
     
-    // AI-trackdown-tools Version
+    // Platform Detection (including WSL2)
+    const platformInfo = detectPlatformInfo();
+    console.log(`🖥️  Platform: ${platformInfo.display}`);
+    if (platformInfo.isWSL2) {
+        console.log(`🐧 WSL2 Environment: ${platformInfo.wslDistro || 'Detected'}`);
+        
+        // WSL2-specific PATH diagnostics
+        const pathDiagnostics = analyzeWSL2Path();
+        if (pathDiagnostics.hasIssues) {
+            console.log(`⚠️  WSL2 PATH Issues Detected:`);
+            for (const issue of pathDiagnostics.issues) {
+                console.log(`   • ${issue}`);
+            }
+            console.log(`💡 Run: ~/.claude-pm/wsl2-diagnostic.sh for detailed analysis`);
+        }
+    }
+    
+    // AI-trackdown-tools Version (with WSL2-aware checking)
     try {
         const { execSync } = require('child_process');
-        const version = execSync('aitrackdown --version', { encoding: 'utf8' }).trim();
+        const execOptions = {
+            encoding: 'utf8',
+            timeout: 5000
+        };
+        
+        // For WSL2, try with extended PATH
+        if (platformInfo.isWSL2) {
+            const npmGlobalBin = getNpmGlobalBin();
+            if (npmGlobalBin) {
+                execOptions.env = {
+                    ...process.env,
+                    PATH: process.env.PATH + ':' + npmGlobalBin
+                };
+            }
+        }
+        
+        const version = execSync('aitrackdown --version', execOptions).trim();
         console.log(`🔍 AI-trackdown-tools Version: v${version}`);
     } catch (error) {
         console.log(`🔍 AI-trackdown-tools Version: Not installed or not accessible`);
+        if (platformInfo.isWSL2) {
+            console.log(`   💡 WSL2 Tip: Try 'source ~/.bashrc' or check PATH configuration`);
+        }
+    }
+    
+    // Claude CLI Version and Compatibility
+    try {
+        const claudeCheck = quickClaudeCheck();
+        if (claudeCheck.available) {
+            const { execSync } = require('child_process');
+            const claudeVersion = execSync('claude --version', { encoding: 'utf8', timeout: 3000 }).trim();
+            const versionMatch = claudeVersion.match(/(\d+\.\d+\.\d+)/);
+            const version = versionMatch ? versionMatch[1] : 'unknown';
+            console.log(`🤖 Claude CLI Version: v${version} (compatible)`);
+        } else {
+            console.log(`🤖 Claude CLI Version: Not available - ${claudeCheck.suggestion}`);
+        }
+    } catch (error) {
+        console.log(`🤖 Claude CLI Version: Error detecting (run --claude-info for details)`);
     }
     
     // Install Type
@@ -1219,6 +1407,308 @@ async function manageFrameworkClaudeMd() {
 }
 
 /**
+ * Claude CLI Version Detection and Compatibility System
+ */
+class ClaudeCliValidator {
+    constructor() {
+        this.versionCache = null;
+        this.featureCache = new Map();
+    }
+
+    /**
+     * Detect Claude CLI version
+     */
+    async detectClaudeVersion() {
+        if (this.versionCache) {
+            return this.versionCache;
+        }
+
+        try {
+            const { execSync } = require('child_process');
+            const versionOutput = execSync('claude --version', { 
+                encoding: 'utf8', 
+                stdio: 'pipe',
+                timeout: 5000 
+            }).trim();
+            
+            // Parse version from output
+            const versionMatch = versionOutput.match(/(\d+\.\d+\.\d+)/);
+            this.versionCache = {
+                found: true,
+                version: versionMatch ? versionMatch[1] : 'unknown',
+                fullOutput: versionOutput
+            };
+            
+            return this.versionCache;
+        } catch (error) {
+            this.versionCache = {
+                found: false,
+                error: error.message,
+                version: null
+            };
+            return this.versionCache;
+        }
+    }
+
+    /**
+     * Test if Claude CLI supports specific feature
+     */
+    async testClaudeFeature(feature) {
+        const cacheKey = feature;
+        if (this.featureCache.has(cacheKey)) {
+            return this.featureCache.get(cacheKey);
+        }
+
+        try {
+            const { execSync } = require('child_process');
+            
+            // Test specific features
+            let testCommand;
+            switch (feature) {
+                case 'model-option':
+                    testCommand = 'claude --help';
+                    break;
+                case 'skip-permissions':
+                    testCommand = 'claude --help';
+                    break;
+                default:
+                    throw new Error(`Unknown feature: ${feature}`);
+            }
+
+            const helpOutput = execSync(testCommand, { 
+                encoding: 'utf8', 
+                stdio: 'pipe',
+                timeout: 5000 
+            });
+            
+            let supported = false;
+            switch (feature) {
+                case 'model-option':
+                    supported = helpOutput.includes('--model') || helpOutput.includes('-m');
+                    break;
+                case 'skip-permissions':
+                    supported = helpOutput.includes('--dangerously-skip-permissions');
+                    break;
+            }
+
+            const result = { supported, tested: true };
+            this.featureCache.set(cacheKey, result);
+            return result;
+            
+        } catch (error) {
+            const result = { supported: false, tested: false, error: error.message };
+            this.featureCache.set(cacheKey, result);
+            return result;
+        }
+    }
+
+    /**
+     * Get optimal Claude launch command with graceful fallback
+     */
+    async getOptimalLaunchCommand() {
+        const version = await this.detectClaudeVersion();
+        
+        if (!version.found) {
+            throw new Error(`Claude CLI not found: ${version.error}`);
+        }
+
+        // Test feature support
+        const modelSupport = await this.testClaudeFeature('model-option');
+        const skipPermissionsSupport = await this.testClaudeFeature('skip-permissions');
+
+        const command = ['claude'];
+        
+        // Add skip permissions if supported
+        if (skipPermissionsSupport.supported) {
+            command.push('--dangerously-skip-permissions');
+        }
+        
+        // Add model option if supported
+        if (modelSupport.supported) {
+            command.push('--model', 'sonnet');
+        }
+
+        return {
+            command,
+            version: version.version,
+            features: {
+                modelOption: modelSupport.supported,
+                skipPermissions: skipPermissionsSupport.supported
+            },
+            fallbackReason: !modelSupport.supported ? 'Model option not supported by this Claude CLI version' : null
+        };
+    }
+
+    /**
+     * Validate Claude CLI environment
+     */
+    async validateEnvironment() {
+        try {
+            const launchConfig = await this.getOptimalLaunchCommand();
+            return {
+                valid: true,
+                version: launchConfig.version,
+                command: launchConfig.command,
+                features: launchConfig.features,
+                fallbackReason: launchConfig.fallbackReason
+            };
+        } catch (error) {
+            // Enhanced error handling for WSL2
+            const platformInfo = detectPlatformInfo();
+            
+            if (platformInfo.isWSL2 && error.message.includes('not found')) {
+                // WSL2-specific PATH issue diagnosis
+                const pathAnalysis = analyzeWSL2Path();
+                const wsl2Guidance = this.getWSL2Guidance(pathAnalysis);
+                
+                return {
+                    valid: false,
+                    error: error.message,
+                    troubleshooting: this.getTroubleshootingSteps(error.message),
+                    wsl2Issues: pathAnalysis,
+                    wsl2Guidance: wsl2Guidance,
+                    isWSL2: true
+                };
+            }
+            
+            return {
+                valid: false,
+                error: error.message,
+                troubleshooting: this.getTroubleshootingSteps(error.message),
+                isWSL2: platformInfo.isWSL2
+            };
+        }
+    }
+    
+    /**
+     * Get WSL2-specific guidance for PATH issues
+     */
+    getWSL2Guidance(pathAnalysis) {
+        const guidance = {
+            immediate: [],
+            permanent: [],
+            diagnostic: []
+        };
+        
+        // Immediate fixes
+        if (pathAnalysis.hasIssues) {
+            const npmGlobalBin = getNpmGlobalBin();
+            if (npmGlobalBin) {
+                guidance.immediate.push(`export PATH="${npmGlobalBin}:$PATH"`);
+                guidance.immediate.push('source ~/.bashrc  # or ~/.zshrc');
+            }
+        }
+        
+        // Permanent fixes
+        guidance.permanent.push('Add to ~/.bashrc or ~/.zshrc:');
+        const npmGlobalBin = getNpmGlobalBin();
+        if (npmGlobalBin) {
+            guidance.permanent.push(`echo 'export PATH="${npmGlobalBin}:$PATH"' >> ~/.bashrc`);
+        } else {
+            guidance.permanent.push('echo \'export PATH="$(npm bin -g):$PATH"\' >> ~/.bashrc');
+        }
+        guidance.permanent.push('source ~/.bashrc');
+        
+        // Diagnostic tools
+        guidance.diagnostic.push('~/.claude-pm/wsl2-diagnostic.sh');
+        guidance.diagnostic.push('npm config get prefix');
+        guidance.diagnostic.push('npm bin -g');
+        guidance.diagnostic.push('echo $PATH');
+        
+        return guidance;
+    }
+
+    /**
+     * Get troubleshooting steps for common issues
+     */
+    getTroubleshootingSteps(errorMessage) {
+        const steps = [];
+        
+        if (errorMessage.includes('not found') || errorMessage.includes('command not found')) {
+            steps.push('Install Claude CLI: Visit https://claude.ai/download');
+            steps.push('Verify PATH: Ensure Claude CLI is in your system PATH');
+            steps.push('Restart terminal: Close and reopen your terminal window');
+        }
+        
+        if (errorMessage.includes('timeout') || errorMessage.includes('ETIMEDOUT')) {
+            steps.push('Network connectivity: Check your internet connection');
+            steps.push('Firewall settings: Ensure Claude CLI can access network');
+            steps.push('Try again: Network issues may be temporary');
+        }
+        
+        if (errorMessage.includes('permission') || errorMessage.includes('EACCES')) {
+            steps.push('File permissions: Check Claude CLI executable permissions');
+            steps.push('Run with elevated privileges if necessary');
+            steps.push('Check installation directory permissions');
+        }
+        
+        if (steps.length === 0) {
+            steps.push('Update Claude CLI: Ensure you have the latest version');
+            steps.push('Reinstall Claude CLI: Download and reinstall from https://claude.ai/download');
+            steps.push('Check system compatibility: Verify your OS is supported');
+        }
+        
+        return steps;
+    }
+
+    /**
+     * Display helpful error information
+     */
+    displayErrorGuidance(validation) {
+        console.error('\n🔧 Claude CLI Troubleshooting Guide:');
+        console.error('=' .repeat(50));
+        console.error(`❌ Error: ${validation.error}`);
+        console.error('');
+        
+        // WSL2-specific guidance
+        if (validation.isWSL2 && validation.wsl2Guidance) {
+            console.error('🐧 WSL2-Specific Solutions:');
+            console.error('');
+            
+            console.error('🚀 Quick Fix (try this first):');
+            validation.wsl2Guidance.immediate.forEach((step, index) => {
+                console.error(`   ${index + 1}. ${step}`);
+            });
+            console.error('');
+            
+            console.error('🔧 Permanent Fix:');
+            validation.wsl2Guidance.permanent.forEach((step, index) => {
+                console.error(`   ${index + 1}. ${step}`);
+            });
+            console.error('');
+            
+            console.error('🔍 Diagnostic Tools:');
+            validation.wsl2Guidance.diagnostic.forEach((tool, index) => {
+                console.error(`   ${index + 1}. ${tool}`);
+            });
+            console.error('');
+            
+            if (validation.wsl2Issues && validation.wsl2Issues.hasIssues) {
+                console.error('⚠️  Detected WSL2 PATH Issues:');
+                validation.wsl2Issues.issues.forEach((issue, index) => {
+                    console.error(`   • ${issue}`);
+                });
+                console.error('');
+            }
+        }
+        
+        console.error('💡 General Solutions:');
+        validation.troubleshooting.forEach((step, index) => {
+            console.error(`   ${index + 1}. ${step}`);
+        });
+        console.error('');
+        console.error('📚 Additional Resources:');
+        console.error('   • Claude CLI Documentation: https://claude.ai/docs/cli');
+        console.error('   • Installation Guide: https://claude.ai/download');
+        console.error('   • GitHub Issues: https://github.com/anthropics/claude-cli/issues');
+        if (validation.isWSL2) {
+            console.error('   • WSL2 PATH Issues: https://github.com/bobmatnyc/claude-multiagent-pm/issues/1');
+        }
+        console.error('');
+    }
+}
+
+/**
  * Enhanced main execution function with deployment detection and memory management
  */
 async function main() {
@@ -1354,13 +1844,36 @@ async function main() {
         }
         
         try {
+            // Create Claude CLI validator and validate environment
+            const claudeValidator = new ClaudeCliValidator();
+            console.log('🔍 Validating Claude CLI environment...');
+            
+            const validation = await claudeValidator.validateEnvironment();
+            
+            if (!validation.valid) {
+                console.error('❌ Claude CLI validation failed');
+                claudeValidator.displayErrorGuidance(validation);
+                cleanup();
+                process.exit(1);
+            }
+            
+            // Display validation results
+            console.log(`✅ Claude CLI v${validation.version} detected`);
+            if (validation.fallbackReason) {
+                console.log(`⚠️  ${validation.fallbackReason}`);
+                console.log(`   → Using fallback command: ${validation.command.join(' ')}`);
+            } else {
+                console.log(`   → Using optimized command: ${validation.command.join(' ')}`);
+            }
+            
             // Add memory optimization to Claude launch
             const claudeEnv = {
                 ...process.env,
-                NODE_OPTIONS: '--max-old-space-size=4096'
+                NODE_OPTIONS: '--max-old-space-size=8192'
             };
             
-            const claudeProcess = spawn('claude', ['--dangerously-skip-permissions', '--model', 'sonnet'], {
+            // Use validated command
+            const claudeProcess = spawn(validation.command[0], validation.command.slice(1), {
                 stdio: 'inherit',
                 env: claudeEnv
             });
@@ -1401,7 +1914,43 @@ async function main() {
             
             claudeProcess.on('error', (error) => {
                 console.error('❌ Failed to launch Claude:', error.message);
-                console.error('Make sure Claude CLI is installed and available in your PATH');
+                console.error('');
+                
+                // Enhanced WSL2 error handling
+                const platformInfo = detectPlatformInfo();
+                if (platformInfo.isWSL2 && error.message.includes('ENOENT')) {
+                    console.error('🐧 WSL2 Environment Detected - PATH Issue Likely');
+                    console.error('');
+                    console.error('🚀 Quick WSL2 Fixes:');
+                    
+                    const npmGlobalBin = getNpmGlobalBin();
+                    if (npmGlobalBin) {
+                        console.error(`   1. export PATH="${npmGlobalBin}:$PATH"`);
+                    } else {
+                        console.error('   1. export PATH="$(npm bin -g):$PATH"');
+                    }
+                    console.error('   2. source ~/.bashrc');
+                    console.error('   3. claude-pm  # try again');
+                    console.error('');
+                    console.error('🔧 Permanent WSL2 Fix:');
+                    if (npmGlobalBin) {
+                        console.error(`   echo 'export PATH="${npmGlobalBin}:$PATH"' >> ~/.bashrc`);
+                    } else {
+                        console.error('   echo \'export PATH="$(npm bin -g):$PATH"\' >> ~/.bashrc');
+                    }
+                    console.error('   source ~/.bashrc');
+                    console.error('');
+                    console.error('🔍 WSL2 Diagnostic:');
+                    console.error('   ~/.claude-pm/wsl2-diagnostic.sh');
+                    console.error('');
+                }
+                
+                console.error('🔧 General Troubleshooting Steps:');
+                console.error('   1. Verify Claude CLI is installed: claude --version');
+                console.error('   2. Check PATH configuration: echo $PATH');
+                console.error('   3. Reinstall Claude CLI: https://claude.ai/download');
+                console.error('   4. Restart your terminal and try again');
+                console.error('');
                 claudeCleanup();
                 process.exit(1);
             });
@@ -1409,7 +1958,32 @@ async function main() {
             return;
         } catch (error) {
             console.error('❌ Failed to launch Claude:', error.message);
-            console.error('Make sure Claude CLI is installed and available in your PATH');
+            console.error('');
+            
+            // Enhanced WSL2 error handling for catch block
+            const platformInfo = detectPlatformInfo();
+            if (platformInfo.isWSL2) {
+                console.error('🐧 WSL2 Environment Detected');
+                console.error('');
+                console.error('🚀 WSL2-Specific Solutions:');
+                
+                const npmGlobalBin = getNpmGlobalBin();
+                if (npmGlobalBin) {
+                    console.error(`   • export PATH="${npmGlobalBin}:$PATH"`);
+                } else {
+                    console.error('   • export PATH="$(npm bin -g):$PATH"');
+                }
+                console.error('   • source ~/.bashrc');
+                console.error('   • Run: ~/.claude-pm/wsl2-diagnostic.sh');
+                console.error('');
+            }
+            
+            console.error('🔧 Common Solutions:');
+            console.error('   • Install Claude CLI: https://claude.ai/download');
+            console.error('   • Add Claude CLI to your PATH');
+            console.error('   • Restart your terminal');
+            console.error('   • Update to latest Claude CLI version');
+            console.error('');
             cleanup();
             process.exit(1);
         }
@@ -1559,6 +2133,91 @@ async function main() {
         handleParentDirectoryStatus(deploymentConfig);
         process.exit(0);
     }
+
+    // Handle Claude CLI validation command
+    if (args.includes('--claude-info')) {
+        console.log('🔍 Claude CLI Detailed Validation:');
+        console.log('=' .repeat(50));
+        
+        const claudeValidator = new ClaudeCliValidator();
+        
+        try {
+            const validation = await claudeValidator.validateEnvironment();
+            
+            if (validation.valid) {
+                console.log(`✅ Claude CLI Status: Working`);
+                console.log(`   Version: ${validation.version}`);
+                console.log(`   Features:`);
+                console.log(`     • Model Selection: ${validation.features.modelOption ? '✅' : '❌'}`);
+                console.log(`     • Skip Permissions: ${validation.features.skipPermissions ? '✅' : '❌'}`);
+                console.log(`   Command: ${validation.command.join(' ')}`);
+                
+                if (validation.fallbackReason) {
+                    console.log(`   Fallback Reason: ${validation.fallbackReason}`);
+                }
+            } else {
+                console.log('❌ Claude CLI Status: Not Working');
+                claudeValidator.displayErrorGuidance(validation);
+            }
+        } catch (error) {
+            console.error(`❌ Validation Error: ${error.message}`);
+        }
+        
+        process.exit(0);
+    }
+
+    // Handle environment status command
+    if (args.includes('--env-status')) {
+        displayEnvironmentStatus();
+        process.exit(0);
+    }
+
+    // Handle troubleshooting command
+    if (args.includes('--troubleshoot')) {
+        console.log('\n🔧 Claude PM Framework Troubleshooting Guide:');
+        console.log('=' .repeat(60));
+        console.log('');
+        console.log('🚨 Common Issues and Solutions:');
+        console.log('');
+        console.log('1️⃣  Claude CLI Startup Errors:');
+        console.log('   Problem: "Unknown option --model" or similar errors');
+        console.log('   Solution: Update to latest Claude CLI version');
+        console.log('   Command: Run --claude-info to check compatibility');
+        console.log('');
+        console.log('2️⃣  Installation Issues:');
+        console.log('   Problem: "claude-pm command not found"');
+        console.log('   Solution: Reinstall via npm: npm install -g @bobmatnyc/claude-multiagent-pm');
+        console.log('   Verify: Run claude-pm --version');
+        console.log('');
+        console.log('3️⃣  Python Environment:');
+        console.log('   Problem: Python-related errors during execution');
+        console.log('   Solution: Ensure Python 3.8+ is installed');
+        console.log('   Command: python3 --version');
+        console.log('');
+        console.log('4️⃣  Framework Detection:');
+        console.log('   Problem: Framework not found or path issues');
+        console.log('   Solution: Check deployment info');
+        console.log('   Command: claude-pm --deployment-info');
+        console.log('');
+        console.log('5️⃣  Memory Issues:');
+        console.log('   Problem: High memory usage or crashes');
+        console.log('   Solution: Increase Node.js memory limit');
+        console.log('   Command: export NODE_OPTIONS="--max-old-space-size=8192"');
+        console.log('');
+        console.log('📚 Additional Resources:');
+        console.log('   • Framework Documentation: https://github.com/bobmatnyc/claude-pm');
+        console.log('   • Claude CLI: https://claude.ai/download');
+        console.log('   • Issue Reports: https://github.com/bobmatnyc/claude-pm/issues');
+        console.log('');
+        console.log('🔍 Diagnostic Commands:');
+        console.log('   claude-pm --system-info     # System information');
+        console.log('   claude-pm --env-status      # Environment validation');
+        console.log('   claude-pm --claude-info     # Claude CLI details');
+        console.log('   claude-pm --deployment-info # Deployment detection');
+        console.log('');
+        
+        process.exit(0);
+    }
     
     // Validate environment
     const pythonCmd = validatePython();
@@ -1594,7 +2253,7 @@ async function main() {
         CLAUDE_PM_DEPLOYMENT_DIR: frameworkPath,
         CLAUDE_PM_WORKING_DIR: process.cwd(),
         // Memory optimization flags
-        NODE_OPTIONS: '--max-old-space-size=4096',
+        NODE_OPTIONS: '--max-old-space-size=8192',
         // Enable garbage collection if available
         NODE_GC: '1'
     };
@@ -2288,12 +2947,98 @@ asyncio.run(deploy_profiles())
     }
 }
 
+/**
+ * Enhanced environment validation with Claude CLI compatibility checking
+ */
+function validateEnvironment() {
+    const validation = {
+        python: null,
+        claude: null,
+        overall: true,
+        errors: [],
+        warnings: []
+    };
+    
+    // Validate Python
+    try {
+        validation.python = validatePython();
+    } catch (error) {
+        validation.python = null;
+        validation.overall = false;
+        validation.errors.push(`Python validation failed: ${error.message}`);
+    }
+    
+    // Note: Claude validation is async and handled separately
+    validation.warnings.push('Claude CLI validation requires async operation - use ClaudeCliValidator directly');
+    
+    return validation;
+}
+
+/**
+ * Quick Claude CLI availability check (synchronous)
+ */
+function quickClaudeCheck() {
+    try {
+        const { execSync } = require('child_process');
+        execSync('claude --version', { stdio: 'pipe', timeout: 3000 });
+        return { available: true };
+    } catch (error) {
+        return { 
+            available: false, 
+            error: error.message,
+            suggestion: 'Install Claude CLI from https://claude.ai/download'
+        };
+    }
+}
+
+/**
+ * Display comprehensive environment status
+ */
+function displayEnvironmentStatus() {
+    console.log('\n🔍 Environment Validation Summary:');
+    console.log('=' .repeat(50));
+    
+    const validation = validateEnvironment();
+    
+    // Python status
+    if (validation.python) {
+        console.log(`✅ Python: ${validation.python} (compatible)`);
+    } else {
+        console.log('❌ Python: Not available or incompatible');
+    }
+    
+    // Claude CLI status (quick check)
+    const claudeCheck = quickClaudeCheck();
+    if (claudeCheck.available) {
+        console.log('✅ Claude CLI: Available (use --claude-info for detailed validation)');
+    } else {
+        console.log(`❌ Claude CLI: ${claudeCheck.error}`);
+        console.log(`   → ${claudeCheck.suggestion}`);
+    }
+    
+    // Overall status
+    if (validation.overall && claudeCheck.available) {
+        console.log('\n🎯 Environment Status: Ready for framework operations');
+    } else {
+        console.log('\n⚠️  Environment Status: Issues detected');
+        validation.errors.forEach(error => {
+            console.log(`   • ${error}`);
+        });
+    }
+    
+    console.log('');
+}
+
 module.exports = { 
     main, 
     getFrameworkPath, 
     getDeploymentConfig, 
     validatePython, 
+    validateEnvironment,
+    quickClaudeCheck,
+    displayEnvironmentStatus,
     DeploymentDetector,
+    ClaudeCliValidator,
     handleTemplateStatus,
     handleDependencyStatus,
     handleParentDirectoryStatus,
