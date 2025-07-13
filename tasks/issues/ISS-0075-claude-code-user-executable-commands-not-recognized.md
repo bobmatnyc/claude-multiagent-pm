@@ -64,7 +64,8 @@ ai_context:
   - context/constraints
   - context/assumptions
   - context/dependencies
-sync_status: local
+sync_status: synced
+github_issue: 4
 related_tasks: []
 related_issues: []
 completion_percentage: 0

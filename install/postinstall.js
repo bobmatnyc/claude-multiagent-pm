@@ -32,6 +32,7 @@ class PostInstallSetup {
 
     /**
      * Check if we're in a global npm installation with enhanced detection
+     * Includes WSL2-specific path detection
      */
     isGlobalInstall() {
         const npmConfigPrefix = process.env.npm_config_prefix;
@@ -53,7 +54,7 @@ class PostInstallSetup {
             // Standard npm global directory detection
             npmGlobalDir: npmRoot && packagePath.includes(npmRoot),
             
-            // Enhanced global node_modules patterns
+            // Enhanced global node_modules patterns (includes WSL2 patterns)
             nodeModulesGlobal: packagePath.includes('node_modules') && (
                 packagePath.includes('/.npm-global/') ||           // Custom npm global paths
                 packagePath.includes('/lib/node_modules/') ||      // Standard global node_modules
@@ -62,7 +63,12 @@ class PostInstallSetup {
                 packagePath.includes('/npm-global/') ||            // Common custom global
                 packagePath.includes('/global/lib/node_modules/') ||
                 packagePath.includes('/usr/local/lib/node_modules/') ||
-                packagePath.includes('/opt/homebrew/lib/node_modules/')
+                packagePath.includes('/opt/homebrew/lib/node_modules/') ||
+                // WSL2-specific patterns
+                packagePath.includes('/.nvm/versions/node/') ||    // NVM global packages in WSL2
+                packagePath.includes('/nvm/versions/node/') ||     // Alternative NVM paths
+                (packagePath.includes('/home/') && packagePath.includes('/.nvm/')) || // WSL2 home NVM
+                (packagePath.includes('/mnt/c/') && packagePath.includes('node_modules')) // WSL2 Windows mount
             ),
             
             // Package name in global path
@@ -73,9 +79,9 @@ class PostInstallSetup {
                         (process.env.npm_execpath.includes('global') || 
                          process.env.npm_execpath.includes('.npm-global')),
             
-            // Check for global installation markers
-            globalMarkers: packagePath.includes('global') && 
-                          packagePath.includes('node_modules'),
+            // Check for global installation markers (includes WSL2 NVM markers)
+            globalMarkers: (packagePath.includes('global') && packagePath.includes('node_modules')) ||
+                          (packagePath.includes('.nvm') && packagePath.includes('lib/node_modules')),
             
             // Try to detect using npm command patterns
             npmCommand: process.env.npm_command === 'install' && 
@@ -99,7 +105,11 @@ class PostInstallSetup {
                 /\/global\/.*\/node_modules\//,
                 /\/usr\/local\/lib\/node_modules\//,
                 /\/opt\/homebrew\/lib\/node_modules\//,
-                /C:\\Users\\.*\\AppData\\Roaming\\npm\\node_modules\\/
+                /C:\\Users\\.*\\AppData\\Roaming\\npm\\node_modules\\/,
+                // WSL2-specific patterns
+                /\/\.nvm\/versions\/node\/v[0-9]+\.[0-9]+\.[0-9]+\/lib\/node_modules\//,
+                /\/home\/[^/]+\/\.nvm\/versions\/node\/.*\/lib\/node_modules\//,
+                /\/mnt\/c\/.*\/node_modules\//  // WSL2 Windows mount
             ];
             
             const matchesGlobalPattern = globalLikePatterns.some(pattern => pattern.test(packagePath));
@@ -306,6 +316,11 @@ class PostInstallSetup {
             } catch (error) {
                 this.log(`Failed to make CLI executable: ${error.message}`, 'warn');
             }
+        }
+        
+        // WSL2-specific setup
+        if (this.isWSL2Environment()) {
+            await this.setupWSL2Environment();
         }
     }
 
@@ -1097,6 +1112,322 @@ echo "   https://github.com/bobmatnyc/claude-multiagent-pm#environment-setup"
     }
 
     /**
+     * Check if running in WSL2 environment
+     */
+    isWSL2Environment() {
+        try {
+            // Check for WSL-specific indicators
+            const isWSL = process.env.WSL_DISTRO_NAME || 
+                         process.env.WSLENV ||
+                         (process.platform === 'linux' && fsSync.existsSync('/proc/version'));
+            
+            if (!isWSL) return false;
+            
+            // Additional WSL2 detection
+            if (fsSync.existsSync('/proc/version')) {
+                const versionContent = fsSync.readFileSync('/proc/version', 'utf8');
+                const isWSL2 = versionContent.includes('WSL2') || versionContent.includes('microsoft');
+                this.log(`WSL environment detected: ${isWSL2 ? 'WSL2' : 'WSL1'}`);
+                return isWSL2;
+            }
+            
+            return false;
+        } catch (error) {
+            return false;
+        }
+    }
+    
+    /**
+     * Setup WSL2-specific environment configuration
+     */
+    async setupWSL2Environment() {
+        try {
+            this.log('🐧 Setting up WSL2-specific configuration...');
+            
+            // Get NPM global bin directory for WSL2
+            const globalBinDir = await this.getWSL2NpmGlobalBin();
+            if (globalBinDir) {
+                this.log(`📍 WSL2 npm global bin directory: ${globalBinDir}`);
+                
+                // Update shell configuration for PATH
+                await this.configureWSL2Shell(globalBinDir);
+                
+                // Create WSL2-specific diagnostic script
+                await this.createWSL2DiagnosticScript(globalBinDir);
+            }
+            
+            // Handle ai-trackdown-tools dependency for WSL2
+            await this.setupWSL2Dependencies();
+            
+        } catch (error) {
+            this.log(`WSL2 setup failed: ${error.message}`, 'warn');
+        }
+    }
+    
+    /**
+     * Get NPM global bin directory for WSL2
+     */
+    async getWSL2NpmGlobalBin() {
+        try {
+            const { execSync } = require('child_process');
+            
+            // Try multiple methods to get npm global bin
+            const methods = [
+                () => execSync('npm config get prefix', { encoding: 'utf8' }).trim() + '/bin',
+                () => execSync('npm bin -g', { encoding: 'utf8' }).trim(),
+                () => {
+                    // NVM-specific detection
+                    const nvmDir = process.env.NVM_DIR || path.join(this.userHome, '.nvm');
+                    const nodeVersion = process.version;
+                    return path.join(nvmDir, 'versions', 'node', nodeVersion, 'bin');
+                },
+                () => {
+                    // Parse npm config list
+                    const configOutput = execSync('npm config list', { encoding: 'utf8' });
+                    const prefixMatch = configOutput.match(/prefix = "([^"]+)"/i);
+                    return prefixMatch ? prefixMatch[1] + '/bin' : null;
+                }
+            ];
+            
+            for (const method of methods) {
+                try {
+                    const binDir = method();
+                    if (binDir && fsSync.existsSync(binDir)) {
+                        this.log(`✅ Found npm global bin directory: ${binDir}`);
+                        return binDir;
+                    }
+                } catch (methodError) {
+                    this.log(`Method failed: ${methodError.message}`, 'warn');
+                }
+            }
+            
+            this.log('❌ Could not determine npm global bin directory', 'warn');
+            return null;
+            
+        } catch (error) {
+            this.log(`Failed to get WSL2 npm global bin: ${error.message}`, 'warn');
+            return null;
+        }
+    }
+    
+    /**
+     * Configure shell environment for WSL2
+     */
+    async configureWSL2Shell(globalBinDir) {
+        try {
+            const shellFiles = [
+                path.join(this.userHome, '.bashrc'),
+                path.join(this.userHome, '.zshrc'),
+                path.join(this.userHome, '.profile')
+            ];
+            
+            for (const shellFile of shellFiles) {
+                if (fsSync.existsSync(shellFile)) {
+                    const content = fsSync.readFileSync(shellFile, 'utf8');
+                    
+                    // Check if PATH already contains our global bin directory
+                    if (!content.includes(globalBinDir)) {
+                        const pathExport = `\n# Claude PM Framework - WSL2 PATH configuration\nexport PATH="${globalBinDir}:$PATH"\n`;
+                        
+                        // Add PATH configuration
+                        fsSync.appendFileSync(shellFile, pathExport);
+                        this.log(`✅ Updated PATH in ${shellFile}`);
+                    } else {
+                        this.log(`📋 PATH already configured in ${shellFile}`);
+                    }
+                }
+            }
+            
+            this.log('💡 Remember to restart your shell or run: source ~/.bashrc');
+            
+        } catch (error) {
+            this.log(`Failed to configure WSL2 shell: ${error.message}`, 'warn');
+        }
+    }
+    
+    /**
+     * Setup WSL2-specific dependencies
+     */
+    async setupWSL2Dependencies() {
+        try {
+            this.log('🔧 Setting up WSL2-specific dependencies...');
+            
+            // Install ai-trackdown-tools with WSL2-specific considerations
+            await this.installWSL2Dependencies();
+            
+            // Create WSL2-specific wrapper scripts if needed
+            await this.createWSL2WrapperScripts();
+            
+        } catch (error) {
+            this.log(`WSL2 dependency setup failed: ${error.message}`, 'warn');
+        }
+    }
+    
+    /**
+     * Install dependencies with WSL2 considerations
+     */
+    async installWSL2Dependencies() {
+        try {
+            const { execSync } = require('child_process');
+            
+            // Check if ai-trackdown-tools is available
+            try {
+                const version = execSync('aitrackdown --version', { 
+                    encoding: 'utf8', 
+                    stdio: 'pipe',
+                    timeout: 5000,
+                    env: { ...process.env, PATH: process.env.PATH + ':' + path.dirname(process.execPath) }
+                });
+                this.log(`ai-trackdown-tools already available: ${version.trim()}`);
+                return;
+            } catch (checkError) {
+                this.log('ai-trackdown-tools not found in WSL2, attempting installation...');
+            }
+            
+            // Install with WSL2-specific npm configuration
+            this.log('Installing ai-trackdown-tools for WSL2...');
+            execSync('npm install -g @bobmatnyc/ai-trackdown-tools', { 
+                encoding: 'utf8',
+                stdio: 'pipe',
+                timeout: 60000,
+                env: { ...process.env, NPM_CONFIG_PROGRESS: 'false' }
+            });
+            
+            // Verify installation with extended PATH
+            const globalBinDir = await this.getWSL2NpmGlobalBin();
+            const extendedPath = process.env.PATH + (globalBinDir ? ':' + globalBinDir : '');
+            
+            const version = execSync('aitrackdown --version', { 
+                encoding: 'utf8', 
+                stdio: 'pipe',
+                timeout: 5000,
+                env: { ...process.env, PATH: extendedPath }
+            });
+            this.log(`✅ ai-trackdown-tools installed successfully in WSL2: ${version.trim()}`);
+            
+        } catch (installError) {
+            this.log(`Failed to install ai-trackdown-tools in WSL2: ${installError.message}`, 'warn');
+            this.log('You may need to manually install: npm install -g @bobmatnyc/ai-trackdown-tools');
+            this.log('Then restart your shell or source your shell configuration file');
+        }
+    }
+    
+    /**
+     * Create WSL2-specific wrapper scripts
+     */
+    async createWSL2WrapperScripts() {
+        try {
+            const wrapperDir = path.join(this.globalConfigDir, 'wsl2-wrappers');
+            await fs.mkdir(wrapperDir, { recursive: true });
+            
+            // Create claude-pm wrapper that handles PATH
+            const claudePmWrapper = `#!/bin/bash
+# Claude PM Framework - WSL2 Wrapper
+# Ensures proper PATH configuration
+
+# Add npm global bin to PATH if not already there
+NPM_BIN="$(npm bin -g 2>/dev/null || echo "")"
+if [ -n "$NPM_BIN" ] && [[ ":$PATH:" != *":$NPM_BIN:"* ]]; then
+    export PATH="$NPM_BIN:$PATH"
+fi
+
+# Execute claude-pm with proper environment
+exec "$(which claude-pm 2>/dev/null || echo 'claude-pm')" "$@"
+`;
+            
+            const wrapperPath = path.join(wrapperDir, 'claude-pm-wsl2');
+            await fs.writeFile(wrapperPath, claudePmWrapper);
+            await fs.chmod(wrapperPath, '755');
+            
+            this.log(`✅ Created WSL2 wrapper script: ${wrapperPath}`);
+            
+        } catch (error) {
+            this.log(`Failed to create WSL2 wrapper scripts: ${error.message}`, 'warn');
+        }
+    }
+    
+    /**
+     * Create WSL2 diagnostic and recovery script
+     */
+    async createWSL2DiagnosticScript(globalBinDir) {
+        try {
+            const diagnosticScript = `#!/bin/bash
+# Claude PM Framework - WSL2 Diagnostic and Recovery Script
+
+echo "🐧 Claude PM Framework - WSL2 Diagnostic Tool"
+echo "============================================="
+echo ""
+
+# Environment information
+echo "📋 Environment Information:"
+echo "   • WSL Version: $(uname -r)"
+echo "   • Distribution: $WSL_DISTRO_NAME"
+echo "   • Node.js Version: $(node --version 2>/dev/null || echo 'Not found')"
+echo "   • NPM Version: $(npm --version 2>/dev/null || echo 'Not found')"
+echo ""
+
+# PATH Analysis
+echo "🔍 PATH Analysis:"
+echo "   • Current PATH: $PATH"
+echo "   • NPM Global Bin: ${globalBinDir}"
+echo "   • Claude PM Available: $(which claude-pm 2>/dev/null || echo 'Not found')"
+echo "   • AI-Trackdown Available: $(which aitrackdown 2>/dev/null || echo 'Not found')"
+echo "   • Claude CLI Available: $(which claude 2>/dev/null || echo 'Not found')"
+echo ""
+
+# Test installations
+echo "🧪 Testing Installations:"
+if command -v claude-pm >/dev/null 2>&1; then
+    echo "   ✅ claude-pm: $(claude-pm --version 2>/dev/null || echo 'Version check failed')"
+else
+    echo "   ❌ claude-pm: Not available in PATH"
+fi
+
+if command -v aitrackdown >/dev/null 2>&1; then
+    echo "   ✅ aitrackdown: $(aitrackdown --version 2>/dev/null || echo 'Version check failed')"
+else
+    echo "   ❌ aitrackdown: Not available in PATH"
+fi
+
+if command -v claude >/dev/null 2>&1; then
+    echo "   ✅ claude: $(claude --version 2>/dev/null || echo 'Version check failed')"
+else
+    echo "   ❌ claude: Not available in PATH"
+fi
+echo ""
+
+# Recovery suggestions
+echo "🔧 Recovery Actions:"
+echo "1. Add npm global bin to PATH:"
+echo "   echo 'export PATH=\"${globalBinDir}:\$PATH\"' >> ~/.bashrc"
+echo "   source ~/.bashrc"
+echo ""
+echo "2. Reinstall dependencies:"
+echo "   npm install -g @bobmatnyc/claude-multiagent-pm"
+echo "   npm install -g @bobmatnyc/ai-trackdown-tools"
+echo ""
+echo "3. Manual PATH configuration:"
+echo "   export PATH=\"${globalBinDir}:\$PATH\""
+echo ""
+echo "4. Test installation:"
+echo "   claude-pm --version"
+echo "   aitrackdown --version"
+echo ""
+`;
+            
+            const diagnosticPath = path.join(this.globalConfigDir, 'wsl2-diagnostic.sh');
+            await fs.writeFile(diagnosticPath, diagnosticScript);
+            await fs.chmod(diagnosticPath, '755');
+            
+            this.log(`✅ Created WSL2 diagnostic script: ${diagnosticPath}`);
+            this.log(`   Run it with: bash ${diagnosticPath}`);
+            
+        } catch (error) {
+            this.log(`Failed to create WSL2 diagnostic script: ${error.message}`, 'warn');
+        }
+    }
+    
+    /**
      * Validate and install ai-trackdown-tools dependency if needed
      */
     async validateAndInstallDependencies() {
@@ -1118,26 +1449,40 @@ echo "   https://github.com/bobmatnyc/claude-multiagent-pm#environment-setup"
                 this.log('ai-trackdown-tools not found, attempting installation...');
             }
             
-            // Try to install ai-trackdown-tools
+            // Try to install ai-trackdown-tools (with WSL2 considerations)
             try {
                 this.log('Installing ai-trackdown-tools dependency...');
-                execSync('npm install -g @bobmatnyc/ai-trackdown-tools', { 
-                    encoding: 'utf8',
-                    stdio: 'pipe',
-                    timeout: 60000 // 1 minute timeout
-                });
                 
-                // Verify installation
-                const version = execSync('aitrackdown --version', { 
-                    encoding: 'utf8', 
-                    stdio: 'pipe',
-                    timeout: 5000 
-                });
-                this.log(`ai-trackdown-tools installed successfully: ${version.trim()}`);
+                // Use WSL2-aware installation if in WSL2
+                if (this.isWSL2Environment()) {
+                    await this.installWSL2Dependencies();
+                } else {
+                    execSync('npm install -g @bobmatnyc/ai-trackdown-tools', { 
+                        encoding: 'utf8',
+                        stdio: 'pipe',
+                        timeout: 60000 // 1 minute timeout
+                    });
+                    
+                    // Verify installation
+                    const version = execSync('aitrackdown --version', { 
+                        encoding: 'utf8', 
+                        stdio: 'pipe',
+                        timeout: 5000 
+                    });
+                    this.log(`ai-trackdown-tools installed successfully: ${version.trim()}`);
+                }
                 
             } catch (installError) {
                 this.log(`Failed to install ai-trackdown-tools: ${installError.message}`, 'warn');
-                this.log('You may need to install it manually: npm install -g @bobmatnyc/ai-trackdown-tools');
+                if (this.isWSL2Environment()) {
+                    this.log('WSL2 detected. Try these steps:');
+                    this.log('1. Restart your shell: source ~/.bashrc');
+                    this.log('2. Check PATH: echo $PATH');
+                    this.log('3. Manual install: npm install -g @bobmatnyc/ai-trackdown-tools');
+                    this.log('4. Run diagnostic: ~/.claude-pm/wsl2-diagnostic.sh');
+                } else {
+                    this.log('You may need to install it manually: npm install -g @bobmatnyc/ai-trackdown-tools');
+                }
             }
             
         } catch (error) {

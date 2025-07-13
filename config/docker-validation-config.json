@@ -1,0 +1,194 @@
+{
+  "dockerValidation": {
+    "enabled": true,
+    "version": "1.0.0",
+    "lastUpdated": "2025-07-13T00:00:00Z",
+    "description": "Docker-based pre-publish validation configuration for claude-multiagent-pm framework",
+    
+    "validation": {
+      "timeouts": {
+        "dockerBuild": 600000,
+        "packageTest": 300000,
+        "serviceTest": 180000,
+        "healthCheck": 120000,
+        "cleanup": 60000
+      },
+      
+      "retries": {
+        "dockerCommands": 2,
+        "serviceStartup": 3,
+        "healthCheck": 2
+      },
+      
+      "thresholds": {
+        "maxErrors": 0,
+        "maxWarnings": 5,
+        "minSuccessfulStages": 6
+      }
+    },
+    
+    "docker": {
+      "imageConfig": {
+        "baseTag": "claude-pm-validation",
+        "target": "testing",
+        "buildArgs": {
+          "BUILD_DATE": "${BUILD_DATE}",
+          "VCS_REF": "${VCS_REF}",
+          "CLAUDE_PM_VERSION": "${PACKAGE_VERSION}"
+        }
+      },
+      
+      "containerConfig": {
+        "namePrefix": "claude-pm-val",
+        "networkName": "claude-pm-test-net",
+        "volumeName": "claude-pm-test-vol",
+        "resourceLimits": {
+          "memory": "512m",
+          "cpus": "1.0"
+        }
+      },
+      
+      "ports": {
+        "api": 18001,
+        "dashboard": 17001,
+        "mem0": 18002,
+        "health": 17999
+      },
+      
+      "environment": {
+        "CLAUDE_PM_LOG_LEVEL": "INFO",
+        "CLAUDE_PM_ENABLE_HEALTH_MONITORING": "true",
+        "CLAUDE_PM_CONTAINER": "true",
+        "CLAUDE_PM_VALIDATION_MODE": "true",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    
+    "stages": {
+      "dockerAvailability": {
+        "enabled": true,
+        "description": "Verify Docker daemon and tools availability",
+        "required": true,
+        "timeout": 30000
+      },
+      
+      "buildEnvironment": {
+        "enabled": true,
+        "description": "Build validation Docker environment",
+        "required": true,
+        "timeout": 600000,
+        "dockerfile": "deployment/docker/Dockerfile",
+        "target": "testing"
+      },
+      
+      "packageBuild": {
+        "enabled": true,
+        "description": "Test npm pack and installation in clean environment",
+        "required": true,
+        "timeout": 300000,
+        "tests": [
+          "npm pack",
+          "npm install -g ${TARBALL}",
+          "claude-pm --version",
+          "python3 -c 'import claude_pm'"
+        ]
+      },
+      
+      "functionalityTest": {
+        "enabled": true,
+        "description": "Test core framework functionality",
+        "required": true,
+        "timeout": 180000,
+        "tests": [
+          "python3 -m claude_pm.cli --help",
+          "python3 -c 'from claude_pm.core.config import Config; Config()'",
+          "python3 -c 'from claude_pm.services.health_monitor import HealthMonitor'",
+          "python3 -c 'from claude_pm.agents.pm_agent import PMAgent'"
+        ]
+      },
+      
+      "healthCheck": {
+        "enabled": true,
+        "description": "Run comprehensive health validation",
+        "required": false,
+        "timeout": 180000,
+        "script": "deployment/scripts/validate.sh"
+      },
+      
+      "serviceIntegration": {
+        "enabled": true,
+        "description": "Test service startup and integration",
+        "required": false,
+        "timeout": 240000,
+        "waitTime": 10000,
+        "healthEndpoint": "/health"
+      },
+      
+      "cleanup": {
+        "enabled": true,
+        "description": "Clean up Docker resources",
+        "required": true,
+        "timeout": 60000,
+        "forceCleanup": true
+      }
+    },
+    
+    "reporting": {
+      "outputDir": "logs",
+      "reportFormat": "json",
+      "includeStages": true,
+      "includeLogs": false,
+      "saveOnSuccess": true,
+      "saveOnFailure": true,
+      "reportRetention": {
+        "maxReports": 10,
+        "maxAgeDays": 30
+      }
+    },
+    
+    "integration": {
+      "npmScripts": {
+        "prePublishValidation": "scripts/pre-publish-docker-validation.js",
+        "validationFlags": "--verbose",
+        "failOnError": true
+      },
+      
+      "cicd": {
+        "enabled": true,
+        "runOn": ["pre-publish", "pr-merge", "release"],
+        "required": ["docker-availability", "package-build", "functionality-test"],
+        "optional": ["health-check", "service-integration"]
+      }
+    },
+    
+    "troubleshooting": {
+      "commonIssues": {
+        "dockerNotRunning": {
+          "message": "Docker daemon is not running",
+          "solution": "Start Docker Desktop or ensure Docker service is running"
+        },
+        "portConflicts": {
+          "message": "Validation ports are in use",
+          "solution": "Stop conflicting services or use different ports"
+        },
+        "buildTimeout": {
+          "message": "Docker build taking too long",
+          "solution": "Check network connectivity and increase timeout"
+        },
+        "memoryIssues": {
+          "message": "Container out of memory",
+          "solution": "Increase Docker memory limits or reduce resource usage"
+        }
+      },
+      
+      "debugCommands": [
+        "docker system info",
+        "docker images | grep claude-pm",
+        "docker ps -a | grep claude-pm",
+        "docker network ls | grep claude-pm",
+        "docker volume ls | grep claude-pm"
+      ]
+    }
+  }
+}

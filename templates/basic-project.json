@@ -1,0 +1,21 @@
+{
+  "name": "Basic Project Template",
+  "version": "1.0.0",
+  "description": "Basic Claude PM project configuration template",
+  "author": "Claude PM Framework",
+  "template_type": "project",
+  "framework_version": "0.5.1",
+  "includes": [
+    ".claude-pm/config.json",
+    ".claude-pm/agents/",
+    ".claude-pm/templates/"
+  ],
+  "agents": {
+    "default": "system"
+  },
+  "features": {
+    "memory_integration": true,
+    "task_tool_integration": true,
+    "health_monitoring": true
+  }
+}

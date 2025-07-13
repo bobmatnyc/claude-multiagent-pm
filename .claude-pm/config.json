@@ -1,6 +1,6 @@
 {
-  "version": "4.5.1",
-  "deployedAt": "2025-07-11T08:18:45.563Z",
+  "version": "0.5.4",
+  "deployedAt": "2025-07-12T02:34:24.577Z",
   "platform": "darwin",
   "deploymentDir": "/Users/masa/Projects/claude-multiagent-pm",
   "pythonCmd": "python3",
@@ -17,6 +17,22 @@
     "aiTrackdownIntegration": true,
     "memoryIntegration": true,
     "multiAgentSupport": true,
-    "portableDeployment": true
+    "portableDeployment": true,
+    "enhancedGlobalInstallation": true,
+    "improvedTemplateDeployment": true,
+    "productionDeploymentFixes": true
+  },
+  "publication": {
+    "npmVersion": "0.5.4",
+    "publishedAt": "2025-07-12T02:34:24.387Z",
+    "registry": "https://registry.npmjs.org/",
+    "packageName": "@bobmatnyc/claude-multiagent-pm",
+    "deploymentFixes": [
+      "Enhanced global installation detection",
+      "Improved template deployment with fallback strategies",
+      "Enhanced custom npm global path support",
+      "Production deployment reliability improvements",
+      "Comprehensive deployment troubleshooting"
+    ]
   }
 }

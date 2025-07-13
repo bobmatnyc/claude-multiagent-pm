@@ -66,45 +66,54 @@ def show_help():
 
 def main():
     """Main entry point for CMPM CLI wrapper."""
-    if len(sys.argv) < 2:
-        show_help()
-        return
-    
-    command = sys.argv[1]
-    
-    if command == "help" or command == "--help" or command == "-h":
-        show_help()
-        return
-    
-    # Handle slash commands
-    if command.startswith("/cmpm:"):
-        command_name = command[6:]  # Remove "/cmpm:" prefix
+    try:
+        if len(sys.argv) < 2:
+            show_help()
+            return
         
-        # Map of command names to their functions
-        command_map = {
-            "health": cmpm_health,
-            "agents": cmpm_agents,
-            "index": cmpm_index,
-            "dashboard": cmpm_dashboard,
-            "qa-status": cmpm_qa_status,
-            "qa-test": cmpm_qa_test,
-            "qa-results": cmpm_qa_results,
-            "integration": cmpm_integration,
-            "ai-ops": cmpm_ai_ops
-        }
+        command = sys.argv[1]
         
-        if command_name in command_map:
-            # Remove the slash command from sys.argv and call the appropriate command
-            sys.argv = [f"cmpm:{command_name}"] + sys.argv[2:]
-            command_map[command_name]()
+        if command == "help" or command == "--help" or command == "-h":
+            show_help()
+            return
+        
+        # Handle slash commands
+        if command.startswith("/cmpm:"):
+            command_name = command[6:]  # Remove "/cmpm:" prefix
+            
+            # Map of command names to their functions
+            command_map = {
+                "health": cmpm_health,
+                "agents": cmpm_agents,
+                "index": cmpm_index,
+                "dashboard": cmpm_dashboard,
+                "qa-status": cmpm_qa_status,
+                "qa-test": cmpm_qa_test,
+                "qa-results": cmpm_qa_results,
+                "integration": cmpm_integration,
+                "ai-ops": cmpm_ai_ops
+            }
+            
+            if command_name in command_map:
+                # Remove the slash command from sys.argv and call the appropriate command
+                sys.argv = [f"cmpm:{command_name}"] + sys.argv[2:]
+                command_map[command_name]()
+            else:
+                console.print(f"[red]Unknown CMPM command: {command}[/red]")
+                console.print("Run 'cmpm help' for available commands")
+                sys.exit(1)
         else:
-            console.print(f"[red]Unknown CMPM command: {command}[/red]")
+            console.print(f"[red]Invalid command format: {command}[/red]")
+            console.print("CMPM commands must start with '/cmpm:'")
             console.print("Run 'cmpm help' for available commands")
             sys.exit(1)
-    else:
-        console.print(f"[red]Invalid command format: {command}[/red]")
-        console.print("CMPM commands must start with '/cmpm:'")
-        console.print("Run 'cmmp help' for available commands")
+    
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Operation cancelled by user[/yellow]")
+        sys.exit(1)
+    except Exception as e:
+        console.print(f"[red]Error: {str(e)}[/red]")
+        console.print("[yellow]Run 'cmpm help' for usage information[/yellow]")
         sys.exit(1)
 
 
