@@ -39,6 +39,16 @@ Detailed implementation task reports and technical development summaries.
 - `M02-014-IMPLEMENTATION-SUMMARY.md` - Detailed workflow implementation summary
 - `LANGGRAPH-DOCUMENTATION-CLEANUP-COMPLETION-REPORT.md` - Historical LangGraph removal completion
 
+### 📁 javascript-migration/
+Historical JavaScript-to-Python migration completion reports and architectural documentation.
+
+**Contents:**
+- `ISS-0085_PHASE_2_COMPLETION_REPORT_20250714.md` - Final JavaScript modularization completion
+- `PHASE1_QA_VALIDATION_REPORT_20250714.md` - Phase 1 QA validation results
+- `EXTRACTION_PLAN_20250714.md` - Original modularization strategy
+- `CLI_MODULES_README_20250714.md` - JavaScript modular architecture documentation
+- Test result files: `phase1-demo-report.json`, `phase1-test-report.json`, `phase2-integration-test-results.json`
+
 ## Navigation Guide
 
 ### By Project Scope
@@ -46,6 +56,7 @@ Detailed implementation task reports and technical development summaries.
 - **Technical Level**: `implementation-tasks/` - Detailed development work
 - **Architecture Level**: `framework-infrastructure/` - Core system components
 - **Enhancement Level**: `memory-integration/` - Advanced feature integration
+- **Historical Level**: `javascript-migration/` - Architectural evolution and migration documentation
 
 ### By Content Type
 - **Completion Reports**: Final deliverable documentation with outcomes

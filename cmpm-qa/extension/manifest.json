@@ -33,7 +33,7 @@
     "128": "icons/icon-128.png"
   },
   "cmpm_qa": {
-    "framework_version": "0.4.6",
+    "framework_version": "0.7.0",
     "native_host": "com.claude.pm.qa",
     "test_capabilities": [
       "ui_testing",

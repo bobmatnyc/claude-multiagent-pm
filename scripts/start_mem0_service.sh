@@ -29,4 +29,4 @@ pkill -f mem0_service.py 2>/dev/null || true
 
 # Start the service
 echo "Starting mem0_service.py..."
-python mem0_service.py
+python3 scripts/mem0_service.py

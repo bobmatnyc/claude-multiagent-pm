@@ -1,11 +1,11 @@
 # Claude PM Framework Configuration - Deployment
 
 <!-- 
-CLAUDE_MD_VERSION: 0.0.1
+CLAUDE_MD_VERSION: {{CLAUDE_MD_VERSION}}
 FRAMEWORK_VERSION: {{FRAMEWORK_VERSION}}
 DEPLOYMENT_DATE: {{DEPLOYMENT_DATE}}
 LAST_UPDATED: {{LAST_UPDATED}}
-CONTENT_HASH: memory-collection-requirements-v001
+CONTENT_HASH: {{CONTENT_HASH}}
 -->
 
 ## 🤖 AI ASSISTANT ROLE DESIGNATION
@@ -363,6 +363,157 @@ Task Tool → QA Agent: Create comprehensive test suite
 
 Update TodoWrite status based on agent completions
 ```
+
+
+## 🚨 MANDATORY: TASK TOOL SUBPROCESS NAMING CONVENTIONS
+
+**ALL TASK TOOL SUBPROCESS DESCRIPTIONS MUST FOLLOW AGENT-SPECIFIC NAMING PATTERNS**
+
+### Core Naming Convention Requirements
+1. **Agent Type Prefix**: Every Task Tool subprocess description MUST start with agent type
+2. **Specificity Match**: Task Tool naming MUST mirror TodoWrite entry specificity
+3. **Consistency Enforcement**: All delegation examples follow standardized patterns
+4. **Memory Integration**: Support for memory collection categories in subprocess descriptions
+
+### Standard Task Tool Subprocess Naming Format
+
+**Template Pattern:**
+```
+**[Agent Type] Agent**: [Specific task description with clear deliverables]
+```
+
+**Examples of Proper Naming:**
+- ✅ **Documentation Agent**: Update framework/CLAUDE.md with Task Tool naming conventions
+- ✅ **QA Agent**: Execute comprehensive test suite validation for merge readiness
+- ✅ **Version Control Agent**: Create feature branch and sync with remote repository
+- ✅ **Research Agent**: Investigate Next.js 14 performance optimization patterns
+- ✅ **Ops Agent**: Deploy application to local development environment with health checks
+
+**Examples of Improper Naming:**
+- ❌ Research implementation approach (missing agent type prefix)
+- ❌ Update documentation (too vague, missing agent context)
+- ❌ Run tests (missing agent type and specificity)
+- ❌ Create branch (lacks agent identification and context)
+
+### Agent-Specific Task Tool Patterns
+
+#### Documentation Agent Task Tool Naming:
+```
+**Documentation Agent**: [Specific documentation operation]
+- **Documentation Agent**: Analyze project documentation patterns and provide operational insights
+- **Documentation Agent**: Update API documentation with new endpoint specifications
+- **Documentation Agent**: Create comprehensive user guide for installation procedures
+- **Documentation Agent**: Validate documentation consistency across framework templates
+```
+
+#### QA Agent Task Tool Naming:
+```
+**QA Agent**: [Specific quality assurance operation]
+- **QA Agent**: Execute pre-commit testing suite with coverage validation
+- **QA Agent**: Perform integration test validation for multi-agent workflows
+- **QA Agent**: Validate deployment scripts and health check procedures
+- **QA Agent**: Create comprehensive test cases for new feature implementation
+```
+
+#### Version Control Agent Task Tool Naming:
+```
+**Version Control Agent**: [Specific Git/version control operation]
+- **Version Control Agent**: Create feature branch with proper naming conventions
+- **Version Control Agent**: Execute merge validation with conflict resolution procedures
+- **Version Control Agent**: Synchronize local branch with remote repository updates
+- **Version Control Agent**: Tag release version with automated changelog generation
+```
+
+#### Research Agent Task Tool Naming:
+```
+**Research Agent**: [Specific research investigation]
+- **Research Agent**: Investigate modern TypeScript patterns for performance optimization
+- **Research Agent**: Research security best practices for Node.js applications
+- **Research Agent**: Analyze competitor documentation strategies and implementation patterns
+- **Research Agent**: Evaluate integration options for third-party API services
+```
+
+#### Ops Agent Task Tool Naming:
+```
+**Ops Agent**: [Specific operational task]
+- **Ops Agent**: Deploy application to local development environment with monitoring
+- **Ops Agent**: Configure CI/CD pipeline with automated testing integration
+- **Ops Agent**: Setup containerized development environment with Docker optimization
+- **Ops Agent**: Implement performance monitoring and alerting system configuration
+```
+
+### Task Tool and TodoWrite Naming Alignment
+
+**Synchronized Patterns:**
+```
+TodoWrite Entry: ☐ Documentation Agent: Update API documentation with endpoint specifications
+Task Tool Call: **Documentation Agent**: Update API documentation with endpoint specifications
+
+TodoWrite Entry: ☐ QA Agent: Execute comprehensive test validation for deployment readiness  
+Task Tool Call: **QA Agent**: Execute comprehensive test validation for deployment readiness
+
+TodoWrite Entry: ☐ Version Control Agent: Create release branch with automated tagging
+Task Tool Call: **Version Control Agent**: Create release branch with automated tagging
+```
+
+### Memory Collection Integration in Task Tool Naming
+
+**Memory-Enhanced Task Tool Format:**
+```
+**[Agent Type] Agent**: [Task description] + MEMORY COLLECTION REQUIRED
+
+Example:
+**Documentation Agent**: Update framework template with new patterns + MEMORY COLLECTION REQUIRED
+**QA Agent**: Validate deployment procedures and document issues + MEMORY COLLECTION REQUIRED
+**Research Agent**: Investigate performance patterns and compile best practices + MEMORY COLLECTION REQUIRED
+```
+
+### Task Tool Context Enhancement
+
+**Enhanced Context Pattern:**
+```
+**[Agent Type] Agent**: [Specific task with clear deliverables]
+
+TEMPORAL CONTEXT: Today is [current date]. Apply date awareness to:
+- [Date-specific considerations for this agent type]
+- [Timeline constraints and urgency factors]
+- [Sprint planning and deadline context]
+
+**Task**: [Detailed task breakdown with numbered steps]
+1. [Specific action item relevant to agent expertise]
+2. [Specific action item with measurable outcome]
+3. [Specific action item with integration requirements]
+
+**Context**: [Comprehensive filtered context for this agent type]
+- [Agent-specific background information]
+- [Related work from other agents in this domain]  
+- [Dependencies and integration points]
+- [Quality standards and requirements for this agent type]
+
+**Authority**: [Agent-specific permissions and scope]
+**Expected Results**: [Specific deliverables PM needs for coordination]
+**Escalation**: [When to escalate back to PM with agent-specific triggers]
+**Integration**: [How results integrate with other agent work]
+```
+
+### Validation Requirements
+
+**Every Task Tool delegation MUST include:**
+1. ✅ Agent type prefix in description
+2. ✅ Specific task description (not generic)
+3. ✅ Clear deliverables and expected outcomes
+4. ✅ Agent-appropriate context and authority scope
+5. ✅ Integration guidance for PM coordination
+6. ✅ Escalation triggers specific to agent type
+
+**Quality Assurance Checklist for Task Tool Naming:**
+- [ ] Agent type clearly identified in subprocess description
+- [ ] Task specificity matches TodoWrite entry detail level
+- [ ] Context appropriate for agent expertise and authority
+- [ ] Expected results support PM coordination needs
+- [ ] Escalation triggers align with agent capabilities
+- [ ] Integration requirements support cross-agent workflows
+
 
 ## 🚨 MANDATORY: CORE AGENT TYPES - HAND-IN-HAND COLLABORATION
 

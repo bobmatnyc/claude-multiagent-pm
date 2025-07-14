@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "claude-multiagent-pm"
-version = "0.6.1"
+version = "0.7.0"
 description = "Claude Multi-Agent Project Management Framework for AI-driven orchestration"
 readme = "README.md"
 license = {text = "MIT"}
@@ -153,7 +153,7 @@ claude_pm = [
 
 # Testing configuration
 [tool.pytest.ini_options]
-minversion = "7.0"
+minversion = "0.7.0"
 addopts = [
     "-ra",
     "-q", 
@@ -251,7 +251,7 @@ sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 
 # Type checking with mypy
 [tool.mypy]
-python_version = "3.9"
+python_version = "0.7.0"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -310,7 +310,7 @@ edit_uri = "edit/main/docs/"
 # Development and build tools
 [tool.setuptools_scm]
 write_to = "claude_pm/_version.py"
-fallback_version = "0.6.1"
+fallback_version = "0.7.0"
 
 [tool.wheel]
 universal = false

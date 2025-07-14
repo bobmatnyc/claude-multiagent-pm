@@ -751,7 +751,7 @@ def deploy_claude_md(ctx, target_dir, backup, force, show_version_check):
                     console.print(f"   ⚠️  Failed to register directory, continuing...")
 
             # Template variables with version metadata (CLAUDE_MD_VERSION will be auto-generated)
-            framework_version = "4.5.1"
+            framework_version = "4.6.0"
             template_variables = {
                 "FRAMEWORK_VERSION": framework_version,
                 "DEPLOYMENT_DATE": datetime.now().isoformat(),

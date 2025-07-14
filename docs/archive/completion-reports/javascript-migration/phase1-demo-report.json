@@ -1,0 +1,265 @@
+{
+  "summary": {
+    "totalTests": 44,
+    "passed": 44,
+    "failed": 0,
+    "skipped": 0,
+    "successRate": "100.00",
+    "duration": 174.01329200000004
+  },
+  "modules": [
+    {
+      "moduleName": "version-resolver",
+      "tests": [
+        {
+          "name": "module-loading",
+          "passed": true,
+          "message": "Module loaded successfully"
+        },
+        {
+          "name": "module-caching",
+          "passed": true,
+          "message": "Module caching works"
+        },
+        {
+          "name": "main-method",
+          "passed": true,
+          "message": "Main method exists"
+        },
+        {
+          "name": "config-object",
+          "passed": true,
+          "message": "Config object exists"
+        },
+        {
+          "name": "dependencies-array",
+          "passed": true,
+          "message": "Dependencies array exists"
+        },
+        {
+          "name": "cleanup-method",
+          "passed": true,
+          "message": "Cleanup method exists"
+        },
+        {
+          "name": "config-name",
+          "passed": true,
+          "message": "Config has name"
+        },
+        {
+          "name": "config-version",
+          "passed": true,
+          "message": "Config has version"
+        },
+        {
+          "name": "config-description",
+          "passed": true,
+          "message": "Config has description"
+        },
+        {
+          "name": "version-resolution",
+          "passed": true,
+          "message": "Version resolved successfully"
+        },
+        {
+          "name": "version-format",
+          "passed": true,
+          "message": "Version has valid format"
+        },
+        {
+          "name": "diagnostics",
+          "passed": true,
+          "message": "Diagnostics available"
+        },
+        {
+          "name": "diagnostics-strategies",
+          "passed": true,
+          "message": "Diagnostics has strategies"
+        },
+        {
+          "name": "cache-clear",
+          "passed": true,
+          "message": "Cache clear works"
+        },
+        {
+          "name": "cleanup",
+          "passed": true,
+          "message": "Cleanup completed successfully"
+        }
+      ],
+      "passed": 15,
+      "failed": 0,
+      "duration": 173.17879200000002,
+      "memoryImpact": -237216
+    },
+    {
+      "moduleName": "environment-validator",
+      "tests": [
+        {
+          "name": "module-loading",
+          "passed": true,
+          "message": "Module loaded successfully"
+        },
+        {
+          "name": "module-caching",
+          "passed": true,
+          "message": "Module caching works"
+        },
+        {
+          "name": "main-method",
+          "passed": true,
+          "message": "Main method exists"
+        },
+        {
+          "name": "config-object",
+          "passed": true,
+          "message": "Config object exists"
+        },
+        {
+          "name": "dependencies-array",
+          "passed": true,
+          "message": "Dependencies array exists"
+        },
+        {
+          "name": "cleanup-method",
+          "passed": true,
+          "message": "Cleanup method exists"
+        },
+        {
+          "name": "config-name",
+          "passed": true,
+          "message": "Config has name"
+        },
+        {
+          "name": "config-version",
+          "passed": true,
+          "message": "Config has version"
+        },
+        {
+          "name": "config-description",
+          "passed": true,
+          "message": "Config has description"
+        },
+        {
+          "name": "environment-validation",
+          "passed": true,
+          "message": "Environment validation works"
+        },
+        {
+          "name": "validation-structure",
+          "passed": true,
+          "message": "Validation has required properties"
+        },
+        {
+          "name": "platform-detection",
+          "passed": true,
+          "message": "Platform detection works"
+        },
+        {
+          "name": "platform-properties",
+          "passed": true,
+          "message": "Platform has required properties"
+        },
+        {
+          "name": "python-validation",
+          "passed": true,
+          "message": "Python validation completes"
+        },
+        {
+          "name": "cleanup",
+          "passed": true,
+          "message": "Cleanup completed successfully"
+        }
+      ],
+      "passed": 15,
+      "failed": 0,
+      "duration": 0.06375000000002728,
+      "memoryImpact": 7240
+    },
+    {
+      "moduleName": "display-manager",
+      "tests": [
+        {
+          "name": "module-loading",
+          "passed": true,
+          "message": "Module loaded successfully"
+        },
+        {
+          "name": "module-caching",
+          "passed": true,
+          "message": "Module caching works"
+        },
+        {
+          "name": "main-method",
+          "passed": true,
+          "message": "Main method exists"
+        },
+        {
+          "name": "config-object",
+          "passed": true,
+          "message": "Config object exists"
+        },
+        {
+          "name": "dependencies-array",
+          "passed": true,
+          "message": "Dependencies array exists"
+        },
+        {
+          "name": "cleanup-method",
+          "passed": true,
+          "message": "Cleanup method exists"
+        },
+        {
+          "name": "config-name",
+          "passed": true,
+          "message": "Config has name"
+        },
+        {
+          "name": "config-version",
+          "passed": true,
+          "message": "Config has version"
+        },
+        {
+          "name": "config-description",
+          "passed": true,
+          "message": "Config has description"
+        },
+        {
+          "name": "output-buffering",
+          "passed": true,
+          "message": "Output buffering works"
+        },
+        {
+          "name": "buffer-clear",
+          "passed": true,
+          "message": "Buffer clear works"
+        },
+        {
+          "name": "indentation",
+          "passed": true,
+          "message": "Indentation works correctly"
+        },
+        {
+          "name": "platform-notes",
+          "passed": true,
+          "message": "Platform notes work"
+        },
+        {
+          "name": "cleanup",
+          "passed": true,
+          "message": "Cleanup completed successfully"
+        }
+      ],
+      "passed": 14,
+      "failed": 0,
+      "duration": 0.062207999999998265,
+      "memoryImpact": 7720
+    }
+  ],
+  "performance": {
+    "version-resolver-load-time": 0.025666000000001077,
+    "environment-validator-load-time": 0.01429200000001174,
+    "display-manager-load-time": 0.011958999999990283
+  },
+  "timestamp": "2025-07-13T21:35:40.893Z"
+}

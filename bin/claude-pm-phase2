@@ -1,0 +1,83 @@
+#!/usr/bin/env node
+
+/**
+ * Claude Multi-Agent PM Framework - Universal CLI Entry Point (Phase 2 Modular)
+ * 
+ * This is the modularized entry point for the claude-pm command-line interface.
+ * Implements Phase 2 modularization reducing the monolithic 3,048-line file.
+ * 
+ * ISS-0085: Complete modularization with Phase 2 modules:
+ * - deployment-detector.js (~536 lines)
+ * - framework-manager.js (~540 lines) 
+ * - command-dispatcher.js (~400 lines)
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+// Try to load Phase 2 modular system
+try {
+    const modulePath = path.join(__dirname, '..', 'lib', 'cli-modules');
+    
+    // Check if modular system is available
+    if (fs.existsSync(path.join(modulePath, 'module-integration-phase2.js'))) {
+        console.log('🚀 Initializing Phase 2 modular architecture...');
+        
+        const { createModularMain, fallbackMain } = require(path.join(modulePath, 'module-integration-phase2.js'));
+        
+        // Create and execute modular main
+        const modularMain = createModularMain();
+        
+        modularMain().then((result) => {
+            if (result && result.fallbackMode) {
+                console.log('⚠️  Modular system failed, falling back to monolithic execution');
+                return executeMonolithicFallback();
+            }
+            
+            // Successful modular execution
+            const exitCode = typeof result === 'number' ? result : 0;
+            process.exit(exitCode);
+        }).catch((error) => {
+            console.error('❌ Modular execution failed:', error.message);
+            console.log('⚠️  Falling back to monolithic execution');
+            return executeMonolithicFallback();
+        });
+        
+    } else {
+        console.log('📄 Modular system not available, using monolithic execution');
+        executeMonolithicFallback();
+    }
+    
+} catch (error) {
+    console.error('❌ Error initializing modular system:', error.message);
+    console.log('⚠️  Falling back to monolithic execution');
+    executeMonolithicFallback();
+}
+
+/**
+ * Fallback to original monolithic execution
+ */
+function executeMonolithicFallback() {
+    try {
+        // Load the original monolithic script
+        const originalScript = path.join(__dirname, 'claude-pm.backup-before-phase2');
+        
+        if (fs.existsSync(originalScript)) {
+            console.log('🔄 Loading monolithic fallback...');
+            
+            // Execute the original script by requiring it
+            // Note: This approach loads the original functionality
+            delete require.cache[originalScript]; // Clear cache to ensure fresh load
+            require(originalScript);
+        } else {
+            // If backup doesn't exist, show error and exit
+            console.error('❌ Monolithic fallback not available');
+            console.error('❌ Both modular and monolithic systems failed');
+            console.error('Please reinstall the Claude PM Framework');
+            process.exit(1);
+        }
+    } catch (fallbackError) {
+        console.error('❌ Fallback execution failed:', fallbackError.message);
+        process.exit(1);
+    }
+}

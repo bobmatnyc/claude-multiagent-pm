@@ -119,7 +119,7 @@ Legacy installation script (maintained for compatibility).
 ### Configuration File Structure
 ```json
 {
-  "version": "0.4.6",
+  "version": "0.7.0",
   "deployedAt": "2025-07-08T...",
   "platform": "darwin",
   "deploymentDir": "/path/to/deployment",

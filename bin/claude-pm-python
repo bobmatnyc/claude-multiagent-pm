@@ -1,0 +1,281 @@
+#!/usr/bin/env python3
+"""
+Claude Multi-Agent PM Framework - Pure Python CLI Entry Point
+
+This is the pure Python implementation that replaces the mixed JavaScript/Python
+architecture. All CLI functionality is now implemented in Python using Click.
+"""
+
+import sys
+import os
+import subprocess
+from pathlib import Path
+
+# Add the framework path to Python path for imports
+framework_path = Path(__file__).parent.parent
+sys.path.insert(0, str(framework_path))
+
+try:
+    import click
+    from rich.console import Console
+except ImportError:
+    print("❌ Missing required dependencies. Please install:")
+    print("   pip install click rich")
+    sys.exit(1)
+
+console = Console()
+
+
+def get_framework_version():
+    """Get framework version from multiple sources."""
+    # Try package.json
+    package_json = framework_path / "package.json"
+    if package_json.exists():
+        try:
+            import json
+            with open(package_json) as f:
+                data = json.load(f)
+                if data.get("name") == "@bobmatnyc/claude-multiagent-pm":
+                    return data.get("version", "unknown")
+        except (json.JSONDecodeError, KeyError):
+            pass
+    
+    # Try VERSION file
+    version_file = framework_path / "VERSION"
+    if version_file.exists():
+        try:
+            return version_file.read_text().strip()
+        except OSError:
+            pass
+    
+    return "unknown"
+
+
+def detect_deployment_type():
+    """Detect the deployment type and framework path."""
+    script_dir = Path(__file__).parent
+    source_root = script_dir.parent
+    
+    # Check for source development
+    if (source_root / "claude_pm").exists() and (source_root / "package.json").exists():
+        return {
+            "type": "source",
+            "framework_path": source_root,
+            "script_path": script_dir
+        }
+    
+    # Check for npm installation
+    if "node_modules" in str(script_dir):
+        return {
+            "type": "npm",
+            "framework_path": source_root,
+            "script_path": script_dir
+        }
+    
+    # Fallback
+    return {
+        "type": "unknown",
+        "framework_path": script_dir,
+        "script_path": script_dir
+    }
+
+
+def validate_claude_cli():
+    """Validate that Claude CLI is available."""
+    try:
+        result = subprocess.run(
+            ["claude", "--version"], 
+            capture_output=True, 
+            text=True, 
+            timeout=5
+        )
+        if result.returncode == 0:
+            return {
+                "valid": True,
+                "version": result.stdout.strip(),
+                "command": ["claude"]
+            }
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+    
+    return {
+        "valid": False,
+        "error": "Claude CLI not found or not accessible",
+        "command": ["claude"]
+    }
+
+
+def show_help():
+    """Display help information."""
+    version = get_framework_version()
+    console.print(f"""
+[bold blue]Claude Multi-Agent PM Framework v{version}[/bold blue]
+Pure Python CLI for Claude-powered project management and task orchestration
+
+[bold]🚀 USAGE:[/bold]
+  claude-pm [command] [options]
+
+[bold]📋 COMMANDS:[/bold]
+  --version, -v            Show version information
+  --help, -h              Show this help message
+  --system-info           Display comprehensive system information
+  --deployment-info       Show deployment detection results
+  
+[bold]🚨 ENHANCED FLAGS (Pure Python Implementation):[/bold]
+  --safe                  Enable safe mode with confirmations and backups
+  --upgrade [VERSION]     Upgrade to latest or specified version
+  --rollback VERSION      Rollback to specific version
+  --dry-run              Show what would be done without executing
+
+[bold]⚡ YOLO Mode (Default):[/bold]
+  claude-pm               Launch Claude CLI directly (YOLO mode - fast startup)
+
+[bold]🚨 TROUBLESHOOTING:[/bold]
+  • Environment Issues: claude-pm --system-info
+  • Deployment Problems: claude-pm --deployment-info
+
+[bold]📖 DOCUMENTATION:[/bold]
+  • GitHub: https://github.com/bobmatnyc/claude-multiagent-pm
+
+---
+Made with ❤️  for AI-powered development workflows (Pure Python Edition)
+""")
+
+
+def display_system_info():
+    """Display system information."""
+    deployment_info = detect_deployment_type()
+    version = get_framework_version()
+    
+    console.print("[bold]🖥️  Claude Multi-Agent PM Framework System Information[/bold]")
+    console.print("═" * 60)
+    console.print(f"📦 Framework Version: v{version}")
+    console.print(f"🗂️  Deployment Type: {deployment_info['type']}")
+    console.print(f"📁 Framework Path: {deployment_info['framework_path']}")
+    console.print(f"🔧 Platform: {sys.platform}")
+    console.print(f"🐍 Python: {sys.version.split()[0]}")
+    console.print(f"📍 Script Path: {deployment_info['script_path']}")
+    console.print("")
+
+
+def display_deployment_info():
+    """Display deployment detection results."""
+    deployment_info = detect_deployment_type()
+    console.print("\n[bold]🔍 Deployment Detection Results:[/bold]")
+    console.print("═" * 60)
+    import json
+    console.print(json.dumps(deployment_info, indent=2, default=str))
+
+
+def launch_claude_cli():
+    """Launch Claude CLI directly."""
+    validation = validate_claude_cli()
+    
+    if not validation["valid"]:
+        console.print("[red]❌ Claude CLI validation failed[/red]")
+        console.print(f"   Error: {validation['error']}")
+        console.print("\n[bold]🔧 Solutions:[/bold]")
+        console.print("   • Install Claude CLI: https://claude.ai/download")
+        console.print("   • Add Claude CLI to your PATH")
+        console.print("   • Restart your terminal")
+        sys.exit(1)
+    
+    # Launch Claude CLI
+    try:
+        os.execvp("claude", ["claude"])
+    except FileNotFoundError:
+        console.print("[red]❌ Failed to launch Claude CLI[/red]")
+        sys.exit(1)
+
+
+def handle_enhanced_flags():
+    """Handle enhanced flags using pure Python implementation."""
+    # Import the CLI flags module
+    try:
+        from claude_pm.cli_flags import cli_flags
+        
+        # Remove the script name from args and pass to Click
+        sys.argv[0] = "claude-pm"
+        cli_flags()
+        
+    except ImportError as e:
+        console.print(f"[red]❌ Failed to import CLI flags module: {e}[/red]")
+        console.print("Make sure the Claude PM Framework is properly installed.")
+        sys.exit(1)
+
+
+def main():
+    """Main entry point with pure Python implementation."""
+    args = sys.argv[1:]
+    
+    # Enhanced flags that trigger Python CLI system
+    enhanced_flags = ["--safe", "--upgrade", "--rollback", "--dry-run"]
+    version_flags = ["--version", "-v"]
+    help_flags = ["--help", "-h"]
+    
+    # Check for enhanced flags
+    has_enhanced_flags = any(
+        arg in enhanced_flags or 
+        arg.startswith("--format=") or
+        any(flag in args for flag in enhanced_flags)
+        for arg in args
+    )
+    
+    # Handle enhanced version command (with additional options)
+    if any(flag in args for flag in version_flags) and (
+        "--components" in args or 
+        "--git" in args or 
+        "--format" in " ".join(args) or
+        "--detailed" in args or
+        has_enhanced_flags
+    ):
+        handle_enhanced_flags()
+        return
+    
+    # Handle enhanced flags
+    if has_enhanced_flags:
+        handle_enhanced_flags()
+        return
+    
+    # Handle basic flags
+    if any(flag in args for flag in version_flags):
+        version = get_framework_version()
+        console.print(f"Claude Multi-Agent PM Framework v{version}")
+        return
+    
+    if any(flag in args for flag in help_flags):
+        show_help()
+        return
+    
+    if "--system-info" in args:
+        display_system_info()
+        return
+    
+    if "--deployment-info" in args:
+        display_deployment_info()
+        return
+    
+    # Handle no arguments case - YOLO mode
+    if not args:
+        launch_claude_cli()
+        return
+    
+    # For other commands, delegate to Python framework
+    deployment_info = detect_deployment_type()
+    framework_path = deployment_info["framework_path"]
+    
+    try:
+        # Use subprocess to call the Python CLI module
+        cmd = [sys.executable, "-m", "claude_pm.cli"] + args
+        result = subprocess.run(cmd, cwd=framework_path)
+        sys.exit(result.returncode)
+        
+    except Exception as e:
+        console.print(f"[red]❌ Failed to execute Claude PM Framework: {e}[/red]")
+        console.print(f"   Framework path: {framework_path}")
+        console.print(f"   Python command: {sys.executable}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

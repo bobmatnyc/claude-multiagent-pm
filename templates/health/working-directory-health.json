@@ -1,0 +1,60 @@
+{
+  "health_monitoring": {
+    "enabled": true,
+    "deployment_type": "{{DEPLOYMENT_TYPE}}",
+    "framework_version": "{{FRAMEWORK_VERSION}}",
+    "working_directory": "{{WORKING_DIRECTORY}}",
+    "deployed_at": "{{DEPLOYMENT_DATE}}"
+  },
+  "monitoring_config": {
+    "check_interval_seconds": 300,
+    "health_checks": [
+      "framework_deployment_status",
+      "agent_availability",
+      "task_tool_functionality", 
+      "memory_service_health",
+      "core_service_connectivity"
+    ],
+    "alert_thresholds": {
+      "deployment_validation_failure": "critical",
+      "agent_unavailability": "warning",
+      "memory_service_down": "warning",
+      "task_tool_failure": "critical"
+    }
+  },
+  "validation_checks": {
+    "mandatory_deployment_validation": true,
+    "core_agent_validation": true,
+    "working_directory_structure": true,
+    "framework_component_integrity": true
+  },
+  "health_endpoints": {
+    "deployment_status": "/health/deployment",
+    "agent_status": "/health/agents", 
+    "service_status": "/health/services",
+    "overall_health": "/health/status"
+  },
+  "logging": {
+    "health_log_path": ".claude-pm/logs/health.log",
+    "error_log_path": ".claude-pm/logs/errors.log",
+    "deployment_log_path": ".claude-pm/logs/deployment.log"
+  },
+  "recovery_procedures": {
+    "deployment_failure": [
+      "run_deployment_diagnosis",
+      "attempt_redeployment",
+      "clear_deployment_cache", 
+      "validate_npm_installation"
+    ],
+    "agent_failure": [
+      "restart_agent_services",
+      "validate_agent_hierarchy",
+      "check_agent_dependencies"
+    ],
+    "service_failure": [
+      "restart_affected_services",
+      "validate_service_configuration",
+      "check_service_dependencies"
+    ]
+  }
+}

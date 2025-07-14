@@ -1,0 +1,48 @@
+{
+  "deployment_type": "{{DEPLOYMENT_TYPE}}",
+  "framework_version": "{{FRAMEWORK_VERSION}}",
+  "deployed_at": "{{DEPLOYMENT_DATE}}",
+  "working_directory": "{{WORKING_DIRECTORY}}",
+  "source_installation": "{{SOURCE_PATH}}",
+  "target_path": "{{TARGET_PATH}}",
+  "features": {
+    "agent_orchestration": true,
+    "task_tool_integration": true,
+    "documentation_management": true,
+    "version_control": true,
+    "health_monitoring": true,
+    "memory_integration": true,
+    "temporal_context": true
+  },
+  "agent_hierarchy": {
+    "enabled": true,
+    "tiers": ["project", "user", "system"],
+    "precedence": "project > user > system"
+  },
+  "core_agents": {
+    "documentation_agent": {
+      "enabled": true,
+      "authority": "all_documentation_operations"
+    },
+    "ticketing_agent": {
+      "enabled": true,
+      "authority": "all_ticket_operations"
+    },
+    "version_control_agent": {
+      "enabled": true,
+      "authority": "all_git_operations"
+    }
+  },
+  "paths": {
+    "agents": ".claude-pm/agents",
+    "templates": ".claude-pm/templates",
+    "health": ".claude-pm/health",
+    "logs": ".claude-pm/logs",
+    "config": ".claude-pm/config.json"
+  },
+  "validation": {
+    "deployment_validator": "FrameworkDeploymentValidator",
+    "health_checks": true,
+    "mandatory_validation": true
+  }
+}

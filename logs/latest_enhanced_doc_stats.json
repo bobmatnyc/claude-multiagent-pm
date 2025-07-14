@@ -13,7 +13,7 @@
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/README.md",
-      "line_number": 96,
+      "line_number": 160,
       "description": "Potentially invalid path reference: docs/packages/[package-name]/`",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
@@ -742,6 +742,36 @@
     {
       "severity": "medium",
       "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-IMPLEMENTATION-STRATEGY.md",
+      "line_number": 175,
+      "description": "Potentially invalid path reference: scripts/deployment/",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/deployment/"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-IMPLEMENTATION-STRATEGY.md",
+      "line_number": 176,
+      "description": "Potentially invalid path reference: scripts/maintenance/",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/maintenance/"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-IMPLEMENTATION-STRATEGY.md",
+      "line_number": 177,
+      "description": "Potentially invalid path reference: scripts/validation/",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/validation/"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/PRACTICAL_IMPLEMENTATION_ROADMAP.md",
       "line_number": 57,
       "description": "Potentially invalid path reference: framework/CLAUDE.md`",
@@ -1642,6 +1672,216 @@
     {
       "severity": "medium",
       "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 23,
+      "description": "Potentially invalid path reference: claude_pm/cli.py.backup.$(date",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli.py.backup.$(date"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 26,
+      "description": "Potentially invalid path reference: claude_pm/cli/{core,commands,utils}",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/{core,commands,utils}"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 27,
+      "description": "Potentially invalid path reference: claude_pm/cli/commands/{agents,project,deployment,health,memory,tickets}",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/commands/{agents,project,deployment,health,memory,tickets}"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 39,
+      "description": "Potentially invalid path reference: claude_pm/cli/core/base_command.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/core/base_command.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 69,
+      "description": "Potentially invalid path reference: claude_pm/cli/core/service_manager.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/core/service_manager.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 106,
+      "description": "Potentially invalid path reference: claude_pm/cli/core/context_manager.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/core/context_manager.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 159,
+      "description": "Potentially invalid path reference: claude_pm/cli/commands/agents/agent_commands.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/commands/agents/agent_commands.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 188,
+      "description": "Potentially invalid path reference: claude_pm/cli/commands/project/project_commands.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/commands/project/project_commands.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 216,
+      "description": "Potentially invalid path reference: claude_pm/cli/commands/deployment/deployment_commands.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/commands/deployment/deployment_commands.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 257,
+      "description": "Potentially invalid path reference: claude_pm/cli/main.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/main.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 301,
+      "description": "Potentially invalid path reference: claude_pm/cli_original.py.backup",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli_original.py.backup"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 302,
+      "description": "Potentially invalid path reference: claude_pm/cli/main.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/main.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 317,
+      "description": "Potentially invalid path reference: claude_pm/cli_original.py.backup",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli_original.py.backup"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 332,
+      "description": "Potentially invalid path reference: claude_pm/services/parent_directory_manager.py.backup.$timestamp\"",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/parent_directory_manager.py.backup.$timestamp\""
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 348,
+      "description": "Potentially invalid path reference: claude_pm/services/{deployment,config,protection}",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/{deployment,config,protection}"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 356,
+      "description": "Potentially invalid path reference: claude_pm/services/deployment/framework_deployer.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/deployment/framework_deployer.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 417,
+      "description": "Potentially invalid path reference: claude_pm/services/deployment/backup_manager.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/deployment/backup_manager.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 536,
+      "description": "Potentially invalid path reference: claude_pm/core/logging/{config,specialized}",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/core/logging/{config,specialized}"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 544,
+      "description": "Potentially invalid path reference: claude_pm/core/logging/unified_logger.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/core/logging/unified_logger.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 759,
+      "description": "Potentially invalid path reference: framework/CLAUDE.md'",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "framework/CLAUDE.md'"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 770,
+      "description": "Potentially invalid path reference: scripts/performance_comparison.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/performance_comparison.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/06-agents-delegation-comprehensive-guide.md",
       "line_number": 38,
       "description": "Potentially invalid path reference: claude_pm/agents/`",
@@ -1928,6 +2168,146 @@
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
       "target_path": "claude_pm/templates/"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 270,
+      "description": "Potentially invalid path reference: ./scripts/monitoring/daily_health_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./scripts/monitoring/daily_health_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 270,
+      "description": "Potentially invalid path reference: scripts/monitoring/daily_health_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/monitoring/daily_health_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 271,
+      "description": "Potentially invalid path reference: ./scripts/monitoring/performance_regression_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./scripts/monitoring/performance_regression_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 271,
+      "description": "Potentially invalid path reference: scripts/monitoring/performance_regression_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/monitoring/performance_regression_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 272,
+      "description": "Potentially invalid path reference: ./scripts/monitoring/test_coverage_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./scripts/monitoring/test_coverage_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 272,
+      "description": "Potentially invalid path reference: scripts/monitoring/test_coverage_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/monitoring/test_coverage_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 273,
+      "description": "Potentially invalid path reference: ./scripts/monitoring/code_quality_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./scripts/monitoring/code_quality_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 273,
+      "description": "Potentially invalid path reference: scripts/monitoring/code_quality_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/monitoring/code_quality_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 276,
+      "description": "Potentially invalid path reference: ./scripts/monitoring/framework_protection_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./scripts/monitoring/framework_protection_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 276,
+      "description": "Potentially invalid path reference: scripts/monitoring/framework_protection_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/monitoring/framework_protection_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 277,
+      "description": "Potentially invalid path reference: ./scripts/monitoring/backup_integrity_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./scripts/monitoring/backup_integrity_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 277,
+      "description": "Potentially invalid path reference: scripts/monitoring/backup_integrity_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/monitoring/backup_integrity_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 278,
+      "description": "Potentially invalid path reference: ./scripts/monitoring/template_corruption_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./scripts/monitoring/template_corruption_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 278,
+      "description": "Potentially invalid path reference: scripts/monitoring/template_corruption_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/monitoring/template_corruption_check.sh"
     },
     {
       "severity": "medium",
@@ -2377,7 +2757,7 @@
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/README.md",
-      "line_number": 96,
+      "line_number": 160,
       "description": "Potentially invalid path reference: docs/packages/[package-name]/`",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
@@ -2662,6 +3042,36 @@
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
       "target_path": "framework/claude_pm/agents/"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-IMPLEMENTATION-STRATEGY.md",
+      "line_number": 175,
+      "description": "Potentially invalid path reference: scripts/deployment/",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/deployment/"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-IMPLEMENTATION-STRATEGY.md",
+      "line_number": 176,
+      "description": "Potentially invalid path reference: scripts/maintenance/",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/maintenance/"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-IMPLEMENTATION-STRATEGY.md",
+      "line_number": 177,
+      "description": "Potentially invalid path reference: scripts/validation/",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/validation/"
     },
     {
       "severity": "medium",
@@ -3556,6 +3966,216 @@
     {
       "severity": "medium",
       "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 23,
+      "description": "Potentially invalid path reference: claude_pm/cli.py.backup.$(date",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli.py.backup.$(date"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 26,
+      "description": "Potentially invalid path reference: claude_pm/cli/{core,commands,utils}",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/{core,commands,utils}"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 27,
+      "description": "Potentially invalid path reference: claude_pm/cli/commands/{agents,project,deployment,health,memory,tickets}",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/commands/{agents,project,deployment,health,memory,tickets}"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 39,
+      "description": "Potentially invalid path reference: claude_pm/cli/core/base_command.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/core/base_command.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 69,
+      "description": "Potentially invalid path reference: claude_pm/cli/core/service_manager.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/core/service_manager.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 106,
+      "description": "Potentially invalid path reference: claude_pm/cli/core/context_manager.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/core/context_manager.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 159,
+      "description": "Potentially invalid path reference: claude_pm/cli/commands/agents/agent_commands.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/commands/agents/agent_commands.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 188,
+      "description": "Potentially invalid path reference: claude_pm/cli/commands/project/project_commands.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/commands/project/project_commands.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 216,
+      "description": "Potentially invalid path reference: claude_pm/cli/commands/deployment/deployment_commands.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/commands/deployment/deployment_commands.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 257,
+      "description": "Potentially invalid path reference: claude_pm/cli/main.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/main.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 301,
+      "description": "Potentially invalid path reference: claude_pm/cli_original.py.backup",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli_original.py.backup"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 302,
+      "description": "Potentially invalid path reference: claude_pm/cli/main.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli/main.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 317,
+      "description": "Potentially invalid path reference: claude_pm/cli_original.py.backup",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cli_original.py.backup"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 332,
+      "description": "Potentially invalid path reference: claude_pm/services/parent_directory_manager.py.backup.$timestamp\"",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/parent_directory_manager.py.backup.$timestamp\""
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 348,
+      "description": "Potentially invalid path reference: claude_pm/services/{deployment,config,protection}",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/{deployment,config,protection}"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 356,
+      "description": "Potentially invalid path reference: claude_pm/services/deployment/framework_deployer.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/deployment/framework_deployer.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 417,
+      "description": "Potentially invalid path reference: claude_pm/services/deployment/backup_manager.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/deployment/backup_manager.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 536,
+      "description": "Potentially invalid path reference: claude_pm/core/logging/{config,specialized}",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/core/logging/{config,specialized}"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 544,
+      "description": "Potentially invalid path reference: claude_pm/core/logging/unified_logger.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/core/logging/unified_logger.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 759,
+      "description": "Potentially invalid path reference: framework/CLAUDE.md'",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "framework/CLAUDE.md'"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-EXECUTION-GUIDES.md",
+      "line_number": 770,
+      "description": "Potentially invalid path reference: scripts/performance_comparison.py",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/performance_comparison.py"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/06-agents-delegation-comprehensive-guide.md",
       "line_number": 38,
       "description": "Potentially invalid path reference: claude_pm/agents/`",
@@ -3846,6 +4466,146 @@
     {
       "severity": "medium",
       "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 270,
+      "description": "Potentially invalid path reference: ./scripts/monitoring/daily_health_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./scripts/monitoring/daily_health_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 270,
+      "description": "Potentially invalid path reference: scripts/monitoring/daily_health_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/monitoring/daily_health_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 271,
+      "description": "Potentially invalid path reference: ./scripts/monitoring/performance_regression_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./scripts/monitoring/performance_regression_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 271,
+      "description": "Potentially invalid path reference: scripts/monitoring/performance_regression_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/monitoring/performance_regression_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 272,
+      "description": "Potentially invalid path reference: ./scripts/monitoring/test_coverage_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./scripts/monitoring/test_coverage_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 272,
+      "description": "Potentially invalid path reference: scripts/monitoring/test_coverage_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/monitoring/test_coverage_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 273,
+      "description": "Potentially invalid path reference: ./scripts/monitoring/code_quality_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./scripts/monitoring/code_quality_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 273,
+      "description": "Potentially invalid path reference: scripts/monitoring/code_quality_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/monitoring/code_quality_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 276,
+      "description": "Potentially invalid path reference: ./scripts/monitoring/framework_protection_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./scripts/monitoring/framework_protection_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 276,
+      "description": "Potentially invalid path reference: scripts/monitoring/framework_protection_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/monitoring/framework_protection_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 277,
+      "description": "Potentially invalid path reference: ./scripts/monitoring/backup_integrity_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./scripts/monitoring/backup_integrity_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 277,
+      "description": "Potentially invalid path reference: scripts/monitoring/backup_integrity_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/monitoring/backup_integrity_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 278,
+      "description": "Potentially invalid path reference: ./scripts/monitoring/template_corruption_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./scripts/monitoring/template_corruption_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/EP-0041-MONITORING-FRAMEWORK.md",
+      "line_number": 278,
+      "description": "Potentially invalid path reference: scripts/monitoring/template_corruption_check.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/monitoring/template_corruption_check.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/PRE_PUBLISH_VALIDATION.md",
       "line_number": 16,
       "description": "Potentially invalid path reference: scripts/comprehensive-pre-publish-validation.js`",
@@ -3905,7 +4665,7 @@
     }
   ],
   "inconsistencies_found": [],
-  "last_update": "2025-07-13 21:17:41",
-  "files_validated": 30,
+  "last_update": "2025-07-14 01:51:50",
+  "files_validated": 33,
   "links_checked": 38
 }

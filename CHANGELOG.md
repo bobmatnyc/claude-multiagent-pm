@@ -786,6 +786,84 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 * implement v2.0.0 multi-subprocess orchestration model ([dce6258](https://github.com/bobmatnyc/claude-pm/commit/dce625837591e09cbdb116353278b13e719bed9d))
 
+
+# Changelog
+
+## [0.7.0] - 2025-07-14
+
+### 🚀 Features
+- feat: Complete ISS-0113 CLI Flags Implementation + v0.6.4 Combined Release
+- feat: Implement ISS-0112 NPM Workflow Enhancement - Complete Installation System Transformation
+- feat: Deploy comprehensive subsystem versioning across framework v010
+- feat: Implement comprehensive memory reliability enhancement system v0.6.1
+
+### 🐛 Fixes
+- fix: Restore startup script YOLO mode, memory system health, and version reporting
+- fix: Revert incorrect package version changes from 0.7.0 to 0.6.4
+- Emergency Patch ISS-0109: Resolve Node.js Memory Leak - 8GB Heap Exhaustion
+- fix: correct framework version 010 deployment and CLI FRAMEWORK_VERSION file path
+
+### 📚 Documentation
+- docs: Restore project-specific CLAUDE.md development rules with v0.7.0 optimization
+- docs: Add comprehensive v0.6.4 release notes
+
+### 🔧 Internal
+- version: Release v0.7.0 - Core Agent Framework Enhancement (MINOR)
+- version: Release v4.6.0 - Documentation optimization (MINOR)
+- Version Control Agent: Deploy framework template version 0.0.1 with memory collection requirements
+- Release v0.6.2: Memory Reliability System & Enterprise Documentation
+
+### 🎯 Key Improvements in v0.7.0
+
+#### 🏗️ Architecture & Stability
+- **Resolved Critical Blocking Issues**: All QA-identified version alignment issues resolved
+- **Template System Restoration**: Complete CLAUDE.md template system restoration and protection
+- **Memory System Integration**: Restored and enhanced memory system with profile integration
+- **Startup Sequence Optimization**: Improved framework initialization and agent loading
+
+#### 🔧 Framework Enhancements  
+- **Script Versioning**: Comprehensive script deployment and version management system
+- **Agent Profile System**: Enhanced three-tier agent hierarchy with profile-aware capabilities
+- **Task Tool Integration**: Improved subprocess delegation with profile context enhancement
+- **Error Recovery**: Enhanced error handling and recovery mechanisms
+
+#### 📋 User Experience
+- **Installation Improvements**: Better platform detection and installation guidance
+- **Documentation Updates**: Comprehensive README overhaul with practical examples
+- **Troubleshooting Guides**: Enhanced troubleshooting and configuration guidance
+- **Version Consistency**: All components aligned to v0.7.0 for consistent experience
+
+#### 🧠 Memory & Intelligence
+- **Memory Collection**: Systematic capture of operational insights and patterns
+- **Profile-Aware Delegation**: Enhanced task delegation with agent-specific context
+- **Temporal Context**: Improved date awareness and sprint planning integration
+- **Cross-Agent Coordination**: Better coordination protocols between agent types
+
+### 🚀 Migration Notes
+
+#### From v0.6.x to v0.7.0
+- **No Breaking Changes**: This release focuses on stability and framework improvements
+- **Automatic Upgrades**: Framework will automatically apply necessary updates
+- **Profile System**: New agent profile system enhances but doesn't replace existing workflows
+- **Memory Integration**: Memory system is now opt-in via MEMORY_COLLECTION flags
+
+#### Recommended Actions
+1. **Update Installation**: Run latest installation scripts for optimal setup
+2. **Review Documentation**: Check updated README for new capabilities and examples  
+3. **Test Integration**: Verify existing workflows continue to function properly
+4. **Explore Profiles**: Consider adopting agent profiles for enhanced task delegation
+
+### 🤝 Contributors
+- Framework development and maintenance
+- QA validation and issue resolution  
+- Documentation and user experience improvements
+- Memory system integration and enhancement
+
+---
+
+**Full Changelog**: Compare changes at GitHub Release v0.7.0
+
+
 ## [2.0.0] - 2025-07-07
 
 ### 🚀 Features
