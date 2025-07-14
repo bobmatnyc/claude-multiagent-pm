@@ -1,8 +1,8 @@
 {
   "name": "@bobmatnyc/claude-multiagent-pm",
-  "version": "0.6.4",
-  "description": "Claude Multi-Agent PM Framework - Complete NPM workflow + CLI flags system with --save, --version, --upgrade, --rollback (ISS-0112 + ISS-0113)",
-  "main": "claude_pm/cli.py",
+  "version": "0.6.5",
+  "description": "Claude Multi-Agent PM Framework - Pure Python implementation with Click-based CLI and enhanced flags system",
+  "main": "bin/claude-pm",
   "bin": {
     "claude-pm": "./bin/claude-pm"
   },
@@ -22,14 +22,13 @@
     "tdd",
     "api-first",
     "npm-package",
-    "universal-deployment",
+    "python-cli",
+    "click-framework",
+    "pure-python",
     "cli-tool",
     "unified-installation",
-    "component-deployment",
     "cross-platform",
-    "health-checking",
-    "installation-validation",
-    "comprehensive-setup"
+    "installation-validation"
   ],
   "author": {
     "name": "Robert (Masa) Matsuoka",
@@ -59,22 +58,7 @@
     "arm64"
   ],
   "scripts": {
-    "start": "NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' node claude_pm/cli.py",
-    "start:memory-safe": "NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' node scripts/memory-optimization.js monitor",
-    "memory:monitor": "NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' node scripts/memory-monitor.js",
-    "memory:optimize": "NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' node scripts/memory-optimization.js optimize",
-    "memory:guard": "NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' node scripts/memory-guard.js",
-    "memory:leak-detect": "NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' node scripts/memory-leak-detector.js",
-    "memory:health": "NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' node scripts/process-health-manager.js",
-    "memory:history": "NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' node scripts/memory-history-tracker.js",
-    "memory:dashboard": "NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' node scripts/memory-dashboard.js",
-    "memory:cleanup": "NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' node scripts/memory-optimization.js cleanup",
-    "memory:report": "NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' node scripts/memory-optimization.js report",
-    "memory:start-all": "./scripts/start-all-memory-services.sh",
-    "memory:stop-all": "./scripts/stop-memory-services.sh",
-    "memory:status": "./scripts/memory-system-status.sh",
-    "memory:deploy": "./scripts/deploy-memory-system-comprehensive.sh",
-    "memory:test": "./scripts/deploy-memory-system-comprehensive.sh test",
+    "start": "python3 -m claude_pm.cli",
     "postinstall": "node install/postinstall.js",
     "install:unified": "node install/postinstall.js",
     "install:validate": "node install/validate.js --comprehensive",

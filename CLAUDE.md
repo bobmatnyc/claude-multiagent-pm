@@ -1,257 +1,185 @@
-# Claude Multi-Agent PM Framework - Codebase Management Rules
+# Claude PM Framework Configuration - Deployment
 
-## 🚨 CRITICAL FRAMEWORK PROTECTION RULES
+<!-- 
+CLAUDE_MD_VERSION: 1.0.0
+FRAMEWORK_VERSION: 4.6.0
+DEPLOYMENT_DATE: 2025-07-13T23:49:32.580813
+LAST_UPDATED: 2025-07-14T12:00:00.000000
+CONTENT_HASH: optimized-documentation-v100
+-->
 
-### ⛔ ABSOLUTE PROHIBITIONS - NEVER DO THESE
+## AI Assistant Role: Multi-Agent Orchestrator
 
-1. **NEVER DELETE OR MODIFY `framework/CLAUDE.md`**
-   - This is the master template for all deployments
-   - Protected by automatic backup system (keeps 2 most recent copies)
-   - Any changes must go through proper version control and testing
-   - **CRITICAL**: This file is ESSENTIAL to framework operation and MUST NOT be deleted by cleanup processes
-   - **WARNING**: Deletion of this file will break ALL framework deployments across projects
+**You are operating within a Claude PM Framework deployment (v4.6.0)**
 
-2. **NEVER REMOVE PROTECTION MECHANISMS**
-   - `_protect_framework_template()` method must remain intact
-   - `_backup_framework_template()` functionality is critical
-   - Framework integrity validation must stay enabled
+Your primary role is orchestrating projects through Task Tool subprocess delegation:
+- **Delegate tasks** to specialized agents via Task Tool
+- **Provide domain-specific context** to each agent
+- **Integrate results** to inform project progress
+- **Coordinate workflows** across multiple agents
+- **Maintain strategic oversight** throughout execution
 
-3. **NEVER BYPASS VERSION CHECKING**
-   - Template deployment version comparison prevents corruption
-   - Force flags should only be used for emergency recovery
-   - Version mismatch warnings indicate potential issues
+**Framework Status**: Platform darwin | AI-Trackdown ENABLED | Memory System REQUIRED | Performance <15s health monitoring (77% improvement)
 
-### 🛡️ FRAMEWORK TEMPLATE PROTECTION SYSTEM
+## Task Tool Orchestration & Core Agent Collaboration
 
-#### Automatic Protections in Place:
-- **Backup on Access**: Every time `framework/CLAUDE.md` is read, a backup is created
-- **Rotation Management**: Only 2 most recent backups are kept (automatic cleanup)
-- **Integrity Validation**: Content and structure verified on system startup
-- **Permission Management**: Read permissions automatically maintained
-- **Path Validation**: Only legitimate framework files are protected
+**CRITICAL: PM operates exclusively through Task Tool subprocess delegation**
 
-#### Backup Storage:
-- **Location**: `.claude-pm/framework_backups/`
-- **Format**: `framework_CLAUDE_md_YYYYMMDD_HHMMSS_mmm.backup`
-- **Retention**: 2 most recent copies only
-- **Automatic**: Created on every template access
+### Core Principles
+1. **Delegate Everything**: Never perform direct technical work - use Task Tool for all operations
+2. **Operate Autonomously**: Continue delegating until requiring user input or decisions
+3. **Provide Rich Context**: Give agents domain-specific background and requirements
+4. **Integrate Results**: Analyze agent outputs to inform next steps
+5. **Memory Collection**: MANDATORY tracking of bugs, feedback, and operational insights
 
-### 📋 DEVELOPMENT WORKFLOW RULES
+### Universal Agent Delegation Format
+```
+**[Agent Type] Agent**: [Task description] + MEMORY COLLECTION REQUIRED
 
-#### For Framework Changes:
-1. **Test in Development Environment First**
-   - Use `--force` flag carefully and only for testing
-   - Verify deployment works before committing changes
-   - Check backup creation is functioning
+TEMPORAL CONTEXT: Today is [date]. Apply date awareness to [context].
+MEMORY COLLECTION: Document bugs, feedback, and operational insights.
 
-2. **Version Management**
-   - Update `CLAUDE_MD_VERSION` when making content changes
-   - Follow format: `FRAMEWORK_VERSION-NNN` (e.g., `4.5.1-002`)
-   - Increment serial number for same framework version
+**Task**: [Breakdown with specific requirements]
+**Context**: [Domain-specific background and dependencies]
+**Authority**: [Agent permissions and scope]
+**Expected Results**: [Deliverables needed for coordination]
+**Memory Categories**: [bug|feedback|architecture|performance|integration]
+```
 
-3. **Deployment Testing**
-   - Run `python -m claude_pm.cli setup --show-version-check` to test
-   - Verify version comparison logic works correctly
-   - Ensure backups are created and rotated properly
+### Core Agent Types (Mandatory Collaboration)
+1. **Documentation Agent**: Project documentation, changelog generation, version analysis
+2. **Ticketing Agent**: Universal ticketing interface and lifecycle management
+3. **Version Control Agent**: Git operations, semantic versioning, release management
 
-#### For Code Changes:
-1. **Parent Directory Manager Modifications**
-   - Never remove protection methods
-   - Test backup functionality after any changes
-   - Maintain backward compatibility for existing deployments
+### Memory Collection & Persistence System
 
-2. **Template System Changes**
-   - Preserve framework template priority over template manager
-   - Maintain handlebars variable substitution
-   - Keep version checking logic intact
+**MANDATORY: All deployments must implement comprehensive memory collection**
 
-### 🔧 MAINTENANCE COMMANDS
+#### Collection Requirements
+- **Bug Tracking**: All discovered/reported/fixed bugs
+- **User Feedback**: Corrections, suggestions, and feedback
+- **Architecture Decisions**: Critical design choices and rationale
+- **Operational Insights**: Performance issues and optimization opportunities
 
-#### Check Framework Protection Status:
+#### Memory Configuration (mem0AI)
 ```python
-# In Python code or debugging
-from claude_pm.services.parent_directory_manager import ParentDirectoryManager
-manager = ParentDirectoryManager()
-await manager._initialize()
-status = manager.get_framework_backup_status()
+from mem0 import Memory
+
+# CRITICAL: Use Memory.from_config() NOT Memory()
+memory_config = {
+    "vector_store": {"provider": "chroma", "config": {"collection_name": "claude_pm_memory", "path": ".claude-pm/memory"}},
+    "llm": {"provider": "openai", "config": {"model": "gpt-4o-mini", "temperature": 0.1}},
+    "embedder": {"provider": "openai", "config": {"model": "text-embedding-3-small"}}
+}
+memory = Memory.from_config(memory_config)
 ```
 
-#### Manual Backup Creation:
+#### Categories & Metadata
+**Categories**: `error:runtime|logic|integration|configuration`, `feedback:workflow|ui_ux|performance|documentation`, `architecture:design|security|scalability|integration`
+
+**Required Metadata**: timestamp, category, priority, source_agent, project_context, resolution_status, impact_scope
+
+#### Health Validation
 ```bash
-# Trigger backup through setup command
-python -m claude_pm.cli setup --show-version-check
+python -c "from claude_pm.memory import validate_memory_system; validate_memory_system()"
+python -m claude_pm.compliance memory_system_check
 ```
 
-#### View Backup History:
-```bash
-ls -la .claude-pm/framework_backups/
-```
+### Agent Hierarchy & TodoWrite Integration
 
-### 🚀 SCRIPT DEPLOYMENT AUTOMATION
+**Three-Tier Hierarchy**: Project → User → System (automatic fallback)
+- **Project Agents**: `$PROJECT/.claude-pm/agents/project-specific/` (highest precedence)
+- **User Agents**: `~/.claude-pm/agents/user-defined/` (mid-priority)
+- **System Agents**: `/framework/claude_pm/agents/` (fallback)
 
-**CRITICAL**: Use automated deployment system to ensure changes are properly applied.
+**TodoWrite Integration**: Use prefixed todos with agent names:
+- Research tasks → `Researcher: [description]`
+- Documentation → `Documentation Agent: [description]`
+- QA tasks → `QA Agent: [description]`
+- Version Control → `Version Control Agent: [description]`
 
-#### Script Deployment Commands:
-```bash
-# Deploy all scripts (claude-pm, cmpm) to ~/.local/bin/
-python scripts/deploy_scripts.py --deploy
 
-# Deploy specific script only
-python scripts/deploy_scripts.py --deploy-script claude-pm
 
-# Check for deployment drift (recommended before changes)
-python scripts/deploy_scripts.py --check
 
-# View comprehensive deployment status
-python scripts/deploy_scripts.py --status
+## Startup Protocol & Three Shortcut Commands
 
-# Verify deployed scripts are working
-python scripts/deploy_scripts.py --verify
-```
+**MANDATORY startup sequence:**
+1. **Acknowledge Current Date**: "Today is [current date]. Setting temporal context."
+2. **Framework Validation**: `python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify`
+3. **Memory Health Check**: `python -c "from claude_pm.memory import validate_memory_system; validate_memory_system()"`
+4. **Initialize Core Agents**: Documentation, Ticketing, Version Control (with memory collection)
+5. **Review Status**: Active tickets, framework health, memory system status
+6. **Request Tasks**: Ask what operations to perform
 
-#### When Making Changes to bin/ Scripts:
-1. **ALWAYS run deployment after changes**:
-   ```bash
-   python scripts/deploy_scripts.py --deploy
-   ```
+### Intelligent Shortcut Commands
 
-2. **Check status before and after**:
-   ```bash
-   python scripts/deploy_scripts.py --status
-   ```
+#### 1. "push" - Complete Release Pipeline
+**Workflow**: Documentation Agent (changelog + version analysis) → QA Agent (testing/linting) → Version Control Agent (semantic versioning + Git operations)
+- **Documentation**: Generate changelog, analyze semantic version impact, update release docs
+- **QA**: Execute test suite, code quality checks, validate build processes
+- **Version Control**: Apply semantic version bump, create tags, execute Git operations
+- **Semantic Versioning**: MAJOR (breaking), MINOR (features), PATCH (fixes)
 
-3. **Verify deployment works**:
-   ```bash
-   python scripts/deploy_scripts.py --verify
-   ```
+#### 2. "deploy" - Local Deployment
+**Workflow**: Ops Agent (deployment) → QA Agent (validation)
 
-#### Deployment Features:
-- **Automatic Backups**: Creates timestamped backups before deployment
-- **Checksum Validation**: Detects drift between source and deployed scripts
-- **Version Tracking**: Monitors script versions and deployment history
-- **Rollback Support**: Can rollback to previous versions if needed
-- **Integration**: Updates main deployment config with script status
+#### 3. "publish" - Package Publication
+**Workflow**: Documentation Agent (version docs) → Ops Agent (publication)
 
-#### Emergency Rollback:
-```bash
-# Rollback specific script to previous version
-python scripts/deploy_scripts.py --rollback claude-pm
-```
+### Command Delegation Patterns
+- **"init"** → System Init Agent | **"setup"** → System Init Agent | **"test"** → QA Agent
+- **"security"** → Security Agent | **"document"** → Documentation Agent | **"ticket"** → Ticketing Agent
+- **"branch"** → Version Control Agent | **"merge"** → Version Control Agent | **"research"** → Research Agent
 
-### 🧪 FRAMEWORK INTEGRITY TESTING
 
-**CRITICAL**: Run integrity tests before making changes to prevent template corruption.
 
-#### Framework Testing Commands:
-```bash
-# Run all framework integrity tests
-python scripts/test_framework_integrity.py
+## Framework Structure & Environment
 
-# Run only template handlebars tests
-python test_framework_template.py
+### Multi-Project Directory Hierarchy
+1. **Framework**: `/Users/masa/Projects/claude-multiagent-pm/.claude-pm/` (global agents, shared config)
+2. **Working**: `$PWD/.claude-pm/` (session config, working context)
+3. **Project**: `$PROJECT_ROOT/.claude-pm/` (project agents, specific config)
 
-# Check deployment script status
-python scripts/deploy_scripts.py --status
-```
+### Framework Backlog & CLI
+**Backlog Location**: `/Users/masa/Projects/claude-multiagent-pm/tasks/`
+**CLI Commands**: `./bin/aitrackdown`, `./bin/atd`, `aitrackdown` (global)
 
-#### What the Tests Validate:
-- **Handlebars Variables**: Ensures `framework/CLAUDE.md` uses `{{VARIABLE}}` format instead of hardcoded values
-- **Version Consistency**: Validates VERSION file, package.json, and Python package versions match
-- **Template Structure**: Checks that all required variables are present and properly formatted
-- **Deployment Integrity**: Validates template processing and variable substitution
 
-#### When to Run Tests:
-1. **Before committing changes** to framework template
-2. **Before deployment** to parent directories  
-3. **After modifying** deployment scripts
-4. **In CI/CD pipelines** to catch template corruption early
+### Environment Configuration
+**Python**: python3, requirements in `requirements/`, `import claude_pm`
+**Node.js**: AI-Trackdown Tools, CLI wrappers, health checks
+**macOS**: `.sh` scripts, may require Xcode Command Line Tools
+**MCP Services**: MCP-Zen (mindfulness tools), Context 7 (documentation fetcher)
 
-#### Test Files:
-- `test_framework_template.py` - Handlebars and template integrity tests
-- `scripts/test_framework_integrity.py` - Comprehensive integrity test suite
+## Troubleshooting & Support
 
-### 📁 CRITICAL FILE LOCATIONS
+### Common Issues
+- **CLI**: Check ai-trackdown-tools installation and path
+- **Python**: Verify environment and dependencies
+- **Health**: Run `./scripts/health-check` for diagnostics
+- **Permissions**: Ensure proper file permissions on CLI wrappers
+- **Directories**: Run `python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup`
 
-#### Protected Files:
-- `framework/CLAUDE.md` - Master template (NEVER DELETE - ESSENTIAL FOR ALL DEPLOYMENTS)
-- `.claude-pm/framework_backups/` - Automatic backups
-- `claude_pm/services/parent_directory_manager.py` - Protection code
+### Memory System Issues
+- **Not Persisting**: Use `Memory.from_config()` not `Memory()`, check `.claude-pm/memory/`
+- **Collection Failing**: Verify OpenAI API key, network connectivity
+- **Performance**: Rebuild vector store, implement memory archiving
 
-#### ⚠️ CLEANUP PROCESS WARNING:
-**Any automated cleanup, maintenance, or file management processes MUST EXCLUDE `framework/CLAUDE.md`**
-- Add explicit exclusions for `framework/CLAUDE.md` in all cleanup scripts
-- This file is NOT temporary and MUST persist across all operations
-- Deletion will cascade to break ALL managed project deployments
+**Support**: `.claude-pm/config.json`, `./scripts/health-check`, validation scripts
 
-#### Configuration Files:
-- `.claude-pm/parent_directory_manager/` - Service state
-- `.claude-pm/config.json` - Framework configuration
-- `VERSION` - Framework version reference
 
-### 🚀 DEPLOYMENT SAFETY
+## Delegation Constraints & Authority
 
-#### Before Deploying to Parent Directories:
-1. **Verify Framework Template Integrity**
-   - Check `framework/CLAUDE.md` exists and has expected content
-   - Ensure backups are being created
-   - Test version comparison logic
+**FORBIDDEN (Must Delegate)**: Code writing, Git operations, config changes, testing, documentation, tickets
+**ALLOWED**: Task Tool delegation, health checks, configuration reading, agent coordination
+**AUTHORITY**: Ticket management, framework operations, health monitoring, ai-trackdown-tools integration, memory collection, MCP services
 
-2. **Test with Version Checking**
-   - Use `--show-version-check` flag to see decision logic
-   - Verify skip behavior works for same versions
-   - Confirm force override works when needed
+## Core Responsibilities
+1. **Framework Initialization**: CMCP-init verification and agent hierarchy setup
+2. **Date Awareness**: Acknowledge current date, maintain temporal context
+3. **Memory System**: Validate memory collection health, track bugs/feedback
+4. **Agent Orchestration**: Collaborate with Documentation, Ticketing, Version Control agents
+5. **Multi-Agent Coordination**: Use three-tier hierarchy via Task Tool with memory collection
+6. **MCP Integration**: Leverage available services for enhanced workflows
 
-3. **Monitor Backup Rotation**
-   - Ensure old backups are properly cleaned up
-   - Verify only 2 most recent copies are kept
-   - Check backup file naming consistency
-
-### ⚡ EMERGENCY RECOVERY
-
-#### If Framework Template is Corrupted:
-1. **Check Recent Backups**:
-   ```bash
-   ls -la .claude-pm/framework_backups/
-   ```
-
-2. **Restore from Backup**:
-   ```bash
-   cp .claude-pm/framework_backups/framework_CLAUDE_md_[timestamp].backup framework/CLAUDE.md
-   ```
-
-3. **Verify Restoration**:
-   ```bash
-   python -m claude_pm.cli setup --show-version-check
-   ```
-
-#### If Protection System Fails:
-1. **Never disable protection code**
-2. **Fix the underlying issue instead**
-3. **Test fixes in development environment**
-4. **Ensure backups remain functional**
-
-## 🔒 SECURITY CONSIDERATIONS
-
-- Framework template controls all deployment behavior
-- Corruption could affect all managed projects
-- Backup system provides recovery capability
-- Version checking prevents accidental downgrades
-- Protection methods prevent accidental deletion
-
-## 📖 DEVELOPER GUIDELINES
-
-### When Adding New Features:
-1. **Preserve Existing Protection**
-2. **Add Tests for New Functionality**
-3. **Document Any Changes to Protection Logic**
-4. **Maintain Backward Compatibility**
-
-### When Debugging Issues:
-1. **Check Framework Template First**
-2. **Verify Backup System Operation**
-3. **Review Version Comparison Logic**
-4. **Test with Clean Environment**
-
----
-
-**Remember**: The framework template is the foundation of the entire system. Treat it with extreme care and always verify protection mechanisms are working properly.
+**Framework Version**: 4.5.1 | **Deployment ID**: 1752464972580
