@@ -1652,6 +1652,44 @@ if __name__ == "__main__":
     }
 
     /**
+     * Synchronize VERSION files with package.json version
+     */
+    async synchronizeVersionFiles() {
+        try {
+            const packageJson = require('../package.json');
+            const packageVersion = packageJson.version;
+            
+            this.log('🔄 Synchronizing VERSION files with package version...');
+            
+            // VERSION files to update
+            const versionFiles = [
+                path.join(this.deploymentPaths.bin, 'VERSION'),
+                path.join(this.deploymentPaths.framework, 'framework', 'VERSION'),
+                path.join(this.deploymentPaths.framework, 'VERSION')
+            ];
+            
+            for (const versionFile of versionFiles) {
+                try {
+                    // Ensure parent directory exists
+                    await fs.mkdir(path.dirname(versionFile), { recursive: true });
+                    
+                    // Write the current package version
+                    await fs.writeFile(versionFile, `${packageVersion}\n`);
+                    
+                    this.log(`   ✅ Updated ${path.relative(this.globalConfigDir, versionFile)} to v${packageVersion}`);
+                } catch (error) {
+                    this.log(`   ⚠️  Failed to update ${versionFile}: ${error.message}`, 'warn');
+                }
+            }
+            
+            this.log('✅ VERSION file synchronization completed');
+            
+        } catch (error) {
+            this.log(`❌ VERSION file synchronization failed: ${error.message}`, 'error');
+        }
+    }
+
+    /**
      * Migrate environment variables from old CLAUDE_PM_* to new CLAUDE_MULTIAGENT_PM_*
      */
     async migrateEnvironmentVariables() {
@@ -2572,6 +2610,7 @@ fi
             
             // Phase 7: Version Management
             await this.safeExecute('updateDeployedInstanceVersion', () => this.updateDeployedInstanceVersion());
+            await this.safeExecute('synchronizeVersionFiles', () => this.synchronizeVersionFiles());
             
             // Final status update
             await this.finalizeInstallation();

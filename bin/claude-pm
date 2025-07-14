@@ -146,6 +146,66 @@ def validate_framework_deployment():
         return False
 
 
+def attempt_auto_installation():
+    """Attempt to automatically install the framework if postinstall didn't run."""
+    console.print("[yellow]⚠️  Framework not detected - attempting auto-installation...[/yellow]")
+    
+    # Check if we can find the postinstall script
+    postinstall_paths = [
+        framework_path / "install" / "postinstall.js",
+        framework_path / "install" / "postinstall-enhanced.js"
+    ]
+    
+    for postinstall_path in postinstall_paths:
+        if postinstall_path.exists():
+            console.print(f"[dim]Found postinstall script: {postinstall_path}[/dim]")
+            
+            try:
+                # Run the postinstall script
+                result = subprocess.run(
+                    ["node", str(postinstall_path)], 
+                    cwd=str(framework_path),
+                    capture_output=True,
+                    text=True,
+                    timeout=120  # 2 minutes timeout
+                )
+                
+                if result.returncode == 0:
+                    console.print("[green]✅ Auto-installation completed successfully![/green]")
+                    return True
+                else:
+                    console.print(f"[red]❌ Auto-installation failed: {result.stderr}[/red]")
+                    
+            except subprocess.TimeoutExpired:
+                console.print("[red]❌ Auto-installation timed out[/red]")
+            except Exception as e:
+                console.print(f"[red]❌ Auto-installation error: {e}[/red]")
+                
+            break
+    
+    # Alternative: Try to run npm install in the framework directory
+    console.print("[yellow]Attempting alternative installation via npm...[/yellow]")
+    try:
+        result = subprocess.run(
+            ["npm", "run", "install:unified"],
+            cwd=str(framework_path),
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+        
+        if result.returncode == 0:
+            console.print("[green]✅ Alternative installation completed successfully![/green]")
+            return True
+        else:
+            console.print(f"[red]❌ Alternative installation failed: {result.stderr}[/red]")
+            
+    except Exception as e:
+        console.print(f"[red]❌ Alternative installation error: {e}[/red]")
+    
+    return False
+
+
 def validate_claude_cli():
     """Validate that Claude CLI is available."""
     try:
@@ -576,14 +636,27 @@ def main():
         if not validate_framework_deployment():
             console.print("[red]❌ Claude PM Framework not properly deployed![/red]")
             console.print("")
-            console.print("[bold]🚨 Framework deployment required before operations[/bold]")
-            console.print("Run one of the following commands to deploy the framework:")
-            console.print("   • claude-pm setup")
-            console.print("   • claude-pm deploy")
-            console.print("   • cmpm-init")
-            console.print("")
-            console.print(f"📍 Expected framework location: ~/.claude-pm")
-            sys.exit(1)
+            
+            # Attempt auto-installation first
+            if attempt_auto_installation():
+                console.print("[green]✅ Framework auto-installation successful![/green]")
+                
+                # Re-validate after auto-installation
+                if validate_framework_deployment():
+                    console.print("[green]✅ Framework deployment validated - proceeding...[/green]")
+                else:
+                    console.print("[red]❌ Framework deployment validation failed after auto-installation[/red]")
+                    sys.exit(1)
+            else:
+                console.print("[bold]🚨 Framework deployment required before operations[/bold]")
+                console.print("Run one of the following commands to deploy the framework:")
+                console.print("   • claude-pm setup")
+                console.print("   • claude-pm deploy")
+                console.print("   • cmpm-init")
+                console.print("   • npm run install:unified (from framework directory)")
+                console.print("")
+                console.print(f"📍 Expected framework location: ~/.claude-pm")
+                sys.exit(1)
         
         console.print("[green]✅ All systems validated - launching Claude CLI with pass-through flags[/green]")
         console.print("")
@@ -598,14 +671,27 @@ def main():
         if not validate_framework_deployment():
             console.print("[red]❌ Claude PM Framework not properly deployed![/red]")
             console.print("")
-            console.print("[bold]🚨 Framework deployment required before operations[/bold]")
-            console.print("Run one of the following commands to deploy the framework:")
-            console.print("   • claude-pm setup")
-            console.print("   • claude-pm deploy")
-            console.print("   • cmpm-init")
-            console.print("")
-            console.print(f"📍 Expected framework location: ~/.claude-pm")
-            sys.exit(1)
+            
+            # Attempt auto-installation first
+            if attempt_auto_installation():
+                console.print("[green]✅ Framework auto-installation successful![/green]")
+                
+                # Re-validate after auto-installation
+                if validate_framework_deployment():
+                    console.print("[green]✅ Framework deployment validated - proceeding...[/green]")
+                else:
+                    console.print("[red]❌ Framework deployment validation failed after auto-installation[/red]")
+                    sys.exit(1)
+            else:
+                console.print("[bold]🚨 Framework deployment required before operations[/bold]")
+                console.print("Run one of the following commands to deploy the framework:")
+                console.print("   • claude-pm setup")
+                console.print("   • claude-pm deploy")
+                console.print("   • cmpm-init")
+                console.print("   • npm run install:unified (from framework directory)")
+                console.print("")
+                console.print(f"📍 Expected framework location: ~/.claude-pm")
+                sys.exit(1)
         
         console.print("[green]✅ All systems validated - launching Claude CLI in YOLO mode[/green]")
         console.print("")

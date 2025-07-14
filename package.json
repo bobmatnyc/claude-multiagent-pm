@@ -1,6 +1,6 @@
 {
   "name": "@bobmatnyc/claude-multiagent-pm",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "Claude Multi-Agent PM Framework - Pure Python implementation with Click-based CLI and enhanced flags system",
   "main": "bin/claude-pm",
   "bin": {
@@ -59,7 +59,7 @@
   ],
   "scripts": {
     "start": "python3 -m claude_pm.cli",
-    "postinstall": "node install/postinstall.js",
+    "postinstall": "node install/postinstall-enhanced.js",
     "install:unified": "node install/postinstall.js",
     "install:validate": "node install/validate.js --comprehensive",
     "install:health-check": "node -e \"const fs = require('fs'); const path = require('path'); const home = require('os').homedir(); const healthPath = path.join(home, '.claude-pm', 'health-check.json'); if (fs.existsSync(healthPath)) { console.log(JSON.stringify(JSON.parse(fs.readFileSync(healthPath, 'utf8')), null, 2)); } else { console.log('Health check not available - run npm run install:unified'); }\"",
