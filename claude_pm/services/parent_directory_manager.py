@@ -148,6 +148,9 @@ class ParentDirectoryManager(BaseService):
         # Framework template backup directory
         self.framework_backups_dir = self.working_dir / ".claude-pm" / "framework_backups"
 
+        # Subsystem version tracking
+        self.subsystem_versions = {}
+
         # Initialize paths
         self._initialize_paths()
 
@@ -171,6 +174,9 @@ class ParentDirectoryManager(BaseService):
             # Validate framework template integrity on startup
             if not self._validate_framework_template_integrity():
                 self.logger.warning("Framework template integrity check failed during initialization")
+
+            # Load subsystem versions
+            await self._load_subsystem_versions()
 
             self.logger.info("Parent Directory Manager initialized successfully")
 
@@ -989,6 +995,314 @@ class ParentDirectoryManager(BaseService):
             self.logger.error(f"Failed to get operation history: {e}")
             return []
 
+    # Subsystem Version Management Methods
+
+    async def _load_subsystem_versions(self) -> None:
+        """Load subsystem versions from version files."""
+        try:
+            subsystem_files = {
+                "memory": "MEMORY_VERSION",
+                "agents": "AGENTS_VERSION", 
+                "ticketing": "TICKETING_VERSION",
+                "documentation": "DOCUMENTATION_VERSION",
+                "services": "SERVICES_VERSION",
+                "cli": "CLI_VERSION",
+                "integration": "INTEGRATION_VERSION",
+                "health": "HEALTH_VERSION",
+                "framework": "FRAMEWORK_VERSION"
+            }
+
+            for subsystem, filename in subsystem_files.items():
+                version_file = self.framework_path / filename
+                if version_file.exists():
+                    try:
+                        version = version_file.read_text().strip()
+                        self.subsystem_versions[subsystem] = {
+                            "version": version,
+                            "file_path": str(version_file),
+                            "last_checked": datetime.now().isoformat()
+                        }
+                        self.logger.debug(f"Loaded {subsystem} version: {version}")
+                    except Exception as e:
+                        self.logger.error(f"Failed to read {subsystem} version from {version_file}: {e}")
+                        self.subsystem_versions[subsystem] = {
+                            "version": "unknown",
+                            "file_path": str(version_file),
+                            "error": str(e),
+                            "last_checked": datetime.now().isoformat()
+                        }
+                else:
+                    self.logger.warning(f"Subsystem version file not found: {version_file}")
+                    self.subsystem_versions[subsystem] = {
+                        "version": "not_found",
+                        "file_path": str(version_file),
+                        "last_checked": datetime.now().isoformat()
+                    }
+
+            self.logger.info(f"Loaded {len(self.subsystem_versions)} subsystem versions")
+
+        except Exception as e:
+            self.logger.error(f"Failed to load subsystem versions: {e}")
+
+    def get_subsystem_versions(self) -> Dict[str, Any]:
+        """
+        Get all detected subsystem versions.
+
+        Returns:
+            Dictionary with subsystem version information
+        """
+        try:
+            return {
+                "framework_path": str(self.framework_path),
+                "subsystems": self.subsystem_versions.copy(),
+                "detection_timestamp": datetime.now().isoformat()
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to get subsystem versions: {e}")
+            return {"error": str(e)}
+
+    def get_subsystem_version(self, subsystem: str) -> Optional[str]:
+        """
+        Get version for a specific subsystem.
+
+        Args:
+            subsystem: Name of the subsystem
+
+        Returns:
+            Version string or None if not found
+        """
+        try:
+            subsystem_info = self.subsystem_versions.get(subsystem)
+            return subsystem_info.get("version") if subsystem_info else None
+        except Exception as e:
+            self.logger.error(f"Failed to get version for subsystem {subsystem}: {e}")
+            return None
+
+    async def validate_subsystem_compatibility(self, required_versions: Dict[str, str]) -> Dict[str, Any]:
+        """
+        Validate subsystem version compatibility against requirements.
+
+        Args:
+            required_versions: Dictionary of subsystem -> required version
+
+        Returns:
+            Validation results with compatibility status
+        """
+        try:
+            results = {
+                "compatible": True,
+                "validation_timestamp": datetime.now().isoformat(),
+                "subsystem_checks": {}
+            }
+
+            for subsystem, required_version in required_versions.items():
+                current_version = self.get_subsystem_version(subsystem)
+                
+                check_result = {
+                    "subsystem": subsystem,
+                    "required_version": required_version,
+                    "current_version": current_version,
+                    "compatible": False,
+                    "status": "unknown"
+                }
+
+                if current_version is None or current_version in ["unknown", "not_found"]:
+                    check_result["status"] = "missing"
+                    results["compatible"] = False
+                elif current_version == required_version:
+                    check_result["compatible"] = True
+                    check_result["status"] = "exact_match"
+                else:
+                    # Try version comparison for compatibility
+                    try:
+                        comparison = self._compare_subsystem_versions(current_version, required_version)
+                        if comparison >= 0:
+                            check_result["compatible"] = True
+                            check_result["status"] = "compatible" if comparison > 0 else "exact_match"
+                        else:
+                            check_result["status"] = "outdated"
+                            results["compatible"] = False
+                    except Exception as comp_error:
+                        check_result["status"] = "comparison_failed"
+                        check_result["error"] = str(comp_error)
+                        results["compatible"] = False
+
+                results["subsystem_checks"][subsystem] = check_result
+
+            return results
+
+        except Exception as e:
+            self.logger.error(f"Failed to validate subsystem compatibility: {e}")
+            return {
+                "compatible": False,
+                "error": str(e),
+                "validation_timestamp": datetime.now().isoformat()
+            }
+
+    def _compare_subsystem_versions(self, version1: str, version2: str) -> int:
+        """
+        Compare two subsystem version strings.
+        Supports serial number format (001, 002, etc.).
+
+        Args:
+            version1: First version string
+            version2: Second version string
+
+        Returns:
+            -1 if version1 < version2
+             0 if version1 == version2
+             1 if version1 > version2
+        """
+        try:
+            # Handle serial number format (001, 002, etc.)
+            if version1.isdigit() and version2.isdigit():
+                v1_num = int(version1)
+                v2_num = int(version2)
+                if v1_num < v2_num:
+                    return -1
+                elif v1_num > v2_num:
+                    return 1
+                else:
+                    return 0
+            
+            # Handle semantic versioning (x.y.z)
+            if "." in version1 and "." in version2:
+                v1_parts = [int(x) for x in version1.split(".")]
+                v2_parts = [int(x) for x in version2.split(".")]
+                
+                # Pad shorter version with zeros
+                max_len = max(len(v1_parts), len(v2_parts))
+                v1_parts.extend([0] * (max_len - len(v1_parts)))
+                v2_parts.extend([0] * (max_len - len(v2_parts)))
+                
+                for i in range(max_len):
+                    if v1_parts[i] < v2_parts[i]:
+                        return -1
+                    elif v1_parts[i] > v2_parts[i]:
+                        return 1
+                
+                return 0
+            
+            # String comparison fallback
+            if version1 < version2:
+                return -1
+            elif version1 > version2:
+                return 1
+            else:
+                return 0
+
+        except Exception as e:
+            self.logger.error(f"Failed to compare subsystem versions {version1} vs {version2}: {e}")
+            # If comparison fails, assume versions are different
+            return -1 if version1 != version2 else 0
+
+    async def update_subsystem_version(self, subsystem: str, new_version: str) -> bool:
+        """
+        Update a subsystem version file.
+
+        Args:
+            subsystem: Name of the subsystem
+            new_version: New version string
+
+        Returns:
+            True if updated successfully, False otherwise
+        """
+        try:
+            version_files = {
+                "memory": "MEMORY_VERSION",
+                "agents": "AGENTS_VERSION", 
+                "ticketing": "TICKETING_VERSION",
+                "documentation": "DOCUMENTATION_VERSION",
+                "services": "SERVICES_VERSION",
+                "cli": "CLI_VERSION",
+                "integration": "INTEGRATION_VERSION",
+                "health": "HEALTH_VERSION",
+                "framework": "FRAMEWORK_VERSION"
+            }
+
+            filename = version_files.get(subsystem)
+            if not filename:
+                self.logger.error(f"Unknown subsystem: {subsystem}")
+                return False
+
+            version_file = self.framework_path / filename
+            
+            # Backup existing version file if it exists
+            if version_file.exists():
+                backup_path = await self._create_backup(version_file)
+                if backup_path:
+                    self.logger.info(f"Created backup of {filename}: {backup_path}")
+
+            # Write new version
+            version_file.write_text(new_version.strip())
+            
+            # Update in-memory tracking
+            self.subsystem_versions[subsystem] = {
+                "version": new_version,
+                "file_path": str(version_file),
+                "last_updated": datetime.now().isoformat()
+            }
+
+            self.logger.info(f"Updated {subsystem} version to: {new_version}")
+            return True
+
+        except Exception as e:
+            self.logger.error(f"Failed to update {subsystem} version to {new_version}: {e}")
+            return False
+
+    def get_subsystem_version_report(self) -> Dict[str, Any]:
+        """
+        Generate a comprehensive subsystem version report.
+
+        Returns:
+            Dictionary with detailed version information
+        """
+        try:
+            report = {
+                "report_timestamp": datetime.now().isoformat(),
+                "framework_path": str(self.framework_path),
+                "subsystem_count": len(self.subsystem_versions),
+                "subsystems": {},
+                "summary": {
+                    "total": 0,
+                    "found": 0,
+                    "missing": 0,
+                    "errors": 0
+                }
+            }
+
+            for subsystem, info in self.subsystem_versions.items():
+                version = info.get("version", "unknown")
+                status = "found"
+                
+                if version == "not_found":
+                    status = "missing"
+                    report["summary"]["missing"] += 1
+                elif version == "unknown" or "error" in info:
+                    status = "error"
+                    report["summary"]["errors"] += 1
+                else:
+                    report["summary"]["found"] += 1
+                
+                report["summary"]["total"] += 1
+                
+                report["subsystems"][subsystem] = {
+                    "version": version,
+                    "status": status,
+                    "file_path": info.get("file_path"),
+                    "last_checked": info.get("last_checked"),
+                    "error": info.get("error")
+                }
+
+            return report
+
+        except Exception as e:
+            self.logger.error(f"Failed to generate subsystem version report: {e}")
+            return {
+                "error": str(e),
+                "report_timestamp": datetime.now().isoformat()
+            }
+
     # Helper Methods
 
     def _extract_claude_md_version(self, content: str) -> Optional[str]:
@@ -1448,14 +1762,19 @@ class ParentDirectoryManager(BaseService):
 
         # Get framework version
         try:
-            # Try VERSION file first
-            version_file = self.framework_path / "VERSION"
-            if version_file.exists():
-                framework_version = version_file.read_text().strip()
+            # Try FRAMEWORK_VERSION file first (simple incremental numbering)
+            framework_version_file = self.framework_path / "FRAMEWORK_VERSION"
+            if framework_version_file.exists():
+                framework_version = framework_version_file.read_text().strip()
             else:
-                # Fall back to package version
-                import claude_pm
-                framework_version = claude_pm.__version__
+                # Try VERSION file for semantic versioning
+                version_file = self.framework_path / "VERSION"
+                if version_file.exists():
+                    framework_version = version_file.read_text().strip()
+                else:
+                    # Fall back to package version
+                    import claude_pm
+                    framework_version = claude_pm.__version__
         except:
             # Import package version as last resort
             try:

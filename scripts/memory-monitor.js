@@ -14,22 +14,26 @@ const os = require('os');
 class MemoryMonitor {
     constructor() {
         this.config = {
-            maxHeapSize: 8 * 1024 * 1024 * 1024,      // 8GB total heap
-            subprocessLimit: 2 * 1024 * 1024 * 1024,  // 2GB per subprocess
-            criticalThreshold: 0.85,                   // 85% of max heap
-            warningThreshold: 0.75,                    // 75% of max heap
+            maxHeapSize: 4 * 1024 * 1024 * 1024,      // 4GB total heap (REDUCED)
+            subprocessLimit: 1.5 * 1024 * 1024 * 1024,  // 1.5GB per subprocess (REDUCED)
+            criticalThreshold: 0.8,                    // 80% of max heap (REDUCED)
+            warningThreshold: 0.7,                     // 70% of max heap (REDUCED)
             monitorInterval: 5000,                     // 5 second intervals
-            alertCooldown: 30000,                      // 30 second alert cooldown
-            maxSubprocesses: 4                         // Maximum concurrent subprocesses
+            alertCooldown: 15000,                      // 15 second alert cooldown (REDUCED)
+            maxSubprocesses: 2,                        // Maximum concurrent subprocesses (REDUCED)
+            subprocessTimeout: 300000,                 // 5 minute subprocess timeout
+            processCleanupInterval: 30000              // Clean subprocess map every 30 seconds
         };
         
         this.state = {
             activeSubprocesses: new Map(),
+            subprocessHistory: new Map(), // Track process creation/termination times
             lastAlert: 0,
             alertCount: 0,
             monitoringStarted: Date.now(),
             memoryHistory: [],
-            predictions: []
+            predictions: [],
+            lastSubprocessCleanup: 0
         };
         
         this.setupMonitoring();
@@ -44,6 +48,7 @@ class MemoryMonitor {
         console.log(`   Monitor Interval: ${this.config.monitorInterval}ms`);
         
         this.startRealTimeMonitoring();
+        this.startSubprocessCleanup();
         this.setupSignalHandlers();
         this.initializeDashboard();
     }
@@ -59,6 +64,121 @@ class MemoryMonitor {
         }, this.config.monitorInterval * 2);
         
         console.log('✅ Real-time monitoring active');
+    }
+    
+    startSubprocessCleanup() {
+        this.subprocessCleanupInterval = setInterval(() => {
+            this.performSubprocessCleanup();
+        }, this.config.processCleanupInterval);
+        
+        console.log('🧹 Subprocess cleanup monitoring started');
+    }
+    
+    performSubprocessCleanup() {
+        const now = Date.now();
+        if (now - this.state.lastSubprocessCleanup < this.config.processCleanupInterval) {
+            return;
+        }
+        
+        this.state.lastSubprocessCleanup = now;
+        
+        // Clean up stale subprocess entries
+        this.cleanupStaleSubprocesses();
+        
+        // Force cleanup of global activeSubprocesses if it exists
+        this.cleanupGlobalSubprocessMaps();
+        
+        // Terminate long-running subprocesses
+        this.terminateLongRunningSubprocesses();
+        
+        console.log(`🧹 Subprocess cleanup complete - tracking ${this.state.activeSubprocesses.size} processes`);
+    }
+    
+    cleanupGlobalSubprocessMaps() {
+        console.log('🧹 Advanced global subprocess map cleanup with enhanced manager integration...');
+        
+        // Try to use Enhanced Subprocess Manager if available
+        try {
+            const { getSubprocessManager } = require('./enhanced-subprocess-manager.js');
+            const subprocessManager = getSubprocessManager();
+            
+            console.log('   Using Enhanced Subprocess Manager for comprehensive cleanup...');
+            
+            // Perform comprehensive cleanup through the enhanced manager
+            subprocessManager.forceCleanup();
+            
+            // Get performance metrics
+            const metrics = subprocessManager.getPerformanceMetrics();
+            const activeCount = subprocessManager.getActiveSubprocessCount();
+            
+            console.log(`   Enhanced cleanup complete: ${activeCount} active, ${metrics.totalSubprocessesTerminated} terminated`);
+            
+            // Validate zero memory retention
+            const validation = subprocessManager.validateZeroMemoryRetention();
+            if (!validation.isValid) {
+                console.log('   ⚠️ Memory retention detected, performing fallback cleanup...');
+                this.fallbackGlobalSubprocessCleanup();
+            } else {
+                console.log('   ✅ Zero memory retention validated');
+            }
+            
+        } catch (error) {
+            console.log('   Enhanced Subprocess Manager not available, using basic cleanup...');
+            this.fallbackGlobalSubprocessCleanup();
+        }
+    }
+    
+    fallbackGlobalSubprocessCleanup() {
+        // Clean up global subprocess tracking that causes memory leaks
+        if (global.activeSubprocesses && global.activeSubprocesses instanceof Map) {
+            const initialSize = global.activeSubprocesses.size;
+            
+            // Remove entries for processes that no longer exist
+            for (const [pid, processInfo] of global.activeSubprocesses) {
+                if (!this.isProcessAlive(pid)) {
+                    global.activeSubprocesses.delete(pid);
+                }
+            }
+            
+            const cleanedCount = initialSize - global.activeSubprocesses.size;
+            if (cleanedCount > 0) {
+                console.log(`   Cleaned ${cleanedCount} stale entries from global activeSubprocesses`);
+            }
+        }
+        
+        // Also clean any other global process maps
+        ['_subprocessCache', '_processTracker', '_taskToolProcesses'].forEach(mapName => {
+            if (global[mapName] && typeof global[mapName].clear === 'function') {
+                const size = global[mapName].size || 0;
+                global[mapName].clear();
+                if (size > 0) {
+                    console.log(`   Cleared ${size} entries from global ${mapName}`);
+                }
+            }
+        });
+    }
+    
+    isProcessAlive(pid) {
+        try {
+            process.kill(pid, 0); // Signal 0 checks if process exists
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+    
+    terminateLongRunningSubprocesses() {
+        const now = Date.now();
+        
+        for (const [pid, processInfo] of this.state.activeSubprocesses) {
+            const runtime = now - processInfo.lastSeen;
+            
+            if (runtime > this.config.subprocessTimeout) {
+                console.log(`🔪 Terminating long-running subprocess PID ${pid} (runtime: ${Math.round(runtime / 1000)}s)`);
+                this.terminateSubprocess(pid, processInfo.memoryUsage);
+                this.state.activeSubprocesses.delete(pid);
+            }
+        }
     }
     
     performMemoryCheck() {
@@ -307,12 +427,35 @@ class MemoryMonitor {
     
     cleanupStaleSubprocesses() {
         const now = Date.now();
-        const staleThreshold = 60000; // 1 minute
+        const staleThreshold = 30000; // 30 seconds (REDUCED)
         
+        let cleanedCount = 0;
         for (const [pid, proc] of this.state.activeSubprocesses) {
-            if (now - proc.lastSeen > staleThreshold) {
+            if (now - proc.lastSeen > staleThreshold || !this.isProcessAlive(pid)) {
                 this.state.activeSubprocesses.delete(pid);
+                cleanedCount++;
+                
+                // Also remove from history tracking
+                if (this.state.subprocessHistory.has(pid)) {
+                    this.state.subprocessHistory.delete(pid);
+                }
             }
+        }
+        
+        if (cleanedCount > 0) {
+            console.log(`   Cleaned ${cleanedCount} stale subprocess entries`);
+        }
+        
+        // Limit memory history size to prevent unbounded growth
+        if (this.state.memoryHistory.length > 200) {
+            this.state.memoryHistory = this.state.memoryHistory.slice(-100);
+            console.log('   Trimmed memory history to prevent growth');
+        }
+        
+        // Limit prediction history size
+        if (this.state.predictions.length > 50) {
+            this.state.predictions = this.state.predictions.slice(-25);
+            console.log('   Trimmed prediction history to prevent growth');
         }
     }
     
@@ -440,6 +583,13 @@ class MemoryMonitor {
         if (this.subprocessInterval) {
             clearInterval(this.subprocessInterval);
         }
+        
+        if (this.subprocessCleanupInterval) {
+            clearInterval(this.subprocessCleanupInterval);
+        }
+        
+        // Final cleanup of global maps
+        this.cleanupGlobalSubprocessMaps();
         
         // Generate final report
         this.generateFinalReport();

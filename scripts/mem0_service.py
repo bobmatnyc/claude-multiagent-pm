@@ -114,6 +114,9 @@ def get_memories_from_storage(user_id=None, query=None, limit=10):
     return all_memories[:limit]
 
 # Initialize memory with enhanced persistent configuration
+memory = None  # Initialize to None
+memory_initialized = False
+
 try:
     # Framework-standard configuration per CLAUDE.md template
     simple_config = {
@@ -138,10 +141,21 @@ try:
             }
         }
     }
-    memory = Memory.from_config(simple_config)
-    logger.info("Memory initialized with simple ChromaDB configuration")
-    logger.info(f"Memory object type after simple init: {type(memory)}")
-    logger.info(f"Memory object methods: {[m for m in dir(memory) if not m.startswith('_')]}")
+    
+    # CRITICAL: Use Memory.from_config() and validate the result
+    memory_instance = Memory.from_config(simple_config)
+    
+    # Validate the memory instance is properly initialized
+    if hasattr(memory_instance, 'add') and hasattr(memory_instance, 'get_all') and hasattr(memory_instance, 'search'):
+        memory = memory_instance
+        memory_initialized = True
+        logger.info("Memory initialized with simple ChromaDB configuration")
+        logger.info(f"Memory object type after simple init: {type(memory)}")
+        logger.info(f"Memory object methods: {[m for m in dir(memory) if not m.startswith('_')]}")
+    else:
+        logger.error(f"Memory.from_config() returned invalid object: {type(memory_instance)}")
+        raise ValueError("Memory.from_config() did not return a proper Memory object")
+        
 except Exception as e:
     logger.error(f"Failed to initialize memory with simple config: {e}")
     # Try advanced configuration
@@ -167,19 +181,47 @@ except Exception as e:
         )
         
         # Initialize memory with ChromaDB configuration
-        memory = Memory.from_config(memory_config)
-        logger.info("Memory initialized with advanced ChromaDB configuration")
-        logger.info(f"Memory object type after advanced init: {type(memory)}")
-        logger.info(f"Memory object methods: {[m for m in dir(memory) if not m.startswith('_')]}")
+        memory_instance = Memory.from_config(memory_config)
+        
+        # Validate the advanced memory instance
+        if hasattr(memory_instance, 'add') and hasattr(memory_instance, 'get_all') and hasattr(memory_instance, 'search'):
+            memory = memory_instance
+            memory_initialized = True
+            logger.info("Memory initialized with advanced ChromaDB configuration")
+            logger.info(f"Memory object type after advanced init: {type(memory)}")
+            logger.info(f"Memory object methods: {[m for m in dir(memory) if not m.startswith('_')]}")
+        else:
+            logger.error(f"Advanced Memory.from_config() returned invalid object: {type(memory_instance)}")
+            raise ValueError("Advanced Memory.from_config() did not return a proper Memory object")
+            
     except Exception as e2:
         logger.error(f"Failed to initialize memory with advanced config: {e2}")
         # Try to create a minimal memory instance
         try:
-            memory = Memory()
-            logger.info("Memory initialized with default configuration as fallback")
+            memory_instance = Memory()
+            
+            # Validate the default memory instance
+            if hasattr(memory_instance, 'add') and hasattr(memory_instance, 'get_all') and hasattr(memory_instance, 'search'):
+                memory = memory_instance
+                memory_initialized = True
+                logger.info("Memory initialized with default configuration as fallback")
+            else:
+                logger.error(f"Default Memory() returned invalid object: {type(memory_instance)}")
+                memory = None
+                memory_initialized = False
+                
         except Exception as e3:
             logger.error(f"Failed to initialize memory with default config: {e3}")
             memory = None
+            memory_initialized = False
+
+# Log final memory initialization status
+if memory_initialized and memory is not None:
+    logger.info(f"FINAL: Memory successfully initialized - type: {type(memory)}")
+    logger.info(f"FINAL: Memory has required methods: add={hasattr(memory, 'add')}, get_all={hasattr(memory, 'get_all')}, search={hasattr(memory, 'search')}")
+else:
+    logger.error("FINAL: Memory initialization FAILED - service will run with fallback storage only")
+    memory = None
 
 # Pydantic models
 class Message(BaseModel):
@@ -213,13 +255,26 @@ async def home():
 @app.post("/memories")
 async def add_memory(memory_data: MemoryCreate):
     """Store new memories."""
-    global memory
+    global memory, memory_initialized
     try:
-        # Debug: Check memory object at start of request
+        # Validate memory object before proceeding
         logger.info(f"DEBUG: Memory object type at start of POST: {type(memory)}")
-        if not hasattr(memory, 'add'):
-            logger.error("DEBUG: Memory object missing 'add' method at start of POST request")
-            raise HTTPException(status_code=500, detail="Memory service not properly initialized")
+        logger.info(f"DEBUG: Memory initialized status: {memory_initialized}")
+        
+        if not memory_initialized or memory is None or not hasattr(memory, 'add'):
+            logger.error("DEBUG: Memory object missing 'add' method or not properly initialized")
+            # Skip mem0 and go directly to fallback storage
+            content = " ".join([f"{msg.role}: {msg.content}" for msg in memory_data.messages])
+            fallback_id = add_to_memory_storage(
+                user_id=memory_data.user_id or "default_user",
+                content=content,
+                metadata=memory_data.metadata or {}
+            )
+            return {
+                "id": fallback_id,
+                "message": "Memory added to fallback storage (mem0 not available)",
+                "result": {"results": [{"id": fallback_id}], "fallback": True}
+            }
         # Convert messages to a format mem0 can understand
         messages_text = []
         for msg in memory_data.messages:
@@ -272,10 +327,13 @@ async def add_memory(memory_data: MemoryCreate):
         
         # Check total memories after adding (but don't log the full result to avoid excessive output)
         try:
-            all_memories = memory.get_all(user_id=add_data.get("user_id", "default_user"))
-            logger.info(f"get_all() returned type: {type(all_memories)}")
-            total_count = len(all_memories.get("results", [])) if isinstance(all_memories, dict) else len(all_memories) if isinstance(all_memories, list) else 0
-            logger.info(f"Total memories after add: {total_count}")
+            if memory_initialized and memory is not None and hasattr(memory, 'get_all'):
+                all_memories = memory.get_all(user_id=add_data.get("user_id", "default_user"))
+                logger.info(f"get_all() returned type: {type(all_memories)}")
+                total_count = len(all_memories.get("results", [])) if isinstance(all_memories, dict) else len(all_memories) if isinstance(all_memories, list) else 0
+                logger.info(f"Total memories after add: {total_count}")
+            else:
+                logger.info("Skipping total count check - memory not properly initialized")
         except Exception as get_all_error:
             logger.warning(f"Error checking total memories: {get_all_error}")
             # Don't fail the request if we can't get the count
@@ -293,12 +351,23 @@ async def add_memory(memory_data: MemoryCreate):
 @app.get("/memories")
 async def get_memories(user_id: Optional[str] = None, limit: int = 10):
     """Get all memories for a user."""
-    global memory
+    global memory, memory_initialized
     try:
-        # Try to get memories from mem0 first (only if memory is available)
+        # Validate memory object before proceeding
+        logger.info(f"DEBUG: Memory object type in GET: {type(memory)}")
+        logger.info(f"DEBUG: Memory initialized status: {memory_initialized}")
+        
+        # Try to get memories from mem0 first (only if memory is available and properly initialized)
         memories = {"results": []}
-        if memory:
-            memories = memory.get_all(user_id=user_id or "default_user")
+        if memory_initialized and memory is not None and hasattr(memory, 'get_all'):
+            try:
+                memories = memory.get_all(user_id=user_id or "default_user")
+                logger.info(f"get_all() returned type: {type(memories)}")
+            except Exception as get_all_error:
+                logger.error(f"Error calling memory.get_all(): {get_all_error}")
+                memories = {"results": []}
+        else:
+            logger.info("Memory not properly initialized, skipping mem0 get_all()")
         
         # If mem0 returns empty results, try fallback storage
         if isinstance(memories, dict) and not memories.get("results"):
@@ -327,11 +396,11 @@ async def get_memories(user_id: Optional[str] = None, limit: int = 10):
 @app.post("/memories/search")
 async def search_memories(search_data: MemorySearch):
     """Search memories."""
-    global memory
+    global memory, memory_initialized
     try:
-        # Try mem0 search first (only if memory is available and query is not empty)
+        # Try mem0 search first (only if memory is available, properly initialized, and query is not empty)
         results = []
-        if memory and search_data.query.strip():  # Don't search with empty queries to avoid OpenAI API errors
+        if memory_initialized and memory is not None and hasattr(memory, 'search') and search_data.query.strip():  # Don't search with empty queries to avoid OpenAI API errors
             results = memory.search(
                 query=search_data.query,
                 user_id=search_data.user_id or "default_user",
@@ -390,22 +459,32 @@ async def search_memories(search_data: MemorySearch):
 @app.get("/memories/search")
 async def get_memories_search(query: str, space_name: Optional[str] = None, limit: int = 10, include_metadata: str = "true", category: Optional[str] = None):
     """Search memories via GET endpoint (for integration compatibility)."""
-    global memory
+    global memory, memory_initialized
     try:
         # Check if memory object is properly initialized
-        if not memory:
-            logger.error("Memory object is not initialized")
-            return {"memories": [], "count": 0, "query": query, "error": "Memory not initialized"}
+        if not memory_initialized or memory is None:
+            logger.error("Memory object is not properly initialized")
+            fallback_results = get_memories_from_storage(
+                user_id=space_name,
+                query=query,
+                limit=limit
+            )
+            return {"memories": fallback_results, "count": len(fallback_results), "query": query, "source": "fallback_no_memory"}
         
         # Try mem0 search first (only if memory is available and query is not empty)
         results = []
         if query.strip():  # Don't search with empty queries to avoid OpenAI API errors
             try:
-                results = memory.search(
-                    query=query,
-                    user_id=space_name or "default_user",
-                    limit=limit
-                )
+                if hasattr(memory, 'search'):
+                    results = memory.search(
+                        query=query,
+                        user_id=space_name or "default_user",
+                        limit=limit
+                    )
+                else:
+                    logger.error(f"Memory object missing search method: {type(memory)}")
+                    logger.error(f"Memory object attributes: {dir(memory) if memory else 'None'}")
+                    raise AttributeError("Memory object missing search method")
             except AttributeError as e:
                 logger.error(f"Memory object missing search method: {e}")
                 logger.error(f"Memory object type: {type(memory)}")

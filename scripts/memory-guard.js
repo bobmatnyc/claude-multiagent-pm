@@ -14,14 +14,16 @@ const os = require('os');
 class MemoryGuard {
     constructor() {
         this.config = {
-            maxTotalMemory: 8 * 1024 * 1024 * 1024,    // 8GB total system limit
-            subprocessMemoryLimit: 2 * 1024 * 1024 * 1024, // 2GB per subprocess
-            maxConcurrentSubprocesses: 4,               // Maximum simultaneous subprocesses
+            maxTotalMemory: 4 * 1024 * 1024 * 1024,    // 4GB total system limit (REDUCED)
+            subprocessMemoryLimit: 1.5 * 1024 * 1024 * 1024, // 1.5GB per subprocess (REDUCED)
+            maxConcurrentSubprocesses: 2,               // Maximum simultaneous subprocesses (REDUCED)
             memoryCheckInterval: 10000,                 // Check every 10 seconds
-            emergencyTerminationThreshold: 0.9,         // 90% of subprocess limit
-            warningThreshold: 0.75,                     // 75% of subprocess limit
+            cacheCleanupInterval: 10000,                // Clean caches every 10 seconds
+            emergencyTerminationThreshold: 0.85,        // 85% of subprocess limit (REDUCED)
+            warningThreshold: 0.7,                      // 70% of subprocess limit (REDUCED)
             processTimeout: 300000,                     // 5 minute default timeout
-            cleanupGracePeriod: 10000                   // 10 second grace period for cleanup
+            cleanupGracePeriod: 5000,                   // 5 second grace period for cleanup (REDUCED)
+            lruCacheSize: 100                           // LRU cache maximum entries
         };
         
         this.state = {
@@ -30,23 +32,120 @@ class MemoryGuard {
             startupTimes: new Map(),
             terminationQueue: new Set(),
             totalMemoryUsed: 0,
-            lastCleanup: 0
+            lastCleanup: 0,
+            lastCacheCleanup: 0
+        };
+        
+        // Initialize LRU caches with size limits
+        this.caches = {
+            _claudePMCache: this.createLRUCache(this.config.lruCacheSize),
+            _deploymentCache: this.createLRUCache(this.config.lruCacheSize),
+            _memoryCache: this.createLRUCache(this.config.lruCacheSize),
+            _taskToolCache: this.createLRUCache(this.config.lruCacheSize),
+            _agentCache: this.createLRUCache(this.config.lruCacheSize),
+            _subprocessCache: this.createLRUCache(50) // Smaller cache for subprocess data
         };
         
         this.setupGuard();
     }
     
+    createLRUCache(maxSize) {
+        const cache = new Map();
+        cache.maxSize = maxSize;
+        
+        cache.get = function(key) {
+            if (this.has(key)) {
+                // Move to end (most recently used)
+                const value = Map.prototype.get.call(this, key);
+                this.delete(key);
+                this.set(key, value);
+                return value;
+            }
+            return undefined;
+        };
+        
+        cache.set = function(key, value) {
+            if (this.has(key)) {
+                this.delete(key);
+            } else if (this.size >= this.maxSize) {
+                // Remove least recently used (first entry)
+                const firstKey = this.keys().next().value;
+                this.delete(firstKey);
+            }
+            Map.prototype.set.call(this, key, value);
+        };
+        
+        return cache;
+    }
+
     setupGuard() {
-        console.log('🛡️ Memory Guard System - Initializing Subprocess Protection');
+        console.log('🛡️ Memory Guard System - Initializing Enhanced Memory Protection');
         console.log(`📊 Configuration:`);
-        console.log(`   Total Memory Limit: ${Math.round(this.config.maxTotalMemory / 1024 / 1024 / 1024)}GB`);
-        console.log(`   Subprocess Limit: ${Math.round(this.config.subprocessMemoryLimit / 1024 / 1024 / 1024)}GB each`);
-        console.log(`   Max Concurrent: ${this.config.maxConcurrentSubprocesses}`);
+        console.log(`   Total Memory Limit: ${Math.round(this.config.maxTotalMemory / 1024 / 1024 / 1024)}GB (REDUCED from 8GB)`);
+        console.log(`   Subprocess Limit: ${Math.round(this.config.subprocessMemoryLimit / 1024 / 1024 / 1024)}GB each (REDUCED)`);
+        console.log(`   Max Concurrent: ${this.config.maxConcurrentSubprocesses} (REDUCED)`);
         console.log(`   Process Timeout: ${this.config.processTimeout / 1000}s`);
+        console.log(`   Cache Cleanup: Every ${this.config.cacheCleanupInterval / 1000}s`);
+        console.log(`   LRU Cache Size: ${this.config.lruCacheSize} entries each`);
         
         this.startMemoryMonitoring();
+        this.startCacheCleanup();
         this.setupSignalHandlers();
         this.initializeLogging();
+        this.initializeGlobalCaches();
+    }
+
+    initializeGlobalCaches() {
+        // Replace global caches with LRU implementations
+        Object.keys(this.caches).forEach(cacheKey => {
+            global[cacheKey] = this.caches[cacheKey];
+        });
+        
+        console.log('✅ Global LRU caches initialized');
+    }
+
+    startCacheCleanup() {
+        this.cacheCleanupInterval = setInterval(() => {
+            this.performCacheCleanup();
+        }, this.config.cacheCleanupInterval);
+        
+        console.log('🧹 Cache cleanup monitoring started');
+    }
+
+    performCacheCleanup() {
+        const now = Date.now();
+        if (now - this.state.lastCacheCleanup < this.config.cacheCleanupInterval) {
+            return;
+        }
+        
+        this.state.lastCacheCleanup = now;
+        
+        // Force garbage collection if available
+        if (global.gc) {
+            global.gc();
+        }
+        
+        // Clean up stale cache entries
+        this.cleanStaleEntries();
+        
+        const memoryUsage = process.memoryUsage();
+        const heapUsedMB = Math.round(memoryUsage.heapUsed / 1024 / 1024);
+        
+        console.log(`🧹 Cache cleanup complete - heap: ${heapUsedMB}MB`);
+    }
+
+    cleanStaleEntries() {
+        Object.keys(this.caches).forEach(cacheKey => {
+            const cache = this.caches[cacheKey];
+            if (cache && cache.size > cache.maxSize * 0.8) {
+                // Remove 20% of entries when cache is 80% full
+                const entriesToRemove = Math.floor(cache.size * 0.2);
+                const keys = Array.from(cache.keys()).slice(0, entriesToRemove);
+                keys.forEach(key => cache.delete(key));
+                
+                console.log(`   Cleaned ${entriesToRemove} entries from ${cacheKey}`);
+            }
+        });
     }
     
     startMemoryMonitoring() {

@@ -13,10 +13,13 @@ const path = require('path');
 
 class MemoryOptimizer {
     constructor() {
-        this.memoryThreshold = 3.5 * 1024 * 1024 * 1024; // 3.5GB
+        this.memoryThreshold = 3.0 * 1024 * 1024 * 1024; // 3.0GB (was 3.5GB for 8GB heap)
+        this.circuitBreakerThreshold = 3.5 * 1024 * 1024 * 1024; // 3.5GB circuit breaker
         this.activeProcesses = new Set();
         this.cleanupHandlers = [];
         this.monitoringInterval = null;
+        this.lastCleanup = 0;
+        this.cleanupCooldown = 10000; // 10 seconds between cleanups
         
         this.setupSignalHandlers();
         this.startMemoryMonitoring();
@@ -46,6 +49,14 @@ class MemoryOptimizer {
         
         console.log(`🧠 Memory: ${heapUsedMB}MB used / ${heapTotalMB}MB total`);
         
+        // Circuit breaker - immediate exit at 3.5GB
+        if (usage.heapUsed > this.circuitBreakerThreshold) {
+            console.error(`🚨 CIRCUIT BREAKER: Memory usage at ${heapUsedMB}MB - exceeding safe threshold`);
+            console.error(`💀 EMERGENCY EXIT: Process terminating to prevent heap exhaustion`);
+            this.emergencyExit();
+            return true;
+        }
+        
         if (usage.heapUsed > this.memoryThreshold) {
             console.error(`❌ CRITICAL: Memory usage at ${heapUsedMB}MB - triggering emergency cleanup`);
             this.emergencyCleanup();
@@ -61,12 +72,34 @@ class MemoryOptimizer {
         return false;
     }
 
+    emergencyExit() {
+        console.log('💀 EMERGENCY EXIT INITIATED - PREVENTING HEAP EXHAUSTION');
+        
+        // Save critical state before exit
+        this.saveCriticalState();
+        
+        // Force cleanup
+        this.cleanup();
+        
+        // Exit immediately
+        setTimeout(() => {
+            process.exit(1);
+        }, 1000);
+    }
+
     emergencyCleanup() {
+        const now = Date.now();
+        if (now - this.lastCleanup < this.cleanupCooldown) {
+            console.log('⚠️  Cleanup cooldown active, skipping cleanup');
+            return;
+        }
+        
+        this.lastCleanup = now;
         console.log('🚨 Emergency memory cleanup initiated...');
         
         // Force garbage collection multiple times
         if (global.gc) {
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < 5; i++) {
                 global.gc();
                 console.log(`   GC pass ${i + 1} completed`);
             }
@@ -77,6 +110,9 @@ class MemoryOptimizer {
         
         // Clear any large data structures
         this.clearDataStructures();
+        
+        // Clear subprocess cache
+        this.clearSubprocessCache();
         
         const newUsage = process.memoryUsage();
         const newUsedMB = Math.round(newUsage.heapUsed / 1024 / 1024);
@@ -135,23 +171,148 @@ class MemoryOptimizer {
     }
 
     clearDataStructures() {
-        // Clear any global caches or large objects
-        if (global._claudePMCache) {
-            global._claudePMCache.clear();
-            global._claudePMCache = null;
+        console.log('🧹 Clearing data structures with enhanced cache management...');
+        
+        // Check if enhanced cache manager is available
+        let enhancedCacheManager = null;
+        try {
+            const EnhancedCacheManager = require('./enhanced-cache-manager.js');
+            if (global._enhancedCacheManager instanceof EnhancedCacheManager) {
+                enhancedCacheManager = global._enhancedCacheManager;
+            }
+        } catch (error) {
+            // Enhanced cache manager not available, fall back to basic cleanup
         }
         
-        if (global._deploymentCache) {
-            global._deploymentCache.clear();
-            global._deploymentCache = null;
+        if (enhancedCacheManager) {
+            console.log('   Using enhanced cache manager for optimized cleanup...');
+            
+            // Use enhanced cache manager's performance-aware cleanup
+            for (const [name, cache] of enhancedCacheManager.caches) {
+                if (cache && typeof cache.performMemoryCleanup === 'function') {
+                    const result = cache.performMemoryCleanup();
+                    console.log(`   Enhanced cleanup for ${name}: freed ${Math.round(result.memoryFreed / 1024)}KB`);
+                } else if (cache && typeof cache.clear === 'function') {
+                    cache.clear();
+                    console.log(`   Cleared cache: ${name}`);
+                }
+            }
+            
+            // Generate performance report before cleanup
+            try {
+                const report = enhancedCacheManager.generatePerformanceReport();
+                console.log(`   Cache performance report generated with ${report.globalMetrics.globalHitRatio}% hit ratio`);
+            } catch (error) {
+                console.log(`   Failed to generate performance report: ${error.message}`);
+            }
+        } else {
+            console.log('   Using basic cache cleanup...');
+            
+            // Clear any global caches or large objects (basic fallback)
+            const cacheKeys = ['_claudePMCache', '_deploymentCache', '_memoryCache', '_taskToolCache', '_agentCache', '_subprocessCache'];
+            
+            cacheKeys.forEach(cacheKey => {
+                if (global[cacheKey]) {
+                    if (typeof global[cacheKey].clear === 'function') {
+                        global[cacheKey].clear();
+                        console.log(`   Cleared basic cache: ${cacheKey}`);
+                    }
+                    global[cacheKey] = null;
+                }
+            });
         }
         
-        // Clear require cache for non-core modules
+        // Clear require cache for non-core modules more aggressively
+        let clearedModules = 0;
         Object.keys(require.cache).forEach(key => {
-            if (key.includes('node_modules') && !key.includes('core')) {
+            if (key.includes('node_modules') && !key.includes('core') && !key.includes('fs') && !key.includes('path')) {
                 delete require.cache[key];
+                clearedModules++;
             }
         });
+        
+        console.log(`   Cleared ${clearedModules} require cache entries`);
+    }
+
+    clearSubprocessCache() {
+        console.log('🗑️  Advanced subprocess cache cleanup with enhanced manager integration...');
+        
+        // Try to use Enhanced Subprocess Manager if available
+        try {
+            const { getSubprocessManager } = require('./enhanced-subprocess-manager.js');
+            const subprocessManager = getSubprocessManager();
+            
+            console.log('   Using Enhanced Subprocess Manager for comprehensive cleanup...');
+            
+            // Perform comprehensive cleanup through the enhanced manager
+            subprocessManager.forceCleanup();
+            
+            // Validate zero memory retention
+            const validation = subprocessManager.validateZeroMemoryRetention();
+            if (validation.isValid) {
+                console.log('   ✅ Zero memory retention validated');
+            } else {
+                console.log('   ⚠️ Memory retention detected:', validation.validation);
+                
+                // Fallback to manual cleanup
+                this.fallbackSubprocessCleanup();
+            }
+            
+            const metrics = subprocessManager.getPerformanceMetrics();
+            console.log(`   Enhanced cleanup stats: ${metrics.totalSubprocessesTerminated} terminated, ${metrics.memoryLeakPreventions} leaks prevented`);
+            
+        } catch (error) {
+            console.log('   Enhanced Subprocess Manager not available, using basic cleanup...');
+            this.fallbackSubprocessCleanup();
+        }
+    }
+    
+    fallbackSubprocessCleanup() {
+        // Clear activeSubprocesses Map that retains process references
+        if (global.activeSubprocesses) {
+            if (typeof global.activeSubprocesses.clear === 'function') {
+                global.activeSubprocesses.clear();
+            }
+            global.activeSubprocesses = null;
+        }
+        
+        // Clear any process tracking maps
+        this.activeProcesses.clear();
+        
+        // Clear additional global subprocess maps
+        ['_subprocessCache', '_processTracker', '_taskToolProcesses'].forEach(mapName => {
+            if (global[mapName]) {
+                if (typeof global[mapName].clear === 'function') {
+                    const size = global[mapName].size || 0;
+                    global[mapName].clear();
+                    if (size > 0) {
+                        console.log(`   Cleared ${size} entries from global ${mapName}`);
+                    }
+                }
+                global[mapName] = null;
+            }
+        });
+        
+        console.log('   Basic subprocess cache cleared');
+    }
+
+    saveCriticalState() {
+        try {
+            const state = {
+                timestamp: new Date().toISOString(),
+                memoryUsage: process.memoryUsage(),
+                processId: process.pid,
+                reason: 'circuit_breaker_triggered'
+            };
+            
+            const stateFile = path.join(process.cwd(), 'logs', 'emergency-exit-state.json');
+            fs.mkdirSync(path.dirname(stateFile), { recursive: true });
+            fs.writeFileSync(stateFile, JSON.stringify(state, null, 2));
+            
+            console.log(`💾 Critical state saved to: ${stateFile}`);
+        } catch (error) {
+            console.error(`⚠️  Failed to save critical state: ${error.message}`);
+        }
     }
 
     clearCaches() {
@@ -196,14 +357,15 @@ class MemoryOptimizer {
     }
 
     optimizeNodeProcess() {
-        // Set Node.js memory optimization flags with 8GB limit
-        process.env.NODE_OPTIONS = (process.env.NODE_OPTIONS || '') + ' --max-old-space-size=8192 --expose-gc';
+        // Set Node.js memory optimization flags with 4GB limit
+        process.env.NODE_OPTIONS = (process.env.NODE_OPTIONS || '') + ' --max-old-space-size=4096 --expose-gc --gc-interval=100';
         
         console.log('🚀 Node.js memory optimization flags set');
-        console.log('   --max-old-space-size=8192 (8GB heap limit)');
+        console.log('   --max-old-space-size=4096 (4GB heap limit - REDUCED from 8GB)');
         console.log('   --expose-gc (manual GC available)');
-        console.log('   ✅ Upgraded from 4GB to 8GB heap limit');
-        console.log('   📝 Note: --gc-interval removed (not supported in NODE_OPTIONS)');
+        console.log('   --gc-interval=100 (frequent garbage collection)');
+        console.log('   ✅ CRITICAL FIX: Reduced heap limit to prevent exhaustion');
+        console.log('   🔥 Circuit breaker at 3.5GB to prevent crashes');
     }
 
     runSystemOptimization() {

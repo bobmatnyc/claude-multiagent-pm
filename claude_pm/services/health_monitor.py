@@ -328,3 +328,104 @@ class HealthMonitorService(BaseService):
     def is_background_monitoring_active(self) -> bool:
         """Check if background monitoring is active."""
         return self._monitor_process is not None and self._monitor_process.poll() is None
+
+    async def get_subsystem_versions(self) -> Dict:
+        """Get subsystem version information from parent directory manager."""
+        try:
+            # Import here to avoid circular imports
+            from .parent_directory_manager import ParentDirectoryManager
+            
+            # Create parent directory manager instance
+            pdm = ParentDirectoryManager()
+            await pdm._initialize()
+            
+            # Get subsystem versions
+            version_info = pdm.get_subsystem_versions()
+            
+            # Clean up
+            await pdm._cleanup()
+            
+            return version_info
+            
+        except Exception as e:
+            self.logger.error(f"Failed to get subsystem versions: {e}")
+            return {
+                "error": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
+
+    async def get_subsystem_version_report(self) -> Dict:
+        """Get comprehensive subsystem version report."""
+        try:
+            # Import here to avoid circular imports
+            from .parent_directory_manager import ParentDirectoryManager
+            
+            # Create parent directory manager instance
+            pdm = ParentDirectoryManager()
+            await pdm._initialize()
+            
+            # Get detailed version report
+            report = pdm.get_subsystem_version_report()
+            
+            # Clean up
+            await pdm._cleanup()
+            
+            return report
+            
+        except Exception as e:
+            self.logger.error(f"Failed to get subsystem version report: {e}")
+            return {
+                "error": str(e),
+                "report_timestamp": datetime.now().isoformat()
+            }
+
+    async def validate_subsystem_compatibility(self, required_versions: Dict[str, str]) -> Dict:
+        """Validate subsystem version compatibility."""
+        try:
+            # Import here to avoid circular imports
+            from .parent_directory_manager import ParentDirectoryManager
+            
+            # Create parent directory manager instance
+            pdm = ParentDirectoryManager()
+            await pdm._initialize()
+            
+            # Validate compatibility
+            validation_result = await pdm.validate_subsystem_compatibility(required_versions)
+            
+            # Clean up
+            await pdm._cleanup()
+            
+            return validation_result
+            
+        except Exception as e:
+            self.logger.error(f"Failed to validate subsystem compatibility: {e}")
+            return {
+                "compatible": False,
+                "error": str(e),
+                "validation_timestamp": datetime.now().isoformat()
+            }
+
+    async def get_enhanced_health_status(self) -> Dict:
+        """Get enhanced health status including subsystem versions."""
+        try:
+            # Get base health status
+            base_status = await self.get_health_status()
+            
+            # Add subsystem version information
+            subsystem_info = await self.get_subsystem_versions()
+            
+            # Combine into enhanced status
+            enhanced_status = {
+                **base_status,
+                "subsystem_versions": subsystem_info,
+                "enhanced_timestamp": datetime.now().isoformat()
+            }
+            
+            return enhanced_status
+            
+        except Exception as e:
+            self.logger.error(f"Failed to get enhanced health status: {e}")
+            return {
+                "error": str(e),
+                "enhanced_timestamp": datetime.now().isoformat()
+            }
