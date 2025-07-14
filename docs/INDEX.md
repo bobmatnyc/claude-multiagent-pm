@@ -72,6 +72,21 @@ Welcome to the Claude Multi-Agent PM Framework documentation hub. This index pro
 | [Systems Guide](SYSTEMS_GUIDE.md) | Framework systems and automation | 12 min |
 | [Ticketing System](TICKETING_SYSTEM.md) | 42-ticket project management system | 5 min |
 
+### Design Documentation
+> **Planning & Best Practices**: Templates and guides for effective project planning
+
+| Document | Purpose | Read Time |
+|----------|---------|-----------|
+| [Design Documentation Guide](design/README.md) | Overview of design doc templates and best practices | 8 min |
+| [Refactoring Template](design/refactoring-design-doc-template.md) | Complete template for refactoring projects | 12 min |
+| [TypeScript Example](design/typescript-refactoring-example.md) | Real-world TypeScript migration example | 15 min |
+
+**Key Benefits**:
+- **Better Claude PM Results**: Clear goals and constraints improve AI assistance
+- **Reduced Scope Creep**: Defined boundaries and success criteria
+- **Improved Team Communication**: Shared understanding of approach and rationale
+- **Risk Mitigation**: Planning for rollback and testing strategies
+
 ### Framework Architecture
 The Claude PM Framework v4.5.1 represents a breakthrough in AI-assisted development through intelligent memory integration (mem0AI) and pure Task tool subprocess delegation. 
 
@@ -121,6 +136,7 @@ cat trackdown/CURRENT-STATUS.md    # Framework status
 1. [Memory Setup Guide](MEMORY_SETUP_GUIDE.md) - Zero-config memory integration
 2. [Claude PM Memory README](CLAUDE_PM_MEMORY_README.md) - Memory service overview
 3. [Authentication Setup](AUTHENTICATION_SETUP_GUIDE.md) - Security configuration
+4. [Design Documentation Guide](design/README.md) - Templates and best practices for project planning
 
 ### Agent Ecosystem
 > **11 Specialized Agents**: Core + Specialist + Code Review

@@ -1,0 +1,163 @@
+{
+  "name": "@bobmatnyc/claude-multiagent-pm",
+  "version": "0.6.1",
+  "description": "Claude Multi-Agent PM Framework - Universal deployment package for AI-driven project management",
+  "main": "claude_pm/cli.py",
+  "bin": {
+    "claude-pm": "./bin/claude-pm"
+  },
+  "keywords": [
+    "claude",
+    "project-management",
+    "ai-orchestration",
+    "subprocess-coordination",
+    "development-framework",
+    "automation",
+    "trackdown",
+    "ai-trackdown-tools",
+    "task-management",
+    "issue-tracking",
+    "pr-management",
+    "best-practices",
+    "tdd",
+    "api-first",
+    "npm-package",
+    "universal-deployment",
+    "cli-tool"
+  ],
+  "author": {
+    "name": "Robert (Masa) Matsuoka",
+    "email": "masa@matsuoka.com",
+    "url": "https://github.com/matsuoka"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bobmatnyc/claude-multiagent-pm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bobmatnyc/claude-multiagent-pm/issues"
+  },
+  "homepage": "https://github.com/bobmatnyc/claude-multiagent-pm#readme",
+  "engines": {
+    "node": ">=16.0.0",
+    "python": ">=3.8.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "scripts": {
+    "start": "NODE_OPTIONS='--max-old-space-size=8192 --gc-interval=100 --expose-gc' node claude_pm/cli.py",
+    "start:memory-safe": "NODE_OPTIONS='--max-old-space-size=8192 --gc-interval=100 --expose-gc' node scripts/memory-optimization.js monitor",
+    "memory:monitor": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' node scripts/memory-monitor.js",
+    "memory:optimize": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' node scripts/memory-optimization.js optimize",
+    "memory:guard": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' node scripts/memory-guard.js",
+    "postinstall": "node install/postinstall.js",
+    "prepublishOnly": "npm run pre-publish:no-docker",
+    "ai-trackdown-setup": "npm install -g @bobmatnyc/ai-trackdown-tools",
+    "verify-dependencies": "aitrackdown --version && atd --version",
+    "test": "node install/validate.js --verbose",
+    "validate-env": "node install/validate.js",
+    "install-to": "node install/install.js",
+    "deploy": "node install/deploy.js",
+    "deploy:verbose": "node install/deploy.js --verbose",
+    "deploy:dry-run": "node install/deploy.js --dry-run --verbose",
+    "validate-deployment": "node install/validate-deployment.js",
+    "health-check": "./trackdown/scripts/health-check.sh",
+    "fix-npm-deployment": "node scripts/fix_npm_deployment.js",
+    "monitor:health": "node scripts/automated-health-monitor.js monitor",
+    "monitor:once": "node scripts/automated-health-monitor.js once",
+    "monitor:status": "node scripts/automated-health-monitor.js status",
+    "monitor:reports": "node scripts/automated-health-monitor.js reports",
+    "monitor:alerts": "node scripts/automated-health-monitor.js alerts",
+    "monitor:verbose": "node scripts/automated-health-monitor.js once --verbose",
+    "monitor:background": "node scripts/automated-health-monitor.js monitor --interval=10",
+    "monitor:setup": "./scripts/setup-health-monitoring.sh",
+    "docker:validate": "node scripts/pre-publish-docker-validation.js",
+    "docker:validate:verbose": "node scripts/pre-publish-docker-validation.js --verbose",
+    "docker:validate:dry-run": "node scripts/pre-publish-docker-validation.js --dry-run --verbose",
+    "docker:quick-test": "./scripts/docker-validation-helper.sh quick-test",
+    "docker:build-env": "./scripts/docker-validation-helper.sh build-env",
+    "docker:clean": "./scripts/docker-validation-helper.sh clean",
+    "docker:status": "./scripts/docker-validation-helper.sh status",
+    "docker:debug": "./scripts/docker-validation-helper.sh debug",
+    "pre-publish": "./scripts/docker-validation-helper.sh pre-publish --verbose",
+    "pre-publish:quick": "npm run docker:quick-test && npm run test",
+    "pre-publish:full": "npm run pre-publish",
+    "pre-publish:validation": "node scripts/comprehensive-pre-publish-validation.js",
+    "pre-publish:standard": "npm run test && npm run validate-deployment && echo '✅ Standard pre-publish validation completed'",
+    "pre-publish:comprehensive": "node scripts/comprehensive-pre-publish-validation.js --verbose",
+    "pre-publish:no-docker": "node scripts/comprehensive-pre-publish-validation.js --skip-docker",
+    "version": "echo $npm_package_version",
+    "release": "standard-version",
+    "release:major": "standard-version --release-as major",
+    "release:minor": "standard-version --release-as minor",
+    "release:patch": "standard-version --release-as patch"
+  },
+  "files": [
+    "bin/",
+    "install/",
+    "claude_pm/",
+    "config/",
+    "requirements/",
+    "schemas/",
+    "templates/",
+    "framework/",
+    "docs/",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@bobmatnyc/ai-trackdown-tools": "^1.1.2"
+  },
+  "devDependencies": {
+    "standard-version": "^9.5.0"
+  },
+  "standard-version": {
+    "types": [
+      {
+        "type": "feat",
+        "section": "Features"
+      },
+      {
+        "type": "fix",
+        "section": "Bug Fixes"
+      },
+      {
+        "type": "docs",
+        "section": "Documentation"
+      },
+      {
+        "type": "framework",
+        "section": "Framework"
+      },
+      {
+        "type": "chore",
+        "hidden": true
+      },
+      {
+        "type": "style",
+        "hidden": true
+      },
+      {
+        "type": "refactor",
+        "section": "Code Refactoring"
+      },
+      {
+        "type": "perf",
+        "section": "Performance Improvements"
+      },
+      {
+        "type": "test",
+        "hidden": true
+      }
+    ]
+  }
+}
