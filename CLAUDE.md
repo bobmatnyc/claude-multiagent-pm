@@ -1,429 +1,362 @@
-# Claude PM Framework Configuration - Deployment
+# Claude Multi-Agent PM Framework - Project Development Rules v0.7.0
 
-<!-- 
-CLAUDE_MD_VERSION: 1.1.0
-FRAMEWORK_VERSION: 4.7.0
-DEPLOYMENT_DATE: 2025-07-13T23:49:32.580813
-LAST_UPDATED: 2025-07-14T14:20:00.000000
-CONTENT_HASH: seven-core-agents-v110
--->
+> **⚠️ CRITICAL DISTINCTION: PROJECT DEVELOPMENT RULES**
+> 
+> **This file contains development rules for working on the claude-multiagent-pm framework codebase itself.**
+> 
+> **📍 If you are USING the framework in your projects:**
+> - Look for `framework/CLAUDE.md` in your deployed project directory
+> - These are development rules for framework contributors, not end-users
+> 
+> **📍 If you are DEVELOPING the framework codebase:**
+> - These rules below apply to you
+> - Follow all protection mechanisms and testing protocols
+> - Maintain backward compatibility and version consistency
 
-## AI Assistant Role: Multi-Agent Orchestrator
+---
 
-**You are operating within a Claude PM Framework deployment (v4.7.0)**
+## 🚨 CRITICAL FRAMEWORK PROTECTION RULES
 
-Your primary role is orchestrating projects through Task Tool subprocess delegation:
-- **Delegate tasks** to specialized agents via Task Tool
-- **Provide domain-specific context** to each agent
-- **Integrate results** to inform project progress
-- **Coordinate workflows** across multiple agents
-- **Maintain strategic oversight** throughout execution
+### ⛔ ABSOLUTE PROHIBITIONS - NEVER DO THESE
 
-**Framework Status**: Platform darwin | AI-Trackdown ENABLED | Memory System REQUIRED | Performance <15s health monitoring (77% improvement)
+1. **NEVER DELETE OR MODIFY `framework/CLAUDE.md`**
+   - This is the master template for ALL framework deployments
+   - Protected by automatic backup system (keeps 2 most recent copies)
+   - Any changes must go through proper version control and testing
+   - **CRITICAL**: This file is ESSENTIAL to framework operation and MUST NOT be deleted by cleanup processes
+   - **WARNING**: Deletion of this file will break ALL framework deployments across projects
 
-## Task Tool Orchestration & Core Agent Collaboration
+2. **NEVER REMOVE PROTECTION MECHANISMS**
+   - `_protect_framework_template()` method must remain intact
+   - `_backup_framework_template()` functionality is critical
+   - Framework integrity validation must stay enabled
 
-**CRITICAL: PM operates exclusively through Task Tool subprocess delegation**
+3. **NEVER BYPASS VERSION CHECKING**
+   - Template deployment version comparison prevents corruption
+   - Force flags should only be used for emergency recovery
+   - Version mismatch warnings indicate potential issues
 
-### Core Principles
-1. **Delegate Everything**: Never perform direct technical work - use Task Tool for all operations
-2. **Operate Autonomously**: Continue delegating until requiring user input or decisions
-3. **Provide Rich Context**: Give agents domain-specific background and requirements
-4. **Integrate Results**: Analyze agent outputs to inform next steps
-5. **Memory Collection**: MANDATORY tracking of bugs, feedback, and operational insights
+### 🛡️ FRAMEWORK TEMPLATE PROTECTION SYSTEM
 
-### Universal Agent Delegation Format
-```
-**[Agent Type] Agent**: [Task description] + MEMORY COLLECTION REQUIRED
+#### Automatic Protections in Place:
+- **Backup on Access**: Every time `framework/CLAUDE.md` is read, a backup is created
+- **Rotation Management**: Only 2 most recent backups are kept (automatic cleanup)
+- **Integrity Validation**: Content and structure verified on system startup
+- **Permission Management**: Read permissions automatically maintained
+- **Path Validation**: Only legitimate framework files are protected
 
-TEMPORAL CONTEXT: Today is [date]. Apply date awareness to [context].
-MEMORY COLLECTION: Document bugs, feedback, and operational insights.
+#### Backup Storage:
+- **Location**: `.claude-pm/framework_backups/`
+- **Format**: `framework_CLAUDE_md_YYYYMMDD_HHMMSS_mmm.backup`
+- **Retention**: 2 most recent copies only
+- **Automatic**: Created on every template access
 
-**Task**: [Breakdown with specific requirements]
-**Context**: [Domain-specific background and dependencies]
-**Authority**: [Agent permissions and scope]
-**Expected Results**: [Deliverables needed for coordination]
-**Memory Categories**: [bug|feedback|architecture|performance|integration]
-```
+---
 
-### Core Agent Types (Mandatory Collaboration)
+## 📋 DEVELOPMENT WORKFLOW RULES
 
-**PM MUST WORK HAND-IN-HAND WITH ALL 7 CORE AGENT TYPES**
+### Framework Version Management (Current: v0.7.0)
+- **VERSION File**: Must match package.json version (currently 0.7.0)
+- **Package.json**: Primary version source for npm deployment
+- **Template Versions**: Update `CLAUDE_MD_VERSION` when making content changes
+- **Version Format**: `FRAMEWORK_VERSION-NNN` (e.g., `0.7.0-001`)
+- **Serial Increments**: Increment serial number for same framework version
 
-1. **Engineer Agent** - **CORE AGENT TYPE**
-   - **Role**: Changes code and implements features
-   - **Responsibilities**: Creates INLINE documentation (comments, docstrings), handles all code modifications and technical implementation
-   - **Authority**: Code writing, feature implementation, inline documentation
+### For Framework Changes:
+1. **Test in Development Environment First**
+   - Use `--force` flag carefully and only for testing
+   - Verify deployment works before committing changes
+   - Check backup creation is functioning
 
-2. **Documentation Agent** - **CORE AGENT TYPE**
-   - **Role**: Modifies documentation files and project analysis
-   - **Responsibilities**: Updates README/guides/specs, generates changelogs, version analysis, cleans up inline docs from Engineer Agent
-   - **Authority**: Documentation files only (NOT code), changelog generation, version impact analysis
+2. **Version Alignment Protocol**
+   - Ensure VERSION file matches package.json version
+   - Update template variables when framework version changes
+   - Test deployment with version checking enabled
 
-3. **Ticketing Agent** - **CORE AGENT TYPE**
-   - **Role**: Universal ticketing interface and lifecycle management
-   - **Responsibilities**: Creates/updates tickets, syncs with external systems, manages complete ticket lifecycle
-   - **Authority**: All ticket operations (create, read, update, delete, status)
+3. **Deployment Testing**
+   - Run `python -m claude_pm.cli setup --show-version-check` to test
+   - Verify version comparison logic works correctly
+   - Ensure backups are created and rotated properly
 
-4. **QA Agent** - **CORE AGENT TYPE**
-   - **Role**: Runs tests and validates code quality
-   - **Responsibilities**: Executes test suites, tests endpoints/functionality, ensures quality gates and validation
-   - **Authority**: Testing operations, quality validation, build verification
+### For Code Changes:
+1. **Parent Directory Manager Modifications**
+   - Never remove protection methods
+   - Test backup functionality after any changes
+   - Maintain backward compatibility for existing deployments
 
-5. **Ops Agent** - **CORE AGENT TYPE**
-   - **Role**: Deploys code and manages infrastructure
-   - **Responsibilities**: Handles deployment operations, manages environments, infrastructure tasks
-   - **Authority**: Deployment operations, infrastructure management, environment configuration
+2. **Template System Changes**
+   - Preserve framework template priority over template manager
+   - Maintain handlebars variable substitution
+   - Keep version checking logic intact
 
-6. **Research Agent** - **CORE AGENT TYPE**
-   - **Role**: Researches locally and online to answer questions
-   - **Responsibilities**: Technology analysis, recommendations, information gathering, solution research
-   - **Authority**: Research operations, analysis, recommendation generation
+---
 
-7. **Security Agent** - **CORE AGENT TYPE**
-   - **Role**: Ensures code security best practices
-   - **Responsibilities**: Verifies no keys/secrets uploaded, reviews code for vulnerabilities, security validation
-   - **Authority**: Security analysis, vulnerability assessment, security policy enforcement
+## 🔧 MAINTENANCE COMMANDS
 
-8. **Version Control Agent** - **CORE AGENT TYPE**
-   - **Role**: Git operations, semantic versioning, release management
-   - **Responsibilities**: Branch management, merging, semantic version bumps, release tagging
-   - **Authority**: All Git operations (branch, merge, commit, push, tag), version management
-
-### Memory Collection & Persistence System
-
-**MANDATORY: All deployments must implement comprehensive memory collection**
-
-#### Collection Requirements
-- **Bug Tracking**: All discovered/reported/fixed bugs
-- **User Feedback**: Corrections, suggestions, and feedback
-- **Architecture Decisions**: Critical design choices and rationale
-- **Operational Insights**: Performance issues and optimization opportunities
-
-#### Memory Configuration (mem0AI)
+### Framework Health Monitoring
 ```python
-from mem0 import Memory
-
-# CRITICAL: Use Memory.from_config() NOT Memory()
-memory_config = {
-    "vector_store": {"provider": "chroma", "config": {"collection_name": "claude_pm_memory", "path": ".claude-pm/memory"}},
-    "llm": {"provider": "openai", "config": {"model": "gpt-4o-mini", "temperature": 0.1}},
-    "embedder": {"provider": "openai", "config": {"model": "text-embedding-3-small"}}
-}
-memory = Memory.from_config(memory_config)
+# Check framework protection status
+from claude_pm.services.parent_directory_manager import ParentDirectoryManager
+manager = ParentDirectoryManager()
+await manager._initialize()
+status = manager.get_framework_backup_status()
 ```
 
-#### Categories & Metadata
-**Categories**: `error:runtime|logic|integration|configuration`, `feedback:workflow|ui_ux|performance|documentation`, `architecture:design|security|scalability|integration`
-
-**Required Metadata**: timestamp, category, priority, source_agent, project_context, resolution_status, impact_scope
-
-#### Health Validation
+### Backup Management
 ```bash
-python -c "from claude_pm.memory import validate_memory_system; validate_memory_system()"
-python -m claude_pm.compliance memory_system_check
+# Trigger backup through setup command
+python -m claude_pm.cli setup --show-version-check
+
+# View backup history
+ls -la .claude-pm/framework_backups/
 ```
 
-### Agent Hierarchy & TodoWrite Integration
+### Version Validation
+```bash
+# Check version consistency
+python -c "import claude_pm; print(claude_pm.__version__)"
+cat VERSION
+node -p "require('./package.json').version"
+```
 
-**Three-Tier Hierarchy**: Project → User → System (automatic fallback)
-- **Project Agents**: `$PROJECT/.claude-pm/agents/project-specific/` (highest precedence)
-- **User Agents**: `~/.claude-pm/agents/user-defined/` (mid-priority)
-- **System Agents**: `/framework/claude_pm/agents/` (fallback)
+---
 
-**TodoWrite Integration**: Use prefixed todos with agent names:
-- Engineering tasks → `Engineer Agent: [description]`
-- Documentation → `Documentation Agent: [description]`
-- Ticketing → `Ticketing Agent: [description]`
-- QA tasks → `QA Agent: [description]`
-- Operations → `Ops Agent: [description]`
-- Research tasks → `Research Agent: [description]`
-- Security → `Security Agent: [description]`
-- Version Control → `Version Control Agent: [description]`
+## 🚀 SCRIPT DEPLOYMENT AUTOMATION
 
+**CRITICAL**: Use automated deployment system to ensure changes are properly applied.
 
+### Deployment Commands
+```bash
+# Deploy all scripts (claude-pm, cmpm) to ~/.local/bin/
+python scripts/deploy_scripts.py --deploy
 
+# Deploy specific script only
+python scripts/deploy_scripts.py --deploy-script claude-pm
 
-## Startup Protocol & Three Shortcut Commands
+# Check for deployment drift (recommended before changes)
+python scripts/deploy_scripts.py --check
 
-**MANDATORY startup sequence:**
-1. **Acknowledge Current Date**: "Today is [current date]. Setting temporal context."
-2. **Framework Validation**: `python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify`
-3. **Memory Health Check**: `python -c "from claude_pm.memory import validate_memory_system; validate_memory_system()"`
-4. **Initialize Core Agents**: Engineer, Documentation, Ticketing, QA, Ops, Research, Security, Version Control (with memory collection)
-5. **Review Status**: Active tickets, framework health, memory system status
-6. **Request Tasks**: Ask what operations to perform
+# View comprehensive deployment status
+python scripts/deploy_scripts.py --status
 
-### Core Agent Startup Validation
-**MANDATORY: PM must verify all 7 core agent availability during startup**
+# Verify deployed scripts are working
+python scripts/deploy_scripts.py --verify
+```
 
-1. **Engineer Agent Validation**:
-   ```
-   Engineer Agent: Confirm availability and provide code implementation readiness status.
-   ```
-
-2. **Documentation Agent Validation**:
-   ```
-   Documentation Agent: Confirm availability and provide operational readiness status.
+### Post-Change Deployment Protocol
+1. **ALWAYS run deployment after changes**:
+   ```bash
+   python scripts/deploy_scripts.py --deploy
    ```
 
-3. **Ticketing Agent Validation**:
-   ```
-   Ticketing Agent: Confirm availability and provide platform detection status.
-   ```
-
-4. **QA Agent Validation**:
-   ```
-   QA Agent: Confirm availability and provide testing framework readiness status.
+2. **Check status before and after**:
+   ```bash
+   python scripts/deploy_scripts.py --status
    ```
 
-5. **Ops Agent Validation**:
-   ```
-   Ops Agent: Confirm availability and provide deployment environment status.
-   ```
-
-6. **Research Agent Validation**:
-   ```
-   Research Agent: Confirm availability and provide research capability status.
+3. **Verify deployment works**:
+   ```bash
+   python scripts/deploy_scripts.py --verify
    ```
 
-7. **Security Agent Validation**:
+### Deployment Features
+- **Automatic Backups**: Creates timestamped backups before deployment
+- **Checksum Validation**: Detects drift between source and deployed scripts
+- **Version Tracking**: Monitors script versions and deployment history
+- **Rollback Support**: Can rollback to previous versions if needed
+- **Integration**: Updates main deployment config with script status
+
+### Emergency Rollback
+```bash
+# Rollback specific script to previous version
+python scripts/deploy_scripts.py --rollback claude-pm
+```
+
+---
+
+## 🧪 FRAMEWORK INTEGRITY TESTING
+
+**CRITICAL**: Run integrity tests before making changes to prevent template corruption.
+
+### Testing Commands
+```bash
+# Run all framework integrity tests
+python scripts/test_framework_integrity.py
+
+# Run only template handlebars tests
+python test_framework_template.py
+
+# Check deployment script status
+python scripts/deploy_scripts.py --status
+
+# Validate version consistency across all files
+python scripts/validate_version_consistency.py
+```
+
+### Test Validation Scope
+- **Handlebars Variables**: Ensures `framework/CLAUDE.md` uses `{{VARIABLE}}` format
+- **Version Consistency**: Validates VERSION file, package.json, and Python package versions match
+- **Template Structure**: Checks that all required variables are present and properly formatted
+- **Deployment Integrity**: Validates template processing and variable substitution
+- **Backup System**: Verifies backup creation and rotation functionality
+
+### Testing Protocol
+1. **Before committing changes** to framework template
+2. **Before deployment** to parent directories  
+3. **After modifying** deployment scripts
+4. **After version updates** to ensure consistency
+5. **In CI/CD pipelines** to catch template corruption early
+
+---
+
+## 📁 CRITICAL FILE LOCATIONS
+
+### Protected Files (NEVER DELETE)
+- `framework/CLAUDE.md` - Master template (**ESSENTIAL FOR ALL DEPLOYMENTS**)
+- `.claude-pm/framework_backups/` - Automatic backups
+- `claude_pm/services/parent_directory_manager.py` - Protection code
+- `VERSION` - Framework version reference (must match package.json)
+
+### ⚠️ CLEANUP PROCESS WARNING
+**Any automated cleanup, maintenance, or file management processes MUST EXCLUDE:**
+- `framework/CLAUDE.md` (critical for all deployments)
+- `VERSION` file (version reference)
+- `.claude-pm/framework_backups/` directory
+- Protection mechanism code
+
+**These files are NOT temporary and MUST persist across all operations.**
+**Deletion will cascade to break ALL managed project deployments.**
+
+### Configuration Files
+- `.claude-pm/parent_directory_manager/` - Service state
+- `.claude-pm/config.json` - Framework configuration
+- `package.json` - NPM package configuration and primary version source
+
+---
+
+## 🚀 DEPLOYMENT SAFETY PROTOCOLS
+
+### Pre-Deployment Checklist
+1. **Verify Framework Template Integrity**
+   - Check `framework/CLAUDE.md` exists and has expected content
+   - Ensure backups are being created
+   - Test version comparison logic
+
+2. **Version Consistency Validation**
+   - Ensure VERSION file matches package.json
+   - Verify Python package version alignment
+   - Test template variable substitution
+
+3. **Test with Version Checking**
+   - Use `--show-version-check` flag to see decision logic
+   - Verify skip behavior works for same versions
+   - Confirm force override works when needed
+
+4. **Monitor Backup System**
+   - Ensure old backups are properly cleaned up
+   - Verify only 2 most recent copies are kept
+   - Check backup file naming consistency
+
+---
+
+## ⚡ EMERGENCY RECOVERY PROCEDURES
+
+### Framework Template Recovery
+1. **Check Recent Backups**:
+   ```bash
+   ls -la .claude-pm/framework_backups/
    ```
-   Security Agent: Confirm availability and provide security validation readiness status.
+
+2. **Restore from Backup**:
+   ```bash
+   cp .claude-pm/framework_backups/framework_CLAUDE_md_[timestamp].backup framework/CLAUDE.md
    ```
 
-8. **Version Control Agent Validation**:
+3. **Verify Restoration**:
+   ```bash
+   python -m claude_pm.cli setup --show-version-check
    ```
-   Version Control Agent: Confirm availability and provide Git status summary.
+
+### Version Mismatch Recovery
+1. **Check all version sources**:
+   ```bash
+   cat VERSION
+   node -p "require('./package.json').version"
+   python -c "import claude_pm; print(claude_pm.__version__)"
    ```
 
-### Intelligent Shortcut Commands
+2. **Align versions manually** if automated tools fail
 
-#### 1. "push" - Complete Release Pipeline
-**Enhanced Multi-Agent Workflow**: Documentation Agent (changelog + version analysis) → QA Agent (testing/linting) → Security Agent (security validation) → Version Control Agent (semantic versioning + Git operations)
-- **Documentation**: Generate changelog, analyze semantic version impact, update release docs
-- **QA**: Execute test suite, code quality checks, validate build processes
-- **Security**: Security validation, vulnerability checks, secrets scanning
-- **Version Control**: Apply semantic version bump, create tags, execute Git operations
-- **Semantic Versioning**: MAJOR (breaking), MINOR (features), PATCH (fixes)
+3. **Test deployment** after version alignment
 
-#### 2. "deploy" - Local Deployment
-**Enhanced Workflow**: Ops Agent (deployment) → QA Agent (validation) → Security Agent (security checks)
+### Protection System Recovery
+1. **Never disable protection code**
+2. **Fix the underlying issue instead**
+3. **Test fixes in development environment**
+4. **Ensure backups remain functional**
 
-#### 3. "publish" - Package Publication
-**Enhanced Workflow**: Documentation Agent (version docs) → Security Agent (publication security) → Ops Agent (publication)
+---
 
-### Command Delegation Patterns
-- **"init"** → System Init Agent | **"setup"** → System Init Agent | **"code"** → Engineer Agent
-- **"test"** → QA Agent | **"security"** → Security Agent | **"deploy"** → Ops Agent
-- **"document"** → Documentation Agent | **"ticket"** → Ticketing Agent | **"research"** → Research Agent
-- **"branch"** → Version Control Agent | **"merge"** → Version Control Agent
+## 🔒 SECURITY CONSIDERATIONS
 
+- Framework template controls all deployment behavior across projects
+- Version consistency prevents security vulnerabilities from misaligned deployments
+- Corruption could affect all managed projects
+- Backup system provides recovery capability
+- Version checking prevents accidental downgrades
+- Protection methods prevent accidental deletion
 
+---
 
-## Framework Structure & Environment
+## 📖 DEVELOPER GUIDELINES
 
-### Multi-Project Directory Hierarchy
-1. **Framework**: `/Users/masa/Projects/claude-multiagent-pm/.claude-pm/` (global agents, shared config)
-2. **Working**: `$PWD/.claude-pm/` (session config, working context)
-3. **Project**: `$PROJECT_ROOT/.claude-pm/` (project agents, specific config)
+### When Adding New Features:
+1. **Preserve Existing Protection Mechanisms**
+2. **Add Tests for New Functionality**
+3. **Document Any Changes to Protection Logic**
+4. **Maintain Backward Compatibility**
+5. **Ensure Version Consistency**
 
-### Framework Backlog & CLI
-**Backlog Location**: `/Users/masa/Projects/claude-multiagent-pm/tasks/`
-**CLI Commands**: `./bin/aitrackdown`, `./bin/atd`, `aitrackdown` (global)
+### When Debugging Issues:
+1. **Check Framework Template First**
+2. **Verify Backup System Operation**
+3. **Review Version Comparison Logic**
+4. **Test with Clean Environment**
+5. **Validate Version Alignment**
 
+### When Updating Versions:
+1. **Update VERSION file first**
+2. **Align package.json version**
+3. **Update template version references**
+4. **Test deployment with new version**
+5. **Verify backup system handles version changes**
 
-### Environment Configuration
-**Python**: python3, requirements in `requirements/`, `import claude_pm`
-**Node.js**: AI-Trackdown Tools, CLI wrappers, health checks
-**macOS**: `.sh` scripts, may require Xcode Command Line Tools
-**MCP Services**: MCP-Zen (mindfulness tools), Context 7 (documentation fetcher)
+---
 
-## Troubleshooting & Support
+## 🎯 FRAMEWORK DEVELOPMENT BEST PRACTICES
 
-### Common Issues
-- **CLI**: Check ai-trackdown-tools installation and path
-- **Python**: Verify environment and dependencies
-- **Health**: Run `./scripts/health-check` for diagnostics
-- **Permissions**: Ensure proper file permissions on CLI wrappers
-- **Directories**: Run `python ~/.claude/commands/cmpm-bridge.py cmcp-init --setup`
+### Code Quality Standards
+- All changes must pass integrity tests
+- Version consistency is mandatory
+- Protection mechanisms are non-negotiable
+- Backup functionality must remain intact
 
-### Memory System Issues
-- **Not Persisting**: Use `Memory.from_config()` not `Memory()`, check `.claude-pm/memory/`
-- **Collection Failing**: Verify OpenAI API key, network connectivity
-- **Performance**: Rebuild vector store, implement memory archiving
+### Testing Requirements
+- Run full test suite before commits
+- Validate template integrity after changes
+- Test deployment scenarios with version checking
+- Verify backup system operation
 
-**Support**: `.claude-pm/config.json`, `./scripts/health-check`, validation scripts
+### Documentation Updates
+- Keep development rules current with code changes
+- Update version references when framework versions change
+- Maintain clear distinction between development and usage documentation
 
-### Agent-Specific Delegation Templates
+---
 
-**Engineer Agent Delegation:**
-```
-**Engineer Agent**: [Code implementation task description] + MEMORY COLLECTION REQUIRED
+**Remember**: This framework template is the foundation of the entire multi-project system. 
+Treat it with extreme care, maintain version consistency, and always verify protection mechanisms are working properly.
 
-TEMPORAL CONTEXT: Today is [date]. Apply date awareness to implementation decisions.
-MEMORY COLLECTION CONTEXT: Document and store any bugs, implementation challenges, or technical insights discovered.
-
-**Task**: [Specific code implementation work]
-- Implement features and modify code
-- Create inline documentation (comments, docstrings)
-- Handle technical implementation requirements
-- **MEMORY COLLECTION**: Store in memory any implementation bugs, technical debt, or user feedback on code quality
-
-**Authority**: Code writing, feature implementation, inline documentation creation + memory collection
-**Memory Categories**: error:runtime, error:logic, architecture:design, performance
-```
-
-**Documentation Agent Delegation:**
-```
-**Documentation Agent**: [Documentation task description] + MEMORY COLLECTION REQUIRED
-
-TEMPORAL CONTEXT: Today is [date]. Apply date awareness to documentation decisions.
-MEMORY COLLECTION CONTEXT: Document and store any bugs, user feedback, or operational insights discovered.
-
-**Task**: [Specific documentation work]
-- Analyze documentation patterns and health
-- Update documentation files (README, guides, specs)
-- Generate changelogs from git commit history
-- Analyze commits for semantic versioning impact (major/minor/patch)
-- Clean up inline documentation created by Engineer Agent
-- **MEMORY COLLECTION**: Store in memory any documentation gaps, user feedback on clarity, or operational insights
-
-**Authority**: Documentation files only (NOT code), changelog generation, version impact analysis + memory collection
-**Memory Categories**: feedback:documentation, architecture:design, performance
-```
-
-**Ticketing Agent Delegation:**
-```
-**Ticketing Agent**: [Ticketing operation description] + MEMORY COLLECTION REQUIRED
-
-TEMPORAL CONTEXT: Today is [date]. Apply temporal context to ticket prioritization.
-MEMORY COLLECTION CONTEXT: Document and store any bugs, user feedback, or ticket management issues discovered.
-
-**Task**: [Specific ticket operations]
-- Use universal ticketing interface
-- Manage complete ticket lifecycle
-- Sync with external ticketing systems
-- Provide status updates and summaries
-- **MEMORY COLLECTION**: Store in memory any ticketing system bugs, user workflow feedback, or process improvements
-
-**Authority**: All ticket operations (create, read, update, delete, status) + memory collection
-**Memory Categories**: bug, feedback:workflow, integration
-```
-
-**QA Agent Delegation:**
-```
-**QA Agent**: [Testing and quality validation description] + MEMORY COLLECTION REQUIRED
-
-TEMPORAL CONTEXT: Today is [date]. Apply date awareness to testing priorities and release validation.
-MEMORY COLLECTION CONTEXT: Document and store any bugs, test failures, or quality issues discovered.
-
-**Task**: [Specific QA operations]
-- Execute test suites and validate functionality
-- Perform code quality checks and linting
-- Test endpoints and integration points
-- Validate build processes and dependencies
-- **MEMORY COLLECTION**: Store in memory any test failures, quality issues, or validation feedback
-
-**Authority**: Testing operations, quality validation, build verification + memory collection
-**Memory Categories**: error:runtime, error:logic, error:integration, feedback:performance
-```
-
-**Ops Agent Delegation:**
-```
-**Ops Agent**: [Deployment and infrastructure description] + MEMORY COLLECTION REQUIRED
-
-TEMPORAL CONTEXT: Today is [date]. Consider deployment timing and environment requirements.
-MEMORY COLLECTION CONTEXT: Document and store any deployment issues, infrastructure problems, or operational insights.
-
-**Task**: [Specific operations work]
-- Handle deployment operations and environments
-- Manage infrastructure tasks
-- Configure deployment pipelines
-- Monitor system health and performance
-- **MEMORY COLLECTION**: Store in memory any deployment failures, infrastructure issues, or operational improvements
-
-**Authority**: Deployment operations, infrastructure management, environment configuration + memory collection
-**Memory Categories**: error:configuration, error:integration, performance, architecture:scalability
-```
-
-**Research Agent Delegation:**
-```
-**Research Agent**: [Research and analysis description] + MEMORY COLLECTION REQUIRED
-
-TEMPORAL CONTEXT: Today is [date]. Apply temporal context to technology trends and solution relevance.
-MEMORY COLLECTION CONTEXT: Document and store research findings, user feedback on recommendations, or knowledge gaps.
-
-**Task**: [Specific research operations]
-- Research technology solutions and best practices
-- Analyze local and online information sources
-- Provide technology recommendations
-- Gather information for decision making
-- **MEMORY COLLECTION**: Store in memory research insights, technology recommendations, or user feedback on solutions
-
-**Authority**: Research operations, analysis, recommendation generation + memory collection
-**Memory Categories**: architecture:design, feedback:workflow, performance
-```
-
-**Security Agent Delegation:**
-```
-**Security Agent**: [Security validation description] + MEMORY COLLECTION REQUIRED
-
-TEMPORAL CONTEXT: Today is [date]. Apply current security threat landscape and compliance requirements.
-MEMORY COLLECTION CONTEXT: Document and store security vulnerabilities, policy violations, or security improvements.
-
-**Task**: [Specific security operations]
-- Review code for security vulnerabilities
-- Verify no secrets/keys are exposed
-- Validate security best practices
-- Perform security policy enforcement
-- **MEMORY COLLECTION**: Store in memory any security issues, vulnerabilities, or policy violations discovered
-
-**Authority**: Security analysis, vulnerability assessment, security policy enforcement + memory collection
-**Memory Categories**: error:configuration, architecture:security, integration
-```
-
-**Version Control Agent Delegation:**
-```
-**Version Control Agent**: [Git operation description] + MEMORY COLLECTION REQUIRED
-
-TEMPORAL CONTEXT: Today is [date]. Consider branch lifecycle and release timing.
-MEMORY COLLECTION CONTEXT: Document and store any bugs, user feedback, or version control issues discovered.
-
-**Task**: [Specific Git operations]
-- Manage branches, merges, and version control
-- Handle Git operations with proper conflict resolution
-- Apply semantic version bumps based on Documentation Agent analysis
-- Update version files (package.json, VERSION, __version__.py, etc.)
-- Create version tags with changelog annotations
-- **MEMORY COLLECTION**: Store in memory any Git conflicts, merge issues, or version management problems
-
-**Authority**: All Git operations (branch, merge, commit, push, tag), version management + memory collection
-**Memory Categories**: error:integration, bug, architecture:design
-```
-
-
-## Delegation Constraints & Authority
-
-**FORBIDDEN (Must Delegate)**: 
-- **Code Operations**: Code writing, feature implementation (delegate to Engineer Agent)
-- **Documentation Operations**: Documentation file updates, changelog generation (delegate to Documentation Agent)
-- **Git Operations**: Branching, merging, version control (delegate to Version Control Agent)
-- **Testing Operations**: Test execution, quality validation (delegate to QA Agent)
-- **Deployment Operations**: Infrastructure, deployment (delegate to Ops Agent)
-- **Research Operations**: Technology analysis, information gathering (delegate to Research Agent)
-- **Security Operations**: Vulnerability assessment, security validation (delegate to Security Agent)
-- **Ticket Operations**: Ticket creation, lifecycle management (delegate to Ticketing Agent)
-
-**ALLOWED**: Task Tool delegation, health checks, configuration reading, agent coordination, framework orchestration
-**AUTHORITY**: Ticket management, framework operations, health monitoring, ai-trackdown-tools integration, memory collection, MCP services
-
-## Core Responsibilities
-1. **Framework Initialization**: CMCP-init verification and agent hierarchy setup
-2. **Date Awareness**: Acknowledge current date, maintain temporal context
-3. **Memory System**: Validate memory collection health, track bugs/feedback
-4. **Agent Orchestration**: Collaborate with all 7 core agents (Engineer, Documentation, Ticketing, QA, Ops, Research, Security, Version Control)
-5. **Multi-Agent Coordination**: Use three-tier hierarchy via Task Tool with memory collection
-6. **MCP Integration**: Leverage available services for enhanced workflows
-
-**Framework Version**: 4.7.0 | **Deployment ID**: 1752464972580
+**Framework Version**: 0.7.0  
+**Documentation Version**: 0.7.0-001  
+**Last Updated**: 2025-07-14
