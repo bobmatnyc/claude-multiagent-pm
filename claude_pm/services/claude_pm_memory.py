@@ -499,6 +499,9 @@ class ClaudePMMemory:
                     f"Invalid category: {category}. Valid categories: {list(self.categories.keys())}"
                 )
 
+            # Get subsystem versions for enhanced metadata
+            subsystem_versions = await self._get_subsystem_versions()
+            
             # Prepare metadata for mem0AI format
             raw_metadata = {
                 "category": category.value,
@@ -508,6 +511,7 @@ class ClaudePMMemory:
                 "stored_at": datetime.now().isoformat(),
                 "framework_version": "3.0.0",
                 "source": "claude_pm_memory",
+                "subsystem_versions": subsystem_versions,
                 **(metadata or {}),
             }
 
@@ -809,6 +813,49 @@ Alternatives Considered:
         return asyncio.run(self.delete_memory(memory_id))
 
     # Statistics and Monitoring
+
+    async def _get_subsystem_versions(self) -> Dict[str, str]:
+        """
+        Get current subsystem versions for memory metadata.
+        
+        Returns:
+            Dict[str, str]: Dictionary of subsystem names to version strings
+        """
+        try:
+            from .parent_directory_manager import ParentDirectoryManager
+            
+            # Create parent directory manager instance
+            pdm = ParentDirectoryManager()
+            await pdm._initialize()
+            
+            # Get subsystem version information
+            version_info = pdm.get_subsystem_versions()
+            
+            # Extract just the version strings
+            subsystems = version_info.get("subsystems", {})
+            versions = {}
+            
+            for subsystem, info in subsystems.items():
+                version = info.get("version", "unknown")
+                if version not in ["not_found", "unknown"]:
+                    versions[subsystem] = version
+            
+            # Clean up
+            await pdm._cleanup()
+            
+            # Always include memory version if available
+            if "memory" not in versions:
+                versions["memory"] = "002"  # Default current memory version
+            
+            return versions
+            
+        except Exception as e:
+            logger.warning(f"Failed to get subsystem versions for memory metadata: {e}")
+            # Return minimal version information
+            return {
+                "memory": "002",
+                "framework": "010"
+            }
 
     def get_statistics(self) -> Dict[str, Any]:
         """

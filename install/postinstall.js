@@ -225,6 +225,9 @@ class PostInstallSetup {
             // Deploy schemas
             await this.deploySchemas();
             
+            // Deploy config files
+            await this.deployConfig();
+            
             // Deploy CLI tools
             await this.deployCLITools();
             
@@ -390,6 +393,29 @@ class PostInstallSetup {
             
         } catch (error) {
             this.log(`   ❌ Failed to deploy schemas: ${error.message}`, 'error');
+            throw error;
+        }
+    }
+    
+    /**
+     * Deploy config files to ~/.claude-pm/config/
+     */
+    async deployConfig() {
+        const configSource = path.join(this.packageRoot, 'config');
+        const configTarget = this.deploymentPaths.config;
+        
+        if (!fsSync.existsSync(configSource)) {
+            this.log('   ⚠️ No config directory found in package, skipping');
+            return;
+        }
+        
+        try {
+            await this.copyDirectory(configSource, configTarget);
+            this.log('   ✅ Config files deployed');
+            await this.updateComponentStatus('config', true);
+            
+        } catch (error) {
+            this.log(`   ❌ Failed to deploy config files: ${error.message}`, 'error');
             throw error;
         }
     }
@@ -2323,7 +2349,6 @@ fi
             this.log(`   🔄 Continuing with remaining installation steps...`);
         }
     }
-}
 
     // =========================================================
     // ISS-0112: Helper Methods for Unified Installation System

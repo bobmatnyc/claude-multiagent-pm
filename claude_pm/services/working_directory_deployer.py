@@ -61,20 +61,57 @@ class WorkingDirectoryDeployer(BaseService):
     """
     
     def __init__(self):
-        super().__init__()
-        self.claude_pm_home = Path.home() / ".claude-pm"
+        super().__init__("working_directory_deployer")
+        # Try to find source installation
+        self.claude_pm_home = self._find_source_installation()
         self.validator = FrameworkDeploymentValidator()
         self.template_files = self._define_template_files()
+    
+    async def _initialize(self) -> bool:
+        """Initialize the working directory deployer."""
+        try:
+            logger.debug("Initializing WorkingDirectoryDeployer")
+            await self.validator._initialize()
+            return True
+        except Exception as e:
+            logger.error(f"Failed to initialize working directory deployer: {e}")
+            return False
+    
+    async def _cleanup(self) -> bool:
+        """Cleanup working directory deployer resources."""
+        try:
+            logger.debug("Cleaning up WorkingDirectoryDeployer")
+            await self.validator._cleanup()
+            return True
+        except Exception as e:
+            logger.error(f"Failed to cleanup working directory deployer: {e}")
+            return False
         
     def _define_template_files(self) -> Dict[str, str]:
         """Define template files to deploy."""
         return {
             'CLAUDE.md': 'templates/CLAUDE.md',
-            'config.json': 'config/working-directory-config.json',
+            'config.json': 'templates/config/working-directory-config.json',
             'agents/project-agents.json': 'templates/project-agents.json',
             'templates/project-template.md': 'templates/project-template.md',
-            'health/config.json': 'health/working-directory-health.json'
+            'health/config.json': 'templates/health/working-directory-health.json'
         }
+    
+    def _find_source_installation(self) -> Path:
+        """Find the source installation directory for templates."""
+        # Try development directory first (for development/testing)
+        current_file = Path(__file__)
+        project_root = current_file.parent.parent.parent  # Go up from services/working_directory_deployer.py
+        if (project_root / "templates").exists():
+            return project_root
+        
+        # Try NPM installation
+        npm_home = Path.home() / ".claude-pm"
+        if npm_home.exists() and (npm_home / "templates").exists():
+            return npm_home
+        
+        # Default to npm home (even if doesn't exist)
+        return npm_home
     
     async def deploy_to_working_directory(self, 
                                         working_directory: Optional[Path] = None,

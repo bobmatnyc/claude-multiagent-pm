@@ -32,6 +32,7 @@ from .scripts.service_manager import ClaudePMServiceManager
 from .cli_enforcement import enforcement_cli
 from .services.memory.cli_integration import cli_memory_trigger, MemoryIntegratedCLI
 from .cmpm_commands import register_cmpm_commands
+from .cli_deployment_integration import integrate_deployment_system
 
 console = Console()
 logger = logging.getLogger(__name__)
@@ -4128,6 +4129,10 @@ def main():
     try:
         # Register CMPM slash commands
         register_cmpm_commands(cli)
+        
+        # Integrate deployment system with mandatory validation
+        integrate_deployment_system(cli)
+        
         cli()
     except KeyboardInterrupt:
         console.print("\n[bold yellow]Operation cancelled by user[/bold yellow]")

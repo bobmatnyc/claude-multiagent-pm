@@ -59,9 +59,27 @@ class FrameworkDeploymentValidator(BaseService):
     """
     
     def __init__(self):
-        super().__init__()
+        super().__init__("framework_deployment_validator")
         self.claude_pm_home = Path.home() / ".claude-pm"
         self.expected_components = self._define_expected_components()
+    
+    async def _initialize(self) -> bool:
+        """Initialize the deployment validator."""
+        try:
+            logger.debug("Initializing FrameworkDeploymentValidator")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to initialize deployment validator: {e}")
+            return False
+    
+    async def _cleanup(self) -> bool:
+        """Cleanup deployment validator resources."""
+        try:
+            logger.debug("Cleaning up FrameworkDeploymentValidator")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to cleanup deployment validator: {e}")
+            return False
         
     def _define_expected_components(self) -> Dict[str, FrameworkComponent]:
         """Define expected framework components."""
