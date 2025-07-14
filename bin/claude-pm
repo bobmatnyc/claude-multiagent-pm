@@ -11,6 +11,19 @@ import os
 import subprocess
 from pathlib import Path
 
+# Script version - tracks claude-pm script updates independently
+def get_script_version():
+    """Get script version from bin/VERSION file."""
+    version_file = Path(__file__).parent / "VERSION"
+    if version_file.exists():
+        try:
+            return version_file.read_text().strip()
+        except OSError:
+            pass
+    return "1.0.0"  # Fallback
+
+SCRIPT_VERSION = get_script_version()
+
 # Add the framework path to Python path for imports
 framework_path = Path(__file__).parent.parent
 sys.path.insert(0, str(framework_path))
@@ -140,9 +153,20 @@ def validate_claude_cli():
 
 def show_help():
     """Display help information."""
-    version = get_framework_version()
+    package_version = get_framework_version()
+    
+    # Get framework/CLAUDE.md version
+    framework_version_file = framework_path / "framework" / "VERSION"
+    framework_version = "unknown"
+    if framework_version_file.exists():
+        try:
+            framework_version = framework_version_file.read_text().strip()
+        except:
+            pass
+    
     console.print(f"""
-[bold blue]Claude Multi-Agent PM Framework v{version}[/bold blue]
+[bold blue]Claude Multi-Agent PM Framework[/bold blue]
+[dim]Package: v{package_version} | Script: {SCRIPT_VERSION} | Framework: {framework_version}[/dim]
 Pure Python CLI for Claude-powered project management and task orchestration
 
 [bold]🚀 USAGE:[/bold]
@@ -178,11 +202,12 @@ Made with ❤️  for AI-powered development workflows (Pure Python Edition)
 def display_system_info():
     """Display system information."""
     deployment_info = detect_deployment_type()
-    version = get_framework_version()
+    framework_version = get_framework_version()
     
     console.print("[bold]🖥️  Claude Multi-Agent PM Framework System Information[/bold]")
     console.print("═" * 60)
-    console.print(f"📦 Framework Version: v{version}")
+    console.print(f"📦 Framework Version: v{framework_version}")
+    console.print(f"🔧 Script Version: {SCRIPT_VERSION}")
     console.print(f"🗂️  Deployment Type: {deployment_info['type']}")
     console.print(f"📁 Framework Path: {deployment_info['framework_path']}")
     console.print(f"🔧 Platform: {sys.platform}")
@@ -208,6 +233,7 @@ def display_comprehensive_status():
     # Project version
     project_version = get_framework_version()
     console.print(f"📦 Project Version: [green]v{project_version}[/green]")
+    console.print(f"🔧 Script Version: [green]{SCRIPT_VERSION}[/green]")
     
     # Framework/CLAUDE.md version (serial number from framework/VERSION)
     framework_version_file = framework_path / "framework" / "VERSION"
@@ -493,8 +519,20 @@ def main():
     
     # Handle basic flags
     if any(flag in args for flag in version_flags):
-        version = get_framework_version()
-        console.print(f"Claude Multi-Agent PM Framework v{version}")
+        package_version = get_framework_version()
+        
+        # Get framework/CLAUDE.md version using the framework_path defined above
+        framework_version_file = framework_path / "framework" / "VERSION"
+        framework_version = "unknown"
+        if framework_version_file.exists():
+            try:
+                framework_version = framework_version_file.read_text().strip()
+            except:
+                pass
+        
+        console.print(f"[bold]claude-pm script version: {SCRIPT_VERSION}[/bold]")
+        console.print(f"Package version: v{package_version}")
+        console.print(f"Framework/CLAUDE.md version: {framework_version}")
         return
     
     if any(flag in args for flag in help_flags):
@@ -557,17 +595,17 @@ def main():
     
     # For other commands, delegate to Python framework
     deployment_info = detect_deployment_type()
-    framework_path = deployment_info["framework_path"]
+    deployment_framework_path = deployment_info["framework_path"]
     
     try:
         # Use subprocess to call the Python CLI module
         cmd = [sys.executable, "-m", "claude_pm.cli"] + args
-        result = subprocess.run(cmd, cwd=framework_path)
+        result = subprocess.run(cmd, cwd=deployment_framework_path)
         sys.exit(result.returncode)
         
     except Exception as e:
         console.print(f"[red]❌ Failed to execute Claude PM Framework: {e}[/red]")
-        console.print(f"   Framework path: {framework_path}")
+        console.print(f"   Framework path: {deployment_framework_path}")
         console.print(f"   Python command: {sys.executable}")
         sys.exit(1)
 

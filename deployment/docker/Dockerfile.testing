@@ -1,0 +1,90 @@
+# Claude PM Framework - Testing Dockerfile
+# Comprehensive testing environment for v0.6.2 prepublish validation
+
+FROM python:3.11-slim as base
+
+# Set build arguments
+ARG CLAUDE_PM_VERSION=0.6.2
+ARG BUILD_DATE
+ARG VCS_REF
+
+# Set labels
+LABEL org.opencontainers.image.title="Claude PM Framework Testing"
+LABEL org.opencontainers.image.description="Testing environment for Claude PM Framework v0.6.2"
+LABEL org.opencontainers.image.version="${CLAUDE_PM_VERSION}"
+LABEL org.opencontainers.image.created="${BUILD_DATE}"
+LABEL org.opencontainers.image.revision="${VCS_REF}"
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV CLAUDE_PM_VERSION=${CLAUDE_PM_VERSION}
+ENV ENVIRONMENT=testing
+ENV CLAUDE_PM_CONTAINER=true
+
+# Install system dependencies including Node.js
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    make \
+    gcc \
+    g++ \
+    nodejs \
+    npm \
+    netcat-traditional \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create application user and directories
+RUN groupadd -r claude-pm && useradd -r -g claude-pm claude-pm
+
+# Set up directory structure
+ENV CLAUDE_PM_ROOT=/app/claude-pm
+ENV CLAUDE_PM_DATA_PATH=/app/data
+ENV CLAUDE_PM_LOGS_PATH=/app/logs
+ENV CLAUDE_PM_CONFIG_PATH=/app/config
+
+RUN mkdir -p ${CLAUDE_PM_ROOT} ${CLAUDE_PM_DATA_PATH} ${CLAUDE_PM_LOGS_PATH} ${CLAUDE_PM_CONFIG_PATH} \
+    && chown -R claude-pm:claude-pm /app
+
+WORKDIR ${CLAUDE_PM_ROOT}
+
+# Copy requirements and install Python dependencies
+COPY requirements/ ./requirements/
+RUN pip install --no-cache-dir -r requirements/dev.txt
+
+# Install additional testing dependencies
+RUN pip install --no-cache-dir \
+    pytest \
+    pytest-cov \
+    pytest-asyncio \
+    pytest-benchmark \
+    pytest-timeout \
+    memory-profiler \
+    psutil
+
+# Copy source code
+COPY . .
+
+# Install Claude PM in development mode
+RUN pip install -e .
+
+# Install Node.js dependencies for NPM package testing
+RUN npm install
+
+# Change ownership
+RUN chown -R claude-pm:claude-pm /app
+
+# Switch to non-root user
+USER claude-pm
+
+# Create test directories
+RUN mkdir -p ${CLAUDE_PM_LOGS_PATH}/testing \
+    && mkdir -p ${CLAUDE_PM_DATA_PATH}/testing \
+    && mkdir -p /tmp/claude-pm-testing
+
+# Health check for testing environment
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD python -c "import claude_pm; print('Testing environment healthy')" || exit 1
+
+# Default command runs comprehensive tests
+CMD ["python", "-m", "pytest", "tests/", "-v", "--cov=claude_pm", "--cov-report=term-missing", "--timeout=300"]

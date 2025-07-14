@@ -63,7 +63,7 @@ class ScriptDeploymentManager:
             "claude-pm": {
                 "source": self.bin_dir / "claude-pm",
                 "target": self.target_dir / "claude-pm",
-                "type": "node",
+                "type": "python",  # Changed from "node" to "python"
                 "description": "Main Claude PM Framework CLI"
             },
             "cmpm": {
@@ -83,6 +83,71 @@ class ScriptDeploymentManager:
             logger.error(f"Failed to calculate checksum for {file_path}: {e}")
             return ""
     
+    def _inject_framework_path_into_python_script(self, source_path: Path, target_path: Path):
+        """Inject framework path into Python script for deployment."""
+        try:
+            # Read source script
+            with open(source_path, 'r') as f:
+                script_content = f.read()
+            
+            # Replace dynamic framework path with injected absolute path
+            framework_path_injection = f'''# Add the framework path to Python path for imports
+# For deployed scripts, use the actual source framework path
+framework_path = Path("{self.framework_root}")'''
+            
+            # Replace deployment type detection with fixed values for deployed scripts
+            deployment_type_injection = f'''def detect_deployment_type():
+    """Detect the deployment type and framework path."""
+    # For deployed scripts, use pre-configured values
+    return {{
+        "type": "deployed",
+        "framework_path": Path("{self.framework_root}"),
+        "script_path": Path(__file__).parent
+    }}'''
+            
+            import re
+            
+            # Replace framework path assignment with corrected escaping
+            # The issue was in the escaping of parentheses - __file__ has double underscores
+            pattern = r'framework_path = Path\(__file__\)\.parent\.parent'
+            replacement = f'framework_path = Path("{self.framework_root}")'
+            updated_content = re.sub(pattern, replacement, script_content)
+            
+            # Debug: Check what patterns we're working with
+            if "Path(__file__).parent.parent" in script_content:
+                logger.info("Found framework path pattern in source")
+                # Force replacement even if regex fails
+                updated_content = script_content.replace(
+                    'framework_path = Path(__file__).parent.parent',
+                    f'framework_path = Path("{self.framework_root}")'
+                )
+                logger.info("Forced framework path replacement using string replace")
+            else:
+                logger.warning("Framework path pattern not found in source content")
+            
+            # Verify the replacement worked
+            if f'Path("{self.framework_root}")' in updated_content:
+                logger.info("Successfully injected framework path")
+            else:
+                logger.error("Framework path injection failed")
+            
+            # Replace deployment type detection function
+            pattern = r'def detect_deployment_type\(\):\s*\n    """Detect the deployment type and framework path\.""".*?return \{\s*"type": "unknown",\s*"framework_path": script_dir,\s*"script_path": script_dir\s*\}'
+            replacement = deployment_type_injection
+            
+            updated_content = re.sub(pattern, replacement, script_content, flags=re.DOTALL)
+            
+            # Write processed script to target
+            with open(target_path, 'w') as f:
+                f.write(updated_content)
+            
+            logger.info(f"Injected framework path '{self.framework_root}' and deployment type into deployed Python script")
+            
+        except Exception as e:
+            logger.error(f"Failed to inject framework path into Python script: {e}")
+            # Fall back to normal copy
+            shutil.copy2(source_path, target_path)
+
     def _inject_version_into_script(self, source_path: Path, target_path: Path):
         """Inject VERSION file content into script for local deployment."""
         try:
@@ -328,8 +393,11 @@ function resolveVersion() {{
                 logger.info(f"Created backup: {backup_path}")
             
             # Process script content before deploying
-            if script_info["type"] == "node" and script_name == "claude-pm":
-                # Inject VERSION file content into Node.js script
+            if script_info["type"] == "python" and script_name == "claude-pm":
+                # Inject framework path into Python script
+                self._inject_framework_path_into_python_script(source_path, target_path)
+            elif script_info["type"] == "node" and script_name == "claude-pm":
+                # Inject VERSION file content into Node.js script (legacy support)
                 self._inject_version_into_script(source_path, target_path)
             else:
                 # Copy script as-is for other scripts
@@ -394,19 +462,29 @@ function resolveVersion() {{
                 continue
             
             try:
-                if script_info["type"] == "node":
+                if script_info["type"] == "python":
+                    # Test Python script - try --version first, then help for different script types
+                    if script_name == "cmpm":
+                        # CMPM uses different command format
+                        result = subprocess.run(
+                            [str(target_path), "help"],
+                            capture_output=True,
+                            text=True,
+                            timeout=10
+                        )
+                    else:
+                        # Standard --version command
+                        result = subprocess.run(
+                            [str(target_path), "--version"],
+                            capture_output=True,
+                            text=True,
+                            timeout=10
+                        )
+                    verification_results[script_name] = result.returncode == 0
+                elif script_info["type"] == "node":
                     # Test Node.js script
                     result = subprocess.run(
                         [str(target_path), "--version"],
-                        capture_output=True,
-                        text=True,
-                        timeout=10
-                    )
-                    verification_results[script_name] = result.returncode == 0
-                elif script_info["type"] == "python":
-                    # Test Python script
-                    result = subprocess.run(
-                        [str(target_path), "--help"],
                         capture_output=True,
                         text=True,
                         timeout=10

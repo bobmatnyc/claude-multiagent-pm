@@ -21,7 +21,7 @@ class EnhancedFlagsBridge:
     def has_enhanced_flags(self, args: list) -> bool:
         """Check if arguments contain enhanced flags"""
         enhanced_flags = [
-            '--save', '--upgrade', '--rollback', '--verify',
+            '--safe', '--upgrade', '--rollback', '--verify',
             '--components', '--environment', '--git', '--dependencies'
         ]
         
@@ -107,7 +107,7 @@ class EnhancedFlagsBridge:
             args.append(version)
             
         if safe_mode:
-            args.append('--save')
+            args.append('--safe')
             
         if dry_run:
             args.append('--dry-run')
@@ -122,7 +122,7 @@ class EnhancedFlagsBridge:
             args.append(version)
             
         if safe_mode:
-            args.append('--save')
+            args.append('--safe')
             
         if dry_run:
             args.append('--dry-run')

@@ -155,7 +155,7 @@ class CMPMQANativeHost:
                     "payload": {
                         "command": "health_check",
                         "status": "healthy",
-                        "framework_version": "0.4.6",
+                        "framework_version": "0.7.0",
                         "qa_integration": "active"
                     }
                 }

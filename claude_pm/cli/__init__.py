@@ -125,6 +125,14 @@ def get_cli():
 def register_external_commands(cli_group):
     """Register external commands that aren't in the modular system yet."""
     
+    # Add enhanced CLI flags (pure Python implementation)
+    try:
+        from ..cli_flags import cli_flags
+        cli_group.add_command(cli_flags, name="flags")
+        logger.debug("Added enhanced CLI flags")
+    except Exception as e:
+        logger.warning(f"Failed to load enhanced CLI flags: {e}")
+    
     # Add enforcement commands (from cli_enforcement.py)
     try:
         from ..cli_enforcement import enforcement_cli

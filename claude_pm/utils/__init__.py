@@ -1,24 +1,16 @@
 """
-Claude PM Framework Utilities Package.
+Root-level utils package for MCP compatibility.
 
-Contains utility classes for performance optimization, caching, resilience patterns,
-and Model Context Protocol (MCP) integration.
+This package provides direct access to the claude_pm.utils functionality
+for MCP tools that expect imports from 'utils.model_context'.
 """
 
-from .performance import CircuitBreaker, HealthCache, CacheEntry
-from .model_context import (
-    MCPContextBridge,
-    get_mcp_context_bridge,
-    prepare_agent_context,
-    prepare_code_review_context,
-    get_context_stats,
-    health_check,
-    initialize_mcp_context,
-)
+# Re-export all utilities from the main package
+from claude_pm.utils import *
 
 __all__ = [
     "CircuitBreaker",
-    "HealthCache",
+    "HealthCache", 
     "CacheEntry",
     "MCPContextBridge",
     "get_mcp_context_bridge",
@@ -26,5 +18,5 @@ __all__ = [
     "prepare_code_review_context",
     "get_context_stats",
     "health_check",
-    "initialize_mcp_context",
+    "initialize_mcp_context"
 ]

@@ -17,7 +17,7 @@ class TestFrameworkTemplate(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
-        self.framework_root = Path(__file__).parent
+        self.framework_root = Path(__file__).parent.parent
         self.framework_template_path = self.framework_root / "framework" / "CLAUDE.md"
         
         # Required handlebars variables that must be present

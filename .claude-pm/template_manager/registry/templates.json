@@ -1,1 +1,5 @@
-{}
+{
+  "project-agents.json": {
+    "template_id": "project-agents.json",
+    "name": "project-agents",
+    "type": 
