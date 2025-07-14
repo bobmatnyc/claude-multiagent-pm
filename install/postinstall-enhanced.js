@@ -88,12 +88,14 @@ class EnhancedPostinstallHandler {
 
     async createMinimalSetup() {
         this.log('🔧 Creating minimal framework setup...');
+        this.log('   📁 Setting up directory structure');
         
         // Ensure .claude-pm directory exists
         const success = await this.ensureDirectoryExists(this.globalConfigDir);
         if (!success) {
             throw new Error('Failed to create .claude-pm directory');
         }
+        this.log('   ✅ Created .claude-pm directory');
         
         // Create basic structure
         const basicDirs = [
@@ -103,11 +105,15 @@ class EnhancedPostinstallHandler {
             path.join(this.globalConfigDir, 'config')
         ];
         
+        let dirCount = 0;
         for (const dir of basicDirs) {
             await this.ensureDirectoryExists(dir);
+            dirCount++;
+            this.log(`   📂 [${dirCount}/${basicDirs.length}] Created: ${path.relative(this.globalConfigDir, dir)}`);
         }
         
         // Create a basic config file
+        this.log('   📄 Writing configuration file...');
         const configFile = path.join(this.globalConfigDir, 'config', 'postinstall.json');
         const configData = {
             version: require('../package.json').version,
@@ -120,25 +126,33 @@ class EnhancedPostinstallHandler {
         
         try {
             await fs.writeFile(configFile, JSON.stringify(configData, null, 2));
-            this.log('✅ Created basic configuration');
+            this.log('   ✅ Configuration file created successfully');
         } catch (error) {
-            this.log(`Failed to create config file: ${error.message}`, 'error');
+            this.log(`   ❌ Failed to create config file: ${error.message}`, 'error');
         }
         
+        this.log('✅ Minimal framework setup completed');
         return true;
     }
 
     async runFullInstallation() {
         this.log('🚀 Running full installation via original postinstall.js...');
+        this.log('   ⚙️  Initializing comprehensive setup process');
         
         try {
             // Import and run the original postinstall
+            this.log('   📦 Loading postinstall module...');
             const PostInstallSetup = require('./postinstall.js');
             const setup = new PostInstallSetup();
+            
+            this.log('   🔄 Executing comprehensive installation...');
             await setup.run();
+            
+            this.log('   ✅ Full installation completed successfully');
             return true;
         } catch (error) {
-            this.log(`Full installation failed: ${error.message}`, 'error');
+            this.log(`   ❌ Full installation failed: ${error.message}`, 'error');
+            this.log('   ⚠️  Falling back to minimal setup mode');
             return false;
         }
     }
@@ -164,38 +178,55 @@ class EnhancedPostinstallHandler {
     }
 
     async run() {
+        console.log('\n' + '='.repeat(60));
+        console.log('📦 Claude Multi-Agent PM Framework - Enhanced Postinstall');
+        console.log('='.repeat(60));
+        
         this.log('🚀 Starting Enhanced NPM Postinstall Handler');
-        this.log(`   Version: ${require('../package.json').version}`);
-        this.log(`   Install Type: ${this.installType}`);
-        this.log(`   NPM Version: ${this.npmVersion}`);
-        this.log(`   Platform: ${this.platform}`);
+        this.log(`   📌 Version: ${require('../package.json').version}`);
+        this.log(`   📍 Install Type: ${this.installType}`);
+        this.log(`   📋 NPM Version: ${this.npmVersion}`);
+        this.log(`   🖥️  Platform: ${this.platform}`);
         
         if (this.isProblematicNpm && this.installType === 'global') {
             this.log('⚠️  NPM 7+ global install detected - using enhanced compatibility mode');
         }
         
         try {
-            // Always try to create minimal setup first
+            this.log('\n🔄 Phase 1: Minimal Setup');
+            console.log('   Setting up essential directory structure...');
             await this.createMinimalSetup();
             
+            this.log('\n🔄 Phase 2: Full Installation');
             // Try full installation if we're in a safe environment
             if (this.installType === 'local' || !this.isProblematicNpm) {
+                console.log('   Running comprehensive installation...');
                 const fullInstallSuccess = await this.runFullInstallation();
                 if (!fullInstallSuccess) {
-                    this.log('Full installation failed, but minimal setup completed', 'warn');
+                    this.log('⚠️  Full installation failed, but minimal setup completed', 'warn');
+                    console.log('   ⚠️  Some features may be limited - run "claude-pm init" to complete setup');
                 }
             } else {
-                this.log('Skipping full installation due to NPM/global install compatibility issues', 'warn');
-                this.log('Framework will initialize on first use');
+                this.log('⚠️  Skipping full installation due to NPM/global install compatibility issues', 'warn');
+                this.log('✨ Framework will initialize automatically on first use');
+                console.log('   ✨ Framework will initialize automatically on first use');
             }
             
-            // Create execution marker
+            this.log('\n🔄 Phase 3: Finalization');
+            console.log('   Creating execution markers...');
             await this.createExecutionMarker();
             
-            this.log('✅ Enhanced postinstall completed successfully');
-            this.log(`📁 Log file: ${this.logFile}`);
+            console.log('\n' + '='.repeat(60));
+            console.log('✅ Enhanced postinstall completed successfully!');
+            console.log('📁 Log file: ' + this.logFile);
+            console.log('🚀 Ready to use: claude-pm --help');
+            console.log('='.repeat(60));
             
         } catch (error) {
+            console.log('\n' + '='.repeat(60));
+            console.log('❌ Enhanced postinstall failed!');
+            console.log('='.repeat(60));
+            
             this.log(`Enhanced postinstall failed: ${error.message}`, 'error');
             
             // Create error marker

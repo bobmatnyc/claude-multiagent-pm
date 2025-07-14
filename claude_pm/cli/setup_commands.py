@@ -29,6 +29,7 @@ from ..services.memory_service import MemoryService
 from ..services.project_service import ProjectService
 from ..services.template_deployment_integration import TemplateDeploymentIntegration
 from ..models.health import HealthStatus, create_service_health_report
+from ..agents.system_init_agent import SystemInitAgent
 
 console = Console()
 logger = logging.getLogger(__name__)
@@ -490,5 +491,45 @@ def register_setup_commands(cli_group):
                 logger.error(f"Health command failed: {e}")
 
         asyncio.run(run())
+    
+    @cli_group.command()
+    @click.option('--force', is_flag=True, help='Force re-initialization even if already set up')
+    @click.pass_context
+    def init(ctx, force):
+        """🛠️ Initialize Claude PM Framework with comprehensive setup and project indexing."""
+        console.print("[bold blue]🛠️ Claude PM Framework Initialization[/bold blue]")
+        console.print("[dim]Initializing framework with enhanced cmpm-init functionality...[/dim]")
+        
+        async def run():
+            try:
+                # Initialize the SystemInitAgent
+                agent = SystemInitAgent()
+                await agent._initialize()
+                
+                # Run enhanced initialization with indexing
+                results = await agent.initialize_framework_with_indexing(force=force)
+                
+                # Display the enhanced initialization report
+                await agent.display_enhanced_initialization_report(results)
+                
+                await agent._cleanup()
+                
+                if results["success"]:
+                    console.print("[green]\n✅ Framework initialization completed successfully![/green]")
+                    console.print("[dim]🚀 You can now use claude-pm commands[/dim]")
+                    return True
+                else:
+                    console.print("[red]\n❌ Framework initialization failed![/red]")
+                    console.print("[dim]🔧 Check the output above for errors[/dim]")
+                    return False
+                    
+            except Exception as e:
+                console.print(f"[red]❌ Initialization error: {e}[/red]")
+                logger.error(f"Init command failed: {e}")
+                return False
+        
+        success = asyncio.run(run())
+        if not success:
+            sys.exit(1)
 
     return cli_group

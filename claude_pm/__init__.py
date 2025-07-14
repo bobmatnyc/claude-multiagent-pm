@@ -19,7 +19,7 @@ try:
 except ImportError:
     pass  # dotenv not available, skip loading
 
-__version__ = "0.7.3"
+__version__ = "0.7.4"
 __title__ = "Claude Multi-Agent PM Framework"
 __description__ = "Claude Multi-Agent Project Management Framework for AI-driven orchestration"
 __author__ = "Robert (Masa) Matsuoka"

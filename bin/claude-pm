@@ -149,6 +149,7 @@ def validate_framework_deployment():
 def attempt_auto_installation():
     """Attempt to automatically install the framework if postinstall didn't run."""
     console.print("[yellow]⚠️  Framework not detected - attempting auto-installation...[/yellow]")
+    console.print("[dim]🔍 Scanning for installation scripts...[/dim]")
     
     # Check if we can find the postinstall script
     postinstall_paths = [
@@ -158,7 +159,8 @@ def attempt_auto_installation():
     
     for postinstall_path in postinstall_paths:
         if postinstall_path.exists():
-            console.print(f"[dim]Found postinstall script: {postinstall_path}[/dim]")
+            console.print(f"[dim]✅ Found postinstall script: {postinstall_path}[/dim]")
+            console.print("[dim]🚀 Executing enhanced postinstall script...[/dim]")
             
             try:
                 # Run the postinstall script
@@ -172,9 +174,17 @@ def attempt_auto_installation():
                 
                 if result.returncode == 0:
                     console.print("[green]✅ Auto-installation completed successfully![/green]")
+                    console.print("[dim]📋 Installation output:[/dim]")
+                    if result.stdout:
+                        # Show last few lines of output
+                        lines = result.stdout.strip().split('\n')[-5:]
+                        for line in lines:
+                            console.print(f"[dim]   {line}[/dim]")
                     return True
                 else:
-                    console.print(f"[red]❌ Auto-installation failed: {result.stderr}[/red]")
+                    console.print(f"[red]❌ Auto-installation failed[/red]")
+                    if result.stderr:
+                        console.print(f"[red]   Error: {result.stderr}[/red]")
                     
             except subprocess.TimeoutExpired:
                 console.print("[red]❌ Auto-installation timed out[/red]")
@@ -184,7 +194,7 @@ def attempt_auto_installation():
             break
     
     # Alternative: Try to run npm install in the framework directory
-    console.print("[yellow]Attempting alternative installation via npm...[/yellow]")
+    console.print("[yellow]🔄 Attempting alternative installation via npm...[/yellow]")
     try:
         result = subprocess.run(
             ["npm", "run", "install:unified"],
@@ -198,7 +208,9 @@ def attempt_auto_installation():
             console.print("[green]✅ Alternative installation completed successfully![/green]")
             return True
         else:
-            console.print(f"[red]❌ Alternative installation failed: {result.stderr}[/red]")
+            console.print(f"[red]❌ Alternative installation failed[/red]")
+            if result.stderr:
+                console.print(f"[red]   Error: {result.stderr}[/red]")
             
     except Exception as e:
         console.print(f"[red]❌ Alternative installation error: {e}[/red]")
@@ -257,6 +269,7 @@ Pure Python CLI for Claude-powered project management and task orchestration
   --help, -h              Show this help message
   --system-info           Display comprehensive system information
   --deployment-info       Show deployment detection results
+  init                    Initialize framework (manual init command)
   
 [bold]🚨 ENHANCED FLAGS (Pure Python Implementation):[/bold]
   --safe                  Enable safe mode with confirmations and backups
@@ -267,9 +280,14 @@ Pure Python CLI for Claude-powered project management and task orchestration
 [bold]⚡ YOLO Mode (Default):[/bold]
   claude-pm               Launch Claude CLI directly (YOLO mode - fast startup)
 
+[bold]🛠️ INITIALIZATION:[/bold]
+  claude-pm init          Manually initialize framework setup
+  claude-pm init --force  Force re-initialization
+
 [bold]🚨 TROUBLESHOOTING:[/bold]
   • Environment Issues: claude-pm --system-info
   • Deployment Problems: claude-pm --deployment-info
+  • Setup Issues: claude-pm init
 
 [bold]📖 DOCUMENTATION:[/bold]
   • GitHub: https://github.com/bobmatnyc/claude-multiagent-pm
@@ -564,6 +582,53 @@ def handle_enhanced_flags():
         sys.exit(1)
 
 
+def handle_init_command(args):
+    """Handle the init command with cmpm-init functionality."""
+    console.print("[bold blue]🛠️  Claude PM Framework Initialization[/bold blue]")
+    console.print("[dim]Initializing framework with enhanced cmpm-init functionality...[/dim]")
+    
+    # Check for force flag
+    force = "--force" in args
+    
+    try:
+        # Import and use the SystemInitAgent
+        from claude_pm.agents.system_init_agent import SystemInitAgent
+        import asyncio
+        
+        async def run_init():
+            agent = SystemInitAgent()
+            await agent._initialize()
+            
+            # Run enhanced initialization with indexing
+            results = await agent.initialize_framework_with_indexing(force=force)
+            
+            # Display the enhanced initialization report
+            await agent.display_enhanced_initialization_report(results)
+            
+            await agent._cleanup()
+            return results["success"]
+        
+        # Run the initialization
+        success = asyncio.run(run_init())
+        
+        if success:
+            console.print("[green]\n✅ Framework initialization completed successfully![/green]")
+            console.print("[dim]🚀 You can now use claude-pm commands[/dim]")
+            sys.exit(0)
+        else:
+            console.print("[red]\n❌ Framework initialization failed![/red]")
+            console.print("[dim]🔧 Check the output above for errors[/dim]")
+            sys.exit(1)
+            
+    except ImportError as e:
+        console.print(f"[red]❌ Failed to import SystemInitAgent: {e}[/red]")
+        console.print("[dim]Make sure the framework is properly installed[/dim]")
+        sys.exit(1)
+    except Exception as e:
+        console.print(f"[red]❌ Initialization error: {e}[/red]")
+        sys.exit(1)
+
+
 def main():
     """Main entry point with pure Python implementation."""
     args = sys.argv[1:]
@@ -572,6 +637,11 @@ def main():
     enhanced_flags = ["--safe", "--upgrade", "--rollback", "--dry-run"]
     version_flags = ["--version"]  # Removed -v to avoid conflict with verbose
     help_flags = ["--help", "-h"]
+    
+    # Check for init command
+    if args and args[0] == "init":
+        handle_init_command(args)
+        return
     
     # Check for enhanced flags
     has_enhanced_flags = any(
@@ -649,10 +719,22 @@ def main():
                     sys.exit(1)
             else:
                 console.print("[bold]🚨 Framework deployment required before operations[/bold]")
-                console.print("Run one of the following commands to deploy the framework:")
+                console.print("\n🛠️  [bold]Automatic Initialization Available[/bold]")
+                console.print("Would you like to initialize the framework now? (y/N): ", end="")
+                
+                try:
+                    response = input().strip().lower()
+                    if response in ['y', 'yes']:
+                        console.print("[dim]🚀 Starting automatic framework initialization...[/dim]")
+                        handle_init_command([])
+                        return
+                except KeyboardInterrupt:
+                    console.print("\n[yellow]Initialization cancelled by user[/yellow]")
+                
+                console.print("\n[bold]Manual initialization commands:[/bold]")
+                console.print("   • claude-pm init                      (recommended)")
                 console.print("   • claude-pm setup")
                 console.print("   • claude-pm deploy")
-                console.print("   • cmpm-init")
                 console.print("   • npm run install:unified (from framework directory)")
                 console.print("")
                 console.print(f"📍 Expected framework location: ~/.claude-pm")
@@ -684,10 +766,22 @@ def main():
                     sys.exit(1)
             else:
                 console.print("[bold]🚨 Framework deployment required before operations[/bold]")
-                console.print("Run one of the following commands to deploy the framework:")
+                console.print("\n🛠️  [bold]Automatic Initialization Available[/bold]")
+                console.print("Would you like to initialize the framework now? (y/N): ", end="")
+                
+                try:
+                    response = input().strip().lower()
+                    if response in ['y', 'yes']:
+                        console.print("[dim]🚀 Starting automatic framework initialization...[/dim]")
+                        handle_init_command([])
+                        return
+                except KeyboardInterrupt:
+                    console.print("\n[yellow]Initialization cancelled by user[/yellow]")
+                
+                console.print("\n[bold]Manual initialization commands:[/bold]")
+                console.print("   • claude-pm init                      (recommended)")
                 console.print("   • claude-pm setup")
                 console.print("   • claude-pm deploy")
-                console.print("   • cmpm-init")
                 console.print("   • npm run install:unified (from framework directory)")
                 console.print("")
                 console.print(f"📍 Expected framework location: ~/.claude-pm")
