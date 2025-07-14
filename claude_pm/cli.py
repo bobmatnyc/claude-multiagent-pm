@@ -471,15 +471,15 @@ def setup(ctx, target_dir, backup, force):
 
             # Set up template variables for handlebars processing
             # Get framework template serial for FRAMEWORK_VERSION
-            framework_version_file = framework_path / "framework" / "VERSION"
+            framework_version_file = framework_path / "FRAMEWORK_VERSION"
             if framework_version_file.exists():
-                framework_version = framework_version_file.read_text().strip()  # This is the serial (008)
+                framework_version = framework_version_file.read_text().strip()  # This is the serial (010)
             else:
                 # Fallback to default serial
                 framework_version = "001"
             
             template_variables = {
-                "FRAMEWORK_VERSION": framework_version,  # Serial from framework/VERSION (008)
+                "FRAMEWORK_VERSION": framework_version,  # Serial from FRAMEWORK_VERSION (010)
                 "CLAUDE_MD_VERSION": _get_framework_version(),  # Main version from VERSION (0.4.6)
                 "DEPLOYMENT_DATE": datetime.now().isoformat(),
                 "PLATFORM": platform.system().lower(),
