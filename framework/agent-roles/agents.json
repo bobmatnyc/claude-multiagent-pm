@@ -156,6 +156,28 @@
         "memory_categories": ["pattern", "project", "error"],
         "specializations": ["git_operations", "branch_management", "semantic_versioning", "conflict_resolution", "merge_operations", "workflow_automation"],
         "context_keywords": ["git", "version", "branch", "merge", "conflict", "repository", "versioning"]
+      },
+      "ticketing": {
+        "name": "Ticketing Agent",
+        "type": "standard",
+        "file": "ticketing-agent.md",
+        "description": "Universal ticketing interface and lifecycle management across multiple platforms",
+        "tools": ["ticket_operations", "workflow_automation", "multi_platform_integration"],
+        "coordination_role": "ticket_lifecycle_management",
+        "memory_categories": ["pattern", "project", "team"],
+        "specializations": ["ai_trackdown_integration", "multi_platform_support", "workflow_automation", "ticket_lifecycle_management", "sla_management", "escalation_procedures"],
+        "context_keywords": ["tickets", "issues", "workflow", "automation", "tracking", "lifecycle", "status"]
+      },
+      "system_init": {
+        "name": "System Init Agent",
+        "type": "standard",
+        "file": "system-init-agent.md",
+        "description": "Framework initialization, setup, and configuration management across multi-project environments",
+        "tools": ["framework_setup", "dependency_management", "configuration"],
+        "coordination_role": "system_initialization",
+        "memory_categories": ["pattern", "project"],
+        "specializations": ["framework_initialization", "dependency_verification", "configuration_management", "directory_structure_setup", "troubleshooting"],
+        "context_keywords": ["init", "setup", "configuration", "dependencies", "framework", "installation"]
       }
     },
     "user_defined_agents": {}
