@@ -1,7 +1,7 @@
 {
   "registry_version": "1.0",
-  "created_at": "2025-07-14 10:51:25",
-  "last_updated": "2025-07-14 10:51:25",
+  "last_updated": "2025-07-14T13:12:05.664062",
+  "last_discovery": "2025-07-14T13:12:05.656426",
   "total_agents": 0,
   "agents_by_tier": {
     "system": {},
@@ -9,10 +9,15 @@
     "project": {}
   },
   "agent_types": {},
+  "discovery_stats": {
+    "total_discoveries": 2,
+    "successful_loads": 0,
+    "failed_loads": 0,
+    "agents_monitored": 0
+  },
   "health_status": {
-    "last_check": null,
-    "healthy_agents": 0,
-    "unhealthy_agents": 0,
+    "total_agents": 0,
+    "loaded_agents": 0,
     "unloaded_agents": 0
   }
 }

@@ -1,24 +1,37 @@
-agent_discovery:
-  auto_discovery: true
-  exclude_patterns:
-  - __*
-  - .*
-  - test_*
-  file_patterns:
-  - '*.py'
-  scan_depth: 2
-agent_loading:
-  cache_agents: true
-  lazy_loading: true
-  reload_on_change: true
-  validation_enabled: true
-created_at: '2025-07-14 10:51:25'
-framework_location: /Users/masa/Projects/claude-multiagent-pm
-hierarchy_paths:
-  project_agents: /Users/masa/Projects/claude-multiagent-pm/.claude-pm/agents/project-specific
-  system_agents: /Users/masa/Projects/claude-multiagent-pm/claude_pm/agents
-  user_agents: /Users/masa/Projects/claude-multiagent-pm/.claude-pm/agents/user-defined
+agent_tiers:
+  project:
+    description: Project-specific agents with highest precedence
+    examples:
+    - project_engineer_agent.py
+    - project_security_agent.py
+    immutable: false
+    path: PROJECT/.claude-pm/agents/project-specific/
+    priority: 3
+  system:
+    description: Core framework agents with highest authority
+    examples:
+    - pm_agent.py
+    - orchestrator_agent.py
+    - ops_agent.py
+    immutable: true
+    path: ./claude_pm/agents/
+    priority: 1
+  user:
+    description: Global user-defined agents across all projects
+    examples:
+    - custom_engineer_agent.py
+    - personal_qa_agent.py
+    immutable: false
+    path: ./agents/user-defined/
+    priority: 2
+created_at: '2025-07-14 15:38:11'
 hierarchy_version: '1.0'
-project_directory: /Users/masa/Projects/claude-multiagent-pm
-tier: working
-working_directory: /Users/masa/Projects/claude-multiagent-pm
+loading_rules:
+  conflict_resolution: highest_priority_wins
+  fallback_enabled: true
+  inheritance_enabled: true
+  precedence_order:
+  - project
+  - user
+  - system
+tier: framework

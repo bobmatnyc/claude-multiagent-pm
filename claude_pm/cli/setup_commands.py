@@ -29,7 +29,7 @@ from ..services.memory_service import MemoryService
 from ..services.project_service import ProjectService
 from ..services.template_deployment_integration import TemplateDeploymentIntegration
 from ..models.health import HealthStatus, create_service_health_report
-from ..agents.system_init_agent import SystemInitAgent
+from ..agents.pm_agent import PMAgent
 
 console = Console()
 logger = logging.getLogger(__name__)
@@ -350,13 +350,18 @@ def register_setup_commands(cli_group):
                 template_content = framework_template_path.read_text()
 
                 # Set up template variables for handlebars processing
-                # Get framework template serial for FRAMEWORK_VERSION
-                framework_version_file = framework_path / "FRAMEWORK_VERSION"
-                if framework_version_file.exists():
-                    framework_version = framework_version_file.read_text().strip()  # This is the serial (010)
-                else:
-                    # Fallback to default serial
-                    framework_version = "001"
+                # Get framework template serial for FRAMEWORK_VERSION using dynamic loading
+                try:
+                    from ..utils.version_loader import get_framework_version
+                    framework_version = get_framework_version()  # This is the serial (010)
+                except ImportError:
+                    # Fallback to reading file directly
+                    framework_version_file = framework_path / "FRAMEWORK_VERSION"
+                    if framework_version_file.exists():
+                        framework_version = framework_version_file.read_text().strip()  # This is the serial (010)
+                    else:
+                        # Fallback to default serial
+                        framework_version = "001"
                 
                 template_variables = {
                     "FRAMEWORK_VERSION": framework_version,  # Serial from FRAMEWORK_VERSION (010)
@@ -494,33 +499,153 @@ def register_setup_commands(cli_group):
     
     @cli_group.command()
     @click.option('--force', is_flag=True, help='Force re-initialization even if already set up')
+    @click.option('--post-install', is_flag=True, help='Run post-installation process (NPM functionality)')
+    @click.option('--skip-postinstall', is_flag=True, help='Skip post-installation process')
+    @click.option('--postinstall-only', is_flag=True, help='Run only post-installation process')
+    @click.option('--validate', is_flag=True, help='Validate post-installation completeness')
+    @click.option('--comprehensive-validation', is_flag=True, help='Run comprehensive post-installation validation')
     @click.pass_context
-    def init(ctx, force):
-        """🛠️ Initialize Claude PM Framework with comprehensive setup and project indexing."""
+    def init(ctx, force, post_install, skip_postinstall, postinstall_only, validate, comprehensive_validation):
+        """🛠️ Initialize Claude PM Framework with comprehensive setup and post-installation support.
+        
+        This command supports all the functionality previously in NPM postinstall.js:
+        
+        Examples:
+            claude-pm init                     # Standard initialization
+            claude-pm init --post-install      # Include post-installation process
+            claude-pm init --postinstall-only  # Run only post-installation
+            claude-pm init --validate          # Validate post-installation
+            claude-pm init --comprehensive-validation  # Run comprehensive validation
+            claude-pm init --force             # Force re-initialization
+        """
         console.print("[bold blue]🛠️ Claude PM Framework Initialization[/bold blue]")
-        console.print("[dim]Initializing framework with enhanced cmpm-init functionality...[/dim]")
+        
+        # Determine post-installation behavior
+        if postinstall_only:
+            console.print("[dim]Running post-installation process only...[/dim]")
+            run_post_install = True
+            run_framework_init = False
+        elif skip_postinstall:
+            console.print("[dim]Skipping post-installation process...[/dim]")
+            run_post_install = False
+            run_framework_init = True
+        elif post_install:
+            console.print("[dim]Including post-installation process...[/dim]")
+            run_post_install = True
+            run_framework_init = True
+        else:
+            console.print("[dim]Standard initialization (no post-install)...[/dim]")
+            run_post_install = False
+            run_framework_init = True
         
         async def run():
             try:
-                # Initialize the SystemInitAgent
-                agent = SystemInitAgent()
+                # Initialize the PM Agent with system initialization capabilities
+                agent = PMAgent()
                 await agent._initialize()
                 
-                # Run enhanced initialization with indexing
-                results = await agent.initialize_framework_with_indexing(force=force)
+                # Handle validation modes
+                if validate or comprehensive_validation:
+                    if comprehensive_validation:
+                        console.print("[bold blue]🔍 Running Comprehensive Diagnostics[/bold blue]")
+                        validation_results = await agent.run_diagnostics()
+                        
+                        # Display comprehensive validation summary
+                        console.print(f"\n📋 [bold]Comprehensive Diagnostics Results:[/bold]")
+                        console.print(f"   • Timestamp: {validation_results.get('timestamp', 'Unknown')}")
+                        console.print(f"   • Framework Path: {validation_results.get('framework_path', 'Unknown')}")
+                        console.print(f"   • Config Exists: {'✅' if validation_results.get('local_config_exists') else '❌'}")
+                        
+                        # Display dependency status
+                        if validation_results.get('dependencies'):
+                            console.print(f"\n🔧 [bold]Dependencies Status:[/bold]")
+                            for dep_name, dep_info in validation_results['dependencies'].items():
+                                console.print(f"   • {dep_name.replace('_', ' ').title()}: {dep_info['status']}")
+                        
+                        # Display troubleshooting info
+                        if validation_results.get('troubleshooting', {}).get('issues'):
+                            console.print(f"\n❌ [bold red]Issues Found:[/bold red]")
+                            for issue in validation_results['troubleshooting']['issues']:
+                                console.print(f"   • {issue}")
+                        
+                        if validation_results.get('recommendations'):
+                            console.print(f"\n💡 [bold blue]Recommendations:[/bold blue]")
+                            for rec in validation_results['recommendations']:
+                                console.print(f"   • {rec}")
+                        
+                        await agent._cleanup()
+                        return validation_results.get('local_config_exists', False)
+                    else:
+                        console.print("[bold blue]🔍 Validating Framework Setup[/bold blue]")
+                        validation_results = await agent.run_diagnostics()
+                        
+                        console.print(f"\n📋 [bold]Validation Results:[/bold]")
+                        console.print(f"   • Valid: {'✅' if validation_results.get('local_config_exists') else '❌'}")
+                        console.print(f"   • Framework Path: {validation_results.get('framework_path', 'Unknown')}")
+                        console.print(f"   • Dependencies: {len(validation_results.get('dependencies', {}))}")
+                        
+                        if validation_results.get('troubleshooting', {}).get('issues'):
+                            console.print(f"\n❌ [bold red]Issues Found:[/bold red]")
+                            for issue in validation_results['troubleshooting']['issues']:
+                                console.print(f"   • {issue}")
+                        
+                        if validation_results.get('recommendations'):
+                            console.print(f"\n💡 [bold blue]Recommendations:[/bold blue]")
+                            for rec in validation_results['recommendations']:
+                                console.print(f"   • {rec}")
+                        
+                        await agent._cleanup()
+                        return validation_results.get('local_config_exists', False)
                 
-                # Display the enhanced initialization report
-                await agent.display_enhanced_initialization_report(results)
+                # Handle post-installation only mode
+                if postinstall_only:
+                    console.print("[bold blue]📦 Running Framework Initialization (Post-Install Mode)[/bold blue]")
+                    results = await agent.initialize_framework(force=force)
+                    
+                    if results["success"]:
+                        console.print("[green]\n✅ Framework initialization completed successfully![/green]")
+                        console.print("[dim]🚀 You can now run 'claude-pm init' for full setup[/dim]")
+                        return True
+                    else:
+                        console.print("[red]\n❌ Framework initialization failed![/red]")
+                        console.print("[dim]🔧 Check the output above for errors[/dim]")
+                        return False
+                
+                # Handle combined or standard initialization
+                if run_post_install and run_framework_init:
+                    # Run enhanced initialization with post-installation
+                    results = await agent.initialize_framework(force=force)
+                    
+                    # Display the enhanced initialization report
+                    await agent.display_initialization_report(results)
+                    
+                elif run_framework_init:
+                    # Run standard initialization
+                    results = await agent.initialize_framework(force=force)
+                    
+                    # Display the standard initialization report
+                    await agent.display_initialization_report(results)
                 
                 await agent._cleanup()
                 
                 if results["success"]:
                     console.print("[green]\n✅ Framework initialization completed successfully![/green]")
                     console.print("[dim]🚀 You can now use claude-pm commands[/dim]")
+                    
+                    # Show next steps based on what was run
+                    if run_post_install:
+                        console.print("[dim]📦 Post-installation components deployed to ~/.claude-pm/[/dim]")
+                        console.print("[dim]🔧 Run 'claude-pm health' to verify installation[/dim]")
+                    
                     return True
                 else:
                     console.print("[red]\n❌ Framework initialization failed![/red]")
                     console.print("[dim]🔧 Check the output above for errors[/dim]")
+                    
+                    # Show specific troubleshooting based on what failed
+                    if run_post_install and results.get("post_install_results", {}).get("errors"):
+                        console.print("[dim]📦 Post-installation errors detected - check ~/.claude-pm/logs/[/dim]")
+                    
                     return False
                     
             except Exception as e:

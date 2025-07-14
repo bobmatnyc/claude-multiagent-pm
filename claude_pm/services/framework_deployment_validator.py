@@ -357,7 +357,7 @@ class FrameworkDeploymentValidator(BaseService):
                 config_data = json.load(f)
             
             # Validate required configuration keys
-            required_keys = ['version', 'deployment_type', 'installed_at']
+            required_keys = ['version', 'installType', 'installationComplete']
             for key in required_keys:
                 if key not in config_data:
                     logger.warning(f"Missing required config key: {key}")

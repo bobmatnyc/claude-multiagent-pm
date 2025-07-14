@@ -18,6 +18,10 @@ class MemoryCategory(str, Enum):
     PATTERN = "pattern"  # Successful solutions, code patterns, reusable approaches
     TEAM = "team"  # Coding standards, team preferences, workflows
     ERROR = "error"  # Bug patterns, error solutions, debugging knowledge
+    BUG = "bug"  # Bug reports, issues, debugging information
+    USER_FEEDBACK = "user_feedback"  # User feedback, suggestions, improvements
+    SYSTEM = "system"  # System operations, framework events, monitoring
+    FRAMEWORK = "framework"  # Framework-specific operations and events
 
     def __str__(self) -> str:
         return self.value

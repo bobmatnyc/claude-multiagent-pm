@@ -489,6 +489,200 @@ claude-pm test → Run tests with pytest integration
             for dep in deps_info:
                 console.print(f"  {dep}")
 
+    @util.group()
+    def versions():
+        """Service version management commands."""
+        pass
+
+    @versions.command()
+    def scan():
+        """Scan and display all subsystem and service versions."""
+        from ..utils.subsystem_versions import SubsystemVersionManager
+        
+        async def _scan_versions():
+            manager = SubsystemVersionManager()
+            await manager.scan_subsystem_versions()
+            
+            report = manager.get_summary_report()
+            
+            console.print("[bold blue]📋 Service Version Report[/bold blue]\n")
+            
+            # Summary table
+            summary = report.get("summary", {})
+            console.print(f"[bold]Total Services:[/bold] {summary.get('total_subsystems', 0)}")
+            console.print(f"[bold]Found:[/bold] {summary.get('found', 0)}")
+            console.print(f"[bold]Missing:[/bold] {summary.get('missing', 0)}")
+            console.print(f"[bold]Errors:[/bold] {summary.get('errors', 0)}")
+            console.print(f"[bold]Coverage:[/bold] {summary.get('coverage_percentage', 0):.1f}%\n")
+            
+            # Services table
+            table = Table(title="Service Versions")
+            table.add_column("Service", style="cyan")
+            table.add_column("Version", style="green")
+            table.add_column("Status", style="yellow")
+            table.add_column("Path", style="dim")
+            
+            for name, info in report.get("subsystems", {}).items():
+                status_icon = {
+                    "found": "🟢",
+                    "missing": "🔴",
+                    "error": "🟠"
+                }.get(info.get("status"), "❓")
+                
+                table.add_row(
+                    name,
+                    info.get("version", "unknown"),
+                    f"{status_icon} {info.get('status', 'unknown')}",
+                    str(Path(info.get("file_path", "")).name)
+                )
+            
+            console.print(table)
+        
+        asyncio.run(_scan_versions())
+
+    @versions.command()
+    @click.argument("service")
+    @click.argument("version")
+    @click.option("--no-backup", is_flag=True, help="Skip creating backup")
+    def update(service, version, no_backup):
+        """Update a specific service version."""
+        from ..utils.subsystem_versions import SubsystemVersionManager
+        
+        async def _update_version():
+            manager = SubsystemVersionManager()
+            
+            # Check if service exists
+            available = manager.get_all_available_subsystems()
+            if service not in available:
+                console.print(f"[red]❌ Unknown service: {service}[/red]")
+                console.print(f"[yellow]Available services:[/yellow] {', '.join(available)}")
+                return
+            
+            success = await manager.update_version(service, version, backup=not no_backup)
+            
+            if success:
+                console.print(f"[green]✅ Updated {service} to version {version}[/green]")
+            else:
+                console.print(f"[red]❌ Failed to update {service}[/red]")
+        
+        asyncio.run(_update_version())
+
+    @versions.command()
+    @click.argument("updates", nargs=-1)
+    @click.option("--no-backup", is_flag=True, help="Skip creating backups")
+    def bulk_update(updates, no_backup):
+        """Update multiple service versions. Format: service1:version1 service2:version2"""
+        from ..utils.subsystem_versions import SubsystemVersionManager
+        
+        if not updates:
+            console.print("[red]❌ No updates specified[/red]")
+            console.print("[yellow]Usage:[/yellow] claude-pm util versions bulk-update service1:version1 service2:version2")
+            return
+        
+        async def _bulk_update():
+            manager = SubsystemVersionManager()
+            
+            # Parse updates
+            update_dict = {}
+            for update in updates:
+                if ":" not in update:
+                    console.print(f"[red]❌ Invalid format: {update}[/red]")
+                    console.print("[yellow]Expected format:[/yellow] service:version")
+                    return
+                
+                service, version = update.split(":", 1)
+                update_dict[service] = version
+            
+            # Validate services
+            available = manager.get_all_available_subsystems()
+            for service in update_dict:
+                if service not in available:
+                    console.print(f"[red]❌ Unknown service: {service}[/red]")
+                    console.print(f"[yellow]Available services:[/yellow] {', '.join(available)}")
+                    return
+            
+            console.print(f"[blue]📦 Updating {len(update_dict)} services...[/blue]")
+            
+            results = await manager.bulk_update(update_dict, backup=not no_backup)
+            
+            # Display results
+            table = Table(title="Bulk Update Results")
+            table.add_column("Service", style="cyan")
+            table.add_column("Version", style="green")
+            table.add_column("Status", style="yellow")
+            
+            for service, version in update_dict.items():
+                success = results.get(service, False)
+                status = "✅ Success" if success else "❌ Failed"
+                table.add_row(service, version, status)
+            
+            console.print(table)
+            
+            success_count = sum(1 for success in results.values() if success)
+            console.print(f"[bold]Updated {success_count}/{len(update_dict)} services[/bold]")
+        
+        asyncio.run(_bulk_update())
+
+    @versions.command()
+    @click.argument("requirements", nargs=-1)
+    def validate(requirements):
+        """Validate service versions against requirements. Format: service1:version1 service2:version2"""
+        from ..utils.subsystem_versions import SubsystemVersionManager
+        
+        if not requirements:
+            console.print("[red]❌ No requirements specified[/red]")
+            console.print("[yellow]Usage:[/yellow] claude-pm util versions validate service1:version1 service2:version2")
+            return
+        
+        async def _validate():
+            manager = SubsystemVersionManager()
+            
+            # Parse requirements
+            req_dict = {}
+            for req in requirements:
+                if ":" not in req:
+                    console.print(f"[red]❌ Invalid format: {req}[/red]")
+                    console.print("[yellow]Expected format:[/yellow] service:version")
+                    return
+                
+                service, version = req.split(":", 1)
+                req_dict[service] = version
+            
+            console.print(f"[blue]🔍 Validating {len(req_dict)} requirements...[/blue]")
+            
+            checks = await manager.validate_compatibility(req_dict)
+            
+            # Display results
+            table = Table(title="Compatibility Validation")
+            table.add_column("Service", style="cyan")
+            table.add_column("Required", style="yellow")
+            table.add_column("Current", style="green")
+            table.add_column("Status", style="magenta")
+            table.add_column("Message", style="dim")
+            
+            all_compatible = True
+            for check in checks:
+                status_icon = "✅" if check.compatible else "❌"
+                if not check.compatible:
+                    all_compatible = False
+                
+                table.add_row(
+                    check.subsystem,
+                    check.required_version,
+                    check.current_version or "missing",
+                    f"{status_icon} {check.status.value}",
+                    check.message or ""
+                )
+            
+            console.print(table)
+            
+            if all_compatible:
+                console.print("[bold green]✅ All requirements satisfied[/bold green]")
+            else:
+                console.print("[bold red]❌ Some requirements not satisfied[/bold red]")
+        
+        asyncio.run(_validate())
+
     @util.command()
     @click.option("--config", is_flag=True, help="Show configuration paths")
     @click.option("--services", is_flag=True, help="Show service status")

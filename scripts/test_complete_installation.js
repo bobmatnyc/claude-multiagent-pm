@@ -111,7 +111,7 @@ class InstallationTester {
                 'bin/claude-pm',
                 'claude_pm',
                 'framework/CLAUDE.md',
-                'install/postinstall.js'
+                'install/postinstall-minimal.js'
             ];
             
             for (const file of requiredFiles) {

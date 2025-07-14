@@ -2,7 +2,7 @@
 """
 AI-Trackdown-Tools CLI Integration Demo for CMCP-init
 
-This demo showcases the new CLI integration capabilities of the SystemInitAgent,
+This demo showcases the new CLI integration capabilities of the PMAgent,
 including:
 1. CLI availability detection
 2. Rich project data collection via CLI
@@ -22,7 +22,7 @@ from pathlib import Path
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from claude_pm.agents.system_init_agent import SystemInitAgent
+from claude_pm.agents.pm_agent import PMAgent
 from claude_pm.core.config import Config
 from claude_pm.utils.ai_trackdown_tools import (
     get_ai_trackdown_tools,
@@ -58,7 +58,7 @@ async def demo_cli_integration():
     console.print("="*50)
     
     current_dir = Path.cwd()
-    agent = SystemInitAgent(working_dir=current_dir)
+    agent = PMAgent(working_dir=current_dir)
     
     availability = agent.check_aitrackdown_availability(current_dir)
     
@@ -219,7 +219,7 @@ async def demo_project_types():
         style="bold cyan"
     ))
     
-    agent = SystemInitAgent()
+    agent = PMAgent()
     
     # Test different project types
     test_cases = [

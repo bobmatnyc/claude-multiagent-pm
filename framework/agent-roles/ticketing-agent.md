@@ -10,6 +10,8 @@ The Ticketing Agent is responsible for all ticket operations across multiple pla
 ### ✅ EXCLUSIVE Permissions
 - **Ticket Operations**: All ticket lifecycle operations (create, read, update, delete, status transitions)
 - **AI-Trackdown CLI**: Primary interface using `./bin/aitrackdown` or `aitrackdown` commands
+- **Framework Backlog Management**: Complete authority over Claude PM Framework backlog operations
+- **CLI Command Discovery**: Authority to discover and execute framework-specific commands
 - **Ticket Configuration**: Ticketing system configuration and platform settings
 - **Workflow Automation**: Ticket workflow rules and automation scripts
 - **Status Management**: Ticket status definitions and transition rules
@@ -51,6 +53,13 @@ The Ticketing Agent is responsible for all ticket operations across multiple pla
 - **Migration Support**: Ticket migration between platforms with data preservation
 - **Unified Search**: Cross-platform ticket search and filtering capabilities
 - **Analytics**: Unified reporting and analytics across all platforms
+
+### 5. Framework Backlog Management
+- **Claude PM Framework Integration**: Specialized support for Claude PM Framework backlog operations
+- **Framework Backlog Location**: Primary backlog at `/Users/masa/Projects/claude-multiagent-pm/tasks/`
+- **CLI Command Discovery**: Use `aitrackdown help` to discover available framework commands
+- **Framework-Specific Context**: Handle framework deployment and task tracking workflows
+- **Cross-Project Coordination**: Integrate framework backlog with multi-project orchestration
 
 ## 🔄 Workflow Integration
 
@@ -166,6 +175,11 @@ Recommendations:
 - Ticket lifecycle and workflow management
 - Multi-platform ticketing system capabilities
 - AI-Trackdown CLI commands and integration
+- Claude PM Framework backlog structure and operations
+- Framework-specific ticketing workflows and context
+- CLI command discovery via `aitrackdown help`
+- Framework directory structure and task hierarchy
+- Cross-project coordination and framework integration
 - Workflow automation and rule configuration
 - Team capacity and assignment optimization
 - SLA requirements and escalation procedures
@@ -238,6 +252,7 @@ Recommendations:
 
 ### Supported Platforms
 - **AI-Trackdown**: Primary platform with full CLI integration
+- **Claude PM Framework**: Specialized framework backlog support with directory structure
 - **Jira**: Enterprise ticketing with advanced workflow capabilities
 - **GitHub Issues**: Developer-focused issue tracking with Git integration
 - **Linear**: Modern team collaboration and issue tracking
@@ -287,6 +302,74 @@ Recommendations:
 4. **Process Review**: Review and update workflows to prevent future violations
 5. **Knowledge Sharing**: Share learnings with team and other agents
 
+## 🏗️ Framework Backlog Integration
+
+### Claude PM Framework Backlog Context
+**Primary Framework Backlog Location**: `/Users/masa/Projects/claude-multiagent-pm/tasks/`
+
+### Framework Structure
+```
+/Users/masa/Projects/claude-multiagent-pm/
+├── claude_pm/          # Framework core
+├── tasks/              # Ticket hierarchy (PRIMARY BACKLOG)
+│   ├── issues/         # Issue tracking
+│   ├── tasks/          # Task management
+│   ├── epics/          # Epic coordination
+│   └── archive/        # Completed items
+├── framework/          # Framework templates and agents
+├── bin/               # CLI wrappers
+├── scripts/           # Deployment scripts
+├── .claude-pm/        # Deployment config
+└── CLAUDE.md         # Framework instructions
+```
+
+### CLI Command Discovery
+**Primary Discovery Method**: `aitrackdown help`
+- Use `aitrackdown help` to discover available framework commands
+- Framework-specific commands: `./bin/aitrackdown`, `./bin/atd`, global `aitrackdown`
+- Command delegation and execution patterns for framework context
+- Framework-aware ticketing operations and specialized workflows
+
+### Framework-Specific Ticketing Operations
+1. **Framework Backlog Management**:
+   - Navigate and manage `/Users/masa/Projects/claude-multiagent-pm/tasks/` directory
+   - Handle framework-specific task hierarchy and organization
+   - Integration with multi-project orchestration capabilities
+
+2. **CLI Integration Strategy**:
+   - Primary: `aitrackdown` commands for framework backlog operations
+   - Secondary: Direct file operations when CLI unavailable
+   - Framework-specific vs universal ticketing pattern recognition
+
+3. **Cross-Project Coordination**:
+   - Framework backlog as specialized ticketing context
+   - Integration with existing multi-platform support
+   - Framework-aware ticket lifecycle management
+   - Specialized context handling for framework operations
+
+### Universal Ticketing Interface Enhancement
+**Framework Backlog as Specialized Context**:
+- Framework backlog operations integrate with universal ticketing interface
+- Specialized handling for framework deployment and task tracking
+- Cross-project coordination with framework-aware workflows
+- Enhanced ticket lifecycle management for framework operations
+
+### Framework-Specific Workflows
+1. **Framework Ticket Creation**:
+   - Use framework-specific templates and categorization
+   - Apply framework context to ticket priorities and assignments
+   - Integration with framework deployment and development workflows
+
+2. **Framework Status Management**:
+   - Framework-aware status transitions and validation
+   - Integration with framework deployment states
+   - Specialized workflow enforcement for framework operations
+
+3. **Framework Reporting**:
+   - Framework-specific analytics and reporting
+   - Integration with framework health monitoring
+   - Cross-project visibility and coordination reports
+
 ## 🔧 Advanced Features
 
 ### Intelligent Automation
@@ -300,12 +383,14 @@ Recommendations:
 - **Communication Tools**: Integration with Slack, Teams, and other communication platforms
 - **Development Tools**: Integration with IDEs and development environments
 - **Reporting Systems**: Integration with business intelligence and reporting tools
+- **Framework Integration**: Deep integration with Claude PM Framework backlog and operations
 
 ### Analytics and Insights
 - **Performance Dashboards**: Real-time dashboards for ticket metrics and KPIs
 - **Trend Analysis**: Historical trend analysis and pattern recognition
 - **Team Productivity**: Individual and team productivity analytics
 - **Process Optimization**: Data-driven process improvement recommendations
+- **Framework Analytics**: Framework-specific performance and health metrics
 
 ---
 

@@ -76,6 +76,19 @@ class SubsystemVersionManager:
         "health": "HEALTH_VERSION",
         "framework": "FRAMEWORK_VERSION"
     }
+    
+    # Service-specific version files (relative to framework path)
+    SERVICE_VERSION_FILES = {
+        "memory_service": "claude_pm/services/memory/VERSION",
+        "agents_service": "claude_pm/agents/VERSION",
+        "cli_service": "claude_pm/cli/VERSION",
+        "services_core": "claude_pm/services/VERSION",
+        "version_control_service": "claude_pm/services/version_control/VERSION",
+        "ai_ops_service": "claude_pm/services/ai_ops/VERSION",
+        "framework_core": "framework/VERSION",
+        "script_system": "bin/VERSION",
+        "deployment_scripts": "scripts/VERSION"
+    }
 
     def __init__(self, framework_path: Optional[Path] = None):
         """
@@ -86,6 +99,10 @@ class SubsystemVersionManager:
         """
         self.framework_path = framework_path or self._detect_framework_path()
         self.subsystem_info: Dict[str, SubsystemVersionInfo] = {}
+        
+        # Centralized backup directory for version file backups
+        self.backup_dir = self.framework_path / ".claude-pm" / "backups" / "versions"
+        self.backup_dir.mkdir(parents=True, exist_ok=True)
         
     def _detect_framework_path(self) -> Path:
         """Detect framework path from environment or current location."""
@@ -117,6 +134,7 @@ class SubsystemVersionManager:
         try:
             self.subsystem_info.clear()
             
+            # Scan standard subsystem versions
             for subsystem, filename in self.SUBSYSTEM_FILES.items():
                 version_file = self.framework_path / filename
                 
@@ -151,7 +169,42 @@ class SubsystemVersionManager:
                     self.subsystem_info[subsystem] = error_info
                     logger.error(f"Error reading {subsystem} version: {e}")
             
-            logger.info(f"Scanned {len(self.subsystem_info)} subsystem versions")
+            # Scan service-specific versions
+            for service, filename in self.SERVICE_VERSION_FILES.items():
+                version_file = self.framework_path / filename
+                
+                try:
+                    if version_file.exists():
+                        version = version_file.read_text().strip()
+                        info = SubsystemVersionInfo(
+                            name=service,
+                            version=version,
+                            status=VersionStatus.FOUND,
+                            file_path=str(version_file)
+                        )
+                    else:
+                        info = SubsystemVersionInfo(
+                            name=service,
+                            version="not_found",
+                            status=VersionStatus.MISSING,
+                            file_path=str(version_file)
+                        )
+                    
+                    self.subsystem_info[service] = info
+                    logger.debug(f"Scanned service {service}: {info.version}")
+                    
+                except Exception as e:
+                    error_info = SubsystemVersionInfo(
+                        name=service,
+                        version="error",
+                        status=VersionStatus.ERROR,
+                        file_path=str(version_file),
+                        error=str(e)
+                    )
+                    self.subsystem_info[service] = error_info
+                    logger.error(f"Error reading service {service} version: {e}")
+            
+            logger.info(f"Scanned {len(self.subsystem_info)} subsystem and service versions")
             return self.subsystem_info
             
         except Exception as e:
@@ -160,16 +213,25 @@ class SubsystemVersionManager:
 
     def get_version(self, subsystem: str) -> Optional[str]:
         """
-        Get version for a specific subsystem.
+        Get version for a specific subsystem or service.
         
         Args:
-            subsystem: Name of the subsystem
+            subsystem: Name of the subsystem or service
             
         Returns:
             Version string or None if not found
         """
         info = self.subsystem_info.get(subsystem)
         return info.version if info and info.status == VersionStatus.FOUND else None
+    
+    def get_all_available_subsystems(self) -> List[str]:
+        """
+        Get list of all available subsystems and services.
+        
+        Returns:
+            List of subsystem and service names
+        """
+        return list(self.SUBSYSTEM_FILES.keys()) + list(self.SERVICE_VERSION_FILES.keys())
 
     def compare_versions(self, version1: str, version2: str) -> int:
         """
@@ -290,10 +352,10 @@ class SubsystemVersionManager:
 
     async def update_version(self, subsystem: str, new_version: str, backup: bool = True) -> bool:
         """
-        Update version for a specific subsystem.
+        Update version for a specific subsystem or service.
         
         Args:
-            subsystem: Name of the subsystem
+            subsystem: Name of the subsystem or service
             new_version: New version string
             backup: Create backup before updating
             
@@ -301,12 +363,19 @@ class SubsystemVersionManager:
             True if successful, False otherwise
         """
         try:
-            if subsystem not in self.SUBSYSTEM_FILES:
-                logger.error(f"Unknown subsystem: {subsystem}")
+            # Check if it's a standard subsystem or service-specific version
+            if subsystem in self.SUBSYSTEM_FILES:
+                filename = self.SUBSYSTEM_FILES[subsystem]
+                version_file = self.framework_path / filename
+            elif subsystem in self.SERVICE_VERSION_FILES:
+                filename = self.SERVICE_VERSION_FILES[subsystem]
+                version_file = self.framework_path / filename
+            else:
+                logger.error(f"Unknown subsystem or service: {subsystem}")
                 return False
             
-            filename = self.SUBSYSTEM_FILES[subsystem]
-            version_file = self.framework_path / filename
+            # Ensure parent directory exists
+            version_file.parent.mkdir(parents=True, exist_ok=True)
             
             # Create backup if requested and file exists
             if backup and version_file.exists():
@@ -337,7 +406,8 @@ class SubsystemVersionManager:
         """Create a backup of a version file."""
         try:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            backup_path = file_path.parent / f"{file_path.name}.backup.{timestamp}"
+            backup_filename = f"{file_path.name}_backup_{timestamp}"
+            backup_path = self.backup_dir / backup_filename
             
             import shutil
             shutil.copy2(file_path, backup_path)
@@ -591,8 +661,16 @@ if __name__ == "__main__":
         report = manager.get_summary_report()
         print(f"✅ Found {report['summary']['found']}/{report['summary']['total_subsystems']} subsystem versions")
         
-        # Example validation
-        requirements = {"memory": "002", "framework": "010"}
+        # Example validation using dynamic version loading
+        try:
+            from .version_loader import get_service_version, get_framework_version
+            requirements = {
+                "memory": get_service_version("memory"), 
+                "framework": get_framework_version()
+            }
+        except ImportError:
+            # Fallback to hardcoded values
+            requirements = {"memory": "002", "framework": "010"}
         print(f"🔍 Validating against requirements: {requirements}")
         checks = await manager.validate_compatibility(requirements)
         

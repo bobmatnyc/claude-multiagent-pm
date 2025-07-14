@@ -28,8 +28,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 import subprocess
 
-from ..core.base_agent import BaseAgent
-from ..core.config import Config
+from claude_pm.core.base_agent import BaseAgent
+from claude_pm.core.config import Config
 
 
 class TicketPlatform(Enum):
@@ -1052,3 +1052,19 @@ class TicketingAgent(BaseAgent):
         # Notify PM for ticket creation, critical updates, and transitions
         pm_notify_operations = ["create_ticket", "transition_ticket", "health_check_tickets"]
         return operation in pm_notify_operations
+
+    async def _cleanup(self) -> None:
+        """Cleanup Ticketing Agent resources."""
+        try:
+            # Cleanup platform layer if it exists
+            if hasattr(self, 'platform_layer') and self.platform_layer:
+                await self.platform_layer.cleanup()
+            
+            # Clear interfaces
+            self.ticket_interface = None
+            self.lifecycle_manager = None
+            
+            self.logger.info("Ticketing Agent cleanup completed")
+        except Exception as e:
+            self.logger.error(f"Failed to cleanup Ticketing Agent: {e}")
+            raise

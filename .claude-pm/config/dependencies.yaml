@@ -1,5 +1,5 @@
-checked_by: system-init-agent
-last_checked: '2025-07-14 10:51:27'
+checked_by: pm-agent
+last_checked: '2025-07-14 13:58:15'
 status:
   ai_trackdown_tools:
     details: CLI available (local)
@@ -12,7 +12,7 @@ status:
   framework_core:
     details: Framework at /Users/masa/Projects/claude-multiagent-pm
     status: "\u2705 INSTALLED"
-    version: 0.7.3
+    version: 0.7.5
   mem0ai:
     details: ConnectionManager.get_session() got an unexpected keyword argument 'timeout'
     status: "\u274C OFFLINE"

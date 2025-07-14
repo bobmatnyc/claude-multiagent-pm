@@ -27,7 +27,7 @@ import hashlib
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Union, Tuple
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 
 from ..core.base_service import BaseService
@@ -197,7 +197,7 @@ class TemplateManager(BaseService):
         # Template manager paths
         self.template_manager_dir = self.working_dir / ".claude-pm" / "template_manager"
         self.versions_dir = self.template_manager_dir / "versions"
-        self.backups_dir = self.template_manager_dir / "backups"
+        self.backups_dir = self.working_dir / ".claude-pm" / "backups" / "templates"  # Use centralized backup directory
         self.registry_dir = self.template_manager_dir / "registry"
         self.conflicts_dir = self.template_manager_dir / "conflicts"
 
@@ -409,7 +409,7 @@ class TemplateManager(BaseService):
                 self.template_registry[template_id] = {
                     "template_id": template_id,
                     "name": template_file.stem,
-                    "type": self._detect_template_type(template_file),
+                    "type": self._detect_template_type(template_file).value,
                     "source": source.value,
                     "path": str(template_file),
                     "current_version": version.version,

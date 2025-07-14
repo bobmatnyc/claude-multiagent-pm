@@ -34,6 +34,13 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 import logging
 
+# Import unified deployment manager
+try:
+    from unified_deployment_strategy import UnifiedDeploymentManager
+    UNIFIED_STRATEGY_AVAILABLE = True
+except ImportError:
+    UNIFIED_STRATEGY_AVAILABLE = False
+
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
@@ -51,12 +58,16 @@ class ScriptDeploymentManager:
         self.deployment_config_dir = Path.home() / ".local" / ".claude-pm"
         self.deployment_config_file = self.deployment_config_dir / "script_deployment.json"
         
+        # Centralized backup directory for script backups
+        self.backup_dir = self.deployment_config_dir / "backups" / "scripts"
+        
         # Integration with existing Claude PM deployment system
         self.main_deployment_config = self.deployment_config_dir / "config.json"
         
         # Ensure directories exist
         self.target_dir.mkdir(parents=True, exist_ok=True)
         self.deployment_config_dir.mkdir(parents=True, exist_ok=True)
+        self.backup_dir.mkdir(parents=True, exist_ok=True)
         
         # Scripts to manage
         self.managed_scripts = {
@@ -65,12 +76,6 @@ class ScriptDeploymentManager:
                 "target": self.target_dir / "claude-pm",
                 "type": "python",  # Changed from "node" to "python"
                 "description": "Main Claude PM Framework CLI"
-            },
-            "cmpm": {
-                "source": self.bin_dir / "cmpm", 
-                "target": self.target_dir / "cmpm",
-                "type": "python",
-                "description": "CMPM slash command wrapper"
             }
         }
         
@@ -89,6 +94,38 @@ class ScriptDeploymentManager:
             # Read source script
             with open(source_path, 'r') as f:
                 script_content = f.read()
+            
+            # Inject the script version from bin/VERSION file
+            bin_version_file = self.bin_dir / "VERSION"
+            if bin_version_file.exists():
+                script_version = bin_version_file.read_text().strip()
+            else:
+                script_version = "001"  # Fallback serial version
+            
+            # Replace the get_script_version function to return the serial version
+            version_function_replacement = f'''def get_script_version():
+    """Get script version - injected during deployment."""
+    return "{script_version}"'''
+            
+            import re
+            # Replace the get_script_version function
+            pattern = r'def get_script_version\(\):\s*""".*?""".*?return "1\.0\.0"  # Fallback'
+            updated_content = re.sub(pattern, version_function_replacement, script_content, flags=re.DOTALL)
+            
+            # Also try alternative patterns in case the exact match fails
+            if f'return "{script_version}"' not in updated_content:
+                # Try simpler pattern for the function body
+                pattern2 = r'(def get_script_version\(\):.*?)return "1\.0\.0"  # Fallback'
+                updated_content = re.sub(pattern2, f'\\1return "{script_version}"', script_content, flags=re.DOTALL)
+                
+                # If still not replaced, try direct string replacement
+                if f'return "{script_version}"' not in updated_content:
+                    updated_content = script_content.replace(
+                        'return "1.0.0"  # Fallback',
+                        f'return "{script_version}"'
+                    )
+            
+            script_content = updated_content
             
             # Replace dynamic framework path with injected absolute path
             framework_path_injection = f'''# Add the framework path to Python path for imports
@@ -401,7 +438,9 @@ function resolveVersion() {{
         try:
             # Create backup if target exists
             if target_path.exists():
-                backup_path = target_path.with_suffix(f"{target_path.suffix}.backup.{datetime.now().strftime('%Y%m%d_%H%M%S')}")
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                backup_filename = f"{script_name}_backup_{timestamp}"
+                backup_path = self.backup_dir / backup_filename
                 shutil.copy2(target_path, backup_path)
                 logger.info(f"Created backup: {backup_path}")
             
@@ -520,9 +559,9 @@ function resolveVersion() {{
         
         target_path = self.managed_scripts[script_name]["target"]
         
-        # Find most recent backup
-        backup_pattern = f"{target_path}.backup.*"
-        backups = list(target_path.parent.glob(f"{target_path.name}.backup.*"))
+        # Find most recent backup in centralized backup directory
+        backup_pattern = f"{script_name}_backup_*"
+        backups = list(self.backup_dir.glob(backup_pattern))
         
         if not backups:
             logger.error(f"No backups found for {script_name}")
@@ -659,6 +698,12 @@ def main():
         help="Quiet mode - minimal output"
     )
     
+    parser.add_argument(
+        "--unified",
+        action="store_true",
+        help="Use unified deployment strategy with enhanced symlink management"
+    )
+    
     args = parser.parse_args()
     
     if args.quiet:
@@ -667,6 +712,66 @@ def main():
     manager = ScriptDeploymentManager()
     
     try:
+        # Check if unified strategy is requested and available
+        if args.unified and not UNIFIED_STRATEGY_AVAILABLE:
+            print("❌ Unified deployment strategy not available. Using standard deployment.")
+            args.unified = False
+        
+        if args.unified:
+            print("🔗 Using unified deployment strategy with enhanced symlink management")
+            unified_manager = UnifiedDeploymentManager()
+            
+            if args.deploy:
+                print("🚀 Deploying all scripts using unified strategy...")
+                results = unified_manager.deploy_all_scripts()
+                
+                success_count = sum(1 for success in results.values() if success)
+                total_count = len(results)
+                
+                if success_count == total_count:
+                    print(f"✅ Successfully deployed {success_count}/{total_count} scripts")
+                else:
+                    print(f"⚠️  Deployed {success_count}/{total_count} scripts with issues")
+                    sys.exit(1)
+            
+            elif args.deploy_script:
+                print(f"🚀 Deploying {args.deploy_script} using unified strategy...")
+                success = unified_manager.deploy_script_unified(args.deploy_script)
+                
+                if success:
+                    print(f"✅ Successfully deployed {args.deploy_script}")
+                else:
+                    print(f"❌ Failed to deploy {args.deploy_script}")
+                    sys.exit(1)
+            
+            elif args.verify:
+                print("🔍 Verifying deployment integrity using unified strategy...")
+                verification_results = unified_manager.verify_deployment_integrity()
+                
+                all_verified = all(
+                    result["status"] == "verified"
+                    for result in verification_results.values()
+                )
+                
+                if all_verified:
+                    print("✅ All scripts verified successfully")
+                else:
+                    print("❌ Some scripts failed verification:")
+                    for script_name, result in verification_results.items():
+                        if result["status"] != "verified":
+                            print(f"   {script_name}: {result['message']}")
+                    sys.exit(1)
+            
+            elif args.status:
+                unified_manager.print_deployment_status()
+            
+            else:
+                # Default behavior for unified strategy
+                unified_manager.print_deployment_status()
+            
+            return
+        
+        # Standard deployment strategy
         if args.deploy:
             print("🚀 Deploying all scripts...")
             results = manager.deploy_all_scripts()

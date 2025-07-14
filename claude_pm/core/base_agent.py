@@ -19,6 +19,17 @@ import logging
 
 from .base_service import BaseService
 from .config import Config
+from ..services.memory.memory_trigger_service import MemoryTriggerService
+from ..services.memory.trigger_orchestrator import TriggerEvent
+from ..services.memory.trigger_types import TriggerType, TriggerPriority
+from ..services.memory.interfaces.models import MemoryCategory
+from ..services.memory.decorators import (
+    memory_trigger,
+    agent_memory_trigger,
+    error_memory_trigger,
+    trigger_immediate_memory,
+    agent_trigger_context,
+)
 
 
 class BaseAgent(BaseService, ABC):
@@ -68,6 +79,16 @@ class BaseAgent(BaseService, ABC):
         self.pm_collaboration_enabled = True
         self.pm_notification_queue = []
 
+        # Memory integration
+        self.memory_service: Optional[MemoryTriggerService] = None
+        self.memory_enabled = config.get("memory_enabled", True) if config else True
+        self.memory_project_name = config.get("project_name", "default") if config else "default"
+        self.memory_auto_collect = config.get("memory_auto_collect", True) if config else True
+        
+        # Add memory capability to all agents
+        if "memory_integration" not in self.capabilities:
+            self.capabilities.append("memory_integration")
+
         self.logger.info(f"Initialized {agent_type} agent: {agent_id} (tier: {tier})")
 
     def _get_tier_priority(self, tier: str) -> int:
@@ -102,7 +123,376 @@ class BaseAgent(BaseService, ABC):
             ),
             "collaboration_enabled": self.pm_collaboration_enabled,
             "pending_notifications": len(self.pm_notification_queue),
+            "memory_enabled": self.memory_enabled,
+            "memory_service_connected": self.memory_service is not None,
+            "memory_project": self.memory_project_name,
         }
+
+    # Memory Integration Methods
+    
+    async def enable_memory_integration(self, memory_service: MemoryTriggerService) -> Dict[str, Any]:
+        """
+        Enable memory integration for the agent.
+        
+        Args:
+            memory_service: Memory trigger service instance
+            
+        Returns:
+            Dict[str, Any]: Integration status
+        """
+        try:
+            self.memory_service = memory_service
+            self.memory_enabled = True
+            
+            # Initialize memory service if not already done
+            if not memory_service._initialized:
+                await memory_service.initialize()
+            
+            self.logger.info(f"Memory integration enabled for {self.agent_type} agent: {self.agent_id}")
+            
+            # Trigger memory collection for successful integration
+            await self._collect_memory(
+                "memory_integration_enabled",
+                MemoryCategory.SYSTEM,
+                {"agent_type": self.agent_type, "agent_id": self.agent_id, "tier": self.tier}
+            )
+            
+            return {
+                "success": True,
+                "memory_enabled": True,
+                "memory_service_connected": True,
+                "agent_id": self.agent_id
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to enable memory integration: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "memory_enabled": False,
+                "memory_service_connected": False
+            }
+    
+    async def disable_memory_integration(self) -> Dict[str, Any]:
+        """
+        Disable memory integration for the agent.
+        
+        Returns:
+            Dict[str, Any]: Integration status
+        """
+        self.memory_service = None
+        self.memory_enabled = False
+        
+        self.logger.info(f"Memory integration disabled for {self.agent_type} agent: {self.agent_id}")
+        
+        return {
+            "success": True,
+            "memory_enabled": False,
+            "memory_service_connected": False,
+            "agent_id": self.agent_id
+        }
+    
+    @agent_memory_trigger(
+        agent_type="base",
+        priority=TriggerPriority.MEDIUM,
+        capture_result=True
+    )
+    async def collect_memory(
+        self,
+        content: str,
+        category: MemoryCategory,
+        metadata: Optional[Dict[str, Any]] = None,
+        tags: Optional[List[str]] = None
+    ) -> Optional[str]:
+        """
+        Collect memory for bugs, feedback, and operational insights.
+        
+        Args:
+            content: Memory content
+            category: Memory category
+            metadata: Optional metadata
+            tags: Optional tags
+            
+        Returns:
+            Optional[str]: Memory ID if successful
+        """
+        return await self._collect_memory(content, category, metadata, tags)
+    
+    async def _collect_memory(
+        self,
+        content: str,
+        category: MemoryCategory,
+        metadata: Optional[Dict[str, Any]] = None,
+        tags: Optional[List[str]] = None
+    ) -> Optional[str]:
+        """
+        Internal memory collection method.
+        
+        Args:
+            content: Memory content
+            category: Memory category
+            metadata: Optional metadata
+            tags: Optional tags
+            
+        Returns:
+            Optional[str]: Memory ID if successful
+        """
+        if not self.memory_enabled or not self.memory_service:
+            self.logger.debug("Memory collection skipped - memory integration not enabled")
+            return None
+        
+        try:
+            # Enhance metadata with agent context
+            enhanced_metadata = {
+                "agent_id": self.agent_id,
+                "agent_type": self.agent_type,
+                "tier": self.tier,
+                "timestamp": datetime.now().isoformat(),
+                "operations_count": self.operations_count,
+                **(metadata or {})
+            }
+            
+            # Enhance tags with agent context
+            enhanced_tags = [
+                f"agent:{self.agent_type}",
+                f"tier:{self.tier}",
+                f"agent_id:{self.agent_id}",
+                *(tags or [])
+            ]
+            
+            # Get memory service from trigger service
+            memory_service = self.memory_service.get_memory_service()
+            if not memory_service:
+                self.logger.warning("Memory service not available for collection")
+                return None
+            
+            # Store memory
+            memory_id = await memory_service.add_memory(
+                project_name=self.memory_project_name,
+                content=content,
+                category=category,
+                tags=enhanced_tags,
+                metadata=enhanced_metadata
+            )
+            
+            if memory_id:
+                self.logger.debug(f"Memory collected: {memory_id[:8]}... for {category.value}")
+            
+            return memory_id
+            
+        except Exception as e:
+            self.logger.error(f"Failed to collect memory: {e}")
+            return None
+    
+    @error_memory_trigger(
+        error_type="agent_operation",
+        priority=TriggerPriority.HIGH
+    )
+    async def collect_error_memory(
+        self,
+        error: Exception,
+        operation: str,
+        context: Optional[Dict[str, Any]] = None
+    ) -> Optional[str]:
+        """
+        Collect memory for errors and exceptions.
+        
+        Args:
+            error: Exception that occurred
+            operation: Operation that failed
+            context: Optional context information
+            
+        Returns:
+            Optional[str]: Memory ID if successful
+        """
+        error_content = f"Error in {self.agent_type} agent during {operation}: {str(error)}"
+        
+        error_metadata = {
+            "error_type": type(error).__name__,
+            "operation": operation,
+            "error_message": str(error),
+            "context": context or {},
+            "severity": "high" if isinstance(error, (MemoryError, RuntimeError)) else "medium"
+        }
+        
+        return await self._collect_memory(
+            error_content,
+            MemoryCategory.BUG,
+            error_metadata,
+            ["error", "bug", operation]
+        )
+    
+    async def collect_feedback_memory(
+        self,
+        feedback: str,
+        source: str = "user",
+        context: Optional[Dict[str, Any]] = None
+    ) -> Optional[str]:
+        """
+        Collect memory for user feedback and suggestions.
+        
+        Args:
+            feedback: Feedback content
+            source: Source of feedback (user, system, agent)
+            context: Optional context information
+            
+        Returns:
+            Optional[str]: Memory ID if successful
+        """
+        feedback_content = f"Feedback for {self.agent_type} agent from {source}: {feedback}"
+        
+        feedback_metadata = {
+            "feedback_source": source,
+            "feedback_type": "suggestion",
+            "context": context or {}
+        }
+        
+        return await self._collect_memory(
+            feedback_content,
+            MemoryCategory.USER_FEEDBACK,
+            feedback_metadata,
+            ["feedback", source, "improvement"]
+        )
+    
+    async def collect_performance_memory(
+        self,
+        operation: str,
+        performance_data: Dict[str, Any],
+        threshold_exceeded: bool = False
+    ) -> Optional[str]:
+        """
+        Collect memory for performance observations.
+        
+        Args:
+            operation: Operation that was measured
+            performance_data: Performance metrics
+            threshold_exceeded: Whether performance thresholds were exceeded
+            
+        Returns:
+            Optional[str]: Memory ID if successful
+        """
+        performance_content = f"Performance observation for {self.agent_type} agent operation {operation}"
+        
+        if threshold_exceeded:
+            performance_content += " - Performance threshold exceeded"
+        
+        performance_metadata = {
+            "operation": operation,
+            "performance_data": performance_data,
+            "threshold_exceeded": threshold_exceeded,
+            "measurement_type": "performance"
+        }
+        
+        category = MemoryCategory.BUG if threshold_exceeded else MemoryCategory.SYSTEM
+        tags = ["performance", operation]
+        if threshold_exceeded:
+            tags.append("slow_performance")
+        
+        return await self._collect_memory(
+            performance_content,
+            category,
+            performance_metadata,
+            tags
+        )
+    
+    async def search_agent_memories(
+        self,
+        query: str,
+        category: Optional[MemoryCategory] = None,
+        limit: int = 10
+    ) -> List[Dict[str, Any]]:
+        """
+        Search memories related to this agent.
+        
+        Args:
+            query: Search query
+            category: Optional category filter
+            limit: Maximum results to return
+            
+        Returns:
+            List[Dict[str, Any]]: Matching memories
+        """
+        if not self.memory_enabled or not self.memory_service:
+            return []
+        
+        try:
+            memory_service = self.memory_service.get_memory_service()
+            if not memory_service:
+                return []
+            
+            from ..services.memory.interfaces.models import MemoryQuery
+            
+            # Create query with agent context
+            memory_query = MemoryQuery(
+                query_text=f"{query} agent:{self.agent_type}",
+                category=category,
+                limit=limit,
+                include_metadata=True
+            )
+            
+            memories = await memory_service.search_memories(
+                project_name=self.memory_project_name,
+                query=memory_query
+            )
+            
+            # Convert to dictionaries for easier handling
+            return [
+                {
+                    "id": memory.id,
+                    "content": memory.content,
+                    "category": memory.category.value,
+                    "tags": memory.tags,
+                    "metadata": memory.metadata,
+                    "created_at": memory.created_at.isoformat() if memory.created_at else None
+                }
+                for memory in memories
+            ]
+            
+        except Exception as e:
+            self.logger.error(f"Failed to search agent memories: {e}")
+            return []
+    
+    async def get_memory_health_status(self) -> Dict[str, Any]:
+        """
+        Get memory system health status.
+        
+        Returns:
+            Dict[str, Any]: Memory health information
+        """
+        if not self.memory_service:
+            return {
+                "memory_enabled": False,
+                "memory_service_connected": False,
+                "memory_health": "disabled"
+            }
+        
+        try:
+            memory_service = self.memory_service.get_memory_service()
+            if not memory_service:
+                return {
+                    "memory_enabled": self.memory_enabled,
+                    "memory_service_connected": False,
+                    "memory_health": "service_unavailable"
+                }
+            
+            health_data = await memory_service.get_service_health()
+            
+            return {
+                "memory_enabled": self.memory_enabled,
+                "memory_service_connected": True,
+                "memory_health": "healthy" if health_data.get("service_healthy") else "unhealthy",
+                "active_backend": health_data.get("active_backend"),
+                "memory_metrics": health_data.get("metrics", {})
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to get memory health status: {e}")
+            return {
+                "memory_enabled": self.memory_enabled,
+                "memory_service_connected": False,
+                "memory_health": "error",
+                "error": str(e)
+            }
 
     async def execute_operation(
         self, operation: str, context: Optional[Dict[str, Any]] = None, **kwargs
@@ -142,6 +532,25 @@ class BaseAgent(BaseService, ABC):
                 "timestamp": self.last_operation_time.isoformat(),
             }
 
+            # Collect memory for significant operations or performance issues
+            if self.memory_auto_collect and self.memory_enabled:
+                # Collect performance memory if operation took too long
+                if execution_time > 5.0:  # 5 second threshold
+                    await self.collect_performance_memory(
+                        operation,
+                        {"execution_time": execution_time, "result_type": type(result).__name__},
+                        threshold_exceeded=True
+                    )
+                
+                # Collect memory for critical operations
+                if operation.startswith("critical_") or operation.endswith("_complete"):
+                    await self.collect_memory(
+                        f"Completed operation: {operation}",
+                        MemoryCategory.SYSTEM,
+                        {"operation_result": operation_result, "context": context},
+                        [operation, "completion"]
+                    )
+
             # Notify PM if collaboration enabled
             if self.pm_collaboration_enabled and self._should_notify_pm(operation, result):
                 await self._notify_pm(operation, operation_result)
@@ -163,6 +572,10 @@ class BaseAgent(BaseService, ABC):
                 "tier": self.tier,
                 "timestamp": self.last_operation_time.isoformat(),
             }
+
+            # Collect error memory automatically
+            if self.memory_auto_collect and self.memory_enabled:
+                await self.collect_error_memory(e, operation, context)
 
             # Notify PM of error if collaboration enabled
             if self.pm_collaboration_enabled:
@@ -297,6 +710,18 @@ class BaseAgent(BaseService, ABC):
         checks["capabilities_available"] = len(self.capabilities) > 0
         checks["pm_collaboration_ready"] = self.pm_collaboration_enabled
         checks["recent_activity"] = self.last_operation_time is not None
+        checks["memory_integration_available"] = "memory_integration" in self.capabilities
+        checks["memory_service_connected"] = self.memory_service is not None
+        
+        # Check memory system health if available
+        if self.memory_enabled and self.memory_service:
+            try:
+                memory_health = await self.get_memory_health_status()
+                checks["memory_system_healthy"] = memory_health.get("memory_health") == "healthy"
+            except Exception:
+                checks["memory_system_healthy"] = False
+        else:
+            checks["memory_system_healthy"] = not self.memory_enabled  # OK if disabled
 
         return checks
 
@@ -322,7 +747,20 @@ class BaseAgent(BaseService, ABC):
             ),
             "tier_priority": self.priority,
             "authority_level": self.authority_level,
+            "memory_enabled": self.memory_enabled,
+            "memory_service_connected": self.memory_service is not None,
+            "memory_auto_collect": self.memory_auto_collect,
+            "memory_project_name": self.memory_project_name,
         }
+
+        # Add memory metrics if available
+        if self.memory_enabled and self.memory_service:
+            try:
+                memory_health = await self.get_memory_health_status()
+                agent_metrics["memory_health"] = memory_health.get("memory_health")
+                agent_metrics["memory_metrics"] = memory_health.get("memory_metrics", {})
+            except Exception as e:
+                agent_metrics["memory_health"] = f"error: {e}"
 
         return {**base_metrics, **agent_metrics}
 

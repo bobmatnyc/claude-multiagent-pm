@@ -18,12 +18,12 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple, Set
 from dataclasses import dataclass, field
 
-from ..core.base_agent import BaseAgent
-from ..core.config import Config
-from ..services.memory.memory_trigger_service import MemoryTriggerService
-from ..services.memory.trigger_orchestrator import TriggerEvent
-from ..services.memory.trigger_types import TriggerType, TriggerPriority
-from ..services.memory.interfaces.models import MemoryCategory
+from claude_pm.core.base_agent import BaseAgent
+from claude_pm.core.config import Config
+from claude_pm.services.memory.memory_trigger_service import MemoryTriggerService
+from claude_pm.services.memory.trigger_orchestrator import TriggerEvent
+from claude_pm.services.memory.trigger_types import TriggerType, TriggerPriority
+from claude_pm.services.memory.interfaces.models import MemoryCategory
 
 
 @dataclass

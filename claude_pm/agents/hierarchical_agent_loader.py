@@ -30,9 +30,16 @@ from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from datetime import datetime
 
-from ..core.base_service import BaseService
-from ..core.config import Config
-from ..core.logging_config import setup_logging
+from claude_pm.core.base_service import BaseService
+from claude_pm.core.config import Config
+from claude_pm.core.logging_config import setup_logging
+from claude_pm.services.memory.agent_memory_integration import (
+    AgentMemoryIntegration,
+    initialize_global_memory_integration,
+    register_agent_for_memory,
+    validate_global_memory_compliance
+)
+from claude_pm.services.memory.memory_health_monitor import MemoryHealthMonitor
 
 
 @dataclass
@@ -147,6 +154,11 @@ class HierarchicalAgentLoader(BaseService):
 
         # Configuration cache
         self._config_cache: Dict[str, Dict[str, Any]] = {}
+        
+        # Memory integration
+        self.memory_integration: Optional[AgentMemoryIntegration] = None
+        self.memory_health_monitor: Optional[MemoryHealthMonitor] = None
+        self.memory_enabled = config.get("memory_enabled", True) if config else True
 
         self.logger.info(f"Initialized HierarchicalAgentLoader")
         self.logger.info(f"  System agents: {self.system_agents_path}")
@@ -162,6 +174,10 @@ class HierarchicalAgentLoader(BaseService):
             # Load agent configuration
             await self._load_agent_configuration()
 
+            # Initialize memory integration if enabled
+            if self.memory_enabled:
+                await self._initialize_memory_integration()
+
             # Discover all agents
             await self._discover_agents()
 
@@ -176,6 +192,15 @@ class HierarchicalAgentLoader(BaseService):
         try:
             # Unload all agents
             await self._unload_all_agents()
+
+            # Cleanup memory integration
+            if self.memory_integration:
+                await self.memory_integration.cleanup()
+                self.memory_integration = None
+            
+            if self.memory_health_monitor:
+                await self.memory_health_monitor.cleanup()
+                self.memory_health_monitor = None
 
             # Clear caches
             self._loaded_agents.clear()
@@ -200,6 +225,41 @@ class HierarchicalAgentLoader(BaseService):
 
         for directory in directories:
             directory.mkdir(parents=True, exist_ok=True)
+    
+    async def _initialize_memory_integration(self) -> None:
+        """Initialize memory integration for agent loading."""
+        try:
+            self.logger.info("Initializing memory integration for agent loading...")
+            
+            # Initialize global memory integration
+            memory_config = self.config.get("memory_integration", {})
+            success = await initialize_global_memory_integration(memory_config)
+            
+            if not success:
+                self.logger.warning("Failed to initialize global memory integration")
+                return
+            
+            # Create memory integration instance
+            self.memory_integration = AgentMemoryIntegration(memory_config)
+            if not await self.memory_integration.initialize():
+                self.logger.warning("Failed to initialize agent memory integration")
+                return
+            
+            # Initialize memory health monitor
+            memory_service = self.memory_integration.memory_service
+            if memory_service:
+                memory_service_instance = memory_service.get_memory_service()
+                if memory_service_instance:
+                    health_config = self.config.get("memory_health_monitoring", {})
+                    self.memory_health_monitor = MemoryHealthMonitor(health_config)
+                    await self.memory_health_monitor.initialize(memory_service_instance, memory_service)
+            
+            self.logger.info("Memory integration initialized for agent loading")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to initialize memory integration: {e}")
+            # Continue without memory integration
+            self.memory_enabled = False
 
             # Create __init__.py if it doesn't exist
             init_file = directory / "__init__.py"
@@ -309,7 +369,7 @@ class HierarchicalAgentLoader(BaseService):
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
 
-            # Find agent classes
+            # Find agent classes (classes that inherit from BaseAgent or BaseService)
             agent_classes = []
             for name, obj in inspect.getmembers(module):
                 if (
@@ -318,12 +378,27 @@ class HierarchicalAgentLoader(BaseService):
                     and hasattr(obj, "__module__")
                     and obj.__module__ == module.__name__
                 ):
-                    agent_classes.append((name, obj))
+                    # Check if it's an agent class (inherits from BaseAgent or BaseService)
+                    base_classes = [base.__name__ for base in inspect.getmro(obj)]
+                    if "BaseAgent" in base_classes or "BaseService" in base_classes:
+                        agent_classes.append((name, obj))
+
+            if not agent_classes:
+                # Fallback to any class with "Agent" in the name
+                for name, obj in inspect.getmembers(module):
+                    if (
+                        inspect.isclass(obj)
+                        and not name.startswith("_")
+                        and hasattr(obj, "__module__")
+                        and obj.__module__ == module.__name__
+                        and "Agent" in name
+                    ):
+                        agent_classes.append((name, obj))
 
             if not agent_classes:
                 return None
 
-            # Use first agent class found
+            # Use first agent class found (should be the actual agent class now)
             class_name, agent_class = agent_classes[0]
 
             # Determine agent type
@@ -343,6 +418,7 @@ class HierarchicalAgentLoader(BaseService):
 
         except Exception as e:
             self.logger.warning(f"Failed to analyze agent file {file_path}: {e}")
+            self.logger.debug(f"Agent file analysis error details: {type(e).__name__}: {e}")
             return None
 
     def _determine_agent_type(self, file_name: str, class_name: str, agent_class: Type) -> str:
@@ -363,6 +439,9 @@ class HierarchicalAgentLoader(BaseService):
             "research": ["research", "analysis", "investigation"],
             "documentation": ["doc", "docs", "documentation", "readme"],
             "scaffolding": ["scaffold", "scaffolding", "template", "generator"],
+            "ticketing": ["ticket", "ticketing", "issue", "task"],
+            "version_control": ["version", "control", "git", "vcs"],
+            "system_init": ["system", "init", "initialization", "setup"],
         }
 
         # Check file name first
@@ -408,6 +487,21 @@ class HierarchicalAgentLoader(BaseService):
             # Cache the loaded agent
             self._loaded_agents[agent_type] = agent_instance
 
+            # Register agent for memory integration if available
+            if self.memory_integration and hasattr(agent_instance, 'enable_memory_integration'):
+                try:
+                    await self.memory_integration.register_agent(agent_instance)
+                    self.logger.debug(f"Registered {agent_type} agent for memory integration")
+                    
+                    # Register with health monitor if available
+                    if self.memory_health_monitor:
+                        agent_id = getattr(agent_instance, 'agent_id', agent_type)
+                        self.memory_health_monitor.register_agent(agent_id, agent_instance)
+                        self.logger.debug(f"Registered {agent_type} agent for health monitoring")
+                        
+                except Exception as e:
+                    self.logger.warning(f"Failed to register {agent_type} agent for memory integration: {e}")
+
             # Update agent info
             agent_info.loaded = True
             agent_info.instance = agent_instance
@@ -419,6 +513,7 @@ class HierarchicalAgentLoader(BaseService):
 
         except Exception as e:
             self.logger.error(f"Failed to load {agent_type} agent: {e}")
+            self.logger.debug(f"Agent loading error details: {type(e).__name__}: {e}")
             agent_info.health_status = "error"
             return None
 
@@ -455,6 +550,21 @@ class HierarchicalAgentLoader(BaseService):
 
         try:
             agent_instance = self._loaded_agents[agent_type]
+
+            # Unregister from memory integration if available
+            if self.memory_integration:
+                try:
+                    agent_id = getattr(agent_instance, 'agent_id', agent_type)
+                    await self.memory_integration.unregister_agent(agent_id)
+                    self.logger.debug(f"Unregistered {agent_type} agent from memory integration")
+                    
+                    # Unregister from health monitor if available
+                    if self.memory_health_monitor:
+                        self.memory_health_monitor.unregister_agent(agent_id)
+                        self.logger.debug(f"Unregistered {agent_type} agent from health monitoring")
+                        
+                except Exception as e:
+                    self.logger.warning(f"Failed to unregister {agent_type} agent from memory integration: {e}")
 
             # Cleanup agent if it supports it
             if hasattr(agent_instance, "cleanup"):
@@ -716,3 +826,144 @@ class HierarchicalAgentLoader(BaseService):
         checks["loaded_agents_healthy"] = len(self._loaded_agents) > 0
 
         return checks
+    
+    # Memory Integration Methods
+    
+    async def validate_memory_compliance(self) -> Dict[str, Any]:
+        """
+        Validate memory collection compliance across all loaded agents.
+        
+        Returns:
+            Dict[str, Any]: Compliance validation results
+        """
+        if not self.memory_integration:
+            return {
+                "compliant": False,
+                "error": "Memory integration not initialized",
+                "total_agents": len(self._loaded_agents)
+            }
+        
+        try:
+            return await self.memory_integration.validate_compliance()
+        except Exception as e:
+            self.logger.error(f"Failed to validate memory compliance: {e}")
+            return {
+                "compliant": False,
+                "error": str(e),
+                "total_agents": len(self._loaded_agents)
+            }
+    
+    async def get_memory_health_status(self) -> Dict[str, Any]:
+        """
+        Get comprehensive memory system health status.
+        
+        Returns:
+            Dict[str, Any]: Memory health information
+        """
+        if not self.memory_integration:
+            return {
+                "memory_integration_enabled": False,
+                "memory_health": "disabled"
+            }
+        
+        try:
+            # Get integration health
+            integration_health = await self.memory_integration.get_integration_health()
+            
+            # Get health monitoring results if available
+            health_monitor_data = {}
+            if self.memory_health_monitor:
+                latest_report = self.memory_health_monitor.get_latest_health_report()
+                if latest_report:
+                    health_monitor_data = {
+                        "overall_health": latest_report.overall_health.value,
+                        "total_agents_monitored": len(latest_report.agent_reports),
+                        "critical_issues": latest_report.critical_issues,
+                        "warnings": latest_report.warnings,
+                        "report_time": latest_report.report_time.isoformat()
+                    }
+            
+            return {
+                "memory_integration_enabled": True,
+                "integration_health": integration_health,
+                "health_monitoring": health_monitor_data,
+                "memory_enabled": self.memory_enabled
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to get memory health status: {e}")
+            return {
+                "memory_integration_enabled": True,
+                "error": str(e),
+                "memory_enabled": self.memory_enabled
+            }
+    
+    async def get_memory_statistics(self) -> Dict[str, Any]:
+        """
+        Get memory collection statistics across all agents.
+        
+        Returns:
+            Dict[str, Any]: Memory statistics
+        """
+        if not self.memory_integration:
+            return {
+                "error": "Memory integration not available",
+                "total_agents": len(self._loaded_agents)
+            }
+        
+        try:
+            return await self.memory_integration.get_memory_statistics()
+        except Exception as e:
+            self.logger.error(f"Failed to get memory statistics: {e}")
+            return {
+                "error": str(e),
+                "total_agents": len(self._loaded_agents)
+            }
+    
+    async def perform_memory_health_check(self) -> Dict[str, Any]:
+        """
+        Perform a comprehensive memory health check.
+        
+        Returns:
+            Dict[str, Any]: Health check results
+        """
+        if not self.memory_health_monitor:
+            return {
+                "error": "Memory health monitoring not available",
+                "memory_enabled": self.memory_enabled
+            }
+        
+        try:
+            report = await self.memory_health_monitor.perform_health_check()
+            return {
+                "success": True,
+                "overall_health": report.overall_health.value,
+                "total_agents": len(report.agent_reports),
+                "system_metrics": len(report.system_metrics),
+                "critical_issues": report.critical_issues,
+                "warnings": report.warnings,
+                "recommendations": report.recommendations,
+                "report_time": report.report_time.isoformat()
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to perform memory health check: {e}")
+            return {
+                "error": str(e),
+                "memory_enabled": self.memory_enabled
+            }
+    
+    def get_memory_integration_info(self) -> Dict[str, Any]:
+        """
+        Get memory integration configuration and status information.
+        
+        Returns:
+            Dict[str, Any]: Memory integration information
+        """
+        return {
+            "memory_enabled": self.memory_enabled,
+            "memory_integration_available": self.memory_integration is not None,
+            "memory_health_monitoring_available": self.memory_health_monitor is not None,
+            "total_loaded_agents": len(self._loaded_agents),
+            "memory_config": self.config.get("memory_integration", {}),
+            "health_config": self.config.get("memory_health_monitoring", {})
+        }

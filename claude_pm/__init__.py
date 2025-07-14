@@ -19,7 +19,13 @@ try:
 except ImportError:
     pass  # dotenv not available, skip loading
 
-__version__ = "0.7.5"
+# Load version dynamically from package.json/VERSION file
+try:
+    from .utils.version_loader import get_package_version
+    __version__ = get_package_version()
+except ImportError:
+    # Fallback if version_loader is not available
+    __version__ = "0.7.5"
 __title__ = "Claude Multi-Agent PM Framework"
 __description__ = "Claude Multi-Agent Project Management Framework for AI-driven orchestration"
 __author__ = "Robert (Masa) Matsuoka"

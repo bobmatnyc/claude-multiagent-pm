@@ -240,9 +240,30 @@ def store_memory(content: str, category: str, priority: str = "medium",
         
         if response.status_code == 200:
             result = response.json()
-            logger.info(f"Memory stored successfully: {result.get('id', 'unknown_id')}")
-            return {"success": True, "id": result.get("id"), "result": result}
+            memory_id = result.get('id', 'unknown_id')
+            
+            # Enhanced console logging for user visibility
+            print(f"🧠 Memory Stored: {category.upper()}")
+            print(f"   User: {user_id}")
+            print(f"   Agent: {agent_id}")
+            print(f"   Priority: {priority}")
+            print(f"   ID: {memory_id}")
+            print(f"   Content: {content[:100]}{'...' if len(content) > 100 else ''}")
+            if metadata:
+                print(f"   Metadata: {str(metadata)[:80]}{'...' if len(str(metadata)) > 80 else ''}")
+            print()
+            
+            # Keep existing logging for debugging
+            logger.info(f"Memory stored successfully: {memory_id}")
+            return {"success": True, "id": memory_id, "result": result}
         else:
+            # Enhanced error console logging
+            print(f"❌ Memory Storage Failed: HTTP {response.status_code}")
+            print(f"   Category: {category}")
+            print(f"   User: {user_id}")
+            print(f"   Error: {response.text[:150]}{'...' if len(response.text) > 150 else ''}")
+            print()
+            
             logger.error(f"Failed to store memory: HTTP {response.status_code} - {response.text}")
             return {"success": False, "error": f"HTTP {response.status_code}: {response.text}"}
             
@@ -327,6 +348,11 @@ def search_memories(query: str, user_id: str = "default_user",
 def collect_bug_memory(bug_description: str, agent_id: str, 
                       error_type: str = "runtime", **kwargs) -> Dict[str, Any]:
     """Collect bug memory with proper categorization."""
+    print(f"🐛 Bug Memory Collection Triggered by {agent_id}")
+    print(f"   Type: {error_type}")
+    print(f"   Description: {bug_description[:120]}{'...' if len(bug_description) > 120 else ''}")
+    print()
+    
     return store_memory(
         content=f"Bug discovered: {bug_description}",
         category=f"error:{error_type}",
@@ -338,6 +364,11 @@ def collect_bug_memory(bug_description: str, agent_id: str,
 def collect_feedback_memory(feedback: str, agent_id: str, 
                            feedback_type: str = "workflow", **kwargs) -> Dict[str, Any]:
     """Collect user feedback memory with proper categorization."""
+    print(f"💬 Feedback Memory Collection Triggered by {agent_id}")
+    print(f"   Type: {feedback_type}")
+    print(f"   Feedback: {feedback[:120]}{'...' if len(feedback) > 120 else ''}")
+    print()
+    
     return store_memory(
         content=f"User feedback: {feedback}",
         category=f"feedback:{feedback_type}",
@@ -349,6 +380,11 @@ def collect_feedback_memory(feedback: str, agent_id: str,
 def collect_architecture_memory(decision: str, agent_id: str, 
                                arch_type: str = "design", **kwargs) -> Dict[str, Any]:
     """Collect architectural decision memory with proper categorization."""
+    print(f"🏠 Architecture Memory Collection Triggered by {agent_id}")
+    print(f"   Type: {arch_type}")
+    print(f"   Decision: {decision[:120]}{'...' if len(decision) > 120 else ''}")
+    print()
+    
     return store_memory(
         content=f"Architecture decision: {decision}",
         category=f"architecture:{arch_type}",
@@ -359,6 +395,10 @@ def collect_architecture_memory(decision: str, agent_id: str,
 
 def collect_performance_memory(observation: str, agent_id: str, **kwargs) -> Dict[str, Any]:
     """Collect performance observation memory."""
+    print(f"⚡ Performance Memory Collection Triggered by {agent_id}")
+    print(f"   Observation: {observation[:120]}{'...' if len(observation) > 120 else ''}")
+    print()
+    
     return store_memory(
         content=f"Performance observation: {observation}",
         category="performance",

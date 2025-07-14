@@ -145,8 +145,8 @@ class ParentDirectoryManager(BaseService):
             self.working_dir / ".claude-pm" / "parent_directory_manager"
         )
         
-        # Framework template backup directory
-        self.framework_backups_dir = self.working_dir / ".claude-pm" / "framework_backups"
+        # Framework template backup directory - using centralized backups structure
+        self.framework_backups_dir = self.working_dir / ".claude-pm" / "backups" / "framework"
 
         # Subsystem version tracking
         self.subsystem_versions = {}
@@ -209,8 +209,8 @@ class ParentDirectoryManager(BaseService):
 
     def _initialize_paths(self):
         """Initialize parent directory manager paths."""
-        # Manager directories
-        self.backups_dir = self.parent_directory_manager_dir / "backups"
+        # Manager directories - using centralized backups structure
+        self.backups_dir = self.working_dir / ".claude-pm" / "backups" / "parent_directory_manager"
         self.configs_dir = self.parent_directory_manager_dir / "configs"
         self.versions_dir = self.parent_directory_manager_dir / "versions"
         self.logs_dir = self.parent_directory_manager_dir / "logs"

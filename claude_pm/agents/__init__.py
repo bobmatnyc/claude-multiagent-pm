@@ -10,7 +10,7 @@ from .ticketing_agent import TicketingAgent
 # Removed agents - replaced by profile system:
 # from .pm_agent import PMAgent
 # from .scaffolding_agent import ScaffoldingAgent
-# from .system_init_agent import SystemInitAgent
+# System init agent functionality moved to PM agent
 # from .version_control_agent import VersionControlAgent
 # from .ai_ops_agent import AIOpsAgent
 from .hierarchical_agent_loader import HierarchicalAgentLoader

@@ -159,11 +159,26 @@ sync/
 # Archive directory
 _archive/
 
-# Operational documents (should be managed via ai-trackdown-cli tickets)
-*-COMPLETION-REPORT.md
-*-IMPLEMENTATION-REPORT.md
-*-DEPLOYMENT-REPORT.md
-*-QA-VALIDATION-REPORT.md
-*_COMPLETION_REPORT.md
-*_IMPLEMENTATION_REPORT.md
-*_DEPLOYMENT_REPORT.md
+# File organization enforcement - prevent misplaced files in root
+/*REPORT*.md
+/*ANALYSIS*.md
+/*SUMMARY*.md
+/*VALIDATION*.md
+/*DEPLOYMENT*.md
+/*IMPLEMENTATION*.md
+/*WORKFLOW*.md
+/*TEST*.md
+/qa_*.json
+/*validation*.json
+/test_*.py
+/*test*.py
+
+# Exception: Allow essential project files in root
+!CLAUDE.md
+!README.md
+!CHANGELOG.md
+!DEPLOYMENT_WORKFLOW.md
+
+# Reports should be in docs/reports/
+# Tests should be in tests/ subdirectories
+# Use: python scripts/organize_project_files.py to fix organization

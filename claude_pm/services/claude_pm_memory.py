@@ -458,10 +458,25 @@ class ClaudePMMemory:
             ) as response:
                 if response.status in [200, 201]:
                     self.stats["memory_spaces_created"] += 1
+                    
+                    # Enhanced console logging for memory space creation
+                    print(f"📁 Memory Space Created: {project_name}")
+                    if description:
+                        print(f"   Description: {description[:100]}{'...' if len(description) > 100 else ''}")
+                    if metadata:
+                        print(f"   Metadata: {str(metadata)[:80]}{'...' if len(str(metadata)) > 80 else ''}")
+                    print(f"   Status: Initialized successfully")
+                    print()
+                    
+                    # Keep existing logging for debugging
                     logger.info(f"Project memory space created/verified: {project_name}")
                     return {"space_name": project_name, "status": "created"}
                 else:
                     error_text = await response.text()
+                    # Enhanced error console logging
+                    print(f"❌ Memory Space Creation Failed: {project_name}")
+                    print(f"   Error: HTTP {response.status} - {error_text[:150]}{'...' if len(error_text) > 150 else ''}")
+                    print()
                     raise Exception(f"HTTP {response.status}: {error_text}")
 
         return await self._execute_with_retry(
@@ -533,6 +548,21 @@ class ClaudePMMemory:
                     # mem0AI might return different response format
                     memory_id = result.get("id") or result.get("memory_id") or "unknown"
                     self.stats["memories_stored"] += 1
+                    
+                    # Enhanced console logging for user visibility
+                    print(f"🧠 Memory Created: {category.value.upper()}")
+                    print(f"   Project: {project_name or 'Global'}")
+                    print(f"   ID: {memory_id}")
+                    if tags:
+                        print(f"   Tags: {', '.join(tags)}")
+                    if metadata:
+                        priority = metadata.get('priority', 'medium')
+                        source = metadata.get('source_agent', 'unknown')
+                        print(f"   Priority: {priority} | Source: {source}")
+                    print(f"   Content: {content[:100]}{'...' if len(content) > 100 else ''}")
+                    print()
+                    
+                    # Keep existing logging for debugging
                     logger.info(
                         f"Memory stored - Category: {category.value}, Project: {project_name}, ID: {memory_id}"
                     )
@@ -543,6 +573,12 @@ class ClaudePMMemory:
                     }
                 else:
                     error_text = await response.text()
+                    # Enhanced error console logging
+                    print(f"❌ Memory Creation Failed: HTTP {response.status}")
+                    print(f"   Category: {category.value}")
+                    print(f"   Project: {project_name or 'Global'}")
+                    print(f"   Error: {error_text[:200]}{'...' if len(error_text) > 200 else ''}")
+                    print()
                     raise Exception(f"HTTP {response.status}: {error_text}")
 
         response = await self._execute_with_retry(_store_memory, _operation_name="store_memory")
@@ -742,6 +778,14 @@ class ClaudePMMemory:
         Returns:
             MemoryResponse: Response object with storage status
         """
+        # Enhanced console logging for project decisions
+        print(f"🏠 Storing Project Decision: {project_name}")
+        print(f"   Decision: {decision[:80]}{'...' if len(decision) > 80 else ''}")
+        print(f"   Context: {context[:80]}{'...' if len(context) > 80 else ''}")
+        if alternatives:
+            print(f"   Alternatives: {len(alternatives)} considered")
+        print()
+        
         content = f"""
 Decision: {decision}
 
@@ -851,11 +895,19 @@ Alternatives Considered:
             
         except Exception as e:
             logger.warning(f"Failed to get subsystem versions for memory metadata: {e}")
-            # Return minimal version information
-            return {
-                "memory": "002",
-                "framework": "010"
-            }
+            # Return minimal version information using dynamic version loading
+            try:
+                from ..utils.version_loader import get_service_version, get_framework_version
+                return {
+                    "memory": get_service_version("memory"),
+                    "framework": get_framework_version()
+                }
+            except ImportError:
+                # Fallback to hardcoded values if version_loader is not available
+                return {
+                    "memory": "002",
+                    "framework": "010"
+                }
 
     def get_statistics(self) -> Dict[str, Any]:
         """

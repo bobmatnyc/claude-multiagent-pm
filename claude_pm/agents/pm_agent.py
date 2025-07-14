@@ -3,14 +3,28 @@ PM Agent - Project Management and Epic Creation Agent
 """
 
 import os
+import sys
 import json
+import yaml
 import asyncio
-from typing import Dict, List, Optional, Any
+import subprocess
+import time
+import aiohttp
+from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
-from ..core.base_agent import BaseAgent
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn
+
+from claude_pm.core.base_agent import BaseAgent
+from claude_pm.core.config import Config
+from claude_pm.core.logging_config import setup_logging
+from claude_pm.core.connection_manager import get_connection_manager
+from claude_pm.services.post_installation_manager import PostInstallationManager
 
 
 @dataclass
@@ -59,7 +73,7 @@ class PMAgent(BaseAgent):
     5. Communicates with stakeholders and reports status
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None, working_dir: Path = None, project_dir: Path = None):
         super().__init__(
             agent_id="pm-agent",
             agent_type="pm",
@@ -72,10 +86,32 @@ class PMAgent(BaseAgent):
                 "resource_allocation",
                 "risk_management",
                 "quality_assurance",
+                "system_initialization",
+                "framework_setup",
+                "dependency_verification",
+                "configuration_management",
+                "directory_management",
+                "project_indexing",
+                "cli_integration",
+                "multi_project_orchestration",
+                "health_monitoring",
+                "diagnostics",
             ],
             config=config,
             tier="system",
         )
+        
+        # System initialization capabilities
+        self.working_dir = working_dir or Path.cwd()
+        self.project_dir = project_dir or self._detect_project_directory()
+        self.framework_path = self._discover_framework_path()
+        self.local_config_dir = self.working_dir / ".claude-pm"
+        self.project_config_dir = self.project_dir / ".claude-pm"
+        self.framework_config_dir = (
+            self.framework_path / ".claude-pm" if self.framework_path else None
+        )
+        self.console = Console()
+        self.logger = setup_logging(__name__)
 
         # PM-specific configurations
         self.prioritization_weights = {
@@ -889,3 +925,1012 @@ class PMAgent(BaseAgent):
 
         else:
             raise ValueError(f"Unknown operation: {operation}")
+
+    async def _initialize(self) -> None:
+        """Initialize the PM Agent."""
+        try:
+            # Initialize any required resources
+            self.logger.info("PM Agent initialized successfully")
+        except Exception as e:
+            self.logger.error(f"Failed to initialize PM Agent: {e}")
+            raise
+
+    async def _cleanup(self) -> None:
+        """Cleanup PM Agent resources."""
+        try:
+            # Cleanup any resources
+            self.logger.info("PM Agent cleanup completed")
+        except Exception as e:
+            self.logger.error(f"Failed to cleanup PM Agent: {e}")
+            raise
+
+    # ===============================================
+    # SYSTEM INITIALIZATION METHODS
+    # (Integrated from SystemInitAgent)
+    # ===============================================
+    
+    def _detect_project_directory(self) -> Path:
+        """
+        Detect the project directory for the current context.
+
+        Project directory detection logic:
+        1. Look for project indicators (.git, package.json, pyproject.toml, etc.)
+        2. Check for existing .claude-pm directory
+        3. Use working directory as fallback
+        """
+        current = self.working_dir
+
+        # Project indicators
+        project_files = [
+            ".git",
+            "package.json",
+            "pyproject.toml",
+            "requirements.txt",
+            "Cargo.toml",
+            "go.mod",
+            "pom.xml",
+            ".claude-pm",
+        ]
+
+        # Walk up the directory tree to find project root
+        while current != current.parent:
+            for indicator in project_files:
+                if (current / indicator).exists():
+                    return current
+            current = current.parent
+
+        # Fallback to working directory
+        return self.working_dir
+
+    def _discover_framework_path(self) -> Optional[Path]:
+        """Discover the Claude PM Framework installation path."""
+        # Check environment variable first
+        env_path = os.environ.get("CLAUDE_PM_FRAMEWORK_PATH")
+        if env_path and Path(env_path).exists():
+            return Path(env_path)
+
+        # Check common installation locations
+        home = Path.home()
+        candidates = [
+            home / "Projects" / "claude-pm",
+            home / "Clients" / "claude-pm",
+            Path.cwd(),
+            Path.cwd().parent,
+        ]
+
+        for candidate in candidates:
+            if candidate.exists() and (candidate / "claude_pm" / "__init__.py").exists():
+                return candidate
+
+        return None
+
+    async def initialize_framework(self, force: bool = False) -> Dict[str, Any]:
+        """
+        Initialize the Claude PM Framework in the current directory.
+
+        Args:
+            force: Force reinitialize even if already set up
+
+        Returns:
+            Dict containing initialization results and status
+        """
+        self.logger.info(f"Starting framework initialization in {self.working_dir}")
+
+        results = {
+            "success": False,
+            "working_directory": str(self.working_dir),
+            "framework_location": str(self.framework_path),
+            "steps_completed": [],
+            "errors": [],
+            "setup_status": "unknown",
+        }
+
+        try:
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                console=self.console,
+            ) as progress:
+
+                # Step 1: Check existing setup
+                check_task = progress.add_task("Checking existing setup...", total=1)
+                local_config_exists = self.local_config_dir.exists()
+
+                if local_config_exists and not force:
+                    progress.update(check_task, completed=1)
+                    results["setup_status"] = "already_exists"
+                    results["success"] = True
+                    results["steps_completed"].append("check_existing")
+                    return results
+
+                progress.update(check_task, completed=1)
+                results["steps_completed"].append("check_existing")
+
+                # Step 2: Create directory structure
+                structure_task = progress.add_task("Creating directory structure...", total=1)
+                if self._create_directory_structure():
+                    progress.update(structure_task, completed=1)
+                    results["steps_completed"].append("directory_structure")
+                else:
+                    results["errors"].append("Failed to create directory structure")
+                    return results
+
+                # Step 3: Generate configuration files
+                config_task = progress.add_task("Generating configuration files...", total=1)
+                if await self._generate_configuration_files():
+                    progress.update(config_task, completed=1)
+                    results["steps_completed"].append("configuration_files")
+                else:
+                    results["errors"].append("Failed to generate configuration files")
+                    return results
+
+                # Step 4: Verify dependencies
+                deps_task = progress.add_task("Verifying dependencies...", total=1)
+                dependency_status = await self._verify_dependencies()
+                results["dependencies"] = dependency_status
+                progress.update(deps_task, completed=1)
+                results["steps_completed"].append("dependency_verification")
+
+                # Step 5: Final setup status
+                results["setup_status"] = self._get_final_setup_status(dependency_status)
+                results["success"] = True
+
+        except Exception as e:
+            self.logger.error(f"Framework initialization failed: {e}")
+            results["errors"].append(f"Initialization failed: {str(e)}")
+            results["success"] = False
+
+        return results
+
+    def _create_directory_structure(self) -> bool:
+        """
+        Create the enhanced .claude-pm directory structure with three-tier agent hierarchy.
+
+        Creates three types of directories:
+        1. Framework directory: Global user agents, system training data
+        2. Working directory: Current working location config
+        3. Project directory: Project-specific agents and configurations
+
+        Agent Hierarchy Structure:
+        - System Agents: /framework/claude_pm/agents/ (core framework)
+        - User Agents: ~/.claude-pm/agents/user-defined/ (global)
+        - Project Agents: $PROJECT/.claude-pm/agents/project-specific/ (local)
+        """
+        try:
+            # Framework directory structure (global) - ENHANCED WITH AGENT HIERARCHY
+            if self.framework_config_dir:
+                framework_dirs = [
+                    self.framework_config_dir,
+                    self.framework_config_dir / "config",
+                    self.framework_config_dir / "agents" / "user-defined",  # Global user agents
+                    self.framework_config_dir
+                    / "agents"
+                    / "user-defined"
+                    / "templates",  # User agent templates
+                    self.framework_config_dir / "agents" / "system-trained",  # System training data
+                    self.framework_config_dir
+                    / "agents"
+                    / "system-trained"
+                    / "patterns",  # Learned patterns
+                    self.framework_config_dir / "templates" / "global",
+                    self.framework_config_dir / "templates" / "agents",  # Agent templates
+                    self.framework_config_dir / "logs" / "framework",
+                    self.framework_config_dir / "logs" / "agents",  # Agent-specific logs
+                    self.framework_config_dir / "cache" / "global",
+                    self.framework_config_dir / "cache" / "agents",  # Agent cache
+                ]
+
+                for directory in framework_dirs:
+                    directory.mkdir(parents=True, exist_ok=True)
+
+            # Working directory structure (current session) - ENHANCED WITH AGENT HIERARCHY
+            working_dirs = [
+                self.local_config_dir,
+                self.local_config_dir / "config",
+                self.local_config_dir / "agents" / "project-specific",  # Project-local agents
+                self.local_config_dir
+                / "agents"
+                / "project-specific"
+                / "templates",  # Project agent templates
+                self.local_config_dir
+                / "agents"
+                / "project-specific"
+                / "config",  # Project agent config
+                self.local_config_dir / "agents" / "hierarchy",  # Agent hierarchy metadata
+                self.local_config_dir / "index",  # Project indexing system
+                self.local_config_dir / "index" / "cache",  # Index cache files
+                self.local_config_dir / "index" / "agents",  # Agent index data
+                self.local_config_dir / "sessions",
+                self.local_config_dir / "logs" / "working",
+                self.local_config_dir / "logs" / "init",  # Initialization logs
+                self.local_config_dir / "logs" / "agents",  # Agent operation logs
+                self.local_config_dir / "cache" / "working",
+                self.local_config_dir / "cache" / "agents",  # Agent cache
+                self.local_config_dir / "templates" / "project",  # Project templates
+                self.local_config_dir / "templates" / "agents",  # Agent templates
+                self.local_config_dir / "memory",  # Memory system storage
+            ]
+
+            for directory in working_dirs:
+                directory.mkdir(parents=True, exist_ok=True)
+
+            # Project directory structure (project-specific) - ENHANCED WITH AGENT HIERARCHY
+            if self.project_dir != self.working_dir:
+                project_dirs = [
+                    self.project_config_dir,
+                    self.project_config_dir / "config",
+                    self.project_config_dir / "agents" / "project-specific",  # Project agents
+                    self.project_config_dir
+                    / "agents"
+                    / "project-specific"
+                    / "templates",  # Project agent templates
+                    self.project_config_dir
+                    / "agents"
+                    / "project-specific"
+                    / "config",  # Project agent config
+                    self.project_config_dir / "agents" / "hierarchy",  # Agent hierarchy metadata
+                    self.project_config_dir / "templates" / "project",
+                    self.project_config_dir / "templates" / "agents",  # Agent templates
+                    self.project_config_dir / "logs" / "project",
+                    self.project_config_dir / "logs" / "agents",  # Agent operation logs
+                    self.project_config_dir / "cache" / "project",
+                    self.project_config_dir / "cache" / "agents",  # Agent cache
+                    self.project_config_dir / "memory",  # Memory system storage
+                ]
+
+                for directory in project_dirs:
+                    directory.mkdir(parents=True, exist_ok=True)
+
+            # Create initial README files and agent hierarchy metadata
+            self._create_initial_readme_files()
+            self._create_agent_hierarchy_metadata()
+
+            return True
+        except Exception as e:
+            self.logger.error(f"Failed to create directory structure: {e}")
+            return False
+
+    def _create_initial_readme_files(self):
+        """Create initial README files for guidance across all directory types."""
+        
+        # Framework directory READMEs (global)
+        if self.framework_config_dir:
+            framework_readme_contents = {
+                "README.md": """# Claude PM Framework - Global Configuration
+
+This directory contains global framework configuration and user agents.
+
+## Directory Structure
+- `agents/user-defined/`: Global user-defined agents (available across all projects)
+- `agents/system-trained/`: System training data and learned patterns
+- `templates/global/`: Global templates available to all projects
+- `logs/framework/`: Framework-level operation logs
+- `cache/global/`: Global cache and state files
+
+## Multi-Project Orchestration
+This framework acts as a multi-project orchestrator, managing:
+- Global user agents shared across projects
+- System-trained prompts and behaviors
+- Framework-level configuration and settings
+""",
+                "agents/user-defined/README.md": """# Global User-Defined Agents
+
+This directory contains user-defined agents that are available across ALL projects.
+
+## Purpose
+- Global agents that can be used in any project
+- Shared agent behaviors and capabilities
+- Framework-level agent definitions
+
+## Structure
+- Place your global agent files here
+- Follow the framework's agent template structure
+- Use the `.py` extension for Python agents
+- Include proper documentation and type hints
+
+## Usage
+Global agents are automatically available to all projects using this framework.
+""",
+            }
+
+            for path, content in framework_readme_contents.items():
+                readme_path = self.framework_config_dir / path
+                readme_path.parent.mkdir(parents=True, exist_ok=True)
+                readme_path.write_text(content)
+
+        # Working directory READMEs (current session)
+        working_readme_contents = {
+            "README.md": """# Claude PM Framework - Working Directory
+
+This directory contains configuration for the current working session.
+
+## Directory Structure
+- `config/`: Working directory specific configuration
+- `sessions/`: Session data and state
+- `logs/working/`: Working directory operation logs
+- `cache/working/`: Working directory cache files
+- `memory/`: Memory system storage for bugs and feedback
+
+## Purpose
+This configuration manages the current working session and provides:
+- Session-specific settings
+- Working directory context
+- Temporary session data
+- Memory collection for continuous improvement
+""",
+            "memory/README.md": """# Memory System Storage
+
+This directory contains memory entries for bugs, feedback, and operational insights.
+
+## Purpose
+- Store bug reports and error tracking
+- Collect user feedback and suggestions
+- Record architectural decisions and insights
+- Track performance observations and optimizations
+
+## Structure
+- Memory entries are stored as JSON files
+- Each entry includes timestamp, category, priority, and content
+- Categories: bug, feedback, architecture, performance, integration, qa
+
+## Usage
+This directory is managed automatically by the PM agent's memory collection system.
+""",
+        }
+
+        for path, content in working_readme_contents.items():
+            readme_path = self.local_config_dir / path
+            readme_path.parent.mkdir(parents=True, exist_ok=True)
+            readme_path.write_text(content)
+
+    def _create_agent_hierarchy_metadata(self):
+        """Create agent hierarchy metadata files for three-tier system."""
+        
+        # Framework-level hierarchy metadata (global)
+        if self.framework_config_dir:
+            framework_hierarchy = {
+                "hierarchy_version": "1.0",
+                "tier": "framework",
+                "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "agent_tiers": {
+                    "system": {
+                        "path": "./claude_pm/agents/",
+                        "priority": 1,
+                        "description": "Core framework agents with highest authority",
+                        "immutable": True,
+                        "examples": [
+                            "pm_agent.py",
+                            "orchestrator_agent.py",
+                            "ops_agent.py",
+                        ],
+                    },
+                    "user": {
+                        "path": "./agents/user-defined/",
+                        "priority": 2,
+                        "description": "Global user-defined agents across all projects",
+                        "immutable": False,
+                        "examples": ["custom_engineer_agent.py", "personal_qa_agent.py"],
+                    },
+                    "project": {
+                        "path": "PROJECT/.claude-pm/agents/project-specific/",
+                        "priority": 3,
+                        "description": "Project-specific agents with highest precedence",
+                        "immutable": False,
+                        "examples": ["project_engineer_agent.py", "project_security_agent.py"],
+                    },
+                },
+                "loading_rules": {
+                    "precedence_order": ["project", "user", "system"],
+                    "conflict_resolution": "highest_priority_wins",
+                    "fallback_enabled": True,
+                    "inheritance_enabled": True,
+                },
+            }
+
+            framework_hierarchy_path = self.framework_config_dir / "agents" / "hierarchy.yaml"
+            framework_hierarchy_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(framework_hierarchy_path, "w") as f:
+                yaml.dump(framework_hierarchy, f, default_flow_style=False, indent=2)
+
+        # Working directory hierarchy metadata with PM agent as system init handler
+        working_hierarchy = {
+            "hierarchy_version": "1.0",
+            "tier": "working",
+            "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "working_directory": str(self.working_dir),
+            "project_directory": str(self.project_dir),
+            "framework_location": str(self.framework_path),
+            "system_init_handler": "pm_agent",
+            "agent_discovery": {
+                "auto_discovery": True,
+                "scan_depth": 2,
+                "file_patterns": ["*.py"],
+                "exclude_patterns": ["__*", ".*", "test_*"],
+            },
+            "agent_loading": {
+                "lazy_loading": True,
+                "cache_agents": True,
+                "reload_on_change": True,
+                "validation_enabled": True,
+            },
+            "hierarchy_paths": {
+                "system_agents": (
+                    str(self.framework_path / "claude_pm" / "agents")
+                    if self.framework_path
+                    else None
+                ),
+                "user_agents": (
+                    str(self.framework_config_dir / "agents" / "user-defined")
+                    if self.framework_config_dir
+                    else None
+                ),
+                "project_agents": str(self.local_config_dir / "agents" / "project-specific"),
+            },
+        }
+
+        working_hierarchy_path = self.local_config_dir / "agents" / "hierarchy.yaml"
+        working_hierarchy_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(working_hierarchy_path, "w") as f:
+            yaml.dump(working_hierarchy, f, default_flow_style=False, indent=2)
+
+    async def _generate_configuration_files(self) -> bool:
+        """Generate configuration files for multi-project setup."""
+        try:
+            # Generate framework-level configuration (global)
+            if self.framework_config_dir:
+                framework_config = {
+                    "claude-pm": {
+                        "version": "4.2.3",
+                        "mode": "multi-project-orchestrator",
+                        "framework_location": str(self.framework_path),
+                        "initialized_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                        "agent_id": "pm-agent",
+                        "system_init_handler": "pm_agent",
+                    },
+                    "global_agents": {
+                        "user_defined_path": "./agents/user-defined",
+                        "system_trained_path": "./agents/system-trained",
+                        "auto_discover": True,
+                        "load_on_startup": True,
+                    },
+                    "templates": {
+                        "global_templates_path": "./templates/global",
+                        "inheritance_enabled": True,
+                    },
+                    "dependencies": {
+                        "mem0ai": {
+                            "service_url": "http://localhost:8002",
+                            "health_endpoint": "/health",
+                            "required": True,
+                        },
+                        "ai-trackdown-tools": {
+                            "package": "@bobmatnyc/ai-trackdown-tools",
+                            "command": "aitrackdown",
+                            "required": True,
+                        },
+                        "claude-pm-portfolio-manager": {
+                            "package": "@bobmatnyc/claude-pm-portfolio-manager",
+                            "required": False,
+                        },
+                    },
+                }
+
+                framework_config_path = self.framework_config_dir / "config" / "framework.yaml"
+                with open(framework_config_path, "w") as f:
+                    yaml.dump(framework_config, f, default_flow_style=False, indent=2)
+
+            # Generate working directory configuration
+            working_config = {
+                "claude-pm": {
+                    "version": "4.2.3",
+                    "mode": "working-directory",
+                    "working_directory": str(self.working_dir),
+                    "project_directory": str(self.project_dir),
+                    "framework_location": str(self.framework_path),
+                    "initialized_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "is_project_specific": self.project_dir != self.working_dir,
+                    "system_init_handler": "pm_agent",
+                },
+                "session": {
+                    "session_id": f"working-{int(time.time())}",
+                    "session_path": "./sessions",
+                    "auto_save": True,
+                },
+                "logging": {
+                    "level": "INFO",
+                    "log_dir": "./logs/working",
+                    "rotate_logs": True,
+                    "max_log_size": "10MB",
+                },
+                "memory": {
+                    "enabled": True,
+                    "storage_path": "./memory",
+                    "categories": ["bug", "feedback", "architecture", "performance", "integration", "qa"],
+                    "auto_collection": True,
+                },
+            }
+
+            working_config_path = self.local_config_dir / "config" / "working.yaml"
+            with open(working_config_path, "w") as f:
+                yaml.dump(working_config, f, default_flow_style=False, indent=2)
+
+            # Generate agents configuration with PM agent as system init handler
+            agents_config = {
+                "agent_hierarchy": {
+                    "system_agents": {
+                        "path": (
+                            str(self.framework_path / "claude_pm" / "agents")
+                            if self.framework_path
+                            else None
+                        ),
+                        "priority": 1,
+                        "immutable": True,
+                        "description": "Core framework agents with highest authority",
+                        "system_init_handler": "pm_agent",
+                    },
+                    "user_agents": {
+                        "path": (
+                            str(self.framework_config_dir / "agents" / "user-defined")
+                            if self.framework_config_dir
+                            else None
+                        ),
+                        "priority": 2,
+                        "immutable": False,
+                        "description": "Global user-defined agents across all projects",
+                    },
+                    "project_agents": {
+                        "path": str(self.local_config_dir / "agents" / "project-specific"),
+                        "priority": 3,
+                        "immutable": False,
+                        "description": "Project-specific agents with highest precedence",
+                    },
+                },
+                "agent_loading": {
+                    "auto_discover": True,
+                    "precedence_order": ["project_agents", "user_agents", "system_agents"],
+                    "conflict_resolution": "highest_priority_wins",
+                    "fallback_enabled": True,
+                    "lazy_loading": True,
+                    "cache_agents": True,
+                    "reload_on_change": True,
+                    "validation_enabled": True,
+                },
+                "agent_types": {
+                    "pm": {
+                        "system": "pm_agent.py",
+                        "user": "custom_pm_agent.py",
+                        "project": "project_pm_agent.py",
+                        "responsibilities": ["system_initialization", "project_management", "agent_orchestration"],
+                    },
+                    "engineer": {
+                        "system": "system_engineer_agent.py",
+                        "user": "custom_engineer_agent.py",
+                        "project": "project_engineer_agent.py",
+                    },
+                    "ops": {
+                        "system": "ops_agent.py",
+                        "user": "personal_ops_agent.py",
+                        "project": "project_ops_agent.py",
+                    },
+                    "qa": {
+                        "system": "qa_agent.py",
+                        "user": "custom_qa_agent.py",
+                        "project": "project_qa_agent.py",
+                    },
+                },
+            }
+
+            agents_config_path = self.local_config_dir / "config" / "agents.yaml"
+            with open(agents_config_path, "w") as f:
+                yaml.dump(agents_config, f, default_flow_style=False, indent=2)
+
+            return True
+        except Exception as e:
+            self.logger.error(f"Failed to generate configuration files: {e}")
+            return False
+
+    async def _verify_dependencies(self) -> Dict[str, Dict[str, str]]:
+        """Verify all framework dependencies."""
+        dependencies = {
+            "mem0ai": await self._check_mem0ai_service(),
+            "ai_trackdown_tools": await self._check_ai_trackdown_tools(),
+            "claude_pm_portfolio_manager": await self._check_claude_pm_portfolio_manager(),
+            "framework_core": await self._check_framework_core(),
+            "python_environment": await self._check_python_environment(),
+            "node_environment": await self._check_node_environment(),
+        }
+
+        # Save dependency status (only if directory exists)
+        if self.local_config_dir.exists():
+            dependencies_config = {
+                "last_checked": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "status": dependencies,
+                "checked_by": "pm-agent",
+            }
+
+            dependencies_config_path = self.local_config_dir / "config" / "dependencies.yaml"
+            dependencies_config_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(dependencies_config_path, "w") as f:
+                yaml.dump(dependencies_config, f, default_flow_style=False, indent=2)
+
+        return dependencies
+
+    async def _check_mem0ai_service(self) -> Dict[str, str]:
+        """Check mem0AI service availability using connection manager."""
+        try:
+            # Use connection manager for proper session lifecycle
+            conn_manager = await get_connection_manager()
+            session = await conn_manager.get_session(
+                service_name="pm_agent_mem0ai_check", timeout=aiohttp.ClientTimeout(total=5.0)
+            )
+
+            async with session.get("http://localhost:8002/health") as response:
+                if response.status == 200:
+                    return {
+                        "status": "✅ ONLINE",
+                        "version": "active",
+                        "details": "Service responding",
+                    }
+                else:
+                    return {
+                        "status": "⚠️ DEGRADED",
+                        "version": "unknown",
+                        "details": f"HTTP {response.status}",
+                    }
+        except Exception as e:
+            return {"status": "❌ OFFLINE", "version": "unknown", "details": str(e)}
+
+    async def _check_ai_trackdown_tools(self) -> Dict[str, str]:
+        """Check ai-trackdown-tools package with enhanced detection."""
+        try:
+            # Enhanced CLI detection
+            availability = self.check_aitrackdown_availability(self.working_dir)
+
+            if availability["available"]:
+                return {
+                    "status": "✅ INSTALLED",
+                    "version": availability["version"],
+                    "details": f"CLI available ({'local' if availability['local_cli'] else 'global'})",
+                }
+            else:
+                return {"status": "❌ MISSING", "version": "none", "details": "CLI not available"}
+        except Exception as e:
+            return {"status": "❌ ERROR", "version": "unknown", "details": str(e)}
+
+    async def _check_claude_pm_portfolio_manager(self) -> Dict[str, str]:
+        """Check claude-pm-portfolio-manager package."""
+        try:
+            result = subprocess.run(
+                ["npm", "list", "-g", "@bobmatnyc/claude-pm-portfolio-manager"],
+                capture_output=True,
+                text=True,
+            )
+            if result.returncode == 0:
+                version_line = [
+                    line
+                    for line in result.stdout.split("\n")
+                    if "@bobmatnyc/claude-pm-portfolio-manager" in line
+                ]
+                version = version_line[0].split("@")[-1] if version_line else "unknown"
+                return {
+                    "status": "✅ INSTALLED",
+                    "version": version,
+                    "details": "NPM package available",
+                }
+            else:
+                return {
+                    "status": "❌ MISSING",
+                    "version": "none",
+                    "details": "NPM package not found",
+                }
+        except Exception as e:
+            return {"status": "❌ ERROR", "version": "unknown", "details": str(e)}
+
+    async def _check_framework_core(self) -> Dict[str, str]:
+        """Check framework core installation."""
+        try:
+            if self.framework_path and (self.framework_path / "claude_pm" / "__init__.py").exists():
+                version_file = self.framework_path / "VERSION"
+                version = version_file.read_text().strip() if version_file.exists() else "unknown"
+                return {
+                    "status": "✅ INSTALLED",
+                    "version": version,
+                    "details": f"Framework at {self.framework_path}",
+                }
+            else:
+                return {"status": "❌ MISSING", "version": "none", "details": "Framework not found"}
+        except Exception as e:
+            return {"status": "❌ ERROR", "version": "unknown", "details": str(e)}
+
+    async def _check_python_environment(self) -> Dict[str, str]:
+        """Check Python environment and required packages."""
+        try:
+            required_packages = ["rich", "pydantic", "aiohttp", "yaml", "asyncio"]
+            missing_packages = []
+
+            for package in required_packages:
+                try:
+                    __import__(package)
+                except ImportError:
+                    missing_packages.append(package)
+
+            if not missing_packages:
+                return {
+                    "status": "✅ READY",
+                    "version": f"Python {sys.version.split()[0]}",
+                    "details": "All required packages available",
+                }
+            else:
+                return {
+                    "status": "⚠️ PARTIAL",
+                    "version": f"Python {sys.version.split()[0]}",
+                    "details": f"Missing: {', '.join(missing_packages)}",
+                }
+        except Exception as e:
+            return {"status": "❌ ERROR", "version": "unknown", "details": str(e)}
+
+    async def _check_node_environment(self) -> Dict[str, str]:
+        """Check Node.js environment."""
+        try:
+            result = subprocess.run(["node", "--version"], capture_output=True, text=True)
+            if result.returncode == 0:
+                version = result.stdout.strip()
+                return {"status": "✅ READY", "version": version, "details": "Node.js available"}
+            else:
+                return {"status": "❌ MISSING", "version": "none", "details": "Node.js not found"}
+        except Exception as e:
+            return {"status": "❌ ERROR", "version": "unknown", "details": str(e)}
+
+    def _get_final_setup_status(self, dependencies: Dict[str, Dict[str, str]]) -> str:
+        """Get overall setup status based on dependencies."""
+        all_ready = all(dep["status"].startswith("✅") for dep in dependencies.values())
+        some_ready = any(dep["status"].startswith("✅") for dep in dependencies.values())
+
+        if all_ready:
+            return "✅ READY"
+        elif some_ready:
+            return "⚠️ PARTIAL"
+        else:
+            return "❌ NEEDS_SETUP"
+
+    def check_aitrackdown_availability(self, project_path: Path) -> Dict[str, Any]:
+        """
+        Check if ai-trackdown-tools is available in project directory.
+
+        Args:
+            project_path: Path to check for CLI availability
+
+        Returns:
+            Dict with availability status, version, and CLI type
+        """
+        try:
+            # Check for local CLI wrappers first
+            local_cli_paths = [
+                project_path / "bin" / "aitrackdown",
+                project_path / "bin" / "atd",
+                project_path / "node_modules" / ".bin" / "aitrackdown",
+                project_path / "node_modules" / ".bin" / "atd",
+            ]
+
+            for cli_path in local_cli_paths:
+                if cli_path.exists() and cli_path.is_file():
+                    # Check if it's executable
+                    if os.access(cli_path, os.X_OK):
+                        version = self._get_cli_version(str(cli_path))
+                        return {
+                            "available": True,
+                            "version": version,
+                            "local_cli": True,
+                            "cli_path": str(cli_path),
+                            "config_path": str(project_path / ".ai-trackdown"),
+                        }
+
+            # Check for global installation
+            global_commands = ["aitrackdown", "atd"]
+            for cmd in global_commands:
+                try:
+                    result = subprocess.run(
+                        [cmd, "--version"], capture_output=True, text=True, timeout=5
+                    )
+                    if result.returncode == 0:
+                        version = result.stdout.strip()
+                        return {
+                            "available": True,
+                            "version": version,
+                            "local_cli": False,
+                            "cli_path": cmd,
+                            "config_path": str(project_path / ".ai-trackdown"),
+                        }
+                except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
+                    continue
+
+            return {
+                "available": False,
+                "version": "none",
+                "local_cli": False,
+                "cli_path": None,
+                "config_path": None,
+            }
+
+        except Exception as e:
+            self.logger.error(f"Error checking ai-trackdown-tools availability: {e}")
+            return {
+                "available": False,
+                "version": "error",
+                "local_cli": False,
+                "cli_path": None,
+                "config_path": None,
+                "error": str(e),
+            }
+
+    def _get_cli_version(self, cli_path: str) -> str:
+        """Get version from CLI command."""
+        try:
+            result = subprocess.run(
+                [cli_path, "--version"], capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                return result.stdout.strip()
+            else:
+                return "unknown"
+        except Exception:
+            return "unknown"
+
+    async def display_initialization_report(self, results: Dict[str, Any]):
+        """Display comprehensive initialization report."""
+        self.console.print("\n" + "=" * 60)
+        self.console.print(
+            "🤖 [bold blue]PM Agent - Multi-Project Orchestrator Report[/bold blue]"
+        )
+        self.console.print("=" * 60)
+
+        # Basic info
+        self.console.print(f"📍 Working Directory: {results['working_directory']}")
+        self.console.print(f"📂 Framework Location: {results['framework_location']}")
+        self.console.print(f"🎯 Project Directory: {self.project_dir}")
+        self.console.print(
+            f"🏗️  Multi-Project Mode: {'Yes' if self.project_dir != self.working_dir else 'No'}"
+        )
+        self.console.print(f"🎯 Setup Status: [{results['setup_status']}]")
+
+        # Dependencies table
+        if "dependencies" in results:
+            self.console.print(f"\n🔧 [bold]Dependencies Status:[/bold]")
+            table = Table(show_header=True, header_style="bold magenta")
+            table.add_column("Component", style="dim")
+            table.add_column("Status", justify="center")
+            table.add_column("Version", justify="center")
+            table.add_column("Details", style="dim")
+
+            for name, info in results["dependencies"].items():
+                display_name = name.replace("_", " ").title()
+                table.add_row(display_name, info["status"], info["version"], info["details"])
+
+            self.console.print(table)
+
+        # Success/failure summary
+        if results["success"]:
+            self.console.print(
+                f"\n✅ [bold green]Framework initialization completed successfully![/bold green]"
+            )
+        else:
+            self.console.print(f"\n❌ [bold red]Framework initialization failed![/bold red]")
+
+        self.console.print("=" * 60)
+
+    async def run_diagnostics(self) -> Dict[str, Any]:
+        """Run comprehensive diagnostics for the framework setup."""
+        diagnostics = {
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "working_directory": str(self.working_dir),
+            "framework_path": str(self.framework_path),
+            "local_config_exists": self.local_config_dir.exists(),
+            "dependencies": await self._verify_dependencies(),
+            "troubleshooting": await self.troubleshoot_setup_issues(),
+            "recommendations": [],
+        }
+
+        # Generate recommendations
+        if not diagnostics["local_config_exists"]:
+            diagnostics["recommendations"].append(
+                "Run initialization: python ~/.claude/commands/cmpm-bridge.py init --setup"
+            )
+
+        # Check for critical issues
+        critical_deps = ["framework_core", "python_environment"]
+        for dep in critical_deps:
+            if dep in diagnostics["dependencies"] and diagnostics["dependencies"][dep][
+                "status"
+            ].startswith("❌"):
+                diagnostics["recommendations"].append(
+                    f"Critical: Fix {dep.replace('_', ' ').title()} installation"
+                )
+
+        return diagnostics
+
+    async def troubleshoot_setup_issues(self) -> Dict[str, Any]:
+        """Troubleshoot common setup issues and provide solutions."""
+        issues = []
+        solutions = []
+
+        # Check if framework path exists
+        if not self.framework_path:
+            issues.append("Claude PM Framework not found")
+            solutions.append(
+                "Install framework: git clone https://github.com/bobmatnyc/claude-multiagent-pm.git ~/Projects/claude-pm"
+            )
+
+        # Check dependencies
+        dependencies = await self._verify_dependencies()
+
+        for name, info in dependencies.items():
+            if info["status"].startswith("❌"):
+                issues.append(f"{name.replace('_', ' ').title()} not available")
+
+                if name == "mem0ai":
+                    solutions.append("Start mem0AI service: Follow the mem0AI installation guide")
+                elif name == "ai_trackdown_tools":
+                    solutions.append(
+                        "Install ai-trackdown-tools: npm install -g @bobmatnyc/ai-trackdown-tools"
+                    )
+                elif name == "claude_pm_portfolio_manager":
+                    solutions.append(
+                        "Install portfolio manager: npm install -g @bobmatnyc/claude-pm-portfolio-manager"
+                    )
+                elif name == "node_environment":
+                    solutions.append("Install Node.js: https://nodejs.org/en/download/")
+
+        return {"issues": issues, "solutions": solutions, "dependencies": dependencies}
+
+    # Memory collection method to track bugs, feedback, and integration insights
+    async def collect_memory(self, category: str, content: str, priority: str = "medium") -> None:
+        """Collect and store memory for bugs, feedback, and integration insights."""
+        try:
+            memory_entry = {
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "category": category,
+                "priority": priority,
+                "source_agent": "pm_agent",
+                "project_context": str(self.working_dir),
+                "content": content,
+                "integration_context": "system_init_agent_consolidation",
+            }
+            
+            # Log the memory entry
+            self.logger.info(f"Memory collected: {category} - {content}")
+            
+            # Store in memory system (placeholder for actual memory integration)
+            memory_file = self.local_config_dir / "memory" / f"{category}_{int(time.time())}.json"
+            memory_file.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(memory_file, "w") as f:
+                json.dump(memory_entry, f, indent=2)
+                
+        except Exception as e:
+            self.logger.error(f"Failed to collect memory: {e}")
+
+    # Enhanced method to handle system initialization operations
+    async def handle_system_initialization(self, operation: str, **kwargs) -> Dict[str, Any]:
+        """Handle system initialization operations that were previously in SystemInitAgent."""
+        try:
+            if operation == "initialize_framework":
+                force = kwargs.get("force", False)
+                return await self.initialize_framework(force=force)
+            elif operation == "verify_dependencies":
+                return await self._verify_dependencies()
+            elif operation == "run_diagnostics":
+                return await self.run_diagnostics()
+            elif operation == "troubleshoot_setup":
+                return await self.troubleshoot_setup_issues()
+            elif operation == "display_report":
+                results = kwargs.get("results", {})
+                await self.display_initialization_report(results)
+                return {"status": "report_displayed"}
+            else:
+                raise ValueError(f"Unknown system initialization operation: {operation}")
+        except Exception as e:
+            await self.collect_memory("bug", f"System initialization operation failed: {operation} - {str(e)}", "high")
+            raise
+
+    # End of System Initialization Methods
+    # ===========================================

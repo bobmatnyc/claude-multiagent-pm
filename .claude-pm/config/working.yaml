@@ -1,0 +1,29 @@
+claude-pm:
+  framework_location: /Users/masa/Projects/claude-multiagent-pm
+  initialized_at: '2025-07-14 13:58:14'
+  is_project_specific: false
+  mode: working-directory
+  project_directory: /Users/masa/Projects/claude-multiagent-pm
+  system_init_handler: pm_agent
+  version: 4.2.3
+  working_directory: /Users/masa/Projects/claude-multiagent-pm
+logging:
+  level: INFO
+  log_dir: ./logs/working
+  max_log_size: 10MB
+  rotate_logs: true
+memory:
+  auto_collection: true
+  categories:
+  - bug
+  - feedback
+  - architecture
+  - performance
+  - integration
+  - qa
+  enabled: true
+  storage_path: ./memory
+session:
+  auto_save: true
+  session_id: working-1752515894
+  session_path: ./sessions

@@ -1,33 +1,45 @@
 {
   "agent_registry": {
-    "version": "2.0.0",
-    "last_updated": "2025-07-09",
+    "version": "3.0.0",
+    "last_updated": "2025-07-14",
+    "description": "Core framework agents - 10 essential agents for Claude PM Framework",
     "standard_agents": {
-      "orchestrator": {
-        "name": "Orchestrator Agent",
-        "type": "standard",
-        "file": "orchestrator-agent.md",
-        "description": "Coordinates multi-agent workflows and task distribution",
-        "tools": ["coordination", "workflow_management", "task_distribution"],
-        "coordination_role": "primary_coordinator",
-        "memory_categories": ["project", "pattern"],
-        "specializations": ["workflow_coordination", "task_decomposition", "resource_allocation"],
-        "context_keywords": ["coordination", "planning", "workflow", "orchestration"]
-      },
       "architect": {
-        "name": "Architect Agent",
-        "type": "standard",
+        "name": "PM Orchestrator Agent",
+        "type": "core",
         "file": "architect-agent.md",
-        "description": "Designs system architecture and makes technical decisions",
-        "tools": ["design", "planning", "analysis"],
-        "coordination_role": "strategic_planning",
-        "memory_categories": ["project", "pattern"],
-        "specializations": ["system_design", "architectural_patterns", "technology_selection"],
-        "context_keywords": ["architecture", "design", "patterns", "scalability", "technical_decisions"]
+        "description": "Multi-agent orchestrator and project management specialist - Primary coordination hub",
+        "tools": ["task_tool", "todo_write", "memory_collection", "health_monitoring", "orchestration"],
+        "coordination_role": "primary_orchestrator",
+        "memory_categories": ["project", "pattern", "feedback", "architecture"],
+        "specializations": ["multi_agent_orchestration", "task_delegation", "framework_management", "memory_collection"],
+        "context_keywords": ["orchestration", "coordination", "delegation", "task_tool", "project_management"]
+      },
+      "data": {
+        "name": "Data Engineer Agent",
+        "type": "core",
+        "file": "data-agent.md",
+        "description": "Designs and implements data processing and storage solutions",
+        "tools": ["data_processing", "analytics", "ml_ops"],
+        "coordination_role": "data_management",
+        "memory_categories": ["pattern", "project"],
+        "specializations": ["data_modeling", "etl_pipelines", "data_storage", "analytics"],
+        "context_keywords": ["data", "storage", "pipelines", "analytics", "databases"]
+      },
+      "documentation": {
+        "name": "Documentation Agent",
+        "type": "core",
+        "file": "documentation-agent.md",
+        "description": "Technical writing, documentation, knowledge management",
+        "tools": ["documentation", "writing", "knowledge_management"],
+        "coordination_role": "knowledge_documentation",
+        "memory_categories": ["pattern", "project", "team"],
+        "specializations": ["technical_writing", "documentation", "knowledge_management"],
+        "context_keywords": ["documentation", "writing", "knowledge", "guides", "docs"]
       },
       "engineer": {
-        "name": "Engineer Agent", 
-        "type": "standard",
+        "name": "Engineer Agent",
+        "type": "core",
         "file": "engineer-agent.md",
         "description": "Implements features and writes production code",
         "tools": ["development", "implementation", "testing"],
@@ -36,53 +48,9 @@
         "specializations": ["feature_implementation", "code_development", "debugging"],
         "context_keywords": ["implementation", "coding", "features", "development", "programming"]
       },
-      "qa": {
-        "name": "QA Agent",
-        "type": "standard", 
-        "file": "qa-agent.md",
-        "description": "Tests functionality and ensures quality standards",
-        "tools": ["testing", "validation", "quality_control"],
-        "coordination_role": "quality_assurance",
-        "memory_categories": ["error", "pattern", "team"],
-        "specializations": ["testing", "quality_assurance", "bug_detection", "test_automation"],
-        "context_keywords": ["testing", "quality", "bugs", "validation", "qa"]
-      },
-      "security": {
-        "name": "Security Agent",
-        "type": "standard",
-        "file": "security-agent.md", 
-        "description": "Analyzes security vulnerabilities and implements security measures",
-        "tools": ["security_scan", "audit", "compliance"],
-        "coordination_role": "security_oversight",
-        "memory_categories": ["error", "pattern", "team"],
-        "specializations": ["security_analysis", "vulnerability_assessment", "security_implementation"],
-        "context_keywords": ["security", "vulnerabilities", "authentication", "authorization", "encryption"]
-      },
-      "data": {
-        "name": "Data Agent",
-        "type": "standard",
-        "file": "data-agent.md",
-        "description": "Designs and implements data processing and storage solutions", 
-        "tools": ["data_processing", "analytics", "ml_ops"],
-        "coordination_role": "data_management",
-        "memory_categories": ["pattern", "project"],
-        "specializations": ["data_modeling", "etl_pipelines", "data_storage", "analytics"],
-        "context_keywords": ["data", "storage", "pipelines", "analytics", "databases"]
-      },
-      "research": {
-        "name": "Research Agent",
-        "type": "standard",
-        "file": "research-agent.md",
-        "description": "Investigates technologies and gathers requirements",
-        "tools": ["research", "analysis", "documentation"],
-        "coordination_role": "information_gathering",
-        "memory_categories": ["pattern", "project"],
-        "specializations": ["technology_research", "requirements_analysis", "market_research"],
-        "context_keywords": ["research", "analysis", "requirements", "investigation", "exploration"]
-      },
       "operations": {
-        "name": "Operations Agent", 
-        "type": "standard",
+        "name": "Operations Agent",
+        "type": "core",
         "file": "ops-agent.md",
         "description": "Manages deployment pipelines and infrastructure",
         "tools": ["deployment", "monitoring", "infrastructure"],
@@ -91,96 +59,62 @@
         "specializations": ["ci_cd", "infrastructure", "deployment", "monitoring"],
         "context_keywords": ["deployment", "infrastructure", "devops", "ci_cd", "monitoring"]
       },
-      "integration": {
-        "name": "Integration Agent",
-        "type": "standard", 
-        "file": "integration-agent.md",
-        "description": "System integration, API development, service coordination",
-        "tools": ["integration", "api_development", "coordination"],
-        "coordination_role": "system_integration",
+      "qa": {
+        "name": "QA Agent",
+        "type": "core",
+        "file": "qa-agent.md",
+        "description": "Tests functionality and ensures quality standards",
+        "tools": ["testing", "validation", "quality_control"],
+        "coordination_role": "quality_assurance",
+        "memory_categories": ["error", "pattern", "team"],
+        "specializations": ["testing", "quality_assurance", "bug_detection", "test_automation"],
+        "context_keywords": ["testing", "quality", "bugs", "validation", "qa"]
+      },
+      "research": {
+        "name": "Research Agent",
+        "type": "core",
+        "file": "research-agent.md",
+        "description": "Investigates technologies and gathers requirements",
+        "tools": ["research", "analysis", "documentation"],
+        "coordination_role": "information_gathering",
         "memory_categories": ["pattern", "project"],
-        "specializations": ["system_integration", "api_development", "service_coordination"],
-        "context_keywords": ["integration", "api", "services", "coordination", "systems"]
+        "specializations": ["technology_research", "requirements_analysis", "market_research"],
+        "context_keywords": ["research", "analysis", "requirements", "investigation", "exploration"]
       },
-      "documentation": {
-        "name": "Documentation Agent",
-        "type": "standard",
-        "file": "documentation-agent.md", 
-        "description": "Technical writing, documentation, knowledge management",
-        "tools": ["documentation", "writing", "knowledge_management"],
-        "coordination_role": "knowledge_documentation",
-        "memory_categories": ["pattern", "project", "team"],
-        "specializations": ["technical_writing", "documentation", "knowledge_management"],
-        "context_keywords": ["documentation", "writing", "knowledge", "guides", "docs"]
-      },
-      "code_review": {
-        "name": "Code Review Agent",
-        "type": "standard",
-        "file": "code-review-engineer-agent.md",
-        "description": "Performs comprehensive code reviews with security, performance, style, and testing analysis", 
-        "tools": ["code_analysis", "quality_assessment", "review"],
-        "coordination_role": "quality_enforcement",
-        "memory_categories": ["pattern", "team", "error"],
-        "specializations": ["code_review", "style_analysis", "security_review", "performance_review", "test_coverage"],
-        "context_keywords": ["code_review", "style", "standards", "quality", "review", "analysis"]
-      },
-      "performance": {
-        "name": "Performance Agent",
-        "type": "standard",
-        "file": "performance-agent.md",
-        "description": "Optimizes performance and analyzes system bottlenecks",
-        "tools": ["performance_analysis", "optimization", "monitoring"],
-        "coordination_role": "performance_optimization",
-        "memory_categories": ["pattern", "error"],
-        "specializations": ["performance_optimization", "bottleneck_analysis", "scalability_testing"],
-        "context_keywords": ["performance", "optimization", "bottlenecks", "scalability", "speed"]
-      },
-      "ui_ux": {
-        "name": "UI/UX Agent",
-        "type": "standard",
-        "file": "ui-ux-agent.md",
-        "description": "Designs user interfaces and user experience flows",
-        "tools": ["ui_design", "ux_design", "frontend_development"],
-        "coordination_role": "user_experience",
-        "memory_categories": ["pattern", "team"],
-        "specializations": ["ui_design", "ux_design", "frontend_development", "user_research"],
-        "context_keywords": ["ui", "ux", "frontend", "design", "user_experience"]
-      },
-      "version_control": {
-        "name": "Version Control Agent",
-        "type": "standard",
-        "file": "version-control-agent.md",
-        "description": "Git operations, branch management, semantic versioning, and conflict resolution",
-        "tools": ["git_operations", "version_management", "conflict_resolution"],
-        "coordination_role": "version_control_management",
-        "memory_categories": ["pattern", "project", "error"],
-        "specializations": ["git_operations", "branch_management", "semantic_versioning", "conflict_resolution", "merge_operations", "workflow_automation"],
-        "context_keywords": ["git", "version", "branch", "merge", "conflict", "repository", "versioning"]
+      "security": {
+        "name": "Security Agent",
+        "type": "core",
+        "file": "security-agent.md",
+        "description": "Analyzes security vulnerabilities and implements security measures",
+        "tools": ["security_scan", "audit", "compliance"],
+        "coordination_role": "security_oversight",
+        "memory_categories": ["error", "pattern", "team"],
+        "specializations": ["security_analysis", "vulnerability_assessment", "security_implementation"],
+        "context_keywords": ["security", "vulnerabilities", "authentication", "authorization", "encryption"]
       },
       "ticketing": {
         "name": "Ticketing Agent",
-        "type": "standard",
+        "type": "core",
         "file": "ticketing-agent.md",
         "description": "Universal ticketing interface and lifecycle management across multiple platforms",
         "tools": ["ticket_operations", "workflow_automation", "multi_platform_integration"],
         "coordination_role": "ticket_lifecycle_management",
         "memory_categories": ["pattern", "project", "team"],
-        "specializations": ["ai_trackdown_integration", "multi_platform_support", "workflow_automation", "ticket_lifecycle_management", "sla_management", "escalation_procedures"],
-        "context_keywords": ["tickets", "issues", "workflow", "automation", "tracking", "lifecycle", "status"]
+        "specializations": ["ai_trackdown_integration", "multi_platform_support", "workflow_automation", "ticket_lifecycle_management"],
+        "context_keywords": ["tickets", "issues", "workflow", "automation", "tracking", "lifecycle"]
       },
-      "system_init": {
-        "name": "System Init Agent",
-        "type": "standard",
-        "file": "system-init-agent.md",
-        "description": "Framework initialization, setup, and configuration management across multi-project environments",
-        "tools": ["framework_setup", "dependency_management", "configuration"],
-        "coordination_role": "system_initialization",
-        "memory_categories": ["pattern", "project"],
-        "specializations": ["framework_initialization", "dependency_verification", "configuration_management", "directory_structure_setup", "troubleshooting"],
-        "context_keywords": ["init", "setup", "configuration", "dependencies", "framework", "installation"]
+      "version_control": {
+        "name": "Version Control Agent",
+        "type": "core",
+        "file": "version-control-agent.md",
+        "description": "Git operations, branch management, semantic versioning, and conflict resolution",
+        "tools": ["git_operations", "version_management", "conflict_resolution"],
+        "coordination_role": "version_control_management",
+        "memory_categories": ["pattern", "project", "error"],
+        "specializations": ["git_operations", "branch_management", "semantic_versioning", "conflict_resolution"],
+        "context_keywords": ["git", "version", "branch", "merge", "conflict", "repository", "versioning"]
       }
-    },
-    "user_defined_agents": {}
+    }
   },
   "configuration": {
     "delegation_framework": {
@@ -192,16 +126,31 @@
     "agent_validation": {
       "required_fields": [
         "name",
-        "base_type", 
+        "type",
         "description",
-        "specialization",
-        "domain_focus"
+        "specializations",
+        "coordination_role"
       ],
-      "base_type_validation": "strict",
+      "type_validation": "core_only",
       "compatibility_checks": [
         "tool_access_inheritance",
         "coordination_protocol_compliance",
         "framework_service_integration"
+      ]
+    },
+    "core_agent_requirements": {
+      "total_count": 10,
+      "mandatory_agents": [
+        "architect",
+        "data", 
+        "documentation",
+        "engineer",
+        "operations",
+        "qa",
+        "research",
+        "security",
+        "ticketing",
+        "version_control"
       ]
     }
   }

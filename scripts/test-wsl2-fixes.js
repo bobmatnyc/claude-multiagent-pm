@@ -174,7 +174,7 @@ class WSL2FixValidator {
         
         try {
             // Test the postinstall file exists and has WSL2 logic
-            const postinstallPath = path.join(this.packageRoot, 'install', 'postinstall.js');
+            const postinstallPath = path.join(this.packageRoot, 'install', 'postinstall-minimal.js');
             
             if (!fs.existsSync(postinstallPath)) {
                 this.log('Postinstall script not found', 'error');

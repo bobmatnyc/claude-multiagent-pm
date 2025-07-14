@@ -21,6 +21,7 @@ from rich.panel import Panel
 
 from ..core.config import Config
 from ..services.memory.cli_integration import MemoryIntegratedCLI
+from ..core.logging_config import setup_streaming_logger, finalize_streaming_logs
 
 console = Console()
 logger = logging.getLogger(__name__)
@@ -110,6 +111,25 @@ def _display_directory_context():
         console.print(f"[dim]Working Directory:[/dim] {working_dir}")
         console.print(f"[dim]Framework Path:[/dim] {claude_pm_path}")
         console.print("")
+    except Exception as e:
+        logger.debug(f"Failed to display directory context: {e}")
+
+
+def _display_directory_context_streaming():
+    """Display deployment and working directory context with streaming logger."""
+    try:
+        streaming_logger = setup_streaming_logger("directory_context")
+        
+        working_dir = Path.cwd()
+        claude_pm_path = get_claude_pm_path()
+        
+        streaming_logger.info(f"📂 Working Directory: {working_dir}")
+        streaming_logger.info(f"🔧 Framework Path: {claude_pm_path}")
+        streaming_logger.info("✅ Directory context loaded")
+        
+        finalize_streaming_logs(streaming_logger)
+        print()  # Add spacing after streaming output
+        
     except Exception as e:
         logger.debug(f"Failed to display directory context: {e}")
 

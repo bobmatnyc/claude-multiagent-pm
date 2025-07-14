@@ -1,0 +1,4 @@
+Requirement already satisfied: rich in /opt/homebrew/lib/python3.13/site-packages (14.0.0)
+Requirement already satisfied: markdown-it-py>=2.2.0 in /opt/homebrew/lib/python3.13/site-packages (from rich) (3.0.0)
+Requirement already satisfied: pygments<3.0.0,>=2.13.0 in /opt/homebrew/lib/python3.13/site-packages (from rich) (2.19.1)
+Requirement already satisfied: mdurl~=0.1 in /opt/homebrew/lib/python3.13/site-packages (from markdown-it-py>=2.2.0->rich) (0.1.2)

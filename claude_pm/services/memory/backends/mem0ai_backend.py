@@ -251,7 +251,7 @@ class Mem0AIBackend(MemoryBackend):
         """Add memory to mem0AI service."""
         try:
             data = {
-                "content": content,
+                "messages": [{"role": "user", "content": content}],
                 "space_name": project_name,
                 "metadata": {
                     "category": category.value,

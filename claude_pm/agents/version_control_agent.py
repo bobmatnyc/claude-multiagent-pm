@@ -18,9 +18,9 @@ from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 import logging
 
-from ..core.base_agent import BaseAgent
-from ..core.config import Config
-from ..services.version_control import (
+from claude_pm.core.base_agent import BaseAgent
+from claude_pm.core.config import Config
+from claude_pm.services.version_control import (
     GitOperationsManager,
     SemanticVersionManager,
     BranchStrategyManager,

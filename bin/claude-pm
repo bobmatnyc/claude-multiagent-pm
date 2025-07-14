@@ -9,29 +9,53 @@ architecture. All CLI functionality is now implemented in Python using Click.
 import sys
 import os
 import subprocess
+import shutil
 from pathlib import Path
 
 # Script version - tracks claude-pm script updates independently
 def get_script_version():
-    """Get script version from bin/VERSION file."""
-    version_file = Path(__file__).parent / "VERSION"
-    if version_file.exists():
-        try:
-            return version_file.read_text().strip()
-        except OSError:
-            pass
-    return "1.0.0"  # Fallback
+    """Get script version - injected during deployment."""
+    return "003"
 
 SCRIPT_VERSION = get_script_version()
 
 # Add the framework path to Python path for imports
-# For deployed scripts, look for framework in ~/.claude-pm/framework
-if Path(__file__).parent == Path.home() / ".claude-pm" / "bin":
-    # Deployed in ~/.claude-pm/bin - framework is at ~/.claude-pm/framework
-    framework_path = Path.home() / ".claude-pm"
-else:
-    # Development mode - framework is parent directory
-    framework_path = Path(__file__).parent.parent
+# Dynamic framework path detection
+def detect_framework_path():
+    """Detect the framework path dynamically."""
+    script_path = Path(__file__).resolve()
+    
+    # Check if we're in a symlinked environment
+    if script_path.is_symlink():
+        # If this is a symlink, resolve to the actual location
+        actual_script_path = script_path.resolve()
+        potential_framework = actual_script_path.parent.parent
+        
+        # Verify this is actually a framework directory
+        if (potential_framework / "claude_pm").exists():
+            return potential_framework
+    
+    # Check if we're in ~/.local/bin (deployed via symlink)
+    if script_path.parent == Path.home() / ".local" / "bin":
+        # Look for framework in typical locations
+        framework_candidates = [
+            Path.home() / ".claude-pm",
+            Path.home() / "Projects" / "claude-multiagent-pm",
+            Path("/Users/masa/Projects/claude-multiagent-pm"),  # Common development location
+        ]
+        
+        for candidate in framework_candidates:
+            if (candidate / "claude_pm").exists():
+                return candidate
+    
+    # Check if we're in development mode (bin directory within framework)
+    if (script_path.parent.parent / "claude_pm").exists():
+        return script_path.parent.parent
+    
+    # Fallback to ~/.claude-pm
+    return Path.home() / ".claude-pm"
+
+framework_path = detect_framework_path()
 
 sys.path.insert(0, str(framework_path))
 
@@ -84,6 +108,22 @@ def get_framework_version():
     return "unknown"
 
 
+def get_script_path():
+    """Get the actual script path that's being executed."""
+    try:
+        # Use shutil.which to find the actual claude-pm executable in PATH
+        script_path = shutil.which("claude-pm")
+        if script_path:
+            return script_path
+        
+        # Fallback to current script location
+        return str(Path(__file__).resolve())
+        
+    except Exception:
+        # If all else fails, return current file location
+        return str(Path(__file__).resolve())
+
+
 def detect_deployment_type():
     """Detect the deployment type and framework path."""
     script_path = Path(__file__).resolve()
@@ -131,7 +171,7 @@ def validate_framework_deployment():
             config = json.load(f)
         
         # ISS-0112: Check for required config keys
-        required_keys = ["deployment_type", "version", "installationComplete"]
+        required_keys = ["installType", "version", "installationComplete"]
         for key in required_keys:
             if key not in config:
                 return False
@@ -144,6 +184,312 @@ def validate_framework_deployment():
         
     except (json.JSONDecodeError, OSError):
         return False
+
+
+def check_parent_claude_md_status():
+    """
+    Check parent directory CLAUDE.md file status against framework template.
+    Now automatically performs backup and update when framework is newer.
+    
+    Returns:
+        Dict with check results:
+        - needs_update: bool - True if parent file needs updating
+        - parent_exists: bool - True if parent CLAUDE.md exists
+        - parent_path: Path - Path to parent CLAUDE.md file
+        - template_version: str - Framework template version
+        - parent_version: str - Parent file version (if available)
+        - status_message: str - Human-readable status description
+        - auto_updated: bool - True if automatic update was performed
+        - backup_path: str - Path to backup file (if created)
+    """
+    try:
+        # Get current working directory and look for parent CLAUDE.md
+        current_dir = Path.cwd()
+        parent_claude_md = current_dir / "CLAUDE.md"
+        
+        # Get framework template path
+        framework_template = framework_path / "framework" / "CLAUDE.md"
+        
+        # Check if framework template exists
+        if not framework_template.exists():
+            return {
+                "needs_update": False,
+                "parent_exists": parent_claude_md.exists(),
+                "parent_path": parent_claude_md,
+                "template_version": "unknown",
+                "parent_version": "unknown",
+                "status_message": "Framework template not found - cannot check for updates",
+                "auto_updated": False,
+                "backup_path": None
+            }
+        
+        # Extract template version from framework template
+        template_version = "unknown"
+        try:
+            template_content = framework_template.read_text()
+            # Look for FRAMEWORK_VERSION in template (it uses handlebars {{FRAMEWORK_VERSION}})
+            # We'll use the actual framework version from VERSION file instead
+            version_file = framework_path / "framework" / "VERSION"
+            if version_file.exists():
+                template_version = version_file.read_text().strip()
+        except Exception:
+            pass
+        
+        # Check if parent CLAUDE.md exists
+        if not parent_claude_md.exists():
+            return {
+                "needs_update": False,
+                "parent_exists": False,
+                "parent_path": parent_claude_md,
+                "template_version": template_version,
+                "parent_version": "none",
+                "status_message": f"No CLAUDE.md in current directory ({current_dir.name})",
+                "auto_updated": False,
+                "backup_path": None
+            }
+        
+        # Extract version from parent CLAUDE.md
+        parent_version = "unknown"
+        try:
+            parent_content = parent_claude_md.read_text()
+            # Look for FRAMEWORK_VERSION in the deployed template
+            import re
+            version_match = re.search(r'FRAMEWORK_VERSION:\s*(\S+)', parent_content)
+            if version_match:
+                parent_version = version_match.group(1)
+        except Exception:
+            pass
+        
+        # Compare versions to determine if update is needed
+        needs_update = False
+        status_message = f"Parent CLAUDE.md version: {parent_version}"
+        
+        if parent_version == "unknown" or template_version == "unknown":
+            # If we can't determine versions, check file modification times
+            try:
+                parent_mtime = parent_claude_md.stat().st_mtime
+                template_mtime = framework_template.stat().st_mtime
+                
+                if template_mtime > parent_mtime:
+                    needs_update = True
+                    status_message = "Framework template is newer than parent CLAUDE.md"
+                else:
+                    status_message = "Parent CLAUDE.md appears current (based on modification time)"
+            except Exception:
+                status_message = "Cannot determine update status - version information unavailable"
+        else:
+            # Compare version strings
+            if parent_version != template_version:
+                needs_update = True
+                status_message = f"Update available: {parent_version} → {template_version}"
+            else:
+                status_message = f"Parent CLAUDE.md is current (version {parent_version})"
+        
+        # ENHANCED: Automatically perform backup and update if framework is newer
+        auto_updated = False
+        backup_path = None
+        
+        if needs_update:
+            try:
+                console.print(f"[yellow]⚡ Auto-updating CLAUDE.md: {parent_version} → {template_version}[/yellow]")
+                
+                # Perform automatic backup and update using Parent Directory Manager
+                backup_result, update_result = perform_automatic_backup_and_update(
+                    current_dir, parent_claude_md, template_version
+                )
+                
+                if backup_result and update_result:
+                    auto_updated = True
+                    backup_path = backup_result
+                    status_message = f"✅ Auto-updated: {parent_version} → {template_version} (backup: {backup_result})"
+                    console.print(f"[green]✅ CLAUDE.md updated successfully![/green]")
+                    console.print(f"[dim]📁 Backup saved: {backup_result}[/dim]")
+                    console.print(f"[dim]🔄 New version: {template_version}[/dim]")
+                    needs_update = False  # Update completed
+                else:
+                    console.print(f"[red]❌ Auto-update failed - manual update required[/red]")
+                    
+            except Exception as update_error:
+                console.print(f"[red]❌ Auto-update error: {update_error}[/red]")
+                console.print(f"[yellow]💡 Use 'claude-pm init' to update manually[/yellow]")
+        
+        return {
+            "needs_update": needs_update,
+            "parent_exists": True,
+            "parent_path": parent_claude_md,
+            "template_version": template_version,
+            "parent_version": parent_version,
+            "status_message": status_message,
+            "auto_updated": auto_updated,
+            "backup_path": backup_path
+        }
+        
+    except Exception as e:
+        return {
+            "needs_update": False,
+            "parent_exists": False,
+            "parent_path": Path.cwd() / "CLAUDE.md",
+            "template_version": "unknown",
+            "parent_version": "unknown",
+            "status_message": f"Error checking parent CLAUDE.md status: {e}",
+            "auto_updated": False,
+            "backup_path": None
+        }
+
+
+def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_version):
+    """
+    Perform automatic backup and update of CLAUDE.md using Parent Directory Manager.
+    
+    This function integrates with the Parent Directory Manager service to:
+    1. Create a timestamped backup of the existing CLAUDE.md file
+    2. Deploy the latest framework template to replace the old file
+    3. Provide clear feedback about the operation status
+    
+    Args:
+        current_dir: Current working directory Path
+        parent_claude_md: Path to existing CLAUDE.md file  
+        template_version: Framework template version
+        
+    Returns:
+        Tuple of (backup_path, success) where:
+        - backup_path: Path to backup file or None if failed
+        - success: True if update succeeded, False otherwise
+    """
+    try:
+        import asyncio
+        
+        async def run_backup_and_update():
+            # Import the Parent Directory Manager service
+            from claude_pm.services.parent_directory_manager import ParentDirectoryManager
+            
+            # Initialize the Parent Directory Manager with proper configuration
+            manager = ParentDirectoryManager()
+            await manager._initialize()
+            
+            backup_path = None
+            
+            try:
+                # Step 1: Create timestamped backup of existing CLAUDE.md
+                console.print("[dim]🔄 Creating backup of existing CLAUDE.md...[/dim]")
+                backup_path = await manager.backup_parent_directory(current_dir)
+                
+                if backup_path:
+                    console.print(f"[green]✅ Backup created: {backup_path.name}[/green]")
+                else:
+                    console.print("[red]⚠️  Backup creation failed - proceeding without backup[/red]")
+                
+                # Step 2: Install new template from framework using force mode
+                console.print("[dim]🔄 Installing updated framework template...[/dim]")
+                operation = await manager.install_template_to_parent_directory(
+                    target_directory=current_dir,
+                    template_id="claude_md",  # Framework template ID for CLAUDE.md
+                    template_variables=None,  # Use default deployment variables
+                    force=True  # Force update to override version checking
+                )
+                
+                if operation.success:
+                    console.print(f"[green]✅ Template installation successful[/green]")
+                    
+                    # Log successful automatic update for memory collection
+                    if hasattr(manager, 'logger'):
+                        manager.logger.info(f"Automatic CLAUDE.md update completed: {template_version}")
+                        manager.logger.info(f"Backup created: {backup_path}")
+                        manager.logger.info(f"Target directory: {current_dir}")
+                    
+                    return backup_path, True
+                else:
+                    error_msg = operation.error_message or "Unknown error"
+                    console.print(f"[red]❌ Template installation failed: {error_msg}[/red]")
+                    
+                    # Log failure for memory collection
+                    if hasattr(manager, 'logger'):
+                        manager.logger.error(f"Automatic CLAUDE.md update failed: {error_msg}")
+                        manager.logger.error(f"Template version: {template_version}")
+                        manager.logger.error(f"Target directory: {current_dir}")
+                    
+                    return backup_path, False
+                    
+            except Exception as manager_error:
+                error_msg = str(manager_error)
+                console.print(f"[red]❌ Parent Directory Manager error: {error_msg}[/red]")
+                
+                # Log manager error for memory collection
+                if hasattr(manager, 'logger'):
+                    manager.logger.error(f"Parent Directory Manager error during auto-update: {error_msg}")
+                    manager.logger.error(f"Template version: {template_version}")
+                    manager.logger.error(f"Target directory: {current_dir}")
+                
+                return backup_path, False
+                
+            finally:
+                # Cleanup manager resources
+                await manager._cleanup()
+        
+        # Run the async backup and update operation
+        return asyncio.run(run_backup_and_update())
+        
+    except ImportError as import_error:
+        console.print(f"[red]❌ Failed to import Parent Directory Manager: {import_error}[/red]")
+        console.print("[yellow]💡 Framework may not be properly installed[/yellow]")
+        
+        # Log import error for troubleshooting
+        console.print("[dim]💭 This usually indicates the framework is not properly installed or accessible[/dim]")
+        return None, False
+        
+    except Exception as e:
+        console.print(f"[red]❌ Backup and update operation failed: {e}[/red]")
+        return None, False
+
+
+def display_parent_claude_md_notification(check_result):
+    """
+    Display notification about parent CLAUDE.md status with actionable guidance.
+    Enhanced to handle automatic updates.
+    
+    Args:
+        check_result: Dict from check_parent_claude_md_status()
+    """
+    if not check_result["parent_exists"]:
+        # No parent CLAUDE.md - this is normal for many directories
+        console.print(f"[dim]📄 Parent CLAUDE.md: {check_result['status_message']}[/dim]")
+        return
+    
+    # Check if automatic update was performed
+    if check_result.get("auto_updated", False):
+        # Automatic update was successful
+        console.print("")
+        console.print("[bold green]📄 CLAUDE.md Auto-Update Complete[/bold green]")
+        console.print("─" * 50)
+        console.print(f"📍 Location: {check_result['parent_path']}")
+        console.print(f"✅ Status: {check_result['status_message']}")
+        if check_result.get("backup_path"):
+            console.print(f"🛡️  Backup: {check_result['backup_path']}")
+        console.print("")
+        console.print("[dim]🎉 Your CLAUDE.md file has been automatically updated with the latest[/dim]")
+        console.print("[dim]   framework features, agent types, and configuration options.[/dim]")
+        console.print("")
+        return
+    
+    if check_result["needs_update"]:
+        # Parent file needs updating (automatic update failed or not attempted)
+        console.print("")
+        console.print("[bold yellow]📄 CLAUDE.md Update Available[/bold yellow]")
+        console.print("─" * 50)
+        console.print(f"📍 Location: {check_result['parent_path']}")
+        console.print(f"📊 Status: {check_result['status_message']}")
+        console.print("")
+        console.print("[bold]💡 Manual update options:[/bold]")
+        console.print("   • claude-pm init          (recommended - updates all framework files)")
+        console.print("   • claude-pm setup         (alternative update method)")
+        console.print("   • claude-pm deploy        (force deployment)")
+        console.print("")
+        console.print("[dim]💬 This update will bring your CLAUDE.md file up to date with the latest[/dim]")
+        console.print("[dim]   framework features, agent types, and configuration options.[/dim]")
+        console.print("")
+    else:
+        # Parent file is current
+        console.print(f"[green]📄 Parent CLAUDE.md: {check_result['status_message']}[/green]")
 
 
 def attempt_auto_installation():
@@ -281,13 +627,15 @@ Pure Python CLI for Claude-powered project management and task orchestration
   claude-pm               Launch Claude CLI directly (YOLO mode - fast startup)
 
 [bold]🛠️ INITIALIZATION:[/bold]
-  claude-pm init          Manually initialize framework setup
-  claude-pm init --force  Force re-initialization
+  claude-pm init                   🚀 Smart initialization - just works! (auto-detects and runs post-install if needed)
+  claude-pm init --force           Force re-initialization (runs post-install even if already set up)
+  claude-pm init --skip-postinstall Skip post-install setup (for advanced users)
+  claude-pm init --validate        Validate installation without making changes
 
 [bold]🚨 TROUBLESHOOTING:[/bold]
+  • Setup Issues: claude-pm init (will auto-fix missing components)
   • Environment Issues: claude-pm --system-info
   • Deployment Problems: claude-pm --deployment-info
-  • Setup Issues: claude-pm init
 
 [bold]📖 DOCUMENTATION:[/bold]
   • GitHub: https://github.com/bobmatnyc/claude-multiagent-pm
@@ -301,16 +649,17 @@ def display_system_info():
     """Display system information."""
     deployment_info = detect_deployment_type()
     framework_version = get_framework_version()
+    script_path = get_script_path()
     
     console.print("[bold]🖥️  Claude Multi-Agent PM Framework System Information[/bold]")
     console.print("═" * 60)
     console.print(f"📦 Framework Version: v{framework_version}")
     console.print(f"🔧 Script Version: {SCRIPT_VERSION}")
+    console.print(f"📍 Script Path: {script_path}")
     console.print(f"🗂️  Deployment Type: {deployment_info['type']}")
     console.print(f"📁 Framework Path: {deployment_info['framework_path']}")
     console.print(f"🔧 Platform: {sys.platform}")
     console.print(f"🐍 Python: {sys.version.split()[0]}")
-    console.print(f"📍 Script Path: {deployment_info['script_path']}")
     console.print("")
 
 
@@ -332,6 +681,10 @@ def display_comprehensive_status():
     project_version = get_framework_version()
     console.print(f"📦 Project Version: [green]v{project_version}[/green]")
     console.print(f"🔧 Script Version: [green]{SCRIPT_VERSION}[/green]")
+    
+    # Script path - show which claude-pm executable is being used
+    script_path = get_script_path()
+    console.print(f"📍 Script Path: [cyan]{script_path}[/cyan]")
     
     # Framework/CLAUDE.md version (serial number from framework/VERSION)
     framework_version_file = framework_path / "framework" / "VERSION"
@@ -362,14 +715,27 @@ def display_comprehensive_status():
     console.print(f"🤖 Claude CLI: [{claude_color}]{claude_status}[/{claude_color}]")
     
     console.print("═" * 60)
+    
+    # Check parent directory CLAUDE.md status
+    parent_check = check_parent_claude_md_status()
+    display_parent_claude_md_notification(parent_check)
 
 
 def check_memory_status():
-    """Check memory system status with mem0AI version and memory count."""
+    """Check memory system status with mem0AI version, memory system serial version, and memory count."""
     try:
         # Check for mem0AI installation and version
         mem0_version = "not installed"
         memory_count = 0
+        
+        # Get memory system serial version from VERSION file
+        memory_system_version = "unknown"
+        try:
+            memory_version_file = framework_path / "claude_pm" / "services" / "memory" / "VERSION"
+            if memory_version_file.exists():
+                memory_system_version = memory_version_file.read_text().strip()
+        except:
+            pass
         
         # Check if mem0AI is installed via pip
         try:
@@ -439,37 +805,46 @@ def check_memory_status():
             return {
                 "healthy": True, 
                 "partial": False,
-                "status": f"✅ mem0AI v{mem0_version} ({memory_count} memories)"
+                "status": f"✅ mem0AI v{mem0_version} | Memory v{memory_system_version} ({memory_count} memories)"
             }
         elif mem0_version != "not installed" and mem0_service_running:
             return {
                 "healthy": True,
                 "partial": False, 
-                "status": f"✅ mem0AI v{mem0_version} (service ready)"
+                "status": f"✅ mem0AI v{mem0_version} | Memory v{memory_system_version} (service ready)"
             }
         elif mem0_version != "not installed":
             return {
                 "healthy": False,
                 "partial": True,
-                "status": f"⚠️ mem0AI v{mem0_version} (no memories)"
+                "status": f"⚠️ mem0AI v{mem0_version} | Memory v{memory_system_version} (no memories)"
             }
         elif optimization_exists:
             return {
                 "healthy": False,
                 "partial": True, 
-                "status": f"⚠️ Optimization only (mem0AI: {mem0_version})"
+                "status": f"⚠️ Optimization only | Memory v{memory_system_version} (mem0AI: {mem0_version})"
             }
         else:
             return {
                 "healthy": False,
                 "partial": False,
-                "status": "❌ Not configured"
+                "status": f"❌ Not configured | Memory v{memory_system_version}"
             }
     except Exception as e:
+        # Try to get memory system version even if there's an error
+        memory_system_version = "unknown"
+        try:
+            memory_version_file = framework_path / "claude_pm" / "services" / "memory" / "VERSION"
+            if memory_version_file.exists():
+                memory_system_version = memory_version_file.read_text().strip()
+        except:
+            pass
+        
         return {
             "healthy": False,
             "partial": False, 
-            "status": f"❌ Error: {str(e)[:20]}..."
+            "status": f"❌ Error | Memory v{memory_system_version}: {str(e)[:20]}..."
         }
 
 
@@ -583,37 +958,85 @@ def handle_enhanced_flags():
 
 
 def handle_init_command(args):
-    """Handle the init command with cmpm-init functionality."""
+    """Handle the init command with intelligent auto-initialization."""
     console.print("[bold blue]🛠️  Claude PM Framework Initialization[/bold blue]")
-    console.print("[dim]Initializing framework with enhanced cmpm-init functionality...[/dim]")
+    console.print("[dim]Intelligent initialization - detecting setup requirements...[/dim]")
     
-    # Check for force flag
+    # Parse command flags
     force = "--force" in args
+    skip_postinstall = "--skip-postinstall" in args
+    validate_only = "--validate" in args
     
     try:
-        # Import and use the SystemInitAgent
-        from claude_pm.agents.system_init_agent import SystemInitAgent
+        # Import required modules
+        from claude_pm.utils.installation_state import InstallationStateDetector
+        from claude_pm.agents.pm_agent import PMAgent
         import asyncio
         
-        async def run_init():
-            agent = SystemInitAgent()
-            await agent._initialize()
+        async def run_smart_init():
+            # Create detector and check installation state
+            detector = InstallationStateDetector(console)
+            state = await detector.detect_installation_state()
             
-            # Run enhanced initialization with indexing
-            results = await agent.initialize_framework_with_indexing(force=force)
+            # Display current state
+            detector.display_installation_state(state)
             
-            # Display the enhanced initialization report
-            await agent.display_enhanced_initialization_report(results)
+            # Handle validate-only mode
+            if validate_only:
+                is_valid, messages = await detector.validate_installation()
+                console.print("\n[bold blue]📋 Validation Results:[/bold blue]")
+                for message in messages:
+                    console.print(f"  {message}")
+                return is_valid
             
-            await agent._cleanup()
-            return results["success"]
+            # Check if post-install is needed
+            needs_post_install = state.needs_post_install or force
+            
+            # Handle skip-postinstall mode
+            if skip_postinstall:
+                console.print("[yellow]⚠️  Skipping post-install setup as requested[/yellow]")
+                needs_post_install = False
+            
+            # Run post-install setup if needed
+            if needs_post_install:
+                console.print("\n[bold]🚀 Running post-install setup...[/bold]")
+                post_install_success = await detector.run_post_install_setup(force=force)
+                
+                if not post_install_success:
+                    console.print("[red]❌ Post-install setup failed![/red]")
+                    return False
+                
+                # Re-check state after post-install
+                state = await detector.detect_installation_state()
+                console.print("\n[bold]📋 Post-install state:[/bold]")
+                detector.display_installation_state(state)
+            
+            # If post-install was skipped or framework is already complete, run standard init
+            if not needs_post_install or state.is_complete:
+                console.print("\n[bold]🔧 Running framework initialization...[/bold]")
+                
+                # Run standard PM Agent initialization
+                agent = PMAgent()
+                await agent._initialize()
+                
+                # Run framework initialization  
+                results = await agent.initialize_framework(force=force)
+                
+                # Display the initialization report
+                await agent.display_initialization_report(results)
+                
+                await agent._cleanup()
+                return results["success"]
+            
+            return True
         
-        # Run the initialization
-        success = asyncio.run(run_init())
+        # Run the smart initialization
+        success = asyncio.run(run_smart_init())
         
         if success:
             console.print("[green]\n✅ Framework initialization completed successfully![/green]")
-            console.print("[dim]🚀 You can now use claude-pm commands[/dim]")
+            console.print("[dim]🚀 Claude PM Framework is ready to use[/dim]")
+            console.print("[dim]   Try: claude-pm --help[/dim]")
             sys.exit(0)
         else:
             console.print("[red]\n❌ Framework initialization failed![/red]")
@@ -621,7 +1044,7 @@ def handle_init_command(args):
             sys.exit(1)
             
     except ImportError as e:
-        console.print(f"[red]❌ Failed to import SystemInitAgent: {e}[/red]")
+        console.print(f"[red]❌ Failed to import required modules: {e}[/red]")
         console.print("[dim]Make sure the framework is properly installed[/dim]")
         sys.exit(1)
     except Exception as e:

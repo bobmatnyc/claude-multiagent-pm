@@ -147,7 +147,7 @@ def identify_candidates_for_removal():
         elif agent_name == 'hierarchical_agent_loader':
             print(f"✅ {agent_name}: Keep - Core framework component")
             keep_agents.append(agent_info)
-        elif agent_name in ['pm_agent', 'system_init_agent', 'ticketing_agent', 'documentation_agent', 'version_control_agent']:
+        elif agent_name in ['pm_agent', 'ticketing_agent', 'documentation_agent', 'version_control_agent']:
             print(f"✅ {agent_name}: Keep - Core orchestration component")
             keep_agents.append(agent_info)
         else:

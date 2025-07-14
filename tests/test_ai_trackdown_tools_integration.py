@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test AI-Trackdown-Tools CLI integration for SystemInitAgent.
+Test AI-Trackdown-Tools CLI integration for PMAgent.
 
 This test verifies that the CLI integration works correctly with both
 available and unavailable AI-Trackdown-Tools installations.
@@ -17,7 +17,7 @@ from unittest.mock import MagicMock, patch, AsyncMock
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from claude_pm.agents.system_init_agent import SystemInitAgent
+from claude_pm.agents.pm_agent import PMAgent
 
 
 class TestAITrackdownToolsIntegration:
@@ -26,7 +26,7 @@ class TestAITrackdownToolsIntegration:
     def setup_method(self, method):
         """Set up test method."""
         self.temp_dir = Path(tempfile.mkdtemp())
-        self.agent = SystemInitAgent(working_dir=self.temp_dir)
+        self.agent = PMAgent(working_dir=self.temp_dir)
 
     def teardown_method(self, method):
         """Tear down test method."""
@@ -283,7 +283,7 @@ async def test_integration_flow():
         (temp_path / "package.json").write_text('{"name": "test-project"}')
 
         # Initialize agent
-        agent = SystemInitAgent(working_dir=temp_path)
+        agent = PMAgent(working_dir=temp_path)
 
         # Test CLI availability check
         availability = agent.check_aitrackdown_availability(temp_path)

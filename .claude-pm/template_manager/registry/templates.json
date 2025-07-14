@@ -1,5 +1,12 @@
 {
-  "project-agents.json": {
-    "template_id": "project-agents.json",
-    "name": "project-agents",
-    "type": 
+  "test_template": {
+    "template_id": "test_template",
+    "name": "Test Template",
+    "type": "agent",
+    "source": "project",
+    "path": "/var/folders/l1/rj7vjw0d5jzcc0g4nkd6kyp40000gn/T/test.template",
+    "current_version": "1.0.0",
+    "created_at": "2025-07-14T00:00:00",
+    "updated_at": "2025-07-14T00:00:00"
+  }
+}

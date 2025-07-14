@@ -7,6 +7,7 @@ Provides standardized logging setup with:
 - JSON formatting for production
 - Log rotation
 - Performance monitoring
+- Single-line streaming for INFO messages
 """
 
 import logging
@@ -19,12 +20,74 @@ from rich.console import Console
 import json
 
 
+class StreamingHandler(logging.StreamHandler):
+    """
+    Custom handler for single-line streaming INFO messages.
+    
+    Shows progress indicators that update in place using carriage returns
+    while keeping ERROR and WARNING messages on separate lines.
+    """
+    
+    def __init__(self, stream=None):
+        super().__init__(stream)
+        self._last_info_message = False
+        self._info_line_active = False
+    
+    def emit(self, record):
+        """
+        Emit a log record with streaming support for INFO messages.
+        """
+        try:
+            msg = self.format(record)
+            stream = self.stream
+            
+            # Handle different log levels
+            if record.levelno == logging.INFO:
+                # For INFO messages, use carriage return for streaming
+                if self._info_line_active:
+                    # Clear the previous line by overwriting with spaces
+                    stream.write('\r' + ' ' * 100 + '\r')
+                
+                # Write INFO message with carriage return (no newline)
+                stream.write(f'\r{msg}')
+                stream.flush()
+                self._info_line_active = True
+                self._last_info_message = True
+                
+            else:
+                # For WARNING, ERROR, CRITICAL - always on new lines
+                if self._info_line_active:
+                    # Finish the INFO line first
+                    stream.write('\n')
+                    self._info_line_active = False
+                
+                stream.write(f'{msg}\n')
+                stream.flush()
+                self._last_info_message = False
+                
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except:
+            self.handleError(record)
+    
+    def finalize_info_line(self):
+        """
+        Finalize any active INFO line by adding a newline.
+        Call this when you want to ensure the final INFO message remains visible.
+        """
+        if self._info_line_active:
+            self.stream.write('\n')
+            self.stream.flush()
+            self._info_line_active = False
+
+
 def setup_logging(
     name: str,
     level: str = "INFO",
     log_file: Optional[Path] = None,
     use_rich: bool = True,
     json_format: bool = False,
+    use_streaming: bool = False,
 ) -> logging.Logger:
     """
     Setup logging for a Claude PM service.
@@ -35,6 +98,7 @@ def setup_logging(
         log_file: Optional log file path
         use_rich: Use Rich handler for colored console output
         json_format: Use JSON format for structured logging
+        use_streaming: Use streaming handler for single-line INFO messages
 
     Returns:
         Configured logger instance
@@ -57,7 +121,13 @@ def setup_logging(
         )
 
     # Console handler
-    if use_rich and not json_format:
+    if use_streaming:
+        # Use streaming handler for single-line INFO messages
+        console_handler = StreamingHandler(sys.stdout)
+        # Use simpler format for streaming
+        streaming_formatter = logging.Formatter(fmt="%(levelname)s: %(message)s")
+        console_handler.setFormatter(streaming_formatter)
+    elif use_rich and not json_format:
         console = Console(stderr=True)
         console_handler = RichHandler(console=console, show_time=True, show_path=True, markup=True)
         console_handler.setFormatter(logging.Formatter(fmt="%(message)s", datefmt="[%X]"))
@@ -139,6 +209,37 @@ class JsonFormatter(logging.Formatter):
 def get_logger(name: str) -> logging.Logger:
     """Get a logger instance with Claude PM defaults."""
     return logging.getLogger(name)
+
+
+def finalize_streaming_logs(logger: logging.Logger):
+    """
+    Finalize any active streaming INFO lines for a logger.
+    
+    This ensures the final INFO message remains visible by adding
+    a newline to complete any streaming output.
+    """
+    for handler in logger.handlers:
+        if isinstance(handler, StreamingHandler):
+            handler.finalize_info_line()
+
+
+def setup_streaming_logger(name: str, level: str = "INFO") -> logging.Logger:
+    """
+    Convenience function to setup a logger with streaming INFO support.
+    
+    Args:
+        name: Logger name
+        level: Log level (default: INFO)
+        
+    Returns:
+        Logger configured with streaming handler
+    """
+    return setup_logging(
+        name=name,
+        level=level,
+        use_rich=False,
+        use_streaming=True
+    )
 
 
 def log_performance(func):
