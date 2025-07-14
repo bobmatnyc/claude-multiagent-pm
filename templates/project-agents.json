@@ -1,0 +1,95 @@
+{
+  "project_agents": {
+    "documentation_agent": {
+      "type": "core",
+      "priority": "high",
+      "authority": "documentation_operations",
+      "capabilities": [
+        "project_documentation_analysis",
+        "operational_understanding",
+        "documentation_pattern_recognition",
+        "content_maintenance"
+      ],
+      "delegation_patterns": [
+        "analyze_documentation_health",
+        "update_project_docs",
+        "maintain_documentation_standards"
+      ]
+    },
+    "ticketing_agent": {
+      "type": "core", 
+      "priority": "high",
+      "authority": "ticket_lifecycle_management",
+      "capabilities": [
+        "universal_ticketing_interface",
+        "ticket_creation_and_management",
+        "status_tracking",
+        "platform_detection"
+      ],
+      "delegation_patterns": [
+        "create_tickets",
+        "update_ticket_status",
+        "manage_ticket_lifecycle"
+      ]
+    },
+    "version_control_agent": {
+      "type": "core",
+      "priority": "high", 
+      "authority": "git_operations",
+      "capabilities": [
+        "branch_management",
+        "merge_operations",
+        "conflict_resolution",
+        "version_control_coordination"
+      ],
+      "delegation_patterns": [
+        "create_branches",
+        "merge_with_validation",
+        "handle_git_operations"
+      ]
+    },
+    "qa_agent": {
+      "type": "extended",
+      "priority": "medium",
+      "authority": "quality_assurance",
+      "capabilities": [
+        "test_execution",
+        "validation_workflows",
+        "quality_checks",
+        "deployment_validation"
+      ],
+      "delegation_patterns": [
+        "run_test_suites",
+        "validate_deployment", 
+        "quality_assurance_checks"
+      ]
+    },
+    "ops_agent": {
+      "type": "extended",
+      "priority": "medium",
+      "authority": "operations_deployment",
+      "capabilities": [
+        "local_deployment",
+        "package_publication", 
+        "infrastructure_management",
+        "deployment_coordination"
+      ],
+      "delegation_patterns": [
+        "deploy_locally",
+        "publish_packages",
+        "manage_infrastructure"
+      ]
+    }
+  },
+  "agent_coordination": {
+    "hierarchy_enabled": true,
+    "precedence_order": ["project", "user", "system"],
+    "fallback_strategy": "automatic",
+    "delegation_required": true
+  },
+  "deployment_info": {
+    "deployed_at": "{{DEPLOYMENT_DATE}}",
+    "framework_version": "{{FRAMEWORK_VERSION}}",
+    "deployment_type": "{{DEPLOYMENT_TYPE}}"
+  }
+}

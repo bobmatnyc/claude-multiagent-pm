@@ -1,6 +1,6 @@
 {
   "name": "@bobmatnyc/claude-multiagent-pm",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Claude Multi-Agent PM Framework - Unified NPM installation system with comprehensive component deployment to ~/.claude-pm/ (ISS-0112)",
   "main": "claude_pm/cli.py",
   "bin": {
