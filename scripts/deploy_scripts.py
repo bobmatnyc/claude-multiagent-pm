@@ -123,7 +123,12 @@ class ScriptDeploymentManager:
             
             # Replace the version resolution function with embedded version
             version_injection = f'''// Embedded version for local deployment
-const CLAUDE_PM_VERSION = '{version_content}';'''
+const CLAUDE_PM_VERSION = '{version_content}';
+
+// Simple version resolver for deployed environments
+function resolveVersion() {{
+    return CLAUDE_PM_VERSION;
+}}'''
             
             # Find and replace the version resolution section
             import re
@@ -137,7 +142,7 @@ const CLAUDE_PM_VERSION = '{version_content}';'''
             # If pattern not found, try simpler pattern
             if updated_content == script_content:
                 pattern = r'const CLAUDE_PM_VERSION = resolveVersion\(\);'
-                replacement = f"const CLAUDE_PM_VERSION = '{version_content}';"
+                replacement = f"const CLAUDE_PM_VERSION = '{version_content}';\n\n// Simple version resolver for deployed environments\nfunction resolveVersion() {{\n    return CLAUDE_PM_VERSION;\n}}"
                 updated_content = re.sub(pattern, replacement, script_content)
             
             # Write processed script to target

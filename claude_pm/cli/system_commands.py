@@ -1,0 +1,533 @@
+#!/usr/bin/env python3
+"""
+System Commands Module - Claude Multi-Agent PM Framework
+
+Handles agents, testing, utilities, and system diagnostics.
+Extracted from main CLI as part of ISS-0114 modularization initiative.
+"""
+
+import asyncio
+import sys
+import subprocess
+import shutil
+import platform
+import os
+import logging
+from pathlib import Path
+from typing import Optional
+
+import click
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+
+from ..core.config import Config
+
+console = Console()
+logger = logging.getLogger(__name__)
+
+
+def get_framework_config():
+    """Get framework configuration with dynamic path resolution."""
+    return Config()
+
+
+def get_claude_pm_path():
+    """Get the Claude PM framework path from configuration."""
+    config = get_framework_config()
+    return Path(config.get("claude_pm_path"))
+
+
+def get_managed_path():
+    """Get the managed projects path from configuration."""
+    config = get_framework_config()
+    return Path(config.get("managed_projects_path"))
+
+
+def register_system_commands(cli_group):
+    """Register all system commands with the main CLI group."""
+    
+    # Agents Commands
+    @cli_group.group()
+    def agents():
+        """Multi-agent coordination and management."""
+        pass
+
+    @agents.command()
+    def status():
+        """Show agent status and availability."""
+        console.print("[bold blue]🤖 Multi-Agent Status[/bold blue]\n")
+
+        # Agent types from the framework
+        agent_types = {
+            "orchestrator": {
+                "status": "available",
+                "current_task": None,
+                "specialization": "Task coordination",
+            },
+            "architect": {
+                "status": "available",
+                "current_task": None,
+                "specialization": "System design",
+            },
+            "engineer": {
+                "status": "busy",
+                "current_task": "M01-008 Implementation",
+                "specialization": "Code implementation",
+            },
+            "qa": {"status": "available", "current_task": None, "specialization": "Quality assurance"},
+            "researcher": {
+                "status": "available",
+                "current_task": None,
+                "specialization": "Information gathering",
+            },
+            "security": {
+                "status": "available",
+                "current_task": None,
+                "specialization": "Security analysis",
+            },
+            "performance": {
+                "status": "idle",
+                "current_task": None,
+                "specialization": "Performance optimization",
+            },
+            "devops": {"status": "available", "current_task": None, "specialization": "Infrastructure"},
+            "data": {"status": "available", "current_task": None, "specialization": "Data engineering"},
+            "ui_ux": {"status": "available", "current_task": None, "specialization": "User experience"},
+            "code_review": {
+                "status": "available",
+                "current_task": None,
+                "specialization": "Code review",
+            },
+        }
+
+        table = Table(title="Agent Ecosystem Status")
+        table.add_column("Agent", style="cyan")
+        table.add_column("Status", style="green")
+        table.add_column("Current Task", style="yellow")
+        table.add_column("Specialization", style="magenta")
+
+        for agent_name, agent_data in agent_types.items():
+            # Status colors
+            status_display = {
+                "available": "[green]🟢 Available[/green]",
+                "busy": "[yellow]🟡 Busy[/yellow]",
+                "idle": "[blue]🔵 Idle[/blue]",
+                "offline": "[red]🔴 Offline[/red]",
+            }.get(agent_data["status"], agent_data["status"])
+
+            current_task = agent_data["current_task"] or "None"
+
+            table.add_row(
+                agent_name.replace("_", " ").title(),
+                status_display,
+                current_task,
+                agent_data["specialization"],
+            )
+
+        console.print(table)
+
+        # Summary
+        available_count = sum(1 for a in agent_types.values() if a["status"] == "available")
+        busy_count = sum(1 for a in agent_types.values() if a["status"] == "busy")
+        total_count = len(agent_types)
+
+        summary_text = f"""
+[bold]Total Agents:[/bold] {total_count}
+[bold]Available:[/bold] {available_count}
+[bold]Busy:[/bold] {busy_count}
+[bold]Utilization:[/bold] {(busy_count/total_count)*100:.1f}%
+[bold]Max Parallel:[/bold] 5 agents
+"""
+        console.print(Panel(summary_text.strip(), title="Agent Summary"))
+
+    # Testing Commands
+    @cli_group.command()
+    @click.option("--unit", is_flag=True, help="Run unit tests only")
+    @click.option("--integration", is_flag=True, help="Run integration tests only")
+    @click.option("--coverage", is_flag=True, help="Generate coverage report")
+    @click.option("--watch", is_flag=True, help="Watch for changes and re-run tests")
+    @click.option("--pattern", help="Run tests matching pattern")
+    @click.option("--verbose", "-v", is_flag=True, help="Verbose output")
+    @click.option("--quiet", "-q", is_flag=True, help="Quiet output")
+    @click.option("--failfast", is_flag=True, help="Stop on first failure")
+    @click.option("--html", is_flag=True, help="Generate HTML coverage report")
+    @click.option("--xml", is_flag=True, help="Generate XML coverage report")
+    @click.option("--json", is_flag=True, help="Output results in JSON format")
+    @click.option("--parallel", is_flag=True, help="Run tests in parallel")
+    @click.option("--workers", type=int, default=4, help="Number of parallel workers")
+    @click.argument("pytest_args", nargs=-1, type=click.UNPROCESSED)
+    def test(
+        unit,
+        integration,
+        coverage,
+        watch,
+        pattern,
+        verbose,
+        quiet,
+        failfast,
+        html,
+        xml,
+        json,
+        parallel,
+        workers,
+        pytest_args,
+    ):
+        """
+        🧪 Run tests with pytest integration.
+
+        This command provides a unified interface for running tests with pytest,
+        supporting all major testing scenarios and options.
+
+        Examples:
+            claude-pm test                      # Run all tests
+            claude-pm test --unit               # Run unit tests only
+            claude-pm test --integration        # Run integration tests only
+            claude-pm test --coverage           # Run with coverage
+            claude-pm test --watch              # Watch mode
+            claude-pm test --pattern "test_cli" # Run tests matching pattern
+            claude-pm test --verbose            # Verbose output
+            claude-pm test --parallel           # Run in parallel
+
+        Advanced usage:
+            claude-pm test -- --pdb             # Pass args to pytest
+            claude-pm test -- -k "test_health"  # Use pytest's -k selector
+        """
+        # Build pytest command
+        cmd = [sys.executable, "-m", "pytest"]
+
+        # Add test markers
+        if unit:
+            cmd.extend(["-m", "unit"])
+        elif integration:
+            cmd.extend(["-m", "integration"])
+
+        # Add coverage options
+        if coverage:
+            cmd.extend(["--cov=claude_pm", "--cov-report=term-missing"])
+            if html:
+                cmd.extend(["--cov-report=html"])
+            if xml:
+                cmd.extend(["--cov-report=xml"])
+
+        # Add output options
+        if verbose:
+            cmd.append("--verbose")
+        elif quiet:
+            cmd.append("--quiet")
+
+        # Add behavior options
+        if failfast:
+            cmd.append("--maxfail=1")
+
+        # Add pattern matching
+        if pattern:
+            cmd.extend(["-k", pattern])
+
+        # Add parallel execution
+        if parallel:
+            try:
+                import pytest_xdist
+                cmd.extend(["-n", str(workers)])
+            except ImportError:
+                console.print(
+                    "[yellow]⚠️ pytest-xdist not installed. Run: pip install pytest-xdist[/yellow]"
+                )
+
+        # Add watch mode
+        if watch:
+            try:
+                import pytest_watch
+                # Replace pytest with ptw for watch mode
+                cmd[1] = "ptw"
+                cmd.append("--")  # Separator for ptw
+            except ImportError:
+                console.print(
+                    "[yellow]⚠️ pytest-watch not installed. Run: pip install pytest-watch[/yellow]"
+                )
+
+        # Add JSON output
+        if json:
+            cmd.extend(["--json-report", "--json-report-file=test-results.json"])
+
+        # Add any additional pytest arguments
+        if pytest_args:
+            cmd.extend(pytest_args)
+
+        # Display command being run
+        console.print(f"[bold blue]🧪 Running tests...[/bold blue]")
+        if verbose:
+            console.print(f"[dim]Command: {' '.join(cmd)}[/dim]")
+
+        try:
+            # Set PYTHONPATH to include current directory
+            env = os.environ.copy()
+            env["PYTHONPATH"] = str(Path.cwd())
+
+            # Run the tests
+            result = subprocess.run(cmd, env=env)
+            
+            if result.returncode == 0:
+                console.print("[bold green]✅ All tests passed![/bold green]")
+            else:
+                console.print(f"[bold red]❌ Tests failed with exit code {result.returncode}[/bold red]")
+                sys.exit(result.returncode)
+
+        except KeyboardInterrupt:
+            console.print("\n[bold yellow]⚠️ Tests interrupted by user[/bold yellow]")
+            sys.exit(130)
+        except Exception as e:
+            console.print(f"[red]❌ Error running tests: {e}[/red]")
+            sys.exit(1)
+
+    # Utility Commands
+    @cli_group.group()
+    def util():
+        """Utility commands and tools."""
+        pass
+
+    @util.command()
+    def info():
+        """Show Claude PM Framework information."""
+        from .. import __version__
+
+        info_text = f"""
+[bold]Claude Multi-Agent Project Management Framework[/bold]
+Version: {__version__}
+Python Edition: [green]✅ Active[/green]
+
+[bold]System Information:[/bold]
+Platform: {platform.system()} {platform.release()}
+Python: {sys.version.split()[0]}
+Architecture: {platform.machine()}
+
+[bold]Framework Paths:[/bold]
+Base Path: {get_framework_config().get('base_path')}
+Claude Multi-Agent PM: {get_claude_pm_path()}
+Managed Projects: {get_managed_path()}
+
+[bold]Services:[/bold]
+Health Monitor: Python-based health monitoring
+Memory Service: mem0AI integration (port 8002)
+Project Service: Framework compliance monitoring
+"""
+
+        console.print(Panel(info_text.strip(), title="Claude Multi-Agent PM Framework Information"))
+
+    @util.command()
+    def migrate():
+        """Show migration information from npm to Python."""
+        migration_info = """
+[bold]Migration from npm to Python Build System[/bold]
+
+[bold yellow]Old npm commands → New commands:[/bold yellow]
+npm run health-check → claude-pm health check
+npm run monitor:health → claude-pm health monitor
+npm run monitor:status → claude-pm health status
+npm test → claude-pm test
+npm run lint → make lint
+
+[bold yellow]New Python-specific commands:[/bold yellow]
+make setup-dev → Complete development setup
+make install-ai → Install AI dependencies
+make type-check → Run type checking
+claude-pm service start → Start all services
+claude-pm project list → List all projects
+claude-pm memory search → Search project memories
+claude-pm test → Run tests with pytest integration
+
+[bold yellow]Development workflow:[/bold yellow]
+1. source .venv/bin/activate (activate virtual environment)
+2. make install-dev (install dependencies)
+3. claude-pm service start (start services)
+4. claude-pm health check (verify health)
+5. claude-pm test (run tests)
+
+[bold yellow]Build system:[/bold yellow]
+• Makefile replaces package.json scripts
+• pyproject.toml replaces package.json
+• requirements/ directory for dependencies
+• Python virtual environment instead of node_modules
+"""
+
+        console.print(Panel(migration_info.strip(), title="Migration Guide"))
+
+    @util.command()
+    def doctor():
+        """Run comprehensive system diagnostics."""
+
+        console.print("[bold blue]🏥 Claude Multi-Agent PM Framework Doctor[/bold blue]\n")
+
+        checks = []
+
+        # Python version check
+        python_version = sys.version.split()[0]
+        python_ok = tuple(map(int, python_version.split("."))) >= (3, 9)
+        checks.append(("Python >= 3.9", python_ok, f"Found: {python_version}"))
+
+        # Virtual environment check
+        venv_active = hasattr(sys, "real_prefix") or (
+            hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix
+        )
+        checks.append(("Virtual Environment", venv_active, "Activate with: source .venv/bin/activate"))
+
+        # Required tools check
+        required_tools = ["git", "make"]
+        for tool in required_tools:
+            tool_available = shutil.which(tool) is not None
+            checks.append((f"{tool} available", tool_available, f"Install {tool}"))
+
+        # Directory structure check
+        base_path = Path.home() / "Projects"
+        claude_pm_path = base_path / "claude-pm"
+        managed_path = base_path / "managed"
+
+        checks.append(("Base directory", base_path.exists(), f"Create {base_path}"))
+        checks.append(
+            ("Claude Multi-Agent PM directory", claude_pm_path.exists(), f"Create {claude_pm_path}")
+        )
+        checks.append(("Managed directory", managed_path.exists(), f"Create {managed_path}"))
+
+        # mem0AI service check
+        try:
+            import aiohttp
+            mem0ai_available = True
+        except ImportError:
+            mem0ai_available = False
+        checks.append(("mem0AI dependencies", mem0ai_available, "pip install aiohttp"))
+
+        # Framework dependencies check
+        try:
+            import click
+            import rich
+            deps_available = True
+        except ImportError:
+            deps_available = False
+        checks.append(("Core dependencies", deps_available, "pip install -r requirements/base.txt"))
+
+        # pytest check for testing
+        try:
+            import pytest
+            pytest_available = True
+        except ImportError:
+            pytest_available = False
+        checks.append(("Testing framework", pytest_available, "pip install pytest"))
+
+        # Display results
+        table = Table(title="System Check Results")
+        table.add_column("Check", style="cyan")
+        table.add_column("Status", style="green")
+        table.add_column("Details", style="yellow")
+
+        all_passed = True
+        for check_name, passed, details in checks:
+            status = "✅ PASS" if passed else "❌ FAIL"
+            if not passed:
+                all_passed = False
+            table.add_row(check_name, status, details)
+
+        console.print(table)
+
+        if all_passed:
+            console.print(
+                "\n[bold green]✅ All checks passed! Claude Multi-Agent PM Framework is ready.[/bold green]"
+            )
+        else:
+            console.print(
+                "\n[bold red]❌ Some checks failed. Please address the issues above.[/bold red]"
+            )
+
+        # Additional recommendations
+        recommendations = []
+        
+        if not venv_active:
+            recommendations.append("Activate virtual environment before running commands")
+        
+        if not mem0ai_available:
+            recommendations.append("Install mem0AI dependencies for full memory features")
+        
+        if not pytest_available:
+            recommendations.append("Install pytest for testing capabilities")
+
+        if recommendations:
+            console.print("\n[bold blue]💡 Recommendations:[/bold blue]")
+            for rec in recommendations:
+                console.print(f"  • {rec}")
+
+    @util.command()
+    def version():
+        """Show detailed version information."""
+        from .. import __version__
+        
+        console.print(f"[bold]Claude Multi-Agent PM Framework[/bold] v{__version__}")
+        console.print(f"Python {sys.version}")
+        console.print(f"Platform: {platform.platform()}")
+        
+        # Check for key dependencies
+        deps_info = []
+        
+        try:
+            import click
+            deps_info.append(f"click: {click.__version__}")
+        except ImportError:
+            deps_info.append("click: not installed")
+        
+        try:
+            import rich
+            deps_info.append(f"rich: {rich.__version__}")
+        except ImportError:
+            deps_info.append("rich: not installed")
+        
+        try:
+            import pytest
+            deps_info.append(f"pytest: {pytest.__version__}")
+        except ImportError:
+            deps_info.append("pytest: not installed")
+        
+        if deps_info:
+            console.print("\n[bold]Dependencies:[/bold]")
+            for dep in deps_info:
+                console.print(f"  {dep}")
+
+    @util.command()
+    @click.option("--config", is_flag=True, help="Show configuration paths")
+    @click.option("--services", is_flag=True, help="Show service status")
+    @click.option("--environment", is_flag=True, help="Show environment variables")
+    def debug(config, services, environment):
+        """Show debug information for troubleshooting."""
+        console.print("[bold blue]🔍 Debug Information[/bold blue]\n")
+        
+        if config or not any([config, services, environment]):
+            # Configuration paths
+            console.print("[bold]Configuration Paths:[/bold]")
+            console.print(f"  Framework Config: {get_framework_config()}")
+            console.print(f"  Claude PM Path: {get_claude_pm_path()}")
+            console.print(f"  Managed Path: {get_managed_path()}")
+            console.print("")
+        
+        if services or not any([config, services, environment]):
+            # Service status (basic check)
+            console.print("[bold]Service Status:[/bold]")
+            
+            # Check if mem0AI is running
+            try:
+                import socket
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                result = sock.connect_ex(('localhost', 8002))
+                sock.close()
+                mem0_status = "🟢 Running" if result == 0 else "🔴 Not running"
+            except:
+                mem0_status = "🔴 Error checking"
+            
+            console.print(f"  mem0AI (port 8002): {mem0_status}")
+            console.print("")
+        
+        if environment or not any([config, services, environment]):
+            # Environment variables
+            console.print("[bold]Environment:[/bold]")
+            console.print(f"  PYTHONPATH: {os.environ.get('PYTHONPATH', 'not set')}")
+            console.print(f"  VIRTUAL_ENV: {os.environ.get('VIRTUAL_ENV', 'not set')}")
+            console.print(f"  PATH: {os.environ.get('PATH', 'not set')[:100]}...")
+            console.print("")
+
+    return cli_group

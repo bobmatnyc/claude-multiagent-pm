@@ -13,6 +13,9 @@ const path = require('path');
 const os = require('os');
 const { spawn } = require('child_process');
 
+// ISS-0113 Enhanced Flag System Integration
+const { CliIntegration } = require('../lib/cli-flag-managers/cli-integration');
+
 // Universal version resolution for all deployment scenarios
 function resolveVersion() {
     const fs = require('fs');
@@ -179,8 +182,8 @@ Universal CLI for Claude-powered project management and task orchestration
   --system-info           Display comprehensive system information
   --deployment-info       Show deployment detection results
 
-⚡ Quick Actions:
-  claude [args...]        Launch Claude CLI with framework context (default)
+⚡ YOLO Mode (Default):
+  claude-pm               Launch Claude CLI directly (YOLO mode - fast startup)
 
 🚨 TROUBLESHOOTING:
   • Environment Issues: claude-pm --system-info
@@ -290,13 +293,10 @@ async function main() {
         process.exit(0);
     }
     
-    // Handle no arguments case - display system info then launch Claude
+    // Handle no arguments case - YOLO mode (direct launch, skip system info)
     if (args.length === 0) {
-        displayBasicSystemInfo();
-        
         try {
             const claudeValidator = new BasicClaudeValidator();
-            console.log('🔍 Validating Claude CLI environment...');
             
             const validation = await claudeValidator.validateEnvironment();
             
@@ -306,10 +306,7 @@ async function main() {
                 process.exit(1);
             }
             
-            console.log(`✅ Claude CLI v${validation.version} detected`);
-            console.log(`   → Using command: ${validation.command.join(' ')}`);
-            
-            // Launch Claude CLI
+            // YOLO mode: Launch Claude CLI directly without verbose output
             const claudeProcess = spawn(validation.command[0], validation.command.slice(1), {
                 stdio: 'inherit'
             });
@@ -373,6 +370,37 @@ async function main() {
 }
 
 /**
+ * ISS-0113 Enhanced Flag System Integration
+ * Handles enhanced flags before delegating to original logic
+ */
+async function executeWithEnhancedFlags() {
+    try {
+        const args = process.argv.slice(2);
+        
+        // Check if enhanced flags are present - if not, skip enhanced integration
+        const enhancedFlags = ['--save', '--upgrade', '--rollback', '--verify', '--components', '--environment', '--git', '--dependencies'];
+        const hasEnhancedFlags = enhancedFlags.some(flag => args.includes(flag)) ||
+            (args.includes('--version') && enhancedFlags.some(flag => args.includes(flag))) ||
+            args.some(arg => arg.startsWith('--format='));
+        
+        if (!hasEnhancedFlags) {
+            // No enhanced flags, delegate to modular support
+            return await executeWithModularSupport();
+        }
+        
+        const cliIntegration = new CliIntegration({
+            verboseMode: process.argv.includes('--verbose') || process.argv.includes('--debug')
+        });
+        
+        return await cliIntegration.execute();
+    } catch (error) {
+        console.error('❌ Enhanced flag integration failed:', error.message);
+        // Fallback to original execution
+        return await executeWithModularSupport();
+    }
+}
+
+/**
  * ISS-0085 Phase 2: Modular execution with fallback
  * Primary execution path using Phase 2 modules with graceful fallback to monolithic main()
  */
@@ -412,7 +440,7 @@ async function executeWithModularSupport() {
  */
 async function run() {
     try {
-        await executeWithModularSupport();
+        await executeWithEnhancedFlags();
     } catch (error) {
         console.error('❌ Fatal error:', error.message);
         process.exit(1);
@@ -433,5 +461,6 @@ module.exports = {
     getDeploymentConfig,
     detectPlatformInfo,
     main,
-    executeWithModularSupport
+    executeWithModularSupport,
+    executeWithEnhancedFlags
 };
