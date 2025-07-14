@@ -25,7 +25,14 @@ def get_script_version():
 SCRIPT_VERSION = get_script_version()
 
 # Add the framework path to Python path for imports
-framework_path = Path(__file__).parent.parent
+# For deployed scripts, look for framework in ~/.claude-pm/framework
+if Path(__file__).parent == Path.home() / ".claude-pm" / "bin":
+    # Deployed in ~/.claude-pm/bin - framework is at ~/.claude-pm/framework
+    framework_path = Path.home() / ".claude-pm"
+else:
+    # Development mode - framework is parent directory
+    framework_path = Path(__file__).parent.parent
+
 sys.path.insert(0, str(framework_path))
 
 try:
@@ -41,6 +48,19 @@ console = Console()
 
 def get_framework_version():
     """Get framework version from multiple sources."""
+    # For deployed version, check config.json first
+    config_json = Path.home() / ".claude-pm" / "config.json"
+    if config_json.exists():
+        try:
+            import json
+            with open(config_json) as f:
+                data = json.load(f)
+                version = data.get("version")
+                if version:
+                    return version
+        except (json.JSONDecodeError, KeyError):
+            pass
+    
     # Try package.json
     package_json = framework_path / "package.json"
     if package_json.exists():
