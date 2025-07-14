@@ -66,6 +66,38 @@ deployment-directory/
 ### `deploy.js`
 Main deployment script that creates a complete framework deployment.
 
+### `preuninstall.js` - **NEW** Comprehensive Cleanup System
+Complete removal and cleanup system with user data handling.
+
+**Features:**
+- Interactive and automatic cleanup modes
+- User data detection and backup creation
+- Multi-platform installation detection (NPM, pip, manual)
+- Safety checks and user confirmations
+- Comprehensive file size analysis (detects 107MB+ installations)
+- Memory collection for cleanup insights
+- Verification system for complete removal
+
+**Usage:**
+```bash
+# CLI integration
+claude-pm --cleanup              # Interactive (safest)
+claude-pm --cleanup --auto       # Automatic (keeps user data)
+claude-pm --cleanup --full       # Complete removal with backup
+
+# NPM scripts
+npm run cleanup                  # Interactive mode
+npm run cleanup:full             # Full interactive cleanup
+npm run cleanup:auto             # Automatic conservative cleanup
+npm run uninstall:complete       # Full uninstall process
+
+# Automatic during uninstall
+npm uninstall -g @bobmatnyc/claude-multiagent-pm  # Triggers preuninstall.js
+```
+
+### `deploy.js`
+Main deployment script that creates a complete framework deployment.
+
 **Features:**
 - Environment validation (Node.js, Python, ai-trackdown-tools)
 - Framework core deployment

@@ -1,1 +1,82 @@
-{}
+{
+  "project-agents.json": [
+    {
+      "template_id": "project-agents.json",
+      "version": "1.0.0",
+      "source": "user",
+      "created_at": "2025-07-14T17:33:13.052664",
+      "checksum": "f63284a9e0e4b72790977480108759ba228b7ab3a710baeba5a2e81ffdba6e0e",
+      "metadata": {
+        "original_path": "/Users/masa/.claude-pm/templates/project-agents.json",
+        "file_size": 2514,
+        "discovered": true
+      },
+      "backup_path": null,
+      "variables": {}
+    }
+  ],
+  "basic-project.json": [
+    {
+      "template_id": "basic-project.json",
+      "version": "1.0.0",
+      "source": "user",
+      "created_at": "2025-07-14T17:33:13.052904",
+      "checksum": "d8455a239f0a31b0d4459ed70734aedb0e3038f4a8e67119c8e75187266ea2bb",
+      "metadata": {
+        "original_path": "/Users/masa/.claude-pm/templates/basic-project.json",
+        "file_size": 490,
+        "discovered": true
+      },
+      "backup_path": null,
+      "variables": {}
+    }
+  ],
+  "config/working-directory-config.json": [
+    {
+      "template_id": "config/working-directory-config.json",
+      "version": "1.0.0",
+      "source": "user",
+      "created_at": "2025-07-14T17:33:13.053419",
+      "checksum": "14d07e306059dfc780dcbf8c01e4e68e83d41a6b8e2a1dfcb4c45677ac59f0ec",
+      "metadata": {
+        "original_path": "/Users/masa/.claude-pm/templates/config/working-directory-config.json",
+        "file_size": 1320,
+        "discovered": true
+      },
+      "backup_path": null,
+      "variables": {}
+    }
+  ],
+  "health/working-directory-health.json": [
+    {
+      "template_id": "health/working-directory-health.json",
+      "version": "1.0.0",
+      "source": "user",
+      "created_at": "2025-07-14T17:33:13.053512",
+      "checksum": "c53a8cd54828c7dfdde4c07d493a22e97cd18d608d7a31746f023069e461fb4e",
+      "metadata": {
+        "original_path": "/Users/masa/.claude-pm/templates/health/working-directory-health.json",
+        "file_size": 1743,
+        "discovered": true
+      },
+      "backup_path": null,
+      "variables": {}
+    }
+  ],
+  "agent/test_agent.template": [
+    {
+      "template_id": "agent/test_agent.template",
+      "version": "1.0.0",
+      "source": "user",
+      "created_at": "2025-07-14T17:44:44.147017",
+      "checksum": "1308f990cc4b290dfcac791a7a054071f11738033f1f6afb1690553609a55e40",
+      "metadata": {
+        "original_path": "/Users/masa/.claude-pm/templates/agent/test_agent.template",
+        "file_size": 22,
+        "discovered": true
+      },
+      "backup_path": null,
+      "variables": {}
+    }
+  ]
+}

@@ -140,6 +140,66 @@ class TemplateManager(BaseService):
         # Load existing registries
         self._load_registries()
 
+    def _safe_enum_value(self, enum_or_str, enum_class=None):
+        """
+        Safely get the value from an enum object or return the string if it's already a string.
+        
+        Args:
+            enum_or_str: Either an enum object or a string value
+            enum_class: The enum class to validate against (optional)
+            
+        Returns:
+            String value of the enum or the original string
+        """
+        if hasattr(enum_or_str, 'value'):
+            # It's an enum object, return its value
+            return enum_or_str.value
+        elif isinstance(enum_or_str, str):
+            # It's already a string, validate if enum_class is provided
+            if enum_class:
+                try:
+                    # Try to create enum to validate it's a valid value
+                    enum_class(enum_or_str)
+                    return enum_or_str
+                except ValueError:
+                    self.logger.warning(f"Invalid enum value '{enum_or_str}' for {enum_class.__name__}")
+                    # Return first enum value as fallback
+                    return list(enum_class)[0].value
+            return enum_or_str
+        else:
+            # Neither enum nor string, log error and return a safe default
+            self.logger.error(f"Unexpected type for enum value: {type(enum_or_str)}")
+            if enum_class:
+                return list(enum_class)[0].value
+            return str(enum_or_str)
+
+    def _ensure_enum_type(self, value, enum_class, default=None):
+        """
+        Ensure a value is of the correct enum type, converting from string if necessary.
+        
+        Args:
+            value: The value to convert (string or enum)
+            enum_class: The target enum class
+            default: Default enum value if conversion fails
+            
+        Returns:
+            Enum object of the specified type
+        """
+        if isinstance(value, enum_class):
+            # Already the correct enum type
+            return value
+        elif isinstance(value, str):
+            try:
+                # Convert string to enum
+                return enum_class(value)
+            except ValueError:
+                self.logger.warning(f"Invalid {enum_class.__name__} value: '{value}'")
+                return default or list(enum_class)[0]
+        else:
+            # Unexpected type
+            self.logger.error(f"Cannot convert {type(value)} to {enum_class.__name__}")
+            return default or list(enum_class)[0]
+
     async def _initialize(self) -> bool:
         """Initialize the Template Manager service."""
         try:
@@ -243,6 +303,14 @@ class TemplateManager(BaseService):
                             version_info["created_at"] = datetime.fromisoformat(
                                 version_info["created_at"]
                             )
+                            # Convert source string to TemplateSource enum if needed
+                            if isinstance(version_info.get("source"), str):
+                                try:
+                                    version_info["source"] = TemplateSource(version_info["source"])
+                                except ValueError:
+                                    # Fallback to PROJECT if invalid source
+                                    version_info["source"] = TemplateSource.PROJECT
+                                    self.logger.warning(f"Invalid source '{version_info.get('source')}' for template {template_id}, using PROJECT")
                             self.version_registry[template_id].append(
                                 TemplateVersion(**version_info)
                             )
@@ -259,6 +327,23 @@ class TemplateManager(BaseService):
                         conflict_info["new_version"]["created_at"] = datetime.fromisoformat(
                             conflict_info["new_version"]["created_at"]
                         )
+
+                        # Convert source strings to TemplateSource enums for both versions
+                        for version_key in ["existing_version", "new_version"]:
+                            if isinstance(conflict_info[version_key].get("source"), str):
+                                try:
+                                    conflict_info[version_key]["source"] = TemplateSource(conflict_info[version_key]["source"])
+                                except ValueError:
+                                    conflict_info[version_key]["source"] = TemplateSource.PROJECT
+                                    self.logger.warning(f"Invalid source in conflict {conflict_id}, using PROJECT")
+
+                        # Convert resolution string to ConflictResolution enum if needed
+                        if isinstance(conflict_info.get("resolution"), str):
+                            try:
+                                conflict_info["resolution"] = ConflictResolution(conflict_info["resolution"])
+                            except ValueError:
+                                conflict_info["resolution"] = None
+                                self.logger.warning(f"Invalid resolution in conflict {conflict_id}, setting to None")
 
                         if conflict_info.get("resolved_at"):
                             conflict_info["resolved_at"] = datetime.fromisoformat(
@@ -285,7 +370,7 @@ class TemplateManager(BaseService):
                     version_dict = {
                         "template_id": version.template_id,
                         "version": version.version,
-                        "source": version.source.value,
+                        "source": self._safe_enum_value(version.source, TemplateSource),
                         "created_at": version.created_at.isoformat(),
                         "checksum": version.checksum,
                         "metadata": version.metadata,
@@ -303,7 +388,7 @@ class TemplateManager(BaseService):
                 existing_version = {
                     "template_id": conflict.existing_version.template_id,
                     "version": conflict.existing_version.version,
-                    "source": conflict.existing_version.source.value,
+                    "source": self._safe_enum_value(conflict.existing_version.source, TemplateSource),
                     "created_at": conflict.existing_version.created_at.isoformat(),
                     "checksum": conflict.existing_version.checksum,
                     "metadata": conflict.existing_version.metadata,
@@ -314,7 +399,7 @@ class TemplateManager(BaseService):
                 new_version = {
                     "template_id": conflict.new_version.template_id,
                     "version": conflict.new_version.version,
-                    "source": conflict.new_version.source.value,
+                    "source": self._safe_enum_value(conflict.new_version.source, TemplateSource),
                     "created_at": conflict.new_version.created_at.isoformat(),
                     "checksum": conflict.new_version.checksum,
                     "metadata": conflict.new_version.metadata,
@@ -327,7 +412,7 @@ class TemplateManager(BaseService):
                     "existing_version": existing_version,
                     "new_version": new_version,
                     "conflict_type": conflict.conflict_type,
-                    "resolution": conflict.resolution.value if conflict.resolution else None,
+                    "resolution": self._safe_enum_value(conflict.resolution, ConflictResolution) if conflict.resolution else None,
                     "resolved_at": (
                         conflict.resolved_at.isoformat() if conflict.resolved_at else None
                     ),
@@ -409,8 +494,8 @@ class TemplateManager(BaseService):
                 self.template_registry[template_id] = {
                     "template_id": template_id,
                     "name": template_file.stem,
-                    "type": self._detect_template_type(template_file).value,
-                    "source": source.value,
+                    "type": self._safe_enum_value(self._detect_template_type(template_file), TemplateType),
+                    "source": self._safe_enum_value(source, TemplateSource),
                     "path": str(template_file),
                     "current_version": version.version,
                     "created_at": version.created_at.isoformat(),
@@ -504,8 +589,9 @@ class TemplateManager(BaseService):
                 # Handle as update
                 return await self.update_template(template_id, content, variables, metadata)
 
-            # Create template directory
-            template_dir = self.template_paths[source] / template_type.value
+            # Create template directory  
+            template_type_value = self._safe_enum_value(template_type, TemplateType)
+            template_dir = self.template_paths[source] / template_type_value
             template_dir.mkdir(parents=True, exist_ok=True)
 
             # Create template file
@@ -530,8 +616,8 @@ class TemplateManager(BaseService):
             self.template_registry[template_id] = {
                 "template_id": template_id,
                 "name": template_id,
-                "type": template_type.value,
-                "source": source.value,
+                "type": self._safe_enum_value(template_type, TemplateType),
+                "source": self._safe_enum_value(source, TemplateSource),
                 "path": str(template_file),
                 "current_version": version.version,
                 "created_at": version.created_at.isoformat(),
@@ -610,10 +696,12 @@ class TemplateManager(BaseService):
 
             # Create new version
             new_version_number = self._generate_next_version(template_id)
+            # Ensure source is properly converted to enum
+            source_enum = self._ensure_enum_type(template_info["source"], TemplateSource, TemplateSource.PROJECT)
             new_version = TemplateVersion(
                 template_id=template_id,
                 version=new_version_number,
-                source=TemplateSource(template_info["source"]),
+                source=source_enum,
                 created_at=datetime.now(),
                 checksum=new_checksum,
                 metadata=metadata or {},
@@ -904,9 +992,12 @@ class TemplateManager(BaseService):
 
             for template_id, template_info in self.template_registry.items():
                 # Apply filters
-                if template_type and template_info["type"] != template_type.value:
+                template_type_value = self._safe_enum_value(template_type, TemplateType) if template_type else None
+                source_value = self._safe_enum_value(source, TemplateSource) if source else None
+                
+                if template_type_value and template_info["type"] != template_type_value:
                     continue
-                if source and template_info["source"] != source.value:
+                if source_value and template_info["source"] != source_value:
                     continue
 
                 # Get version information
@@ -955,7 +1046,7 @@ class TemplateManager(BaseService):
             for version in versions:
                 version_info = {
                     "version": version.version,
-                    "source": version.source.value,
+                    "source": self._safe_enum_value(version.source, TemplateSource),
                     "created_at": version.created_at.isoformat(),
                     "checksum": version.checksum,
                     "metadata": version.metadata,

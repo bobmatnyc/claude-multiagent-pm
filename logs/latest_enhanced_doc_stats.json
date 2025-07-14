@@ -45,7 +45,7 @@
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
       "line_number": 70,
       "description": "Broken link: [Memory Integration Guide](MEMORY_INTEGRATION_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md",
-      "suggested_fix": "File not found. Check if 'MEMORY_INTEGRATION_GUIDE.md' exists or has been moved.",
+      "suggested_fix": "Suggested fix: Use 'guides/MEMORY_INTEGRATION_GUIDE.md' instead of 'MEMORY_INTEGRATION_GUIDE.md'",
       "link_text": "Memory Integration Guide",
       "target_path": "/Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md"
     },
@@ -115,7 +115,7 @@
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
       "line_number": 175,
       "description": "Broken link: [Memory Integration Guide](MEMORY_INTEGRATION_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md",
-      "suggested_fix": "File not found. Check if 'MEMORY_INTEGRATION_GUIDE.md' exists or has been moved.",
+      "suggested_fix": "Suggested fix: Use 'guides/MEMORY_INTEGRATION_GUIDE.md' instead of 'MEMORY_INTEGRATION_GUIDE.md'",
       "link_text": "Memory Integration Guide",
       "target_path": "/Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md"
     },
@@ -165,7 +165,7 @@
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
       "line_number": 291,
       "description": "Broken link: [Memory Integration Guide](MEMORY_INTEGRATION_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md",
-      "suggested_fix": "File not found. Check if 'MEMORY_INTEGRATION_GUIDE.md' exists or has been moved.",
+      "suggested_fix": "Suggested fix: Use 'guides/MEMORY_INTEGRATION_GUIDE.md' instead of 'MEMORY_INTEGRATION_GUIDE.md'",
       "link_text": "Memory Integration Guide",
       "target_path": "/Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md"
     },
@@ -205,7 +205,7 @@
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
       "line_number": 297,
       "description": "Broken link: [Memory Integration Guide](MEMORY_INTEGRATION_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md",
-      "suggested_fix": "File not found. Check if 'MEMORY_INTEGRATION_GUIDE.md' exists or has been moved.",
+      "suggested_fix": "Suggested fix: Use 'guides/MEMORY_INTEGRATION_GUIDE.md' instead of 'MEMORY_INTEGRATION_GUIDE.md'",
       "link_text": "Memory Integration Guide",
       "target_path": "/Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md"
     },
@@ -403,6 +403,36 @@
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
+      "line_number": 235,
+      "description": "Potentially invalid path reference: ./bin/cmpm",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./bin/cmpm"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
+      "line_number": 236,
+      "description": "Potentially invalid path reference: ./bin/cmpm",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./bin/cmpm"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
+      "line_number": 237,
+      "description": "Potentially invalid path reference: ./bin/cmpm",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./bin/cmpm"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
       "line_number": 243,
       "description": "Potentially invalid path reference: trackdown/BACKLOG.md",
       "suggested_fix": "Verify this path is correct and accessible",
@@ -428,6 +458,16 @@
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
       "target_path": "/Users/masa/Projects/managed/`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
+      "line_number": 385,
+      "description": "Potentially invalid path reference: ./bin/cmpm",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./bin/cmpm"
     },
     {
       "severity": "medium",
@@ -522,42 +562,32 @@
     {
       "severity": "medium",
       "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/context-population-patterns.md",
-      "line_number": 413,
-      "description": "Potentially invalid path reference: claude_pm/services/mem0_context_manager.py`",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/streaming-logger-guide.md",
+      "line_number": 18,
+      "description": "Potentially invalid path reference: claude_pm/core/logging_config.py`",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
-      "target_path": "claude_pm/services/mem0_context_manager.py`"
+      "target_path": "claude_pm/core/logging_config.py`"
     },
     {
       "severity": "medium",
       "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/context-population-patterns.md",
-      "line_number": 414,
-      "description": "Potentially invalid path reference: claude_pm/services/multi_agent_orchestrator.py`",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/streaming-logger-guide.md",
+      "line_number": 98,
+      "description": "Potentially invalid path reference: claude_pm/utils/installation_state.py`",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
-      "target_path": "claude_pm/services/multi_agent_orchestrator.py`"
+      "target_path": "claude_pm/utils/installation_state.py`"
     },
     {
       "severity": "medium",
       "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/context-population-patterns.md",
-      "line_number": 415,
-      "description": "Potentially invalid path reference: claude_pm/utils/model_context.py`",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/streaming-logger-guide.md",
+      "line_number": 113,
+      "description": "Potentially invalid path reference: claude_pm/cli/cli_utils.py`",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
-      "target_path": "claude_pm/utils/model_context.py`"
-    },
-    {
-      "severity": "medium",
-      "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/context-population-patterns.md",
-      "line_number": 416,
-      "description": "Potentially invalid path reference: claude_pm/services/intelligent_task_planner.py`",
-      "suggested_fix": "Verify this path is correct and accessible",
-      "link_text": null,
-      "target_path": "claude_pm/services/intelligent_task_planner.py`"
+      "target_path": "claude_pm/cli/cli_utils.py`"
     },
     {
       "severity": "high",
@@ -578,46 +608,6 @@
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
       "target_path": "docs/archive/`:"
-    },
-    {
-      "severity": "medium",
-      "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/NPM_POSTINSTALL_SOLUTION.md",
-      "line_number": 116,
-      "description": "Potentially invalid path reference: docs/NPM_POSTINSTALL_SOLUTION.md`",
-      "suggested_fix": "Verify this path is correct and accessible",
-      "link_text": null,
-      "target_path": "docs/NPM_POSTINSTALL_SOLUTION.md`"
-    },
-    {
-      "severity": "medium",
-      "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/VERSION_ALIGNMENT_STRATEGY.md",
-      "line_number": 11,
-      "description": "Potentially invalid path reference: claude_pm/_version.py**",
-      "suggested_fix": "Verify this path is correct and accessible",
-      "link_text": null,
-      "target_path": "claude_pm/_version.py**"
-    },
-    {
-      "severity": "medium",
-      "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/VERSION_ALIGNMENT_STRATEGY.md",
-      "line_number": 12,
-      "description": "Potentially invalid path reference: claude_pm/__init__.py**",
-      "suggested_fix": "Verify this path is correct and accessible",
-      "link_text": null,
-      "target_path": "claude_pm/__init__.py**"
-    },
-    {
-      "severity": "medium",
-      "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/VERSION_ALIGNMENT_STRATEGY.md",
-      "line_number": 15,
-      "description": "Potentially invalid path reference: framework/VERSION**",
-      "suggested_fix": "Verify this path is correct and accessible",
-      "link_text": null,
-      "target_path": "framework/VERSION**"
     }
   ],
   "broken_links": [
@@ -647,7 +637,7 @@
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
       "line_number": 70,
       "description": "Broken link: [Memory Integration Guide](MEMORY_INTEGRATION_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md",
-      "suggested_fix": "File not found. Check if 'MEMORY_INTEGRATION_GUIDE.md' exists or has been moved.",
+      "suggested_fix": "Suggested fix: Use 'guides/MEMORY_INTEGRATION_GUIDE.md' instead of 'MEMORY_INTEGRATION_GUIDE.md'",
       "link_text": "Memory Integration Guide",
       "target_path": "/Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md"
     },
@@ -717,7 +707,7 @@
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
       "line_number": 175,
       "description": "Broken link: [Memory Integration Guide](MEMORY_INTEGRATION_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md",
-      "suggested_fix": "File not found. Check if 'MEMORY_INTEGRATION_GUIDE.md' exists or has been moved.",
+      "suggested_fix": "Suggested fix: Use 'guides/MEMORY_INTEGRATION_GUIDE.md' instead of 'MEMORY_INTEGRATION_GUIDE.md'",
       "link_text": "Memory Integration Guide",
       "target_path": "/Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md"
     },
@@ -767,7 +757,7 @@
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
       "line_number": 291,
       "description": "Broken link: [Memory Integration Guide](MEMORY_INTEGRATION_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md",
-      "suggested_fix": "File not found. Check if 'MEMORY_INTEGRATION_GUIDE.md' exists or has been moved.",
+      "suggested_fix": "Suggested fix: Use 'guides/MEMORY_INTEGRATION_GUIDE.md' instead of 'MEMORY_INTEGRATION_GUIDE.md'",
       "link_text": "Memory Integration Guide",
       "target_path": "/Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md"
     },
@@ -807,7 +797,7 @@
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
       "line_number": 297,
       "description": "Broken link: [Memory Integration Guide](MEMORY_INTEGRATION_GUIDE.md) -> /Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md",
-      "suggested_fix": "File not found. Check if 'MEMORY_INTEGRATION_GUIDE.md' exists or has been moved.",
+      "suggested_fix": "Suggested fix: Use 'guides/MEMORY_INTEGRATION_GUIDE.md' instead of 'MEMORY_INTEGRATION_GUIDE.md'",
       "link_text": "Memory Integration Guide",
       "target_path": "/Users/masa/Projects/claude-multiagent-pm/docs/MEMORY_INTEGRATION_GUIDE.md"
     },
@@ -1027,6 +1017,36 @@
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
+      "line_number": 235,
+      "description": "Potentially invalid path reference: ./bin/cmpm",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./bin/cmpm"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
+      "line_number": 236,
+      "description": "Potentially invalid path reference: ./bin/cmpm",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./bin/cmpm"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
+      "line_number": 237,
+      "description": "Potentially invalid path reference: ./bin/cmpm",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./bin/cmpm"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
       "line_number": 243,
       "description": "Potentially invalid path reference: trackdown/BACKLOG.md",
       "suggested_fix": "Verify this path is correct and accessible",
@@ -1057,6 +1077,16 @@
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
+      "line_number": 385,
+      "description": "Potentially invalid path reference: ./bin/cmpm",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./bin/cmpm"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/INDEX.md",
       "line_number": 387,
       "description": "Potentially invalid path reference: trackdown/CURRENT-STATUS.md`",
       "suggested_fix": "Verify this path is correct and accessible",
@@ -1076,42 +1106,32 @@
     {
       "severity": "medium",
       "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/context-population-patterns.md",
-      "line_number": 413,
-      "description": "Potentially invalid path reference: claude_pm/services/mem0_context_manager.py`",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/streaming-logger-guide.md",
+      "line_number": 18,
+      "description": "Potentially invalid path reference: claude_pm/core/logging_config.py`",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
-      "target_path": "claude_pm/services/mem0_context_manager.py`"
+      "target_path": "claude_pm/core/logging_config.py`"
     },
     {
       "severity": "medium",
       "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/context-population-patterns.md",
-      "line_number": 414,
-      "description": "Potentially invalid path reference: claude_pm/services/multi_agent_orchestrator.py`",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/streaming-logger-guide.md",
+      "line_number": 98,
+      "description": "Potentially invalid path reference: claude_pm/utils/installation_state.py`",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
-      "target_path": "claude_pm/services/multi_agent_orchestrator.py`"
+      "target_path": "claude_pm/utils/installation_state.py`"
     },
     {
       "severity": "medium",
       "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/context-population-patterns.md",
-      "line_number": 415,
-      "description": "Potentially invalid path reference: claude_pm/utils/model_context.py`",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/streaming-logger-guide.md",
+      "line_number": 113,
+      "description": "Potentially invalid path reference: claude_pm/cli/cli_utils.py`",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
-      "target_path": "claude_pm/utils/model_context.py`"
-    },
-    {
-      "severity": "medium",
-      "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/context-population-patterns.md",
-      "line_number": 416,
-      "description": "Potentially invalid path reference: claude_pm/services/intelligent_task_planner.py`",
-      "suggested_fix": "Verify this path is correct and accessible",
-      "link_text": null,
-      "target_path": "claude_pm/services/intelligent_task_planner.py`"
+      "target_path": "claude_pm/cli/cli_utils.py`"
     },
     {
       "severity": "medium",
@@ -1122,50 +1142,10 @@
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
       "target_path": "docs/archive/`:"
-    },
-    {
-      "severity": "medium",
-      "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/NPM_POSTINSTALL_SOLUTION.md",
-      "line_number": 116,
-      "description": "Potentially invalid path reference: docs/NPM_POSTINSTALL_SOLUTION.md`",
-      "suggested_fix": "Verify this path is correct and accessible",
-      "link_text": null,
-      "target_path": "docs/NPM_POSTINSTALL_SOLUTION.md`"
-    },
-    {
-      "severity": "medium",
-      "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/VERSION_ALIGNMENT_STRATEGY.md",
-      "line_number": 11,
-      "description": "Potentially invalid path reference: claude_pm/_version.py**",
-      "suggested_fix": "Verify this path is correct and accessible",
-      "link_text": null,
-      "target_path": "claude_pm/_version.py**"
-    },
-    {
-      "severity": "medium",
-      "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/VERSION_ALIGNMENT_STRATEGY.md",
-      "line_number": 12,
-      "description": "Potentially invalid path reference: claude_pm/__init__.py**",
-      "suggested_fix": "Verify this path is correct and accessible",
-      "link_text": null,
-      "target_path": "claude_pm/__init__.py**"
-    },
-    {
-      "severity": "medium",
-      "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/VERSION_ALIGNMENT_STRATEGY.md",
-      "line_number": 15,
-      "description": "Potentially invalid path reference: framework/VERSION**",
-      "suggested_fix": "Verify this path is correct and accessible",
-      "link_text": null,
-      "target_path": "framework/VERSION**"
     }
   ],
   "inconsistencies_found": [],
-  "last_update": "2025-07-14 11:14:24",
-  "files_validated": 13,
+  "last_update": "2025-07-14 17:40:14",
+  "files_validated": 11,
   "links_checked": 38
 }

@@ -55,6 +55,72 @@ class MinimalPostInstall {
     }
 
     /**
+     * Install Python package
+     */
+     installPythonPackage() {
+        this.log('Installing Python package...');
+        
+        try {
+            // Find available Python command
+            const pythonCommands = ['python3', 'python'];
+            let pythonCmd = null;
+            
+            for (const cmd of pythonCommands) {
+                try {
+                    const version = execSync(`${cmd} --version`, { stdio: 'pipe', encoding: 'utf8' });
+                    if (version.includes('Python 3.')) {
+                        pythonCmd = cmd;
+                        break;
+                    }
+                } catch (e) {
+                    // Continue to next command
+                }
+            }
+            
+            if (!pythonCmd) {
+                this.log('Python 3.8+ not found - skipping Python package installation', 'warn');
+                return false;
+            }
+            
+            this.log(`Using Python command: ${pythonCmd}`);
+            
+            // Install package in editable mode from current directory
+            try {
+                this.log('Installing Python package in editable mode...');
+                execSync(`${pythonCmd} -m pip install --user -e .`, { 
+                    cwd: this.packageRoot,
+                    stdio: 'pipe' 
+                });
+                this.log('Python package installed successfully');
+                return true;
+            } catch (error) {
+                // Try with --break-system-packages for externally managed environments
+                const stderr = error.stderr ? error.stderr.toString() : '';
+                if (stderr.includes('externally-managed-environment') || stderr.includes('externally managed')) {
+                    this.log('Retrying with --break-system-packages for externally managed environment...');
+                    try {
+                        execSync(`${pythonCmd} -m pip install --user --break-system-packages -e .`, { 
+                            cwd: this.packageRoot,
+                            stdio: 'pipe' 
+                        });
+                        this.log('Python package installed successfully with --break-system-packages');
+                        return true;
+                    } catch (retryError) {
+                        this.log(`Failed to install Python package: ${retryError.message}`, 'error');
+                        return false;
+                    }
+                } else {
+                    this.log(`Failed to install Python package: ${error.message}`, 'error');
+                    return false;
+                }
+            }
+        } catch (e) {
+            this.log(`Python package installation error: ${e.message}`, 'error');
+            return false;
+        }
+    }
+
+    /**
      * Check if claude-pm CLI is available
      */
     checkClaudePmAvailable() {
@@ -191,6 +257,16 @@ class MinimalPostInstall {
             // Create basic directory structure
             this.createBasicStructure();
             
+            // Install Python package (critical for CLI functionality)
+            this.log('Installing Python package for CLI functionality...');
+            const pythonInstallSuccess = this.installPythonPackage();
+            
+            if (pythonInstallSuccess) {
+                this.log('Python package installation completed successfully');
+            } else {
+                this.log('Python package installation failed - manual installation may be required', 'warn');
+            }
+            
             // Display instructions
             this.displayInstructions();
             
@@ -205,7 +281,8 @@ class MinimalPostInstall {
             console.error('\n🔧 Manual setup required:');
             console.error('   1. Check permissions for ~/.claude-pm/');
             console.error('   2. Verify Python and required dependencies');
-            console.error('   3. Run claude-pm init --post-install manually');
+            console.error('   3. Install Python package: pip install -e .');
+            console.error('   4. Run claude-pm init --post-install manually');
             return false;
         }
     }

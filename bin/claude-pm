@@ -616,6 +616,7 @@ Pure Python CLI for Claude-powered project management and task orchestration
   --system-info           Display comprehensive system information
   --deployment-info       Show deployment detection results
   init                    Initialize framework (manual init command)
+  --cleanup               Comprehensive framework removal tool
   
 [bold]🚨 ENHANCED FLAGS (Pure Python Implementation):[/bold]
   --safe                  Enable safe mode with confirmations and backups
@@ -631,6 +632,13 @@ Pure Python CLI for Claude-powered project management and task orchestration
   claude-pm init --force           Force re-initialization (runs post-install even if already set up)
   claude-pm init --skip-postinstall Skip post-install setup (for advanced users)
   claude-pm init --validate        Validate installation without making changes
+
+[bold]🧹 CLEANUP & REMOVAL:[/bold]
+  claude-pm --cleanup              🗑️  Interactive comprehensive cleanup (safest option)
+  claude-pm --cleanup --auto       Automatic cleanup (keeps user data)
+  claude-pm --cleanup --full       Complete removal including user data (with backup)
+  npm run cleanup                  Alternative cleanup via npm script
+  npm run uninstall:complete       Full interactive uninstall process
 
 [bold]🚨 TROUBLESHOOTING:[/bold]
   • Setup Issues: claude-pm init (will auto-fix missing components)
@@ -957,6 +965,66 @@ def handle_enhanced_flags():
         sys.exit(1)
 
 
+def attempt_python_package_installation():
+    """Attempt to install the Python package if it's missing."""
+    console.print("[yellow]⚠️  Python package not found - attempting installation...[/yellow]")
+    
+    try:
+        # Find available Python command
+        python_commands = ['python3', 'python']
+        python_cmd = None
+        
+        for cmd in python_commands:
+            try:
+                result = subprocess.run([cmd, '--version'], capture_output=True, text=True, timeout=5)
+                if result.returncode == 0 and 'Python 3.' in result.stdout:
+                    python_cmd = cmd
+                    break
+            except (subprocess.TimeoutExpired, FileNotFoundError):
+                continue
+        
+        if not python_cmd:
+            console.print("[red]❌ Python 3.8+ not found[/red]")
+            return False
+        
+        console.print(f"[dim]Using Python command: {python_cmd}[/dim]")
+        
+        # Try to install the package in editable mode
+        try:
+            console.print("[dim]Installing Python package in editable mode...[/dim]")
+            result = subprocess.run([
+                python_cmd, '-m', 'pip', 'install', '--user', '-e', '.'
+            ], cwd=str(framework_path), capture_output=True, text=True, timeout=60)
+            
+            if result.returncode == 0:
+                console.print("[green]✅ Python package installed successfully![/green]")
+                return True
+            else:
+                # Try with --break-system-packages for externally managed environments
+                if 'externally-managed-environment' in result.stderr or 'externally managed' in result.stderr:
+                    console.print("[dim]Retrying with --break-system-packages...[/dim]")
+                    result = subprocess.run([
+                        python_cmd, '-m', 'pip', 'install', '--user', '--break-system-packages', '-e', '.'
+                    ], cwd=str(framework_path), capture_output=True, text=True, timeout=60)
+                    
+                    if result.returncode == 0:
+                        console.print("[green]✅ Python package installed successfully![/green]")
+                        return True
+                
+                console.print(f"[red]❌ Package installation failed: {result.stderr}[/red]")
+                return False
+                
+        except subprocess.TimeoutExpired:
+            console.print("[red]❌ Package installation timed out[/red]")
+            return False
+        except Exception as e:
+            console.print(f"[red]❌ Package installation error: {e}[/red]")
+            return False
+            
+    except Exception as e:
+        console.print(f"[red]❌ Python package installation failed: {e}[/red]")
+        return False
+
 def handle_init_command(args):
     """Handle the init command with intelligent auto-initialization."""
     console.print("[bold blue]🛠️  Claude PM Framework Initialization[/bold blue]")
@@ -1045,10 +1113,99 @@ def handle_init_command(args):
             
     except ImportError as e:
         console.print(f"[red]❌ Failed to import required modules: {e}[/red]")
-        console.print("[dim]Make sure the framework is properly installed[/dim]")
-        sys.exit(1)
+        console.print("[dim]This usually indicates the Python package is not installed[/dim]")
+        
+        # Attempt automatic Python package installation
+        if attempt_python_package_installation():
+            console.print("[green]✅ Package installed! Please run the command again.[/green]")
+            sys.exit(0)
+        else:
+            console.print("[red]❌ Automatic installation failed[/red]")
+            console.print("\n[bold]🔧 Manual installation required:[/bold]")
+            console.print("   1. Navigate to the framework directory:")
+            console.print(f"      cd {framework_path}")
+            console.print("   2. Install the Python package:")
+            console.print("      pip install -e .")
+            console.print("   3. Or run npm installation:")
+            console.print("      npm run install:dependencies")
+            console.print("   4. Then retry the command")
+            sys.exit(1)
     except Exception as e:
         console.print(f"[red]❌ Initialization error: {e}[/red]")
+        sys.exit(1)
+
+
+def handle_cleanup_command(args):
+    """Handle the --cleanup command with self-removal capabilities."""
+    console.print("[bold red]🧹 Claude PM Framework Self-Removal Tool[/bold red]")
+    console.print("[dim]Comprehensive cleanup system with user data handling...[/dim]")
+    
+    # Parse cleanup flags
+    interactive = "--interactive" in args or "--full" in args
+    automatic = "--automatic" in args or "--auto" in args
+    
+    try:
+        # Find the preuninstall script
+        preuninstall_script = framework_path / "install" / "preuninstall.js"
+        
+        if not preuninstall_script.exists():
+            console.print("[red]❌ Cleanup script not found![/red]")
+            console.print(f"   Expected: {preuninstall_script}")
+            console.print("\n[bold]Manual cleanup required:[/bold]")
+            console.print("   • Remove ~/.claude-pm/ directory")
+            console.print("   • Remove ~/.local/bin/claude-pm")
+            console.print("   • Remove global npm package: npm uninstall -g @bobmatnyc/claude-multiagent-pm")
+            console.print("   • Remove pip package: pip uninstall claude-multiagent-pm")
+            sys.exit(1)
+        
+        # Build cleanup command
+        cleanup_cmd = ["node", str(preuninstall_script)]
+        
+        if interactive:
+            cleanup_cmd.append("--interactive")
+        elif automatic:
+            cleanup_cmd.append("--automatic")
+        else:
+            # Default to interactive for safety
+            cleanup_cmd.append("--interactive")
+        
+        console.print(f"[dim]Executing: {' '.join(cleanup_cmd)}[/dim]")
+        console.print("")
+        
+        # Execute the cleanup script
+        result = subprocess.run(cleanup_cmd, cwd=str(framework_path))
+        
+        if result.returncode == 0:
+            console.print("\n[green]✅ Claude PM Framework cleanup completed successfully![/green]")
+            console.print("[dim]🎉 All components have been removed from your system[/dim]")
+            
+            # Display post-cleanup information
+            console.print("\n[bold]📋 What was cleaned up:[/bold]")
+            console.print("   • NPM package installations")
+            console.print("   • Python pip packages")
+            console.print("   • CLI executables")
+            console.print("   • Framework files and configurations")
+            console.print("   • User data (if requested)")
+            console.print("   • Memory and cache files")
+            
+            console.print("\n[dim]💡 To reinstall: npm install -g @bobmatnyc/claude-multiagent-pm[/dim]")
+            sys.exit(0)
+        else:
+            console.print("\n[red]❌ Cleanup failed or was incomplete![/red]")
+            console.print("[dim]Check the output above for errors[/dim]")
+            sys.exit(1)
+            
+    except FileNotFoundError:
+        console.print("[red]❌ Node.js not found![/red]")
+        console.print("Node.js is required to run the cleanup script.")
+        console.print("\n[bold]Manual cleanup alternatives:[/bold]")
+        console.print("   • Install Node.js and retry")
+        console.print("   • Manual removal of ~/.claude-pm/ directory")
+        console.print("   • Manual removal of CLI executables")
+        sys.exit(1)
+    except Exception as e:
+        console.print(f"[red]❌ Cleanup error: {e}[/red]")
+        console.print("\n[bold]Manual cleanup may be required[/bold]")
         sys.exit(1)
 
 
@@ -1057,13 +1214,18 @@ def main():
     args = sys.argv[1:]
     
     # Enhanced flags that trigger Python CLI system
-    enhanced_flags = ["--safe", "--upgrade", "--rollback", "--dry-run"]
+    enhanced_flags = ["--safe", "--upgrade", "--rollback", "--dry-run", "--cleanup"]
     version_flags = ["--version"]  # Removed -v to avoid conflict with verbose
     help_flags = ["--help", "-h"]
     
     # Check for init command
     if args and args[0] == "init":
         handle_init_command(args)
+        return
+    
+    # Check for cleanup command
+    if "--cleanup" in args:
+        handle_cleanup_command(args)
         return
     
     # Check for enhanced flags
@@ -1224,6 +1386,29 @@ def main():
         # Use subprocess to call the Python CLI module
         cmd = [sys.executable, "-m", "claude_pm.cli"] + args
         result = subprocess.run(cmd, cwd=deployment_framework_path)
+        
+        # Check if the command failed due to missing module
+        if result.returncode != 0:
+            # Try to test if module is importable
+            test_import = subprocess.run([
+                sys.executable, "-c", "import claude_pm"
+            ], capture_output=True, cwd=deployment_framework_path)
+            
+            if test_import.returncode != 0:
+                console.print("[yellow]⚠️  Python module not found - attempting installation...[/yellow]")
+                if attempt_python_package_installation():
+                    console.print("[green]✅ Package installed! Please run the command again.[/green]")
+                    sys.exit(0)
+                else:
+                    console.print("[red]❌ Automatic installation failed[/red]")
+                    console.print("\n[bold]🔧 Manual installation required:[/bold]")
+                    console.print("   1. Navigate to the framework directory:")
+                    console.print(f"      cd {deployment_framework_path}")
+                    console.print("   2. Install the Python package:")
+                    console.print("      pip install -e .")
+                    console.print("   3. Then retry the command")
+                    sys.exit(1)
+        
         sys.exit(result.returncode)
         
     except Exception as e:
