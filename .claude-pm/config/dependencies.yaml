@@ -1,10 +1,10 @@
 checked_by: system-init-agent
-last_checked: '2025-07-11 10:50:26'
+last_checked: '2025-07-14 10:51:27'
 status:
   ai_trackdown_tools:
     details: CLI available (local)
     status: "\u2705 INSTALLED"
-    version: 1.1.2
+    version: 1.1.9
   claude_pm_portfolio_manager:
     details: NPM package not found
     status: "\u274C MISSING"
@@ -12,11 +12,11 @@ status:
   framework_core:
     details: Framework at /Users/masa/Projects/claude-multiagent-pm
     status: "\u2705 INSTALLED"
-    version: 4.5.1
+    version: 0.7.3
   mem0ai:
-    details: Service responding
-    status: "\u2705 ONLINE"
-    version: active
+    details: ConnectionManager.get_session() got an unexpected keyword argument 'timeout'
+    status: "\u274C OFFLINE"
+    version: unknown
   node_environment:
     details: Node.js available
     status: "\u2705 READY"

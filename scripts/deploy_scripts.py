@@ -107,13 +107,17 @@ framework_path = Path("{self.framework_root}")'''
             
             import re
             
-            # Replace framework path assignment with corrected escaping
-            # The issue was in the escaping of parentheses - __file__ has double underscores
-            pattern = r'framework_path = Path\(__file__\)\.parent\.parent'
-            replacement = f'framework_path = Path("{self.framework_root}")'
-            updated_content = re.sub(pattern, replacement, script_content)
+            # Replace framework path detection logic completely
+            # Look for the entire framework path detection block
+            framework_detection_pattern = r'# Add the framework path to Python path for imports\n# For deployed scripts, look for framework in ~/.claude-pm/framework\nif Path\(__file__\)\.parent == Path\.home\(\) / "\.claude-pm" / "bin":\n    # Deployed in ~/.claude-pm/bin - framework is at ~/.claude-pm/framework\n    framework_path = Path\.home\(\) / "\.claude-pm"\nelse:\n    # Development mode - framework is parent directory\n    framework_path = Path\(__file__\)\.parent\.parent'
             
-            # Debug: Check what patterns we're working with
+            framework_replacement = f'''# Add the framework path to Python path for imports
+# For deployed scripts, use the actual source framework path
+framework_path = Path("{self.framework_root}")'''
+            
+            updated_content = re.sub(framework_detection_pattern, framework_replacement, script_content, flags=re.MULTILINE)
+            
+            # Also try simpler replacements for fallback
             if "Path(__file__).parent.parent" in script_content:
                 logger.info("Found framework path pattern in source")
                 # Force replacement even if regex fails
@@ -122,8 +126,17 @@ framework_path = Path("{self.framework_root}")'''
                     f'framework_path = Path("{self.framework_root}")'
                 )
                 logger.info("Forced framework path replacement using string replace")
+            
+            # Also replace the conditional framework path detection
+            if "if Path(__file__).parent == Path.home() / \".claude-pm\" / \"bin\":" in script_content:
+                logger.info("Found conditional framework path pattern in source")
+                # Replace the entire conditional block
+                conditional_pattern = r'if Path\(__file__\)\.parent == Path\.home\(\) / "\.claude-pm" / "bin":\s*\n\s*# Deployed in ~/.claude-pm/bin - framework is at ~/.claude-pm/framework\s*\n\s*framework_path = Path\.home\(\) / "\.claude-pm"\s*\nelse:\s*\n\s*# Development mode - framework is parent directory\s*\n\s*framework_path = Path\(__file__\)\.parent\.parent'
+                conditional_replacement = f'# For deployed scripts, use the actual source framework path\nframework_path = Path("{self.framework_root}")'
+                updated_content = re.sub(conditional_pattern, conditional_replacement, updated_content, flags=re.MULTILINE)
+                logger.info("Replaced conditional framework path detection")
             else:
-                logger.warning("Framework path pattern not found in source content")
+                logger.warning("Conditional framework path pattern not found in source content")
             
             # Verify the replacement worked
             if f'Path("{self.framework_root}")' in updated_content:
