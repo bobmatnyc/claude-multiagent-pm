@@ -115,20 +115,30 @@ def get_memories_from_storage(user_id=None, query=None, limit=10):
 
 # Initialize memory with enhanced persistent configuration
 try:
-    # Enhanced configuration for data durability
+    # Framework-standard configuration per CLAUDE.md template
     simple_config = {
         "vector_store": {
             "provider": "chroma",
             "config": {
-                "collection_name": "mem0_collection",
-                "path": "./chroma_db",
-                "persist_directory": "./chroma_db_persist",
-                "allow_reset": False,
-                "anonymized_telemetry": False
+                "collection_name": "claude_pm_memory",
+                "path": ".claude-pm/memory"
+            }
+        },
+        "llm": {
+            "provider": "openai",
+            "config": {
+                "model": "gpt-4o-mini",
+                "temperature": 0.1
+            }
+        },
+        "embedder": {
+            "provider": "openai",
+            "config": {
+                "model": "text-embedding-3-small"
             }
         }
     }
-    memory = Memory(config=simple_config)
+    memory = Memory.from_config(simple_config)
     logger.info("Memory initialized with simple ChromaDB configuration")
     logger.info(f"Memory object type after simple init: {type(memory)}")
     logger.info(f"Memory object methods: {[m for m in dir(memory) if not m.startswith('_')]}")
@@ -157,7 +167,7 @@ except Exception as e:
         )
         
         # Initialize memory with ChromaDB configuration
-        memory = Memory(config=memory_config)
+        memory = Memory.from_config(memory_config)
         logger.info("Memory initialized with advanced ChromaDB configuration")
         logger.info(f"Memory object type after advanced init: {type(memory)}")
         logger.info(f"Memory object methods: {[m for m in dir(memory) if not m.startswith('_')]}")

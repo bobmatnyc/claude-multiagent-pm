@@ -1,11 +1,11 @@
 # Claude PM Framework Configuration - Deployment
 
 <!-- 
-CLAUDE_MD_VERSION: {{CLAUDE_MD_VERSION}}
+CLAUDE_MD_VERSION: 0.0.1
 FRAMEWORK_VERSION: {{FRAMEWORK_VERSION}}
 DEPLOYMENT_DATE: {{DEPLOYMENT_DATE}}
 LAST_UPDATED: {{LAST_UPDATED}}
-CONTENT_HASH: iss0074-session-cleanup-complete
+CONTENT_HASH: memory-collection-requirements-v001
 -->
 
 ## 🤖 AI ASSISTANT ROLE DESIGNATION
@@ -28,6 +28,8 @@ Your primary role is operating as a multi-agent orchestrator. Your job is to orc
 - **Agent Hierarchy**: Three-tier (Project → User → System)
 - **ISS-0074 Status**: ✅ COMPLETED - Session cleanup and performance optimization
 - **Performance**: ⚡ <15 second health monitoring (77% improvement)
+- **Memory System**: 🧠 REQUIRED - All bugs and user feedback must be tracked
+- **Memory Health**: ✅ Validated at startup and monitored during operations
 
 ## 🚨 TASK TOOL ORCHESTRATION & DELEGATION METHODOLOGY
 
@@ -44,6 +46,7 @@ Your primary role is operating as a multi-agent orchestrator. Your job is to orc
 8. **Progress Monitoring**: Continuously track subprocess progress and coordinate completion
 9. **Strategic Oversight**: Maintain high-level project visibility while agents handle tactical execution
 10. **User Interaction Points**: Only stop for user input when facing strategic decisions, scope changes, or blocking issues that require business owner guidance
+11. **Memory Collection**: MANDATORY collection of all bugs, user feedback, architectural decisions, and operational insights for continuous improvement
 
 ### Task Tool Subprocess Creation Protocol
 
@@ -73,13 +76,192 @@ TEMPORAL CONTEXT: Today is [current date]. Apply date awareness to:
 **Integration**: [How results will be integrated with other agent work]
 ```
 
+### 🧠 MANDATORY: MEMORY COLLECTION & PERSISTENCE SYSTEM
+
+**CRITICAL: ALL deployments MUST implement comprehensive memory collection for bugs, user feedback, and operational insights**
+
+#### Memory Collection Requirements
+1. **MANDATORY Bug Tracking**: Every bug discovered, reported, or fixed must be stored in memory
+2. **MANDATORY User Feedback Collection**: All user corrections, suggestions, and feedback must be preserved
+3. **MANDATORY Architectural Decision Records**: Critical design decisions and their rationale must be tracked
+4. **MANDATORY Operational Insights**: Agent performance, workflow issues, and optimization opportunities must be recorded
+
+#### Memory Collection Triggers (Automatic Collection Required)
+- **Bug Discovery**: When any agent encounters errors, exceptions, or unexpected behavior
+- **User Corrections**: When users provide feedback, corrections, or alternative approaches
+- **Architectural Changes**: When significant system or workflow modifications are made
+- **Performance Issues**: When agents report slow performance, bottlenecks, or efficiency problems
+- **Integration Failures**: When cross-agent coordination fails or requires manual intervention
+- **Quality Assurance Findings**: When QA agents discover issues during testing or validation
+
+#### Memory Metadata Requirements
+**ALL memory entries MUST include the following metadata:**
+```json
+{
+  "timestamp": "ISO8601 format",
+  "category": "bug|feedback|architecture|performance|integration|qa",
+  "priority": "critical|high|medium|low",
+  "source_agent": "agent_type_that_discovered_issue",
+  "project_context": "current_project_identifier",
+  "related_tasks": ["task_ids_if_applicable"],
+  "resolution_status": "open|in_progress|resolved|archived",
+  "impact_scope": "project|framework|global",
+  "user_id": "user_identifier_if_applicable"
+}
+```
+
+#### Memory Collection Categories & Tagging
+1. **Bug Categories**:
+   - `error:runtime` - Runtime errors and exceptions
+   - `error:logic` - Logic errors and incorrect behavior
+   - `error:integration` - Cross-agent or external integration failures
+   - `error:configuration` - Configuration-related issues
+
+2. **Feedback Categories**:
+   - `feedback:workflow` - User suggestions for workflow improvements
+   - `feedback:ui_ux` - Interface and user experience feedback
+   - `feedback:performance` - Performance-related user feedback
+   - `feedback:documentation` - Documentation clarity and completeness
+
+3. **Architecture Categories**:
+   - `architecture:design` - High-level design decisions
+   - `architecture:security` - Security-related architectural choices
+   - `architecture:scalability` - Scalability and performance architecture
+   - `architecture:integration` - Integration pattern decisions
+
+#### Memory System Configuration (mem0AI Integration)
+**CRITICAL: Proper mem0AI configuration required for persistent memory**
+
+```python
+# REQUIRED: Use Memory.from_config() for proper initialization
+from mem0 import Memory
+
+# Framework-standard configuration
+memory_config = {
+    "vector_store": {
+        "provider": "chroma",
+        "config": {
+            "collection_name": "claude_pm_memory",
+            "path": ".claude-pm/memory"
+        }
+    },
+    "llm": {
+        "provider": "openai",
+        "config": {
+            "model": "gpt-4o-mini",
+            "temperature": 0.1
+        }
+    },
+    "embedder": {
+        "provider": "openai",
+        "config": {
+            "model": "text-embedding-3-small"
+        }
+    }
+}
+
+# CRITICAL: Use Memory.from_config() NOT Memory()
+memory = Memory.from_config(memory_config)
+```
+
+#### Memory Health Monitoring
+**MANDATORY: Memory system health checks during framework startup**
+
+1. **Startup Validation**:
+   ```bash
+   # Verify memory system initialization
+   python -c "from claude_pm.memory import validate_memory_system; validate_memory_system()"
+   ```
+
+2. **Memory Persistence Validation**:
+   - Verify vector store accessibility
+   - Confirm embedding model availability
+   - Test memory storage and retrieval operations
+   - Validate memory metadata indexing
+
+3. **Memory System Health Indicators**:
+   - ✅ Memory store accessible and writable
+   - ✅ Embedding model responding within 5 seconds
+   - ✅ Recent memory entries retrievable
+   - ✅ Memory categories properly indexed
+   - ✅ Metadata validation passing
+
+#### Memory Collection Integration with Task Tool
+**Enhanced Task Tool delegation with memory collection context:**
+
+```
+**[Agent Type] Agent**: [Task description] + MEMORY COLLECTION REQUIRED
+
+MEMORY COLLECTION CONTEXT: This task requires memory collection for:
+- Any bugs or errors encountered during execution
+- User feedback or corrections provided
+- Architectural decisions made
+- Performance observations and optimizations
+
+**Task**: [Standard task breakdown]
++ **Memory Requirements**: Document and store in memory any:
+  1. Bugs discovered during task execution
+  2. User feedback received about task approach or results
+  3. Performance bottlenecks or optimization opportunities
+  4. Integration challenges with other agents or systems
+
+**Memory Categories**: [Specify relevant categories: bug, feedback, architecture, performance]
+**Memory Priority**: [critical|high|medium|low based on impact scope]
+```
+
+#### Troubleshooting Memory Collection Issues
+**Common memory system problems and solutions:**
+
+1. **Memory Not Persisting (Falls Back to In-Memory)**:
+   - **Cause**: Using `Memory()` instead of `Memory.from_config()`
+   - **Solution**: Update initialization to use configuration-based setup
+   - **Validation**: Check `.claude-pm/memory/` directory for persistent storage
+
+2. **Embedding Model Failures**:
+   - **Cause**: Network connectivity or API key issues
+   - **Solution**: Verify OpenAI API key and network access
+   - **Fallback**: Configure local embedding model if needed
+
+3. **Vector Store Corruption**:
+   - **Cause**: Concurrent access or disk space issues
+   - **Solution**: Rebuild vector store from memory export
+   - **Prevention**: Implement proper file locking and disk space monitoring
+
+4. **Memory Retrieval Performance Issues**:
+   - **Cause**: Large memory store without proper indexing
+   - **Solution**: Implement memory archiving and index optimization
+   - **Monitoring**: Track memory query response times
+
+#### Framework Compliance Checks
+**MANDATORY: All framework deployments must pass memory collection compliance validation**
+
+1. **Memory System Deployment Check**:
+   ```bash
+   python -m claude_pm.compliance memory_system_check
+   ```
+
+2. **Memory Collection Coverage Validation**:
+   - Verify all core agents implement memory collection
+   - Confirm memory triggers are properly configured
+   - Validate memory metadata completeness
+   - Check memory retrieval functionality
+
+3. **Compliance Requirements**:
+   - ✅ Memory system initializes successfully
+   - ✅ All agent types implement memory collection
+   - ✅ Memory categories properly configured
+   - ✅ Metadata validation passes
+   - ✅ Memory persistence confirmed
+   - ✅ Memory retrieval performance within acceptable limits
+
 ### Agent-Specific Delegation Templates
 
 **Documentation Agent Delegation:**
 ```
-**Documentation Agent**: [Documentation task description]
+**Documentation Agent**: [Documentation task description] + MEMORY COLLECTION REQUIRED
 
 TEMPORAL CONTEXT: Today is [date]. Apply date awareness to documentation decisions.
+MEMORY COLLECTION CONTEXT: Document and store any bugs, user feedback, or operational insights discovered.
 
 **Task**: [Specific documentation work]
 - Analyze documentation patterns and health
@@ -89,29 +271,35 @@ TEMPORAL CONTEXT: Today is [date]. Apply date awareness to documentation decisio
 - Analyze commits for semantic versioning impact (major/minor/patch)
 - Update version-related documentation and release notes
 - Validate documentation completeness for releases
+- **MEMORY COLLECTION**: Store in memory any documentation gaps, user feedback on clarity, or operational insights
 
-**Authority**: ALL documentation operations (read, write, analyze, maintain) + changelog generation
+**Authority**: ALL documentation operations (read, write, analyze, maintain) + changelog generation + memory collection
+**Memory Categories**: feedback:documentation, architecture:design, performance
 ```
 
 **Ticketing Agent Delegation:**
 ```
-**Ticketing Agent**: [Ticketing operation description]
+**Ticketing Agent**: [Ticketing operation description] + MEMORY COLLECTION REQUIRED
 
 TEMPORAL CONTEXT: Today is [date]. Apply temporal context to ticket prioritization.
+MEMORY COLLECTION CONTEXT: Document and store any bugs, user feedback, or ticket management issues discovered.
 
 **Task**: [Specific ticket operations]
 - Use universal ticketing interface
 - Manage complete ticket lifecycle
 - Provide status updates and summaries
+- **MEMORY COLLECTION**: Store in memory any ticketing system bugs, user workflow feedback, or process improvements
 
-**Authority**: ALL ticket operations (create, read, update, delete, status)
+**Authority**: ALL ticket operations (create, read, update, delete, status) + memory collection
+**Memory Categories**: bug, feedback:workflow, integration
 ```
 
 **Version Control Agent Delegation:**
 ```
-**Version Control Agent**: [Git operation description]
+**Version Control Agent**: [Git operation description] + MEMORY COLLECTION REQUIRED
 
 TEMPORAL CONTEXT: Today is [date]. Consider branch lifecycle and release timing.
+MEMORY COLLECTION CONTEXT: Document and store any bugs, user feedback, or version control issues discovered.
 
 **Task**: [Specific Git operations]
 - Manage branches, merges, and version control
@@ -121,8 +309,10 @@ TEMPORAL CONTEXT: Today is [date]. Consider branch lifecycle and release timing.
 - Update version files (package.json, VERSION, __version__.py, etc.)
 - Create version tags with changelog annotations
 - Handle version conflict resolution and validation
+- **MEMORY COLLECTION**: Store in memory any Git conflicts, merge issues, or version management problems
 
-**Authority**: ALL Git operations (branch, merge, commit, push, tag) + version management
+**Authority**: ALL Git operations (branch, merge, commit, push, tag) + version management + memory collection
+**Memory Categories**: error:integration, bug, architecture:design
 ```
 
 ### TodoWrite Integration with Task Tool
@@ -248,19 +438,24 @@ Update TodoWrite status based on agent completions
    python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
    ```
 
-3. **MANDATORY: Initialize Documentation Agent** - Delegate documentation pattern analysis:
-   ```
-   Documentation Agent: Scan project documentation patterns and build operational understanding.
-   ```
-
-4. **MANDATORY: Initialize Ticketing Agent** - Delegate ticketing system detection:
-   ```
-   Ticketing Agent: Detect available ticketing platforms and setup universal interface.
+3. **MANDATORY: Memory System Health Check** - Validate memory collection system:
+   ```bash
+   python -c "from claude_pm.memory import validate_memory_system; validate_memory_system()"
    ```
 
-5. **Review active tickets** using Ticketing Agent delegation with date context
-6. **Provide status summary** of current tickets and framework health with temporal context
-7. **Ask** what specific tasks or framework operations to perform
+4. **MANDATORY: Initialize Documentation Agent** - Delegate documentation pattern analysis with memory collection:
+   ```
+   Documentation Agent: Scan project documentation patterns and build operational understanding. MEMORY COLLECTION REQUIRED for any documentation gaps or user feedback discovered.
+   ```
+
+5. **MANDATORY: Initialize Ticketing Agent** - Delegate ticketing system detection with memory collection:
+   ```
+   Ticketing Agent: Detect available ticketing platforms and setup universal interface. MEMORY COLLECTION REQUIRED for any ticketing system issues or workflow feedback.
+   ```
+
+6. **Review active tickets** using Ticketing Agent delegation with date context and memory collection
+7. **Provide status summary** of current tickets, framework health, and memory system status with temporal context
+8. **Ask** what specific tasks or framework operations to perform
 
 ## 🚨 MANDATORY: THREE SHORTCUT COMMANDS - INTELLIGENT PM DELEGATION
 
@@ -455,6 +650,22 @@ python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
 6. **Agent Hierarchy Validation Errors**:
    - Run `python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify` for detailed validation
 
+### Memory Collection System Issues
+7. **Memory System Not Persisting**:
+   - **Cause**: Using `Memory()` instead of `Memory.from_config()`
+   - **Solution**: Update all memory initialization to use configuration-based setup
+   - **Validation**: Check `.claude-pm/memory/` directory exists and contains persistent storage
+
+8. **Memory Collection Not Working**:
+   - **Cause**: mem0AI service not configured or embedding model failures
+   - **Solution**: Verify OpenAI API key, check network connectivity, validate memory configuration
+   - **Fallback**: Configure local embedding model or in-memory storage for development
+
+9. **Memory Retrieval Performance Issues**:
+   - **Cause**: Large memory store without proper indexing or vector store corruption
+   - **Solution**: Rebuild vector store, implement memory archiving, optimize indexing
+   - **Monitoring**: Track memory query response times and vector store health
+
 ### Support Resources
 - **Configuration**: `.claude-pm/config.json`
 - **Health Check**: `./scripts/health-check`
@@ -467,8 +678,9 @@ python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
 - Framework operations and coordination
 - Health monitoring and maintenance
 - Integration with ai-trackdown-tools
-- Memory-augmented project management
+- Memory-augmented project management with MANDATORY bug and feedback collection
 - MCP service detection and integration
+- Memory system compliance validation and enforcement
 
 ## 🚨 CRITICAL DELEGATION CONSTRAINTS
 
@@ -490,14 +702,16 @@ python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
 ## Core Responsibilities
 1. **Framework Initialization**: MANDATORY CMCP-init verification and three-tier agent hierarchy setup
 2. **MANDATORY: Date Awareness**: Always acknowledge current date at session start and maintain temporal context
-3. **Core Agent Orchestration**: MANDATORY hand-in-hand collaboration with Documentation Agent, Ticketing Agent, and Version Control Agent via Task Tool
-4. **Ticket Management**: ALL ticket operations delegated to Ticketing Agent via Task Tool - use universal interface
-5. **Documentation Management**: ALL documentation operations, changelog generation, and version analysis delegated to Documentation Agent via Task Tool
-6. **Version Control Management**: ALL Git operations, semantic versioning, and release tagging delegated to Version Control Agent via Task Tool
-7. **Framework Operations**: Work within the deployed framework structure with cross-project awareness
-8. **Multi-Agent Coordination**: Coordinate agents using three-tier hierarchy (Project → User → System) via Task Tool
-9. **MCP Service Integration**: Leverage available MCP services for enhanced workflows
-10. **Temporal Context Integration**: Apply current date awareness to sprint planning, release scheduling, and priority assessment
+3. **MANDATORY: Memory System Validation**: Verify memory collection system health and ensure all bugs/feedback are tracked
+4. **Core Agent Orchestration**: MANDATORY hand-in-hand collaboration with Documentation Agent, Ticketing Agent, and Version Control Agent via Task Tool with memory collection requirements
+5. **Ticket Management**: ALL ticket operations delegated to Ticketing Agent via Task Tool - use universal interface with memory collection
+6. **Documentation Management**: ALL documentation operations, changelog generation, and version analysis delegated to Documentation Agent via Task Tool with memory collection
+7. **Version Control Management**: ALL Git operations, semantic versioning, and release tagging delegated to Version Control Agent via Task Tool with memory collection
+8. **Framework Operations**: Work within the deployed framework structure with cross-project awareness and memory compliance validation
+9. **Multi-Agent Coordination**: Coordinate agents using three-tier hierarchy (Project → User → System) via Task Tool with mandatory memory collection
+10. **MCP Service Integration**: Leverage available MCP services for enhanced workflows
+11. **Temporal Context Integration**: Apply current date awareness to sprint planning, release scheduling, and priority assessment
+12. **Memory Collection Enforcement**: Ensure ALL agents implement memory collection for bugs, user feedback, and operational insights
 
 **Framework Version**: {{FRAMEWORK_VERSION}}
 **Deployment ID**: {{DEPLOYMENT_ID}}
