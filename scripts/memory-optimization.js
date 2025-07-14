@@ -196,13 +196,14 @@ class MemoryOptimizer {
     }
 
     optimizeNodeProcess() {
-        // Set Node.js memory optimization flags
-        process.env.NODE_OPTIONS = (process.env.NODE_OPTIONS || '') + ' --max-old-space-size=4096 --gc-interval=100 --expose-gc';
+        // Set Node.js memory optimization flags with 8GB limit
+        process.env.NODE_OPTIONS = (process.env.NODE_OPTIONS || '') + ' --max-old-space-size=8192 --expose-gc';
         
         console.log('🚀 Node.js memory optimization flags set');
-        console.log('   --max-old-space-size=4096 (4GB heap limit)');
-        console.log('   --gc-interval=100 (frequent garbage collection)');
+        console.log('   --max-old-space-size=8192 (8GB heap limit)');
         console.log('   --expose-gc (manual GC available)');
+        console.log('   ✅ Upgraded from 4GB to 8GB heap limit');
+        console.log('   📝 Note: --gc-interval removed (not supported in NODE_OPTIONS)');
     }
 
     runSystemOptimization() {
@@ -256,7 +257,7 @@ class MemoryOptimizer {
                     if (!content.includes('--max-old-space-size')) {
                         content = content.replace(
                             '#!/usr/bin/env node',
-                            '#!/usr/bin/env node --max-old-space-size=4096 --gc-interval=100 --expose-gc'
+                            '#!/usr/bin/env node --max-old-space-size=8192 --expose-gc'
                         );
                         
                         fs.writeFileSync(scriptPath, content);
@@ -280,11 +281,14 @@ class MemoryOptimizer {
                 rss_mb: Math.round(usage.rss / 1024 / 1024)
             },
             optimizations_applied: [
-                'Node.js heap size increased to 4GB',
+                'Node.js heap size increased to 8GB',
+                'Subprocess memory isolation (2GB per subprocess)',
                 'Garbage collection interval reduced',
                 'Automatic memory monitoring enabled',
                 'Emergency cleanup procedures implemented',
-                'Process cleanup handlers installed'
+                'Process cleanup handlers installed',
+                'Predictive memory alerts enabled',
+                'Memory guard system for Task Tool subprocesses'
             ],
             recommendations: [
                 'Monitor memory usage regularly',

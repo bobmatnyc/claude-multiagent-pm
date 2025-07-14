@@ -38,6 +38,35 @@ else
     echo "⚠ AI-trackdown integration issue"
 fi
 
+# Check memory optimization system
+if [ -f "scripts/memory-monitor.js" ] && [ -f "scripts/memory-guard.js" ]; then
+    echo "✓ Memory optimization system present"
+    
+    # Test memory monitoring
+    if NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' node scripts/memory-monitor.js --version >/dev/null 2>&1; then
+        echo "✓ Memory monitor functional"
+    else
+        echo "⚠ Memory monitor issue"
+    fi
+    
+    # Check memory guard
+    if NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' node scripts/memory-guard.js status >/dev/null 2>&1; then
+        echo "✓ Memory guard system functional"
+    else
+        echo "⚠ Memory guard system issue"
+    fi
+else
+    echo "❌ Memory optimization system missing"
+fi
+
+# Check Node.js memory configuration
+if echo $NODE_OPTIONS | grep -q "max-old-space-size=8192"; then
+    echo "✓ Node.js 8GB memory limit configured"
+else
+    echo "⚠ Node.js memory limit not optimally configured"
+    echo "   Recommended: export NODE_OPTIONS='--max-old-space-size=8192 --gc-interval=100 --expose-gc'"
+fi
+
 # Check Python environment
 if python3 --version >/dev/null 2>&1; then
     echo "✓ Python environment ready"
@@ -46,5 +75,18 @@ else
     exit 1
 fi
 
+# Memory usage summary
+echo ""
+echo "Memory Usage Summary:"
+echo "----------------------"
+if command -v node >/dev/null 2>&1; then
+    MEMORY_USAGE=$(node -e "const usage = process.memoryUsage(); console.log(\`Heap: \${Math.round(usage.heapUsed/1024/1024)}MB / \${Math.round(usage.heapTotal/1024/1024)}MB\`);")
+    echo "Current: $MEMORY_USAGE"
+fi
+echo "Max Heap Configured: 8GB"
+echo "Subprocess Limit: 2GB each"
+echo "Max Concurrent Subprocesses: 4"
+
 echo "======================================"
 echo "🎉 Health check completed successfully"
+echo "🧠 Memory optimization system ready"

@@ -39,6 +39,9 @@ claude-pm
 # AI agents help establish patterns, testing, and documentation
 ```
 
+**💡 Recommendation**: Create a [design document](./docs/design/) before major feature development. Example prompt:
+> "Help me design a user authentication system with JWT tokens and role-based access control"
+
 ### 🔧 Refactor Existing Project
 Safely modernize your codebase with AI guidance:
 ```bash
@@ -50,6 +53,12 @@ claude-pm
 # Your existing scripts remain untouched
 ```
 
+**💡 Recommendation**: Start with a [refactoring design doc](./docs/design/refactoring-design-doc-template.md). Simple prompts work great:
+> "Refactor file src/auth.js to keep line size under 100 characters"
+> "Refactor files in src/components/ to use TypeScript with strict typing"
+
+See our [TypeScript refactoring example](./docs/design/typescript-refactoring-example.md) for detailed guidance.
+
 ### 📋 Take Over Project
 Understanding inherited or unfamiliar code:
 ```bash
@@ -58,6 +67,33 @@ claude-pm
 # AI agents scan and explain codebase patterns
 # Get up to speed faster with intelligent analysis
 ```
+
+**💡 Recommendation**: Document your understanding in a [project analysis design doc](./docs/design/) first. Example prompt:
+> "Analyze the current authentication flow and document any security concerns or improvement opportunities"
+
+### 🏢 Monorepo Best Practices
+Managing multiple packages in a single repository:
+```bash
+cd my-monorepo
+claude-pm
+# AI agents understand workspace structures and cross-package dependencies
+# Provides coordinated development across multiple projects
+```
+
+**Key Monorepo Features:**
+- **Workspace Detection**: Automatically identifies package.json workspaces, Lerna, Rush, or Nx configurations
+- **Cross-Package Dependencies**: Tracks and validates dependencies between internal packages
+- **Coordinated Testing**: Runs tests across affected packages when changes are made
+- **Shared Configuration**: Manages consistent linting, formatting, and build configs across packages
+- **Release Coordination**: Handles version bumping and publishing for multiple packages
+
+**Simple Monorepo Prompts:**
+> "Update all packages in workspace to use TypeScript 5.0"
+> "Run tests for packages affected by changes in packages/shared"
+> "Refactor common utilities from packages/app-a and packages/app-b into packages/shared"
+> "Ensure all packages follow the same ESLint configuration"
+
+**💡 Monorepo Recommendation**: Create package-specific design docs in `docs/packages/[package-name]/` to track individual package evolution while maintaining overall architecture coherence.
 
 ## Start Small
 

@@ -53,6 +53,11 @@
     "arm64"
   ],
   "scripts": {
+    "start": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' node claude_pm/cli.py",
+    "start:memory-safe": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' node scripts/memory-optimization.js monitor",
+    "memory:monitor": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' node scripts/memory-monitor.js",
+    "memory:optimize": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' node scripts/memory-optimization.js optimize",
+    "memory:guard": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' node scripts/memory-guard.js",
     "postinstall": "node install/postinstall.js",
     "prepublishOnly": "npm run pre-publish:no-docker",
     "ai-trackdown-setup": "npm install -g @bobmatnyc/ai-trackdown-tools",

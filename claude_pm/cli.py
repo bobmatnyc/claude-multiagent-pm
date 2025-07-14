@@ -16,6 +16,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+from functools import wraps
 
 import click
 from rich.console import Console
@@ -29,10 +30,58 @@ from .services.memory_service import MemoryService
 from .services.project_service import ProjectService
 from .scripts.service_manager import ClaudePMServiceManager
 from .cli_enforcement import enforcement_cli
+from .services.memory.cli_integration import cli_memory_trigger, MemoryIntegratedCLI
 from .cmpm_commands import register_cmpm_commands
 
 console = Console()
 logger = logging.getLogger(__name__)
+
+# Global memory integration instance
+_memory_integration = None
+
+
+async def get_memory_integration():
+    """Get or create global memory integration instance."""
+    global _memory_integration
+    if _memory_integration is None:
+        _memory_integration = MemoryIntegratedCLI()
+        try:
+            await _memory_integration.initialize()
+            logger.info("Memory trigger CLI integration initialized")
+        except Exception as e:
+            logger.warning(f"Failed to initialize memory integration: {e}")
+    return _memory_integration
+
+
+def memory_aware_command(func):
+    """Decorator to add memory trigger support to CLI commands."""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # For sync CLI commands, wrap the execution with memory triggers
+        async def execute_with_memory():
+            integration = await get_memory_integration()
+            if integration and integration.service:
+                try:
+                    return await integration.execute_with_memory_trigger(
+                        operation_name=func.__name__,
+                        operation_func=lambda **kw: func(*args, **kwargs),
+                        project_name="claude-multiagent-pm",
+                        operation_type="cli_command"
+                    )
+                except Exception as e:
+                    logger.warning(f"Memory trigger execution failed: {e}")
+                    return func(*args, **kwargs)
+            else:
+                return func(*args, **kwargs)
+        
+        # Run the async wrapper
+        try:
+            return asyncio.run(execute_with_memory())
+        except RuntimeError:
+            # If already in event loop, just run normally
+            return func(*args, **kwargs)
+    
+    return wrapper
 
 
 def get_framework_config():
@@ -326,9 +375,30 @@ def cli(ctx, verbose, config):
 
     # FIXED: Display deployment and working directories on every call
     _display_directory_context()
+    
+    # Initialize memory reliability service in background
+    _initialize_memory_reliability_background()
 
     if verbose:
         console.print("[dim]Claude Multi-Agent PM Framework v3.0.0 - Python Edition[/dim]")
+
+
+def _initialize_memory_reliability_background():
+    """Initialize memory reliability service in background."""
+    async def init_memory_reliability():
+        try:
+            from .services.memory_reliability import get_memory_reliability_service
+            reliability_service = await get_memory_reliability_service()
+            logger.debug("Memory reliability service initialized in background")
+        except Exception as e:
+            logger.debug(f"Background memory reliability initialization failed: {e}")
+    
+    # Run in background without blocking CLI startup
+    try:
+        asyncio.create_task(init_memory_reliability())
+    except RuntimeError:
+        # Event loop not running, skip background initialization
+        pass
 
 
 # Health Monitoring Commands
@@ -488,6 +558,7 @@ def health(ctx, detailed, service, export, report, verbose):
         from .services.health_dashboard import HealthDashboardOrchestrator
         from .services.project_indexer import create_project_indexer
         from .services.project_memory_manager import create_project_memory_manager
+        from .services.memory_reliability import get_memory_reliability_service
         from .integrations.mem0ai_integration import create_mem0ai_integration
         from .models.health import HealthStatus, create_service_health_report
         import time
@@ -503,6 +574,9 @@ def health(ctx, detailed, service, export, report, verbose):
 
             # Add MEM-007 project indexing health monitoring
             await _add_project_indexing_health_collector(orchestrator)
+            
+            # Add memory reliability health monitoring
+            await _add_memory_reliability_health_collector(orchestrator)
 
             # Get comprehensive health dashboard
             dashboard = await orchestrator.get_health_dashboard(force_refresh=True)
@@ -1897,6 +1971,332 @@ def summary(format, period):
     asyncio.run(run())
 
 
+# Memory Configuration Commands
+@cli.group()
+def memory():
+    """Memory service configuration and management."""
+    pass
+
+
+@memory.command()
+@click.argument("config_file")
+@click.option("--strict", is_flag=True, help="Enable strict validation")
+def validate(config_file, strict):
+    """Validate memory configuration file."""
+    from .cli.memory_config_cli import MemoryConfigCLI
+    
+    memory_cli = MemoryConfigCLI()
+    args = ["validate", config_file]
+    if strict:
+        args.append("--strict")
+    
+    exit_code = memory_cli.run(args)
+    sys.exit(exit_code)
+
+
+@memory.command()
+@click.option("--env", 
+              type=click.Choice(["development", "testing", "staging", "production"]),
+              default="development", help="Environment type")
+@click.option("--output", "-o", help="Output file path")
+@click.option("--minimal", is_flag=True, help="Generate minimal configuration")
+def generate(env, output, minimal):
+    """Generate memory configuration template."""
+    from .cli.memory_config_cli import MemoryConfigCLI
+    
+    memory_cli = MemoryConfigCLI()
+    args = ["generate", "--env", env]
+    if output:
+        args.extend(["--output", output])
+    if minimal:
+        args.append("--minimal")
+    
+    exit_code = memory_cli.run(args)
+    sys.exit(exit_code)
+
+
+@memory.command()
+@click.argument("config_file")
+@click.option("--env", 
+              type=click.Choice(["development", "testing", "staging", "production"]),
+              required=True, help="Target environment")
+@click.option("--dry-run", is_flag=True, help="Show what would be deployed")
+@click.option("--backup", is_flag=True, help="Create backup before deployment")
+def deploy(config_file, env, dry_run, backup):
+    """Deploy memory configuration."""
+    from .cli.memory_config_cli import MemoryConfigCLI
+    
+    memory_cli = MemoryConfigCLI()
+    args = ["deploy", config_file, "--env", env]
+    if dry_run:
+        args.append("--dry-run")
+    if backup:
+        args.append("--backup")
+    
+    exit_code = memory_cli.run(args)
+    sys.exit(exit_code)
+
+
+@memory.command()
+@click.option("--format", type=click.Choice(["text", "json", "yaml"]), 
+              default="text", help="Output format")
+def stats(format):
+    """Show memory configuration statistics."""
+    from .cli.memory_config_cli import MemoryConfigCLI
+    
+    memory_cli = MemoryConfigCLI()
+    args = ["stats", "--format", format]
+    
+    exit_code = memory_cli.run(args)
+    sys.exit(exit_code)
+
+
+@memory.command()
+@click.option("--interval", type=int, default=30, help="Check interval in seconds")
+@click.option("--alerts", is_flag=True, help="Enable alert notifications")
+def monitor(interval, alerts):
+    """Monitor memory service health."""
+    from .cli.memory_config_cli import MemoryConfigCLI
+    
+    memory_cli = MemoryConfigCLI()
+    args = ["monitor", "--interval", str(interval)]
+    if alerts:
+        args.append("--alerts")
+    
+    exit_code = memory_cli.run(args)
+    sys.exit(exit_code)
+
+
+@memory.command()
+@click.option("--output", "-o", help="Backup file path")
+@click.option("--include-policies", is_flag=True, help="Include policy rules")
+def backup(output, include_policies):
+    """Backup memory configuration."""
+    from .cli.memory_config_cli import MemoryConfigCLI
+    
+    memory_cli = MemoryConfigCLI()
+    args = ["backup"]
+    if output:
+        args.extend(["--output", output])
+    if include_policies:
+        args.append("--include-policies")
+    
+    exit_code = memory_cli.run(args)
+    sys.exit(exit_code)
+
+
+@memory.command()
+@click.argument("backup_file")
+@click.option("--dry-run", is_flag=True, help="Show what would be restored")
+def restore(backup_file, dry_run):
+    """Restore memory configuration from backup."""
+    from .cli.memory_config_cli import MemoryConfigCLI
+    
+    memory_cli = MemoryConfigCLI()
+    args = ["restore", backup_file]
+    if dry_run:
+        args.append("--dry-run")
+    
+    exit_code = memory_cli.run(args)
+    sys.exit(exit_code)
+
+
+@memory.command()
+@click.option("--force", is_flag=True, help="Force recovery attempt")
+@click.option("--test-after", is_flag=True, help="Run tests after recovery")
+def recover(force, test_after):
+    """Attempt automatic memory service recovery."""
+    async def run():
+        from .services.memory_reliability import get_memory_reliability_service
+        
+        console.print("[bold blue]🔧 Starting memory service recovery...[/bold blue]")
+        
+        try:
+            reliability_service = await get_memory_reliability_service()
+            
+            # Show current status
+            status_summary = reliability_service.get_status_summary()
+            console.print(f"Current status: [bold]{status_summary['status']}[/bold]")
+            
+            if status_summary['status'] == 'healthy' and not force:
+                console.print("[green]✅ Memory service is already healthy[/green]")
+                console.print("Use --force to attempt recovery anyway")
+                return
+            
+            # Attempt recovery
+            console.print("Attempting automatic recovery...")
+            success = await reliability_service.attempt_recovery()
+            
+            if success:
+                console.print("[green]✅ Recovery successful![/green]")
+                
+                # Test after recovery if requested
+                if test_after:
+                    console.print("Running post-recovery tests...")
+                    test_results = await reliability_service.test_memory_service()
+                    
+                    if test_results["overall_status"] == "healthy":
+                        console.print("[green]✅ All tests passed[/green]")
+                    else:
+                        console.print("[yellow]⚠️  Some tests failed after recovery[/yellow]")
+                        for test_name, result in test_results["tests"].items():
+                            status_icon = "✅" if result.get("status") == "pass" else "❌"
+                            console.print(f"  {status_icon} {test_name}")
+            else:
+                console.print("[red]❌ Recovery failed[/red]")
+                console.print("Try:")
+                console.print("1. Check if mem0 service is running")
+                console.print("2. Verify ChromaDB configuration")
+                console.print("3. Check network connectivity")
+                console.print("4. Review service logs")
+                
+        except Exception as e:
+            console.print(f"[red]❌ Recovery attempt failed: {e}[/red]")
+            
+    asyncio.run(run())
+
+
+@memory.command()
+def status():
+    """Show comprehensive memory service status."""
+    async def run():
+        from .services.memory_reliability import get_memory_reliability_service
+        
+        console.print("[bold blue]🧠 Memory Service Status[/bold blue]")
+        
+        try:
+            reliability_service = await get_memory_reliability_service()
+            status_summary = reliability_service.get_status_summary()
+            
+            # Status overview
+            status_color = {
+                "healthy": "green",
+                "degraded": "yellow", 
+                "recovering": "blue",
+                "unhealthy": "red",
+                "offline": "red"
+            }.get(status_summary["status"], "white")
+            
+            console.print(f"Overall Status: [{status_color}]{status_summary['status'].upper()}[/{status_color}]")
+            
+            # Circuit breaker info
+            cb_info = status_summary["circuit_breaker"]
+            cb_state_color = {
+                "closed": "green",
+                "half_open": "yellow",
+                "open": "red"
+            }.get(cb_info["state"], "white")
+            
+            console.print(f"Circuit Breaker: [{cb_state_color}]{cb_info['state'].upper()}[/{cb_state_color}]")
+            
+            # Metrics table
+            from rich.table import Table
+            
+            metrics_table = Table(title="Reliability Metrics")
+            metrics_table.add_column("Metric", style="cyan")
+            metrics_table.add_column("Value", style="magenta")
+            
+            metrics = status_summary["metrics"]
+            metrics_table.add_row("Total Requests", str(metrics["total_requests"]))
+            metrics_table.add_row("Success Rate", f"{metrics['success_rate']:.1f}%")
+            metrics_table.add_row("Failure Rate", f"{metrics['failure_rate']:.1f}%")
+            metrics_table.add_row("Circuit Breaker Trips", str(metrics["circuit_breaker_trips"]))
+            metrics_table.add_row("Recovery Attempts", str(metrics["recovery_attempts"]))
+            metrics_table.add_row("Avg Response Time", f"{metrics['average_response_time']:.2f}s")
+            
+            console.print(metrics_table)
+            
+            # Recent activity
+            if metrics["last_success_time"]:
+                console.print(f"Last Success: {metrics['last_success_time']}")
+            if metrics["last_failure_time"]:
+                console.print(f"Last Failure: {metrics['last_failure_time']}")
+                
+        except Exception as e:
+            console.print(f"[red]❌ Failed to get status: {e}[/red]")
+            
+    asyncio.run(run())
+
+
+@memory.group()
+def policy():
+    """Memory policy management commands."""
+    pass
+
+
+@policy.command("list")
+@click.option("--scope", 
+              type=click.Choice(["global", "agent", "workflow", "task", "user", "session"]),
+              help="Filter by scope")
+@click.option("--enabled-only", is_flag=True, help="Show only enabled rules")
+def policy_list(scope, enabled_only):
+    """List memory policy rules."""
+    from .cli.memory_config_cli import MemoryConfigCLI
+    
+    memory_cli = MemoryConfigCLI()
+    args = ["policy", "list"]
+    if scope:
+        args.extend(["--scope", scope])
+    if enabled_only:
+        args.append("--enabled-only")
+    
+    exit_code = memory_cli.run(args)
+    sys.exit(exit_code)
+
+
+@policy.command("add")
+@click.argument("policy_file")
+@click.option("--validate", is_flag=True, help="Validate before adding")
+def policy_add(policy_file, validate):
+    """Add memory policy rule."""
+    from .cli.memory_config_cli import MemoryConfigCLI
+    
+    memory_cli = MemoryConfigCLI()
+    args = ["policy", "add", policy_file]
+    if validate:
+        args.append("--validate")
+    
+    exit_code = memory_cli.run(args)
+    sys.exit(exit_code)
+
+
+@policy.command("remove")
+@click.argument("rule_name")
+@click.option("--force", is_flag=True, help="Force removal without confirmation")
+def policy_remove(rule_name, force):
+    """Remove memory policy rule."""
+    from .cli.memory_config_cli import MemoryConfigCLI
+    
+    memory_cli = MemoryConfigCLI()
+    args = ["policy", "remove", rule_name]
+    if force:
+        args.append("--force")
+    
+    exit_code = memory_cli.run(args)
+    sys.exit(exit_code)
+
+
+@policy.command("test")
+@click.option("--context", help="Context file (JSON)")
+@click.option("--rule", help="Test specific rule")
+@click.option("--output", help="Output results to file")
+def policy_test(context, rule, output):
+    """Test memory policy rules."""
+    from .cli.memory_config_cli import MemoryConfigCLI
+    
+    memory_cli = MemoryConfigCLI()
+    args = ["policy", "test"]
+    if context:
+        args.extend(["--context", context])
+    if rule:
+        args.extend(["--rule", rule])
+    if output:
+        args.extend(["--output", output])
+    
+    exit_code = memory_cli.run(args)
+    sys.exit(exit_code)
+
+
 # Deployment Commands
 @cli.group()
 def deploy():
@@ -2866,6 +3266,72 @@ async def _add_project_indexing_health_collector(orchestrator):
         orchestrator.add_collector(indexing_collector)
     except Exception as e:
         logger.warning(f"Could not add project indexing health collector: {e}")
+
+
+async def _add_memory_reliability_health_collector(orchestrator):
+    """Add memory reliability health collector to orchestrator."""
+    try:
+        from .services.memory_reliability import get_memory_reliability_service
+        from .models.health import HealthCollector, HealthStatus, ServiceHealthData
+        
+        class MemoryReliabilityHealthCollector(HealthCollector):
+            """Health collector for memory reliability service."""
+            
+            def __init__(self):
+                super().__init__("memory_reliability", "Memory Reliability Service")
+            
+            async def collect_health(self) -> ServiceHealthData:
+                """Collect memory reliability health data."""
+                try:
+                    reliability_service = await get_memory_reliability_service()
+                    status_summary = reliability_service.get_status_summary()
+                    
+                    # Determine health status
+                    if status_summary["status"] == "healthy":
+                        status = HealthStatus.HEALTHY
+                    elif status_summary["status"] in ["degraded", "recovering"]:
+                        status = HealthStatus.WARNING
+                    else:
+                        status = HealthStatus.CRITICAL
+                    
+                    # Test memory service
+                    test_results = await reliability_service.test_memory_service()
+                    
+                    return ServiceHealthData(
+                        service_name=self.service_name,
+                        status=status,
+                        message=f"Service status: {status_summary['status']}",
+                        details={
+                            "status": status_summary["status"],
+                            "circuit_breaker": status_summary["circuit_breaker"],
+                            "metrics": status_summary["metrics"],
+                            "test_results": test_results,
+                            "last_health_check": status_summary["last_health_check"],
+                        },
+                        metrics={
+                            "success_rate": status_summary["metrics"]["success_rate"],
+                            "failure_rate": status_summary["metrics"]["failure_rate"],
+                            "total_requests": status_summary["metrics"]["total_requests"],
+                            "circuit_breaker_trips": status_summary["metrics"]["circuit_breaker_trips"],
+                            "recovery_attempts": status_summary["metrics"]["recovery_attempts"],
+                        }
+                    )
+                except Exception as e:
+                    return ServiceHealthData(
+                        service_name=self.service_name,
+                        status=HealthStatus.CRITICAL,
+                        message=f"Memory reliability collector failed: {e}",
+                        details={"error": str(e)},
+                        metrics={}
+                    )
+        
+        # Create and add memory reliability health collector
+        reliability_collector = MemoryReliabilityHealthCollector()
+        orchestrator.add_collector(reliability_collector)
+        logger.info("Added memory reliability health collector")
+        
+    except Exception as e:
+        logger.warning(f"Could not add memory reliability health collector: {e}")
 
 
 async def _get_managed_projects_health():
