@@ -1,6 +1,6 @@
 {
   "name": "@bobmatnyc/claude-multiagent-pm",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Claude Multi-Agent PM Framework - Pure Python implementation with Click-based CLI and enhanced flags system",
   "main": "bin/claude-pm",
   "bin": {
@@ -63,6 +63,7 @@
     "install:unified": "node install/postinstall.js",
     "install:validate": "node install/validate.js --comprehensive",
     "install:health-check": "node -e \"const fs = require('fs'); const path = require('path'); const home = require('os').homedir(); const healthPath = path.join(home, '.claude-pm', 'health-check.json'); if (fs.existsSync(healthPath)) { console.log(JSON.stringify(JSON.parse(fs.readFileSync(healthPath, 'utf8')), null, 2)); } else { console.log('Health check not available - run npm run install:unified'); }\"",
+    "install:dependencies": "node -e \"const { execSync } = require('child_process'); const pythonCmds = ['python3', 'python']; let pythonCmd = null; for (const cmd of pythonCmds) { try { const version = execSync(cmd + ' --version', { encoding: 'utf8', stdio: 'pipe' }); if (version.includes('Python 3.')) { pythonCmd = cmd; break; } } catch {} } if (!pythonCmd) { console.error('❌ Python 3.8+ not found'); process.exit(1); } console.log('🐍 Installing Python dependencies...'); const deps = ['click>=8.1.0', 'rich>=13.7.0']; for (const dep of deps) { try { execSync(pythonCmd + ' -m pip install --user ' + dep, { stdio: 'pipe' }); console.log('   ✅ ' + dep + ' installed'); } catch (error) { const stderr = error.stderr ? error.stderr.toString() : ''; if (stderr.includes('externally-managed-environment') || stderr.includes('externally managed')) { console.log('   Retrying with --break-system-packages for ' + dep + '...'); try { execSync(pythonCmd + ' -m pip install --user --break-system-packages ' + dep, { stdio: 'pipe' }); console.log('   ✅ ' + dep + ' installed'); } catch (retryError) { console.error('   ❌ Failed to install ' + dep + ':', retryError.message); } } else { console.error('   ❌ Failed to install ' + dep + ':', error.message); } } } console.log('✅ Python dependency installation completed');\"",
     "install:diagnostics": "node -e \"const fs = require('fs'); const path = require('path'); const home = require('os').homedir(); const diagPath = path.join(home, '.claude-pm', 'installation-diagnostics.json'); if (fs.existsSync(diagPath)) { console.log(JSON.stringify(JSON.parse(fs.readFileSync(diagPath, 'utf8')), null, 2)); } else { console.log('Diagnostics not available - run npm run install:unified'); }\"",
     "install:report": "node -e \"const fs = require('fs'); const path = require('path'); const home = require('os').homedir(); const reportPath = path.join(home, '.claude-pm', 'installation-report.md'); if (fs.existsSync(reportPath)) { console.log(fs.readFileSync(reportPath, 'utf8')); } else { console.log('Installation report not available - run npm run install:unified'); }\"",
     "test:unified-installation": "node install/test-unified-installation.js",
@@ -104,7 +105,7 @@
     "pre-publish:standard": "npm run test && npm run validate-deployment && echo '✅ Standard pre-publish validation completed'",
     "pre-publish:comprehensive": "node scripts/comprehensive-pre-publish-validation.js --verbose",
     "pre-publish:no-docker": "node scripts/comprehensive-pre-publish-validation.js --skip-docker",
-    "version": "0.7.0",
+    "version": "0.7.1",
     "release": "standard-version",
     "release:major": "standard-version --release-as major",
     "release:minor": "standard-version --release-as minor",

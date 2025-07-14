@@ -2054,15 +2054,189 @@ echo ""
     }
     
     /**
+     * Install Python dependencies required for claude-pm CLI
+     */
+    async installPythonDependencies() {
+        try {
+            this.log('🐍 Installing Python dependencies for claude-pm CLI...');
+            
+            const { execSync } = require('child_process');
+            
+            // Detect Python command (python3 vs python)
+            const pythonCmd = this.detectPythonCommand();
+            if (!pythonCmd) {
+                this.log('⚠️  Python not found - claude-pm requires Python 3.8+', 'warn');
+                this.log('   Please install Python and run: npm run install:dependencies');
+                return;
+            }
+            
+            this.log(`   Using Python command: ${pythonCmd}`);
+            
+            // Check if pip is available
+            try {
+                execSync(`${pythonCmd} -m pip --version`, { 
+                    encoding: 'utf8', 
+                    stdio: 'pipe',
+                    timeout: 10000 
+                });
+            } catch (pipError) {
+                this.log('⚠️  pip not found - unable to install Python dependencies', 'warn');
+                this.log('   Please install pip and run: npm run install:dependencies');
+                return;
+            }
+            
+            // Core dependencies required for claude-pm CLI to function
+            const coreDependencies = ['click>=8.1.0', 'rich>=13.7.0'];
+            
+            for (const dependency of coreDependencies) {
+                try {
+                    this.log(`   Installing ${dependency}...`);
+                    
+                    // Install with user flag to avoid permission issues
+                    // Handle externally managed environments (PEP 668)
+                    let installCmd = `${pythonCmd} -m pip install --user "${dependency}"`;
+                    
+                    try {
+                        execSync(installCmd, { 
+                            encoding: 'utf8',
+                            stdio: 'pipe',
+                            timeout: 60000 // 1 minute per dependency
+                        });
+                    } catch (firstError) {
+                        // If install failed due to externally managed environment, try with break-system-packages
+                        if (firstError.message.includes('externally-managed-environment')) {
+                            this.log(`   Retrying with --break-system-packages for ${dependency}...`);
+                            installCmd = `${pythonCmd} -m pip install --user --break-system-packages "${dependency}"`;
+                            execSync(installCmd, { 
+                                encoding: 'utf8',
+                                stdio: 'pipe',
+                                timeout: 60000
+                            });
+                        } else {
+                            throw firstError;
+                        }
+                    }
+                    
+                    this.log(`   ✅ ${dependency} installed successfully`);
+                    
+                } catch (installError) {
+                    this.log(`   ❌ Failed to install ${dependency}: ${installError.message}`, 'warn');
+                    this.log(`   You can install manually: ${pythonCmd} -m pip install --user "${dependency}"`);
+                }
+            }
+            
+            // Verify claude-pm CLI can import required modules
+            await this.verifyPythonDependencies(pythonCmd);
+            
+            this.log('🐍 Python dependency installation completed');
+            
+        } catch (error) {
+            this.log(`Python dependency installation failed: ${error.message}`, 'warn');
+            this.log('Manual installation: python3 -m pip install --user click rich');
+        }
+    }
+    
+    /**
+     * Detect available Python command (python3 preferred, python fallback)
+     */
+    detectPythonCommand() {
+        const { execSync } = require('child_process');
+        
+        // Try python3 first (preferred)
+        try {
+            const version = execSync('python3 --version', { 
+                encoding: 'utf8', 
+                stdio: 'pipe',
+                timeout: 5000 
+            });
+            
+            // Check if it's Python 3.8+
+            const versionMatch = version.match(/Python (\d+)\.(\d+)/);
+            if (versionMatch) {
+                const major = parseInt(versionMatch[1]);
+                const minor = parseInt(versionMatch[2]);
+                if (major === 3 && minor >= 8) {
+                    return 'python3';
+                }
+            }
+        } catch (error) {
+            // python3 not available or version check failed
+        }
+        
+        // Try python as fallback
+        try {
+            const version = execSync('python --version', { 
+                encoding: 'utf8', 
+                stdio: 'pipe',
+                timeout: 5000 
+            });
+            
+            // Check if it's Python 3.8+
+            const versionMatch = version.match(/Python (\d+)\.(\d+)/);
+            if (versionMatch) {
+                const major = parseInt(versionMatch[1]);
+                const minor = parseInt(versionMatch[2]);
+                if (major === 3 && minor >= 8) {
+                    return 'python';
+                }
+            }
+        } catch (error) {
+            // python not available or version check failed
+        }
+        
+        return null; // No suitable Python found
+    }
+    
+    /**
+     * Verify that Python dependencies are properly installed
+     */
+    async verifyPythonDependencies(pythonCmd) {
+        try {
+            // Test import of critical modules
+            const testScript = `
+import sys
+try:
+    import click
+    import rich
+    print("SUCCESS: All required modules available")
+    sys.exit(0)
+except ImportError as e:
+    print(f"ERROR: Missing module - {e}")
+    sys.exit(1)
+`;
+            
+            const { execSync } = require('child_process');
+            const result = execSync(`${pythonCmd} -c "${testScript}"`, { 
+                encoding: 'utf8',
+                stdio: 'pipe',
+                timeout: 10000 
+            });
+            
+            if (result.includes('SUCCESS')) {
+                this.log('   ✅ Python dependencies verified successfully');
+            } else {
+                this.log('   ⚠️  Python dependency verification failed', 'warn');
+            }
+            
+        } catch (error) {
+            this.log('   ⚠️  Could not verify Python dependencies', 'warn');
+            this.log('   Run: claude-pm --version to test CLI functionality');
+        }
+    }
+
+    /**
      * Validate and install ai-trackdown-tools dependency if needed
      */
     async validateAndInstallDependencies() {
         try {
             this.log('Validating dependencies...');
             
-            // Check if ai-trackdown-tools is available
             const { execSync } = require('child_process');
             
+            // Phase 1: Install Python dependencies (critical for claude-pm CLI)
+            await this.installPythonDependencies();
+            
+            // Phase 2: Check if ai-trackdown-tools is available
             try {
                 const version = execSync('aitrackdown --version', { 
                     encoding: 'utf8', 
@@ -2075,7 +2249,7 @@ echo ""
                 this.log('ai-trackdown-tools not found, attempting installation...');
             }
             
-            // Try to install ai-trackdown-tools (with WSL2 considerations)
+            // Phase 3: Try to install ai-trackdown-tools (with WSL2 considerations)
             try {
                 this.log('Installing ai-trackdown-tools dependency...');
                 

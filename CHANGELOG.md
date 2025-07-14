@@ -2,6 +2,36 @@
 
 All notable changes to the Claude Multi-Agent Project Management Framework will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 0.7.1 (2025-07-14)
+
+### 🚀 PATCH RELEASE: Automatic Python Dependency Installation
+
+#### 🐍 Enhanced NPM Installation Experience
+- **Automatic Python Dependencies**: NPM postinstall now automatically installs required Python dependencies (click, rich)
+- **Cross-Platform Python Detection**: Intelligent detection of python3 vs python command across platforms
+- **PEP 668 Compatibility**: Handles externally managed Python environments with --break-system-packages fallback
+- **Seamless User Experience**: Users can now run `npm install -g @bobmatnyc/claude-multiagent-pm` and immediately use `claude-pm`
+- **Error Handling**: Comprehensive error handling for missing Python, pip, or dependency installation failures
+
+#### 🛠 Installation Infrastructure Improvements
+- **Manual Installation Script**: Added `npm run install:dependencies` for manual Python dependency installation
+- **Enhanced Error Messages**: Clear guidance for users when automatic installation fails
+- **Verification System**: Post-installation verification ensures Python dependencies are properly installed
+- **Fallback Instructions**: Detailed fallback instructions for edge cases and permission issues
+
+#### 🎯 User Experience Enhancement
+- **One-Command Installation**: Complete framework installation with single NPM command
+- **Immediate CLI Availability**: claude-pm CLI functional immediately after NPM installation
+- **Reduced Support Burden**: Eliminates common "click/rich not found" support requests
+- **Cross-Platform Reliability**: Tested on macOS with Homebrew Python and externally managed environments
+
+#### 📋 Technical Details
+- Enhanced postinstall.js with installPythonDependencies() method
+- Cross-platform Python command detection (python3 preferred, python fallback)
+- Automatic retry with --break-system-packages for PEP 668 compliance
+- Python dependency verification using import testing
+- Package.json script for manual dependency installation
+
 ## 0.5.4 (2025-07-13)
 
 ### 🚀 PATCH RELEASE: README Simplification & Modular Architecture Phase 1
