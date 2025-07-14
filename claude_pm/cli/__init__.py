@@ -168,9 +168,16 @@ def create_modular_cli():
     return cli
 
 
+def main():
+    """Main entry point for the CLI application."""
+    from .__main__ import main as cli_main
+    cli_main()
+
+
 __all__ = [
     'ModularCLI',
     'get_cli', 
     'create_modular_cli',
-    'register_external_commands'
+    'register_external_commands',
+    'main'
 ]

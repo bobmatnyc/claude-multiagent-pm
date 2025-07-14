@@ -1,0 +1,2 @@
+Requirement already satisfied: aiosqlite in /opt/homebrew/lib/python3.13/site-packages (0.21.0)
+Requirement already satisfied: typing_extensions>=4.0 in /opt/homebrew/lib/python3.13/site-packages (from aiosqlite) (4.14.0)

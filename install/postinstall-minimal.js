@@ -55,10 +55,10 @@ class MinimalPostInstall {
     }
 
     /**
-     * Install Python package
+     * Install Python dependencies and package
      */
-     installPythonPackage() {
-        this.log('Installing Python package...');
+    installPythonPackage() {
+        this.log('Installing Python dependencies and package...');
         
         try {
             // Find available Python command
@@ -78,44 +78,234 @@ class MinimalPostInstall {
             }
             
             if (!pythonCmd) {
-                this.log('Python 3.8+ not found - skipping Python package installation', 'warn');
+                this.log('Python 3.8+ not found - skipping Python installation', 'warn');
                 return false;
             }
             
             this.log(`Using Python command: ${pythonCmd}`);
             
+            // Install core dependencies first
+            const coreDependencies = [
+                'click>=8.1.0',
+                'rich>=13.7.0', 
+                'pydantic>=2.5.0',
+                'pyyaml>=6.0.1',
+                'python-dotenv>=1.0.0',
+                'requests>=2.31.0',
+                'openai>=1.0.0'
+            ];
+            
+            const aiDependencies = [
+                'mem0ai>=0.1.0',
+                'chromadb>=0.4.0', 
+                'aiosqlite>=0.19.0',
+                'tiktoken>=0.5.0',
+                'sqlite-vec>=0.0.1a0'
+            ];
+            
+            // Install core dependencies
+            this.log('Installing core Python dependencies...');
+            let coreSuccess = this.installDependencyGroup(pythonCmd, coreDependencies, 'core');
+            
+            // Install AI dependencies (optional but critical)
+            this.log('Installing AI/memory system dependencies...');
+            let aiSuccess = this.installDependencyGroup(pythonCmd, aiDependencies, 'AI/memory');
+            
             // Install package in editable mode from current directory
-            try {
-                this.log('Installing Python package in editable mode...');
-                execSync(`${pythonCmd} -m pip install --user -e .`, { 
-                    cwd: this.packageRoot,
-                    stdio: 'pipe' 
-                });
-                this.log('Python package installed successfully');
+            const packageInstalled = this.installClaudePmPackage(pythonCmd);
+            
+            // Validate installation
+            const validationResults = this.validateInstallation(pythonCmd);
+            
+            // Log overall success status
+            if (coreSuccess && aiSuccess && packageInstalled) {
+                this.log('✅ Complete installation successful - all dependencies and package installed');
+                this.log(`✅ Validation: Core CLI (${validationResults.cliAvailable ? 'available' : 'missing'}), Memory system (${validationResults.memorySystemAvailable ? 'available' : 'missing'})`);
                 return true;
-            } catch (error) {
-                // Try with --break-system-packages for externally managed environments
-                const stderr = error.stderr ? error.stderr.toString() : '';
-                if (stderr.includes('externally-managed-environment') || stderr.includes('externally managed')) {
-                    this.log('Retrying with --break-system-packages for externally managed environment...');
-                    try {
-                        execSync(`${pythonCmd} -m pip install --user --break-system-packages -e .`, { 
-                            cwd: this.packageRoot,
-                            stdio: 'pipe' 
-                        });
-                        this.log('Python package installed successfully with --break-system-packages');
-                        return true;
-                    } catch (retryError) {
-                        this.log(`Failed to install Python package: ${retryError.message}`, 'error');
-                        return false;
-                    }
-                } else {
-                    this.log(`Failed to install Python package: ${error.message}`, 'error');
-                    return false;
-                }
+            } else if (coreSuccess && packageInstalled) {
+                this.log('⚠️ Partial installation successful - core functionality available, some AI features may be limited', 'warn');
+                this.log(`⚠️ Validation: Core CLI (${validationResults.cliAvailable ? 'available' : 'missing'}), Memory system (${validationResults.memorySystemAvailable ? 'limited' : 'missing'})`);
+                return true; // Still functional without AI deps
+            } else {
+                this.log('❌ Installation failed - critical components missing', 'error');
+                this.log(`❌ Validation: Core CLI (${validationResults.cliAvailable ? 'available' : 'missing'}), Memory system (${validationResults.memorySystemAvailable ? 'available' : 'missing'})`);
+                return false;
             }
         } catch (e) {
             this.log(`Python package installation error: ${e.message}`, 'error');
+            return false;
+        }
+    }
+
+    /**
+     * Install Claude PM package with comprehensive error handling
+     */
+    installClaudePmPackage(pythonCmd) {
+        this.log('Installing Claude PM Python package in editable mode...');
+        
+        try {
+            execSync(`${pythonCmd} -m pip install --user -e .`, { 
+                cwd: this.packageRoot,
+                stdio: 'pipe',
+                timeout: 120000
+            });
+            this.log('✅ Claude PM Python package installed successfully');
+            return true;
+        } catch (error) {
+            const stderr = error.stderr ? error.stderr.toString() : '';
+            
+            // Try with --break-system-packages for externally managed environments
+            if (stderr.includes('externally-managed-environment') || stderr.includes('externally managed')) {
+                this.log('Retrying package installation with --break-system-packages...');
+                try {
+                    execSync(`${pythonCmd} -m pip install --user --break-system-packages -e .`, { 
+                        cwd: this.packageRoot,
+                        stdio: 'pipe',
+                        timeout: 120000
+                    });
+                    this.log('✅ Claude PM package installed with --break-system-packages');
+                    return true;
+                } catch (retryError) {
+                    this.log(`❌ Failed to install Claude PM package: ${retryError.message}`, 'error');
+                    return false;
+                }
+            }
+            
+            // Try alternative installation method (from PyPI if available)
+            this.log('Trying installation from PyPI...');
+            try {
+                execSync(`${pythonCmd} -m pip install --user claude-multiagent-pm`, { 
+                    stdio: 'pipe',
+                    timeout: 120000
+                });
+                this.log('✅ Claude PM package installed from PyPI');
+                return true;
+            } catch (pypiError) {
+                this.log(`❌ All installation methods failed: ${error.message}`, 'error');
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Validate installation components
+     */
+    validateInstallation(pythonCmd) {
+        const results = {
+            cliAvailable: false,
+            memorySystemAvailable: false,
+            coreModulesAvailable: false
+        };
+        
+        // Test CLI availability
+        try {
+            execSync(`${pythonCmd} -c "import claude_pm; print('CLI available')"`, { stdio: 'pipe', timeout: 10000 });
+            results.cliAvailable = true;
+        } catch (e) {
+            // CLI not available
+        }
+        
+        // Test memory system components
+        try {
+            execSync(`${pythonCmd} -c "import mem0ai, chromadb; print('Memory system available')"`, { stdio: 'pipe', timeout: 10000 });
+            results.memorySystemAvailable = true;
+        } catch (e) {
+            // Memory system not fully available
+        }
+        
+        // Test core modules
+        try {
+            execSync(`${pythonCmd} -c "import click, rich, pydantic; print('Core modules available')"`, { stdio: 'pipe', timeout: 10000 });
+            results.coreModulesAvailable = true;
+        } catch (e) {
+            // Core modules not available
+        }
+        
+        return results;
+    }
+
+    /**
+     * Install a group of dependencies with error handling
+     */
+    installDependencyGroup(pythonCmd, dependencies, groupName) {
+        let groupSuccess = true;
+        let installCount = 0;
+        
+        this.log(`Installing ${dependencies.length} ${groupName} dependencies...`);
+        
+        for (const dep of dependencies) {
+            const installed = this.installSingleDependency(pythonCmd, dep, groupName);
+            if (installed) {
+                installCount++;
+            } else if (groupName === 'core') {
+                groupSuccess = false; // Core deps are critical
+            }
+        }
+        
+        this.log(`${groupName} dependencies: ${installCount}/${dependencies.length} installed successfully`);
+        
+        if (groupSuccess) {
+            this.log(`✅ ${groupName} dependencies completed`);
+        } else {
+            this.log(`❌ Critical ${groupName} dependencies failed`, 'error');
+        }
+        
+        return groupSuccess;
+    }
+
+    /**
+     * Install a single dependency with comprehensive error handling
+     */
+    installSingleDependency(pythonCmd, dep, groupName) {
+        // Try normal installation first
+        try {
+            execSync(`${pythonCmd} -m pip install --user ${dep}`, { stdio: 'pipe', timeout: 120000 });
+            this.log(`   ✅ ${dep}`);
+            return true;
+        } catch (error) {
+            const stderr = error.stderr ? error.stderr.toString() : '';
+            
+            // Try with --break-system-packages for externally managed environments
+            if (stderr.includes('externally-managed-environment') || stderr.includes('externally managed')) {
+                try {
+                    execSync(`${pythonCmd} -m pip install --user --break-system-packages ${dep}`, { stdio: 'pipe', timeout: 120000 });
+                    this.log(`   ✅ ${dep} (system packages)`);
+                    return true;
+                } catch (retryError) {
+                    this.log(`   ❌ ${dep}: ${retryError.message}`, 'error');
+                    return false;
+                }
+            }
+            
+            // For AI dependencies, try alternative installation methods
+            if (groupName === 'AI/memory' && dep.includes('mem0ai')) {
+                this.log(`   ⚠️ ${dep} failed, trying git installation...`, 'warn');
+                try {
+                    execSync(`${pythonCmd} -m pip install --user git+https://github.com/mem0ai/mem0.git`, { stdio: 'pipe', timeout: 180000 });
+                    this.log(`   ✅ mem0ai (git version)`);
+                    return true;
+                } catch (gitError) {
+                    this.log(`   ❌ ${dep}: Git installation also failed`, 'error');
+                    return false;
+                }
+            }
+            
+            // For chromadb, try different versions
+            if (groupName === 'AI/memory' && dep.includes('chromadb')) {
+                this.log(`   ⚠️ ${dep} failed, trying alternative version...`, 'warn');
+                const altVersions = ['chromadb>=0.3.0', 'chromadb'];
+                for (const altDep of altVersions) {
+                    try {
+                        execSync(`${pythonCmd} -m pip install --user ${altDep}`, { stdio: 'pipe', timeout: 120000 });
+                        this.log(`   ✅ ${altDep}`);
+                        return true;
+                    } catch (altError) {
+                        continue;
+                    }
+                }
+            }
+            
+            this.log(`   ❌ ${dep}: ${error.message}`, 'error');
             return false;
         }
     }
@@ -182,14 +372,36 @@ class MinimalPostInstall {
             console.log('      python -m claude_pm.cli init --post-install');
             console.log('   3. Or install the package globally:');
             console.log('      pip install -e .');
+            console.log('\n🚨 Installation Status Summary:');
+            const pythonCommands = ['python3', 'python'];
+            let pythonCmd = null;
+            for (const cmd of pythonCommands) {
+                try {
+                    execSync(`${cmd} --version`, { stdio: 'pipe' });
+                    pythonCmd = cmd;
+                    break;
+                } catch (e) {}
+            }
+            if (pythonCmd) {
+                const validation = this.validateInstallation(pythonCmd);
+                console.log(`   Core Modules: ${validation.coreModulesAvailable ? '✅' : '❌'}`);
+                console.log(`   CLI Package: ${validation.cliAvailable ? '✅' : '❌'}`);
+                console.log(`   Memory System: ${validation.memorySystemAvailable ? '✅' : '❌'}`);
+            }
         }
         
         console.log('\n💡 What the post-installation process does:');
         console.log('   • Creates ~/.claude-pm/ directory structure');
+        console.log('   • Installs Python dependencies (core + AI/memory)');
         console.log('   • Deploys framework components');
-        console.log('   • Initializes memory system');
+        console.log('   • Initializes memory system (mem0ai, chromadb)');
         console.log('   • Configures CLI commands');
         console.log('   • Validates installation');
+        console.log('\n🔧 Troubleshooting:');
+        console.log('   • If Python dependencies fail: Check Python 3.8+ is installed');
+        console.log('   • If permission errors occur: Try with --break-system-packages flag');
+        console.log('   • If memory system fails: AI features will be limited but core CLI works');
+        console.log('   • For detailed logs: Check ~/.claude-pm/logs/ after initialization');
         
         console.log('\n📚 Documentation:');
         console.log('   • Check README.md for usage instructions');
@@ -262,16 +474,17 @@ class MinimalPostInstall {
             const pythonInstallSuccess = this.installPythonPackage();
             
             if (pythonInstallSuccess) {
-                this.log('Python package installation completed successfully');
+                this.log('✅ Python package installation completed successfully');
             } else {
-                this.log('Python package installation failed - manual installation may be required', 'warn');
+                this.log('⚠️ Python package installation partial/failed - manual steps may be required', 'warn');
+                this.log('💡 Run "npm run install:validate" to check installation status');
             }
             
             // Display instructions
             this.displayInstructions();
             
-            this.log('Minimal post-installation completed');
-            this.log('Run "claude-pm init --post-install" to complete setup');
+            this.log('📦 NPM post-installation completed');
+            this.log('🚀 Next: Run "claude-pm init --post-install" to complete framework setup');
             
             return true;
         } catch (e) {
