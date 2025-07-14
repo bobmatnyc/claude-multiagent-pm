@@ -1,466 +1,576 @@
-#!/usr/bin/env node
+#!/usr/bin/env python3
+"""
+Claude Multi-Agent PM Framework - Pure Python CLI Entry Point
 
-/**
- * Claude Multi-Agent PM Framework - Universal CLI Entry Point
- * 
- * ISS-0085 Phase 3: Cleaned modular architecture with redundant code removed
- * Delegates heavy functionality to Phase 2 modules while maintaining essential
- * fallback mechanisms and entry point logic.
- */
+This is the pure Python implementation that replaces the mixed JavaScript/Python
+architecture. All CLI functionality is now implemented in Python using Click.
+"""
 
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const { spawn } = require('child_process');
+import sys
+import os
+import subprocess
+from pathlib import Path
 
-// ISS-0113 Enhanced Flag System Integration
-const { CliIntegration } = require('../lib/cli-flag-managers/cli-integration');
+# Add the framework path to Python path for imports
+framework_path = Path(__file__).parent.parent
+sys.path.insert(0, str(framework_path))
 
-// Universal version resolution for all deployment scenarios
-function resolveVersion() {
-    const fs = require('fs');
-    const path = require('path');
+try:
+    import click
+    from rich.console import Console
+except ImportError:
+    print("❌ Missing required dependencies. Please install:")
+    print("   pip install click rich")
+    sys.exit(1)
+
+console = Console()
+
+
+def get_framework_version():
+    """Get framework version from multiple sources."""
+    # Try package.json
+    package_json = framework_path / "package.json"
+    if package_json.exists():
+        try:
+            import json
+            with open(package_json) as f:
+                data = json.load(f)
+                if data.get("name") == "@bobmatnyc/claude-multiagent-pm":
+                    return data.get("version", "unknown")
+        except (json.JSONDecodeError, KeyError):
+            pass
     
-    // Strategy 1: Try to find package.json relative to this script
-    const packagePaths = [
-        path.join(__dirname, '../package.json'),
-        path.join(__dirname, '../../package.json'),
-        path.join(__dirname, '../../../package.json')
-    ];
+    # Try VERSION file
+    version_file = framework_path / "VERSION"
+    if version_file.exists():
+        try:
+            return version_file.read_text().strip()
+        except OSError:
+            pass
     
-    for (const packagePath of packagePaths) {
-        try {
-            if (fs.existsSync(packagePath)) {
-                const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-                if (pkg.name === '@bobmatnyc/claude-multiagent-pm' && pkg.version) {
-                    return pkg.version;
-                }
-            }
-        } catch (e) {
-            // Continue to next path
+    return "unknown"
+
+
+def detect_deployment_type():
+    """Detect the deployment type and framework path."""
+    script_path = Path(__file__).resolve()
+    
+    # Check if this script is deployed in ~/.local/bin
+    local_bin = Path.home() / ".local" / "bin"
+    if script_path.parent == local_bin:
+        return {
+            "type": "deployed", 
+            "framework_path": framework_path,
+            "script_path": script_path.parent
         }
-    }
     
-    // Strategy 2: Try VERSION file (source development scenario)
-    const versionPaths = [
-        path.join(__dirname, '../VERSION'),
-        path.join(__dirname, '../../VERSION')
-    ];
-    
-    for (const versionPath of versionPaths) {
-        try {
-            if (fs.existsSync(versionPath)) {
-                return fs.readFileSync(versionPath, 'utf8').trim();
-            }
-        } catch (e) {
-            // Continue to next path
+    # Check if this script is in the framework directory
+    if "claude-multiagent-pm" in str(script_path):
+        return {
+            "type": "development",
+            "framework_path": framework_path,
+            "script_path": script_path.parent
         }
-    }
     
-    // Strategy 3: Check for NPM package in node_modules
-    try {
-        const nodeModulesPaths = [
-            path.join(process.cwd(), 'node_modules', '@bobmatnyc', 'claude-multiagent-pm', 'package.json'),
-            path.join(process.cwd(), '..', 'node_modules', '@bobmatnyc', 'claude-multiagent-pm', 'package.json')
-        ];
+    # Default fallback
+    return {
+        "type": "unknown",
+        "framework_path": framework_path,
+        "script_path": script_path.parent
+    }
+
+
+def validate_framework_deployment():
+    """Validate that Claude PM Framework is properly deployed per ISS-0112."""
+    # Check for ~/.claude-pm/ directory
+    claude_pm_dir = Path.home() / ".claude-pm"
+    if not claude_pm_dir.exists():
+        return False
+    
+    # Check for config.json with required keys
+    config_file = claude_pm_dir / "config.json"
+    if not config_file.exists():
+        return False
+    
+    try:
+        import json
+        with open(config_file) as f:
+            config = json.load(f)
         
-        for (const npmPackagePath of nodeModulesPaths) {
-            if (fs.existsSync(npmPackagePath)) {
-                const pkg = JSON.parse(fs.readFileSync(npmPackagePath, 'utf8'));
-                if (pkg.name === '@bobmatnyc/claude-multiagent-pm' && pkg.version) {
-                    return pkg.version;
-                }
+        # ISS-0112: Check for required config keys
+        required_keys = ["deployment_type", "version", "installationComplete"]
+        for key in required_keys:
+            if key not in config:
+                return False
+        
+        # Check that installation is marked complete
+        if not config.get("installationComplete", False):
+            return False
+        
+        return True
+        
+    except (json.JSONDecodeError, OSError):
+        return False
+
+
+def validate_claude_cli():
+    """Validate that Claude CLI is available."""
+    try:
+        result = subprocess.run(
+            ["claude", "--version"], 
+            capture_output=True, 
+            text=True, 
+            timeout=5
+        )
+        if result.returncode == 0:
+            return {
+                "valid": True,
+                "version": result.stdout.strip(),
+                "command": ["claude"]
             }
-        }
-    } catch (e) {
-        // Continue to fallback
-    }
-    
-    // If all strategies fail, throw error with helpful message
-    throw new Error(
-        'Could not resolve Claude PM Framework version. ' +
-        'This may indicate a corrupted installation or unsupported deployment scenario. ' +
-        'Please reinstall using: npm install -g @bobmatnyc/claude-multiagent-pm'
-    );
-}
-
-const CLAUDE_PM_VERSION = resolveVersion();
-
-/**
- * Lightweight deployment detection - main functionality delegated to deployment-detector module
- */
-function getBasicDeploymentInfo() {
-    const scriptDir = __dirname;
-    const sourceRoot = path.join(scriptDir, '..');
-    
-    // Quick check for source development
-    if (fs.existsSync(path.join(sourceRoot, 'claude_pm')) && 
-        fs.existsSync(path.join(sourceRoot, 'package.json'))) {
-        return {
-            type: 'source',
-            frameworkPath: sourceRoot,
-            scriptPath: scriptDir
-        };
-    }
-    
-    // Quick check for npm installation
-    if (scriptDir.includes('node_modules')) {
-        return {
-            type: 'npm',
-            frameworkPath: sourceRoot,
-            scriptPath: scriptDir
-        };
-    }
-    
-    // Fallback
-    return {
-        type: 'unknown',
-        frameworkPath: scriptDir,
-        scriptPath: scriptDir
-    };
-}
-
-/**
- * Legacy function for compatibility - functionality delegated to modules
- */
-function getFrameworkPath() {
-    const deploymentInfo = getBasicDeploymentInfo();
-    return deploymentInfo.frameworkPath;
-}
-
-/**
- * Legacy function for compatibility - functionality delegated to modules
- */
-function getDeploymentConfig() {
-    const deploymentDetector = { getDeploymentStrategy: () => ({ config: getBasicDeploymentInfo() }) };
-    return deploymentDetector.getDeploymentStrategy();
-}
-
-/**
- * Simplified platform detection - main functionality delegated to framework-manager module
- */
-function detectPlatformInfo() {
-    const platform = os.platform();
-    const isWSL2 = process.env.WSL_DISTRO_NAME || 
-                   (platform === 'linux' && fs.existsSync('/proc/version') && 
-                    fs.readFileSync('/proc/version', 'utf8').includes('microsoft'));
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
     
     return {
-        platform,
-        isWSL2,
-        arch: os.arch(),
-        nodeVersion: process.version
-    };
-}
-
-/**
- * Essential utility functions kept for fallback scenarios
- */
-function getNpmGlobalBin() {
-    try {
-        const { execSync } = require('child_process');
-        return execSync('npm bin -g', { encoding: 'utf8', timeout: 5000 }).trim();
-    } catch (error) {
-        return null;
+        "valid": False,
+        "error": "Claude CLI not found or not accessible",
+        "command": ["claude"]
     }
-}
 
-/**
- * Simplified help display - main functionality delegated to command-dispatcher module
- */
-function showHelp() {
-    console.log(`
-Claude Multi-Agent PM Framework v${CLAUDE_PM_VERSION}
-Universal CLI for Claude-powered project management and task orchestration
 
-🚀 USAGE:
+def show_help():
+    """Display help information."""
+    version = get_framework_version()
+    console.print(f"""
+[bold blue]Claude Multi-Agent PM Framework v{version}[/bold blue]
+Pure Python CLI for Claude-powered project management and task orchestration
+
+[bold]🚀 USAGE:[/bold]
   claude-pm [command] [options]
 
-📋 COMMANDS:
-  --version, -v            Show version information
+[bold]📋 COMMANDS:[/bold]
+  --version               Show version information
   --help, -h              Show this help message
   --system-info           Display comprehensive system information
   --deployment-info       Show deployment detection results
+  
+[bold]🚨 ENHANCED FLAGS (Pure Python Implementation):[/bold]
+  --safe                  Enable safe mode with confirmations and backups
+  --upgrade [VERSION]     Upgrade to latest or specified version
+  --rollback VERSION      Rollback to specific version
+  --dry-run              Show what would be done without executing
 
-⚡ YOLO Mode (Default):
+[bold]⚡ YOLO Mode (Default):[/bold]
   claude-pm               Launch Claude CLI directly (YOLO mode - fast startup)
 
-🚨 TROUBLESHOOTING:
+[bold]🚨 TROUBLESHOOTING:[/bold]
   • Environment Issues: claude-pm --system-info
   • Deployment Problems: claude-pm --deployment-info
 
-📖 DOCUMENTATION:
+[bold]📖 DOCUMENTATION:[/bold]
   • GitHub: https://github.com/bobmatnyc/claude-multiagent-pm
 
 ---
-Made with ❤️  for AI-powered development workflows
-`);
-}
+Made with ❤️  for AI-powered development workflows (Pure Python Edition)
+""")
 
-/**
- * Basic system info display - comprehensive functionality delegated to framework-manager module
- */
-function displayBasicSystemInfo() {
-    const deploymentInfo = getBasicDeploymentInfo();
-    const platformInfo = detectPlatformInfo();
+
+def display_system_info():
+    """Display system information."""
+    deployment_info = detect_deployment_type()
+    version = get_framework_version()
     
-    console.log('🖥️  Claude Multi-Agent PM Framework System Information');
-    console.log('=' .repeat(60));
-    console.log(`📦 Framework Version: v${CLAUDE_PM_VERSION}`);
-    console.log(`🗂️  Deployment Type: ${deploymentInfo.type}`);
-    console.log(`📁 Framework Path: ${deploymentInfo.frameworkPath}`);
-    console.log(`🔧 Platform: ${platformInfo.platform} (${platformInfo.arch})`);
-    console.log(`⚙️  Node.js: ${platformInfo.nodeVersion}`);
-    if (platformInfo.isWSL2) {
-        console.log('🐧 WSL2 Environment detected');
-    }
-    console.log('');
-}
+    console.print("[bold]🖥️  Claude Multi-Agent PM Framework System Information[/bold]")
+    console.print("═" * 60)
+    console.print(f"📦 Framework Version: v{version}")
+    console.print(f"🗂️  Deployment Type: {deployment_info['type']}")
+    console.print(f"📁 Framework Path: {deployment_info['framework_path']}")
+    console.print(f"🔧 Platform: {sys.platform}")
+    console.print(f"🐍 Python: {sys.version.split()[0]}")
+    console.print(f"📍 Script Path: {deployment_info['script_path']}")
+    console.print("")
 
-/**
- * Minimal Claude CLI validator for fallback scenarios
- */
-class BasicClaudeValidator {
-    async validateEnvironment() {
-        try {
-            const { execSync } = require('child_process');
-            const version = execSync('claude --version', { encoding: 'utf8', timeout: 5000 }).trim();
+
+def display_deployment_info():
+    """Display deployment detection results."""
+    deployment_info = detect_deployment_type()
+    console.print("\n[bold]🔍 Deployment Detection Results:[/bold]")
+    console.print("═" * 60)
+    import json
+    console.print(json.dumps(deployment_info, indent=2, default=str))
+
+
+def display_comprehensive_status():
+    """Display comprehensive framework status checks."""
+    console.print("[bold blue]🔍 Claude PM Framework Status Validation[/bold blue]")
+    console.print("═" * 60)
+    
+    # Project version
+    project_version = get_framework_version()
+    console.print(f"📦 Project Version: [green]v{project_version}[/green]")
+    
+    # Framework/CLAUDE.md version (serial number from framework/VERSION)
+    framework_version_file = framework_path / "framework" / "VERSION"
+    if framework_version_file.exists():
+        try:
+            framework_version = framework_version_file.read_text().strip()
+            console.print(f"📋 Framework/CLAUDE.md Version: [green]{framework_version}[/green]")
+        except:
+            console.print("📋 Framework/CLAUDE.md Version: [yellow]read error[/yellow]")
+    else:
+        console.print("📋 Framework/CLAUDE.md Version: [yellow]not found[/yellow]")
+    
+    # Memory system status with mem0AI version and memory count
+    memory_status = check_memory_status()
+    memory_color = "green" if memory_status["healthy"] else "yellow" if memory_status["partial"] else "red"
+    console.print(f"🧠 Memory System: [{memory_color}]{memory_status['status']}[/{memory_color}]")
+    
+    # Framework deployment status
+    deployment_valid = validate_framework_deployment()
+    deploy_color = "green" if deployment_valid else "red"
+    deploy_status = "✅ Deployed" if deployment_valid else "❌ Not Deployed"
+    console.print(f"🚀 Framework Deployment: [{deploy_color}]{deploy_status}[/{deploy_color}]")
+    
+    # Claude CLI status
+    claude_validation = validate_claude_cli()
+    claude_color = "green" if claude_validation["valid"] else "red"
+    claude_status = f"✅ v{claude_validation.get('version', 'unknown')}" if claude_validation["valid"] else "❌ Not Found"
+    console.print(f"🤖 Claude CLI: [{claude_color}]{claude_status}[/{claude_color}]")
+    
+    console.print("═" * 60)
+
+
+def check_memory_status():
+    """Check memory system status with mem0AI version and memory count."""
+    try:
+        # Check for mem0AI installation and version
+        mem0_version = "not installed"
+        memory_count = 0
+        
+        # Check if mem0AI is installed via pip
+        try:
+            import subprocess
+            # Use python -m pip to avoid PATH issues
+            result = subprocess.run([sys.executable, "-m", "pip", "show", "mem0ai"], capture_output=True, text=True, timeout=5)
+            if result.returncode == 0:
+                import re
+                version_match = re.search(r'Version:\s*(\S+)', result.stdout)
+                if version_match:
+                    mem0_version = version_match.group(1)
+        except:
+            # Try alternative package names
+            try:
+                result = subprocess.run([sys.executable, "-m", "pip", "show", "mem0"], capture_output=True, text=True, timeout=5)
+                if result.returncode == 0:
+                    import re
+                    version_match = re.search(r'Version:\s*(\S+)', result.stdout)
+                    if version_match:
+                        mem0_version = version_match.group(1)
+            except:
+                pass
+        
+        # Check for memory storage locations and count memories
+        memory_locations = [
+            Path.home() / ".mem0",  # Default mem0 location
+            Path.home() / ".claude-pm" / "memory",  # Framework memory location
+            framework_path / "memory",  # Local memory storage
+            framework_path / "logs" / "memory"  # Memory logs
+        ]
+        
+        for loc in memory_locations:
+            if loc.exists() and loc.is_dir():
+                try:
+                    # Count actual memory files (json, db, etc.)
+                    memory_files = list(loc.glob("**/*.json")) + list(loc.glob("**/*.db")) + list(loc.glob("**/*.sqlite"))
+                    memory_count += len(memory_files)
+                    
+                    # Also check for any files that might be memories
+                    if memory_count == 0:
+                        all_files = [f for f in loc.glob("**/*") if f.is_file()]
+                        memory_count += len(all_files)
+                except:
+                    pass
+        
+        # Check if memory optimization files exist  
+        memory_opt_files = [
+            framework_path / "scripts" / "memory-optimization.js",
+            framework_path / "scripts" / "memory-monitor.js",
+            framework_path / "scripts" / "memory-dashboard.js"
+        ]
+        
+        optimization_exists = any(f.exists() for f in memory_opt_files)
+        
+        # Check for mem0 service
+        mem0_service_running = False
+        try:
+            # Check if mem0 service script exists
+            mem0_service_script = framework_path / "scripts" / "mem0_service.py"
+            if mem0_service_script.exists():
+                mem0_service_running = True
+        except:
+            pass
+        
+        # Determine status based on findings
+        if mem0_version != "not installed" and memory_count > 0:
             return {
-                valid: true,
-                version: version.replace(/[^\d.]/g, ''),
-                command: ['claude']
-            };
-        } catch (error) {
+                "healthy": True, 
+                "partial": False,
+                "status": f"✅ mem0AI v{mem0_version} ({memory_count} memories)"
+            }
+        elif mem0_version != "not installed" and mem0_service_running:
             return {
-                valid: false,
-                error: error.message,
-                command: ['claude']
-            };
-        }
-    }
-
-    displayErrorGuidance(validation) {
-        console.error('❌ Claude CLI validation failed');
-        console.error(`   Error: ${validation.error}`);
-        console.error('');
-        console.error('🔧 Solutions:');
-        console.error('   • Install Claude CLI: https://claude.ai/download');
-        console.error('   • Add Claude CLI to your PATH');
-        console.error('   • Restart your terminal');
-        console.error('');
-    }
-}
-
-/**
- * Streamlined main function - most functionality delegated to command-dispatcher module
- */
-async function main() {
-    const args = process.argv.slice(2);
-    
-    // Basic memory monitoring for fallback scenarios
-    const memoryThreshold = 3.5 * 1024 * 1024 * 1024; // 3.5GB
-    const checkMemory = () => {
-        const usage = process.memoryUsage();
-        if (usage.heapUsed > memoryThreshold) {
-            console.error(`❌ Memory usage critical: ${Math.round(usage.heapUsed / 1024 / 1024)}MB`);
-            if (global.gc) global.gc();
-            return true;
-        }
-        return false;
-    };
-    
-    // Handle special flags (delegated to command-dispatcher in modular mode)
-    if (args.includes('--version') || args.includes('-v')) {
-        console.log(`Claude Multi-Agent PM Framework v${CLAUDE_PM_VERSION}`);
-        process.exit(0);
-    }
-    
-    if (args.includes('--help') || args.includes('-h')) {
-        showHelp();
-        process.exit(0);
-    }
-    
-    if (args.includes('--system-info')) {
-        displayBasicSystemInfo();
-        process.exit(0);
-    }
-    
-    if (args.includes('--deployment-info')) {
-        const deploymentInfo = getBasicDeploymentInfo();
-        console.log('\n🔍 Basic Deployment Detection Results:');
-        console.log('=' .repeat(60));
-        console.log(JSON.stringify(deploymentInfo, null, 2));
-        process.exit(0);
-    }
-    
-    // Handle no arguments case - YOLO mode (direct launch, skip system info)
-    if (args.length === 0) {
-        try {
-            const claudeValidator = new BasicClaudeValidator();
-            
-            const validation = await claudeValidator.validateEnvironment();
-            
-            if (!validation.valid) {
-                console.error('❌ Claude CLI validation failed');
-                claudeValidator.displayErrorGuidance(validation);
-                process.exit(1);
+                "healthy": True,
+                "partial": False, 
+                "status": f"✅ mem0AI v{mem0_version} (service ready)"
             }
-            
-            // YOLO mode: Launch Claude CLI directly without verbose output
-            const claudeProcess = spawn(validation.command[0], validation.command.slice(1), {
-                stdio: 'inherit'
-            });
-            
-            claudeProcess.on('close', (code) => {
-                process.exit(code);
-            });
-            
-            claudeProcess.on('error', (error) => {
-                console.error('❌ Failed to launch Claude:', error.message);
-                const platformInfo = detectPlatformInfo();
-                
-                if (platformInfo.isWSL2 && error.message.includes('ENOENT')) {
-                    console.error('🐧 WSL2 Environment Detected - PATH Issue Likely');
-                    console.error('🚀 Quick WSL2 Fix:');
-                    const npmGlobalBin = getNpmGlobalBin();
-                    if (npmGlobalBin) {
-                        console.error(`   export PATH="${npmGlobalBin}:$PATH"`);
-                    } else {
-                        console.error('   export PATH="$(npm bin -g):$PATH"');
-                    }
-                    console.error('   source ~/.bashrc');
-                }
-                
-                console.error('🔧 General Solutions:');
-                console.error('   • Install Claude CLI: https://claude.ai/download');
-                console.error('   • Add Claude CLI to your PATH');
-                console.error('   • Restart your terminal');
-                process.exit(1);
-            });
-            
-            return;
-        } catch (error) {
-            console.error('❌ Failed to launch Claude:', error.message);
-            process.exit(1);
-        }
-    }
-    
-    // For all other commands, delegate to Python framework
-    const deploymentInfo = getBasicDeploymentInfo();
-    const frameworkPath = deploymentInfo.frameworkPath;
-    const pythonCmd = 'python3';
-    
-    checkMemory();
-    
-    const pythonProcess = spawn(pythonCmd, ['-m', 'claude_pm.cli', ...args], {
-        cwd: frameworkPath,
-        stdio: 'inherit'
-    });
-    
-    pythonProcess.on('close', (code) => {
-        process.exit(code);
-    });
-    
-    pythonProcess.on('error', (error) => {
-        console.error('❌ Failed to execute Claude PM Framework:', error.message);
-        console.error(`   Framework path: ${frameworkPath}`);
-        console.error(`   Python command: ${pythonCmd}`);
-        process.exit(1);
-    });
-}
-
-/**
- * ISS-0113 Enhanced Flag System Integration
- * Handles enhanced flags before delegating to original logic
- */
-async function executeWithEnhancedFlags() {
-    try {
-        const args = process.argv.slice(2);
-        
-        // Check if enhanced flags are present - if not, skip enhanced integration
-        const enhancedFlags = ['--save', '--upgrade', '--rollback', '--verify', '--components', '--environment', '--git', '--dependencies'];
-        const hasEnhancedFlags = enhancedFlags.some(flag => args.includes(flag)) ||
-            (args.includes('--version') && enhancedFlags.some(flag => args.includes(flag))) ||
-            args.some(arg => arg.startsWith('--format='));
-        
-        if (!hasEnhancedFlags) {
-            // No enhanced flags, delegate to modular support
-            return await executeWithModularSupport();
-        }
-        
-        const cliIntegration = new CliIntegration({
-            verboseMode: process.argv.includes('--verbose') || process.argv.includes('--debug')
-        });
-        
-        return await cliIntegration.execute();
-    } catch (error) {
-        console.error('❌ Enhanced flag integration failed:', error.message);
-        // Fallback to original execution
-        return await executeWithModularSupport();
-    }
-}
-
-/**
- * ISS-0085 Phase 2: Modular execution with fallback
- * Primary execution path using Phase 2 modules with graceful fallback to monolithic main()
- */
-async function executeWithModularSupport() {
-    // Try Phase 2 modular execution first
-    try {
-        const modulePath = path.join(__dirname, '..', 'lib', 'cli-modules');
-        
-        if (fs.existsSync(path.join(modulePath, 'module-integration-phase2.js'))) {
-            console.log('🔧 Loading Phase 2 modular architecture...');
-            
-            const { createModularMain } = require(path.join(modulePath, 'module-integration-phase2.js'));
-            const modularMain = createModularMain();
-            
-            const result = await modularMain();
-            
-            if (result && result.fallbackMode) {
-                console.log('⚠️  Modular system initialization failed, using monolithic fallback');
-                return await main();
+        elif mem0_version != "not installed":
+            return {
+                "healthy": False,
+                "partial": True,
+                "status": f"⚠️ mem0AI v{mem0_version} (no memories)"
             }
-            
-            // Successful modular execution
-            return typeof result === 'number' ? result : 0;
-        } else {
-            console.log('📄 Phase 2 modules not available, using monolithic execution');
-            return await main();
+        elif optimization_exists:
+            return {
+                "healthy": False,
+                "partial": True, 
+                "status": f"⚠️ Optimization only (mem0AI: {mem0_version})"
+            }
+        else:
+            return {
+                "healthy": False,
+                "partial": False,
+                "status": "❌ Not configured"
+            }
+    except Exception as e:
+        return {
+            "healthy": False,
+            "partial": False, 
+            "status": f"❌ Error: {str(e)[:20]}..."
         }
-    } catch (error) {
-        console.log(`⚠️  Modular execution error: ${error.message}`);
-        console.log('⚠️  Falling back to monolithic execution');
-        return await main();
-    }
-}
 
-/**
- * Entry point with error handling
- */
-async function run() {
-    try {
-        await executeWithEnhancedFlags();
-    } catch (error) {
-        console.error('❌ Fatal error:', error.message);
-        process.exit(1);
-    }
-}
 
-// Execute main entry point
-if (require.main === module) {
-    run();
-}
+def launch_claude_cli_yolo():
+    """Launch Claude CLI in proper YOLO mode with essential flags."""
+    validation = validate_claude_cli()
+    
+    if not validation["valid"]:
+        console.print("[red]❌ Claude CLI validation failed[/red]")
+        console.print(f"   Error: {validation['error']}")
+        console.print("\n[bold]🔧 Solutions:[/bold]")
+        console.print("   • Install Claude CLI: https://claude.ai/download")
+        console.print("   • Add Claude CLI to your PATH")
+        console.print("   • Restart your terminal")
+        sys.exit(1)
+    
+    # Launch Claude CLI with essential YOLO mode flags
+    try:
+        import shutil
+        claude_path = shutil.which("claude")
+        if not claude_path:
+            console.print("[red]❌ Claude CLI not found in PATH[/red]")
+            sys.exit(1)
+        
+        # Essential YOLO mode arguments
+        claude_args = [
+            "claude",
+            "--model", "sonnet", 
+            "--dangerously-skip-permissions"
+        ]
+        
+        console.print(f"[dim]Launching Claude with: {' '.join(claude_args[1:])}[/dim]")
+        
+        # Use os.execvp for proper terminal handling in YOLO mode
+        os.execvp("claude", claude_args)
+        
+    except Exception as e:
+        console.print(f"[red]❌ Failed to launch Claude CLI: {e}[/red]")
+        sys.exit(1)
 
-// Module exports for compatibility
-module.exports = {
-    CLAUDE_PM_VERSION,
-    resolveVersion,
-    getBasicDeploymentInfo,
-    getFrameworkPath,
-    getDeploymentConfig,
-    detectPlatformInfo,
-    main,
-    executeWithModularSupport,
-    executeWithEnhancedFlags
-};
+
+def launch_claude_cli_with_args(args):
+    """Launch Claude CLI with pass-through arguments."""
+    validation = validate_claude_cli()
+    
+    if not validation["valid"]:
+        console.print("[red]❌ Claude CLI validation failed[/red]")
+        console.print(f"   Error: {validation['error']}")
+        sys.exit(1)
+    
+    # Launch Claude CLI with pass-through args plus essential flags
+    try:
+        import shutil
+        claude_path = shutil.which("claude")
+        if not claude_path:
+            console.print("[red]❌ Claude CLI not found in PATH[/red]")
+            sys.exit(1)
+        
+        # Build command with essential flags + pass-through args
+        claude_args = [
+            "claude",
+            "--model", "sonnet",
+            "--dangerously-skip-permissions"
+        ] + args
+        
+        console.print(f"[dim]Launching Claude with: {' '.join(claude_args[1:])}[/dim]")
+        
+        # Use os.execvp for proper terminal handling
+        os.execvp("claude", claude_args)
+        
+    except Exception as e:
+        console.print(f"[red]❌ Failed to launch Claude CLI: {e}[/red]")
+        sys.exit(1)
+
+
+def launch_claude_cli():
+    """Launch Claude CLI directly (legacy method)."""
+    validation = validate_claude_cli()
+    
+    if not validation["valid"]:
+        console.print("[red]❌ Claude CLI validation failed[/red]")
+        console.print(f"   Error: {validation['error']}")
+        console.print("\n[bold]🔧 Solutions:[/bold]")
+        console.print("   • Install Claude CLI: https://claude.ai/download")
+        console.print("   • Add Claude CLI to your PATH")
+        console.print("   • Restart your terminal")
+        sys.exit(1)
+    
+    # Launch Claude CLI
+    try:
+        os.execvp("claude", ["claude"])
+    except FileNotFoundError:
+        console.print("[red]❌ Failed to launch Claude CLI[/red]")
+        sys.exit(1)
+
+
+def handle_enhanced_flags():
+    """Handle enhanced flags using pure Python implementation."""
+    # Import the CLI flags module
+    try:
+        from claude_pm.cli_flags import cli_flags
+        
+        # Remove the script name from args and pass to Click
+        sys.argv[0] = "claude-pm"
+        cli_flags()
+        
+    except ImportError as e:
+        console.print(f"[red]❌ Failed to import CLI flags module: {e}[/red]")
+        console.print("Make sure the Claude PM Framework is properly installed.")
+        sys.exit(1)
+
+
+def main():
+    """Main entry point with pure Python implementation."""
+    args = sys.argv[1:]
+    
+    # Enhanced flags that trigger Python CLI system
+    enhanced_flags = ["--safe", "--upgrade", "--rollback", "--dry-run"]
+    version_flags = ["--version"]  # Removed -v to avoid conflict with verbose
+    help_flags = ["--help", "-h"]
+    
+    # Check for enhanced flags
+    has_enhanced_flags = any(
+        arg in enhanced_flags or 
+        arg.startswith("--format=") or
+        any(flag in args for flag in enhanced_flags)
+        for arg in args
+    )
+    
+    # Handle enhanced version command (with additional options)
+    if any(flag in args for flag in version_flags) and (
+        "--components" in args or 
+        "--git" in args or 
+        "--format" in " ".join(args) or
+        "--detailed" in args or
+        has_enhanced_flags
+    ):
+        handle_enhanced_flags()
+        return
+    
+    # Handle enhanced flags
+    if has_enhanced_flags:
+        handle_enhanced_flags()
+        return
+    
+    # Handle basic flags
+    if any(flag in args for flag in version_flags):
+        version = get_framework_version()
+        console.print(f"Claude Multi-Agent PM Framework v{version}")
+        return
+    
+    if any(flag in args for flag in help_flags):
+        show_help()
+        return
+    
+    if "--system-info" in args:
+        display_system_info()
+        return
+    
+    if "--deployment-info" in args:
+        display_deployment_info()
+        return
+    
+    # Check for pass-through flags first
+    passthrough_flags = ["--continue", "-c", "--resume", "-r"]
+    if any(flag in args for flag in passthrough_flags):
+        # Pass through continue/resume flags after validation
+        display_comprehensive_status()
+        
+        if not validate_framework_deployment():
+            console.print("[red]❌ Claude PM Framework not properly deployed![/red]")
+            console.print("")
+            console.print("[bold]🚨 Framework deployment required before operations[/bold]")
+            console.print("Run one of the following commands to deploy the framework:")
+            console.print("   • claude-pm setup")
+            console.print("   • claude-pm deploy")
+            console.print("   • cmpm-init")
+            console.print("")
+            console.print(f"📍 Expected framework location: ~/.claude-pm")
+            sys.exit(1)
+        
+        console.print("[green]✅ All systems validated - launching Claude CLI with pass-through flags[/green]")
+        console.print("")
+        launch_claude_cli_with_args(args)
+        return
+    
+    # Handle no arguments case - Framework validation required per ISS-0112
+    if not args:
+        # ISS-0112: Require framework deployment before ANY operations
+        display_comprehensive_status()
+        
+        if not validate_framework_deployment():
+            console.print("[red]❌ Claude PM Framework not properly deployed![/red]")
+            console.print("")
+            console.print("[bold]🚨 Framework deployment required before operations[/bold]")
+            console.print("Run one of the following commands to deploy the framework:")
+            console.print("   • claude-pm setup")
+            console.print("   • claude-pm deploy")
+            console.print("   • cmpm-init")
+            console.print("")
+            console.print(f"📍 Expected framework location: ~/.claude-pm")
+            sys.exit(1)
+        
+        console.print("[green]✅ All systems validated - launching Claude CLI in YOLO mode[/green]")
+        console.print("")
+        # Framework validated - launch Claude CLI in proper YOLO mode
+        launch_claude_cli_yolo()
+        return
+    
+    # For other commands, delegate to Python framework
+    deployment_info = detect_deployment_type()
+    framework_path = deployment_info["framework_path"]
+    
+    try:
+        # Use subprocess to call the Python CLI module
+        cmd = [sys.executable, "-m", "claude_pm.cli"] + args
+        result = subprocess.run(cmd, cwd=framework_path)
+        sys.exit(result.returncode)
+        
+    except Exception as e:
+        console.print(f"[red]❌ Failed to execute Claude PM Framework: {e}[/red]")
+        console.print(f"   Framework path: {framework_path}")
+        console.print(f"   Python command: {sys.executable}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
