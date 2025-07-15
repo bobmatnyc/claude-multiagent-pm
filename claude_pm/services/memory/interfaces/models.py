@@ -22,6 +22,9 @@ class MemoryCategory(str, Enum):
     USER_FEEDBACK = "user_feedback"  # User feedback, suggestions, improvements
     SYSTEM = "system"  # System operations, framework events, monitoring
     FRAMEWORK = "framework"  # Framework-specific operations and events
+    QA = "qa"  # Quality assurance, testing, validation
+    INTEGRATION = "integration"  # System integration, API connections, cross-service
+    PERFORMANCE = "performance"  # Performance monitoring, optimization, metrics
 
     def __str__(self) -> str:
         return self.value

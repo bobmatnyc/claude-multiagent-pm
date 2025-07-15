@@ -1,0 +1,74 @@
+{
+  "test_start_time": 1752539897.378282,
+  "tests_run": 8,
+  "tests_passed": 4,
+  "tests_failed": 4,
+  "timeout_errors": 0,
+  "concurrent_errors": 0,
+  "performance_issues": 0,
+  "test_results": [
+    {
+      "test_name": "Memory Service Initialization",
+      "passed": true,
+      "execution_time": 0.00778508186340332,
+      "details": "All services initialized successfully",
+      "timestamp": 1752539897.386134
+    },
+    {
+      "test_name": "Single Operation Timeouts",
+      "passed": true,
+      "execution_time": 34.35446786880493,
+      "details": "Timeouts: 3/10, Avg time: 3.435s",
+      "timestamp": 1752539931.7406359
+    },
+    {
+      "test_name": "Concurrent Memory Operations",
+      "passed": false,
+      "execution_time": 2.0019209384918213,
+      "details": "Concurrent test failed: Too many concurrent errors: 25/25",
+      "timestamp": 1752539933.7425861
+    },
+    {
+      "test_name": "High Load Stress Test",
+      "passed": false,
+      "execution_time": 15.113481044769287,
+      "details": "Stress test failed: Too many stress errors: 18/50",
+      "timestamp": 1752539948.856097
+    },
+    {
+      "test_name": "Circuit Breaker Behavior",
+      "passed": true,
+      "execution_time": 0.0026259422302246094,
+      "details": "Circuit breaker activations: 0",
+      "timestamp": 1752539948.858751
+    },
+    {
+      "test_name": "Validation Load Scenarios",
+      "passed": true,
+      "execution_time": 3.0272791385650635,
+      "details": "Validation errors: 0",
+      "timestamp": 1752539951.886058
+    },
+    {
+      "test_name": "Backend Switching Under Load",
+      "passed": false,
+      "execution_time": 0.002128124237060547,
+      "details": "Backend switching test failed: Too many backend switching errors: 6",
+      "timestamp": 1752539951.888215
+    },
+    {
+      "test_name": "Recovery and Resilience",
+      "passed": false,
+      "execution_time": 7.797951936721802,
+      "details": "Recovery test failed: Too many recovery errors: 6",
+      "timestamp": 1752539959.686228
+    }
+  ],
+  "memory_operations": 10,
+  "avg_response_time": 3.4352315187454225,
+  "max_response_time": 9.0067617893219,
+  "circuit_breaker_activations": 0,
+  "total_execution_time": 62.30796480178833,
+  "test_success_rate": 0.5,
+  "overall_result": "FAIL"
+}

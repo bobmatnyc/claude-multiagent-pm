@@ -135,6 +135,9 @@ from .memory_trigger_service import (
 
 # Memory recall system
 from ..memory_recall_service import MemoryRecallService, MemoryRecallConfig, MemoryRecallResult
+
+# Legacy MemoryService for backward compatibility
+from ..memory_service import MemoryService
 from .memory_context_enhancer import (
     MemoryContextEnhancer,
     MemoryContext,
@@ -249,6 +252,10 @@ def create_release_ready_memory_service(environment: str = None) -> ReleaseReady
 def get_memory_service(config: dict = None) -> FlexibleMemoryService:
     """Legacy factory function for backward compatibility."""
     return create_flexible_memory_service(config)
+
+
+# Additional backward compatibility for unified_memory_service
+unified_memory_service = FlexibleMemoryService
 
 
 # Quick validation function
@@ -384,4 +391,7 @@ __all__ = [
     "validate_memory_system_for_release",
     "print_validation_report",
     "quick_memory_validation",
+    # Backward compatibility aliases
+    "unified_memory_service",
+    "MemoryService",
 ]

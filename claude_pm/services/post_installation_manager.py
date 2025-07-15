@@ -34,7 +34,7 @@ from rich.table import Table
 from rich.panel import Panel
 
 from ..core.base_service import BaseService
-from ..core.logging_config import setup_logging
+from ..core.logging_config import setup_logging, setup_streaming_logger, finalize_streaming_logs
 
 console = Console()
 logger = setup_logging(__name__)
@@ -131,7 +131,9 @@ class PostInstallationManager(BaseService):
             "error_handling": False
         }
         
-        self.logger = setup_logging(__name__)
+        # Use streaming logger for clean INFO display during initialization
+        self.logger = setup_streaming_logger(__name__)
+        self.standard_logger = setup_logging(__name__)  # For ERROR/WARNING messages
     
     def _detect_package_root(self) -> Path:
         """Detect the package root directory."""
@@ -159,16 +161,19 @@ class PostInstallationManager(BaseService):
             
             return True
         except Exception as e:
-            self.logger.error(f"Failed to initialize PostInstallationManager: {e}")
+            self.standard_logger.error(f"Failed to initialize PostInstallationManager: {e}")
             return False
     
     async def _cleanup(self) -> bool:
         """Cleanup the PostInstallationManager service."""
         try:
             self.logger.info("PostInstallationManager cleanup completed")
+            # Finalize streaming logs to ensure final message is visible
+            finalize_streaming_logs(self.logger)
             return True
         except Exception as e:
-            self.logger.error(f"Failed to cleanup PostInstallationManager: {e}")
+            self.standard_logger.error(f"Failed to cleanup PostInstallationManager: {e}")
+            finalize_streaming_logs(self.logger)
             return False
     
     def _log_step(self, step_name: str, description: str, completed: bool = True, error: Optional[str] = None):
@@ -185,7 +190,8 @@ class PostInstallationManager(BaseService):
         if completed and not error:
             self.logger.info(f"✅ {description}")
         elif error:
-            self.logger.error(f"❌ {description}: {error}")
+            # Use standard logger for errors to ensure they appear on new lines
+            self.standard_logger.error(f"❌ {description}: {error}")
         else:
             self.logger.info(f"🔄 {description}")
     
@@ -200,9 +206,11 @@ class PostInstallationManager(BaseService):
         self.validation_results.append(result)
         
         if status == "error":
-            self.logger.error(f"❌ {component}: {details}")
+            # Use standard logger for errors to ensure they appear on new lines
+            self.standard_logger.error(f"❌ {component}: {details}")
         elif status == "warning":
-            self.logger.warning(f"⚠️ {component}: {details}")
+            # Use standard logger for warnings to ensure they appear on new lines
+            self.standard_logger.warning(f"⚠️ {component}: {details}")
         else:
             self.logger.info(f"✅ {component}: {details}")
     
@@ -361,7 +369,7 @@ class PostInstallationManager(BaseService):
                 results["validation_results"] = [asdict(r) for r in self.validation_results]
                 
         except Exception as e:
-            self.logger.error(f"Post-installation failed: {e}")
+            self.standard_logger.error(f"Post-installation failed: {e}")
             results["errors"].append(f"Post-installation failed: {str(e)}")
             results["success"] = False
         
@@ -451,7 +459,7 @@ class PostInstallationManager(BaseService):
             return True
             
         except Exception as e:
-            self.logger.error(f"Pre-installation checks failed: {e}")
+            self.standard_logger.error(f"Pre-installation checks failed: {e}")
             return False
     
     async def _create_directory_structure(self) -> bool:
@@ -494,7 +502,7 @@ class PostInstallationManager(BaseService):
             return True
             
         except Exception as e:
-            self.logger.error(f"Failed to create directory structure: {e}")
+            self.standard_logger.error(f"Failed to create directory structure: {e}")
             self._add_validation_result(
                 "directory_structure",
                 "error",
@@ -542,7 +550,7 @@ class PostInstallationManager(BaseService):
                         self.logger.debug(f"Deployed {source_name} to {dest_path}")
                         
                     except Exception as e:
-                        self.logger.warning(f"Failed to deploy {source_name}: {e}")
+                        self.standard_logger.warning(f"Failed to deploy {source_name}: {e}")
                         self._add_validation_result(
                             f"deploy_{source_name}",
                             "warning",
@@ -567,7 +575,7 @@ class PostInstallationManager(BaseService):
                 return False
             
         except Exception as e:
-            self.logger.error(f"Failed to deploy framework components: {e}")
+            self.standard_logger.error(f"Failed to deploy framework components: {e}")
             self._add_validation_result(
                 "component_deployment",
                 "error",
@@ -633,7 +641,7 @@ class PostInstallationManager(BaseService):
             return True
             
         except Exception as e:
-            self.logger.error(f"Failed to initialize memory system: {e}")
+            self.standard_logger.error(f"Failed to initialize memory system: {e}")
             self._add_validation_result(
                 "memory_system",
                 "warning",
@@ -711,7 +719,7 @@ class PostInstallationManager(BaseService):
             return True
             
         except Exception as e:
-            self.logger.error(f"Failed to configure framework: {e}")
+            self.standard_logger.error(f"Failed to configure framework: {e}")
             self._add_validation_result(
                 "framework_configuration",
                 "error",
@@ -809,7 +817,7 @@ class PostInstallationManager(BaseService):
             return True
             
         except Exception as e:
-            self.logger.error(f"Health checks failed: {e}")
+            self.standard_logger.error(f"Health checks failed: {e}")
             self._add_validation_result(
                 "health_checks",
                 "error",
@@ -910,7 +918,7 @@ class PostInstallationManager(BaseService):
             return True
             
         except Exception as e:
-            self.logger.error(f"Installation validation failed: {e}")
+            self.standard_logger.error(f"Installation validation failed: {e}")
             self._add_validation_result(
                 "installation_validation",
                 "error",
@@ -983,7 +991,7 @@ class PostInstallationManager(BaseService):
             return True
             
         except Exception as e:
-            self.logger.error(f"Failed to generate installation report: {e}")
+            self.standard_logger.error(f"Failed to generate installation report: {e}")
             self._add_validation_result(
                 "installation_report",
                 "error",
@@ -1076,7 +1084,7 @@ class PostInstallationManager(BaseService):
             console.print("=" * 70)
             
         except Exception as e:
-            self.logger.error(f"Failed to display installation results: {e}")
+            self.standard_logger.error(f"Failed to display installation results: {e}")
             console.print(f"❌ Error displaying results: {e}")
     
     async def get_installation_status(self) -> Dict[str, Any]:
@@ -1111,5 +1119,5 @@ class PostInstallationManager(BaseService):
             return status
             
         except Exception as e:
-            self.logger.error(f"Failed to get installation status: {e}")
+            self.standard_logger.error(f"Failed to get installation status: {e}")
             return {"installed": False, "error": str(e)}

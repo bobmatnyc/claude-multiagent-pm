@@ -8,6 +8,13 @@ Provides standardized logging setup with:
 - Log rotation
 - Performance monitoring
 - Single-line streaming for INFO messages
+
+STREAMING LOGGER IMPLEMENTATION:
+The StreamingHandler provides single-line ticker display for INFO messages during
+framework initialization, eliminating visual clutter. INFO messages overwrite the
+same line using carriage returns (\r), while ERROR/WARNING messages appear on
+separate lines for visibility. Use setup_streaming_logger() for initialization
+processes and finalize_streaming_logs() to ensure final messages remain visible.
 """
 
 import logging

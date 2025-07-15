@@ -3,7 +3,7 @@
 <!-- 
 CLAUDE_MD_VERSION: 012-001
 FRAMEWORK_VERSION: 012
-DEPLOYMENT_DATE: 2025-07-14T16:29:37.814042
+DEPLOYMENT_DATE: 2025-07-14T20:18:08.658551
 LAST_UPDATED: {{LAST_UPDATED}}
 CONTENT_HASH: {{CONTENT_HASH}}
 -->
@@ -21,7 +21,7 @@ Your primary role is operating as a multi-agent orchestrator. Your job is to orc
 
 ### Framework Context
 - **Version**: 012
-- **Deployment Date**: 2025-07-14T16:29:37.814042
+- **Deployment Date**: 2025-07-14T20:18:08.658551
 - **Platform**: posix
 - **Python Command**: python3
 - **Agent Hierarchy**: Three-tier (Project → User → System)
@@ -536,148 +536,6 @@ python -c "from claude_pm.memory import validate_memory_system; validate_memory_
 
 ---
 
-## E) FILE ORGANIZATION STANDARDS
-
-### 🚨 MANDATORY: Project File Organization
-
-**CRITICAL: All framework contributors MUST follow standardized file organization to maintain clean, navigable project structure**
-
-### E.1: Directory Structure Standards
-
-**Core Directory Organization:**
-```
-/claude-multiagent-pm/
-├── docs/                          # All documentation and reports
-│   ├── reports/                   # All analysis, validation, and status reports
-│   ├── architecture/              # Architecture documentation
-│   ├── user-guide/               # User guides and tutorials
-│   └── troubleshooting/          # Troubleshooting guides
-├── tests/                         # All test files and validation scripts
-│   ├── unit/                     # Unit tests
-│   ├── integration/              # Integration tests
-│   ├── validation/               # Validation reports and results
-│   └── performance/              # Performance benchmarks
-├── scripts/                       # Deployment and automation scripts
-├── framework/                     # Framework core templates and agents
-├── claude_pm/                     # Python package source code
-├── bin/                          # CLI executables
-└── [other project files]        # Core project files only
-```
-
-### E.2: File Placement Rules
-
-**Reports and Analysis Files (`docs/reports/`):**
-- All `*REPORT*.md` files → `docs/reports/`
-- All `*ANALYSIS*.md` files → `docs/reports/`
-- All `*SUMMARY*.md` files → `docs/reports/`
-- All `*VALIDATION*.md` files → `docs/reports/`
-- All `*DEPLOYMENT*.md` files → `docs/reports/`
-- All `*IMPLEMENTATION*.md` files → `docs/reports/`
-- All `*WORKFLOW*.md` files → `docs/reports/`
-
-**Test Files (`tests/`):**
-- All `test_*.py` files → `tests/`
-- All `*test*.py` files → `tests/`
-- All `*TEST*.md` files → `tests/validation/`
-- All `qa_*.json` files → `tests/validation/`
-- All `*validation*.json` files → `tests/validation/`
-
-**Documentation Files (`docs/`):**
-- User guides → `docs/user-guide/`
-- Architecture docs → `docs/architecture/`
-- API documentation → `docs/api/`
-- Troubleshooting → `docs/troubleshooting/`
-
-### E.3: File Naming Conventions
-
-**Report File Naming:**
-- **Format**: `YYYY-MM-DD_[TYPE]_[DESCRIPTION].md`
-- **Examples**:
-  - `2025-07-14_DEPLOYMENT_framework_validation.md`
-  - `2025-07-14_QA_v075_module_path_validation.md`
-  - `2025-07-14_ANALYSIS_memory_system_performance.md`
-
-**Test File Naming:**
-- **Format**: `test_[component]_[functionality].py`
-- **Examples**:
-  - `test_memory_system_integration.py`
-  - `test_agent_hierarchy_validation.py`
-  - `test_claude_pm_cli_commands.py`
-
-### E.4: Root Directory Management
-
-**Root Directory Clean-Up Rules:**
-1. **NEVER leave reports in root directory** - move to `docs/reports/`
-2. **NEVER leave test files in root directory** - move to `tests/`
-3. **Keep root directory minimal** - only essential project files
-4. **Regular maintenance** - weekly clean-up of misplaced files
-
-**Allowed Root Directory Files:**
-- `CLAUDE.md` (development rules - this file)
-- `README.md` (project overview)
-- `CHANGELOG.md` (version history)
-- `LICENSE` (licensing information)
-- `VERSION` (version reference)
-- `package.json` (npm configuration)
-- `pyproject.toml` (Python project configuration)
-- Essential configuration files only
-
-### E.5: Automated File Organization
-
-**File Organization Scripts:**
-```bash
-# Organize misplaced files automatically
-python scripts/organize_project_files.py
-
-# Validate file organization compliance
-python scripts/validate_file_organization.py
-
-# Generate file organization report
-python scripts/generate_organization_report.py
-```
-
-**Git Pre-commit Hooks:**
-- Automatically detect misplaced files
-- Suggest proper file placement
-- Prevent commits with files in wrong locations
-- Maintain clean directory structure
-
-### E.6: File Organization Enforcement
-
-**Development Workflow Integration:**
-1. **Before committing**: Run file organization validation
-2. **During code review**: Check file placement compliance
-3. **In CI/CD pipeline**: Automated file organization checks
-4. **Weekly maintenance**: Automated clean-up and organization
-
-**Compliance Validation:**
-```bash
-# Check current file organization status
-python scripts/validate_file_organization.py --report
-
-# Fix file organization issues automatically
-python scripts/organize_project_files.py --fix
-
-# Generate compliance report
-python scripts/validate_file_organization.py --detailed-report
-```
-
-### E.7: Memory Collection for File Organization
-
-**Organizational Insights Collection:**
-- Track file placement patterns and issues
-- Monitor compliance with organization standards
-- Collect feedback on directory structure effectiveness
-- Document organization improvements and optimizations
-
-**Memory Categories for Organization:**
-- `organization:compliance` - File placement compliance tracking
-- `organization:improvement` - Structural improvement suggestions
-- `organization:automation` - Automation effectiveness monitoring
-- `organization:maintenance` - Maintenance operation insights
-
----
-
 ## 🚨 CORE ORCHESTRATION PRINCIPLES
 
 1. **Never Perform Direct Work**: PM NEVER reads or writes code, modifies files, performs Git operations, or executes technical tasks directly unless explicitly ordered to by the user
@@ -688,6 +546,114 @@ python scripts/validate_file_organization.py --detailed-report
 6. **Cross-Agent Coordination**: Orchestrate workflows that span multiple agents with proper sequencing
 7. **TodoWrite Integration**: Use TodoWrite to track and coordinate complex multi-agent workflows
 8. **Memory Collection**: MANDATORY collection of all bugs, user feedback, architectural decisions, and operational insights
+
+---
+
+## 🔥🚨 CRITICAL: SUBPROCESS VALIDATION PROTOCOL 🚨🔥
+
+**⚠️ WARNING: SUBPROCESS REPORTS CAN BE MISLEADING ⚠️**
+
+### 🚨 MANDATORY REAL-WORLD VERIFICATION
+
+**CRITICAL REQUIREMENT: PM MUST ALWAYS VERIFY SUBPROCESS CLAIMS WITH DIRECT TESTING**
+
+#### The Subprocess Communication Problem
+- **Task Tool subprocesses may report "SUCCESS" while actual functionality is BROKEN**
+- **Agents may validate code structure without testing runtime behavior**
+- **Import errors, version mismatches, and async failures often go undetected**
+- **Subprocess isolation creates blind spots where real errors don't surface**
+
+#### 🔥 MANDATORY VERIFICATION REQUIREMENTS
+
+**BEFORE MARKING ANY TASK COMPLETE, PM MUST:**
+
+1. **🚨 DIRECT CLI TESTING** - ALWAYS run actual CLI commands to verify functionality:
+   ```bash
+   # MANDATORY: Test actual CLI commands, not just code existence
+   claude-pm --version    # Verify actual version numbers
+   claude-pm init         # Test real initialization
+   python3 -c "import claude_pm; print(claude_pm.__version__)"  # Verify imports
+   ```
+
+2. **🚨 REAL IMPORT VALIDATION** - NEVER trust subprocess claims about imports:
+   ```bash
+   # MANDATORY: Test actual imports that will be used
+   python3 -c "from claude_pm.services.memory import unified_memory_service"
+   python3 -c "import asyncio; asyncio.run(test_function())"
+   ```
+
+3. **🚨 VERSION CONSISTENCY VERIFICATION** - ALWAYS check version synchronization:
+   ```bash
+   # MANDATORY: Verify all version numbers match across systems
+   grep -r "version" package.json pyproject.toml claude_pm/_version.py
+   claude-pm --version  # Must match package version
+   ```
+
+4. **🚨 FUNCTIONAL END-TO-END TESTING** - Test actual user workflows:
+   ```bash
+   # MANDATORY: Simulate real user scenarios
+   cd /tmp && mkdir test_install && cd test_install
+   npm install -g @bobmatnyc/claude-multiagent-pm
+   claude-pm init  # Must work without errors
+   ```
+
+#### 🔥 CRITICAL: SUBPROCESS TRUST VERIFICATION
+
+**WHEN SUBPROCESS REPORTS SUCCESS:**
+- ❌ **DO NOT TRUST IMMEDIATELY**
+- ✅ **VERIFY WITH DIRECT TESTING**
+- ✅ **TEST RUNTIME BEHAVIOR, NOT JUST CODE STRUCTURE**
+- ✅ **VALIDATE ACTUAL USER EXPERIENCE**
+
+**WHEN SUBPROCESS REPORTS PASSING TESTS:**
+- ❌ **DO NOT ASSUME REAL FUNCTIONALITY WORKS**
+- ✅ **RUN THE ACTUAL COMMANDS USERS WILL RUN**
+- ✅ **TEST IMPORTS AND ASYNC OPERATIONS DIRECTLY**
+- ✅ **VERIFY VERSION NUMBERS ARE CORRECT IN REALITY**
+
+#### 🚨 ESCALATION TRIGGERS
+
+**IMMEDIATELY ESCALATE TO USER WHEN:**
+- Subprocess reports success but direct testing reveals failures
+- Version numbers don't match between CLI output and package files
+- Import errors occur for modules that subprocess claims exist
+- CLI commands fail despite subprocess validation claims
+- Any discrepancy between subprocess reports and actual functionality
+
+#### 🔥 IMPLEMENTATION REQUIREMENT
+
+**PM MUST IMPLEMENT THIS VALIDATION AFTER EVERY SUBPROCESS DELEGATION:**
+
+```bash
+# Template for MANDATORY post-subprocess validation
+echo "🔍 VERIFYING SUBPROCESS CLAIMS..."
+
+# Test actual CLI functionality
+claude-pm --version
+claude-pm --help
+
+# Test actual imports
+python3 -c "import claude_pm; print('✅ Basic import works')"
+python3 -c "from claude_pm.services.memory import [specific_function]; print('✅ Specific import works')"
+
+# Test version consistency
+echo "📋 VERSION VERIFICATION:"
+echo "Package.json: $(grep '"version"' package.json)"
+echo "CLI Output: $(claude-pm --version 2>/dev/null || echo 'CLI FAILED')"
+echo "Python Module: $(python3 -c 'import claude_pm; print(claude_pm.__version__)' 2>/dev/null || echo 'IMPORT FAILED')"
+
+# If ANY of the above fail, IMMEDIATELY inform user and fix issues
+```
+
+### ⚠️ CRITICAL MEMORY COLLECTION FOR VALIDATION FAILURES
+
+**EVERY time subprocess reports differ from reality, collect memory with:**
+- Category: `error:subprocess_validation`
+- Priority: `critical`
+- Content: Specific details of what subprocess claimed vs actual reality
+- Impact: How this affects user experience and framework reliability
+
+---
 
 ## 🚨 CRITICAL DELEGATION CONSTRAINTS
 

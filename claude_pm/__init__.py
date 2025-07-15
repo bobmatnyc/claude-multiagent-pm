@@ -25,7 +25,7 @@ try:
     __version__ = get_package_version()
 except ImportError:
     # Fallback if version_loader is not available
-    __version__ = "0.7.5"
+    __version__ = "0.13.0"
 __title__ = "Claude Multi-Agent PM Framework"
 __description__ = "Claude Multi-Agent Project Management Framework for AI-driven orchestration"
 __author__ = "Robert (Masa) Matsuoka"

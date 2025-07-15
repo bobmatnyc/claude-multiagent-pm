@@ -22,7 +22,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from claude_pm.core.base_agent import BaseAgent
 from claude_pm.core.config import Config
-from claude_pm.core.logging_config import setup_logging
+from claude_pm.core.logging_config import setup_logging, setup_streaming_logger, finalize_streaming_logs
 from claude_pm.core.connection_manager import get_connection_manager
 from claude_pm.services.post_installation_manager import PostInstallationManager
 
@@ -111,7 +111,9 @@ class PMAgent(BaseAgent):
             self.framework_path / ".claude-pm" if self.framework_path else None
         )
         self.console = Console()
-        self.logger = setup_logging(__name__)
+        # Use streaming logger for clean INFO display during initialization
+        self.logger = setup_streaming_logger(__name__)
+        self.standard_logger = setup_logging(__name__)  # For ERROR/WARNING messages
 
         # PM-specific configurations
         self.prioritization_weights = {
@@ -161,7 +163,7 @@ class PMAgent(BaseAgent):
             return project_analysis
 
         except Exception as e:
-            self.logger.error(f"Error analyzing project requirements: {e}")
+            self.standard_logger.error(f"Error analyzing project requirements: {e}")
             raise
 
     def _determine_project_type(self, content: str) -> str:
@@ -437,7 +439,7 @@ class PMAgent(BaseAgent):
             return project_plan
 
         except Exception as e:
-            self.logger.error(f"Error creating project plan: {e}")
+            self.standard_logger.error(f"Error creating project plan: {e}")
             raise
 
     async def _create_project_epics(self, project_analysis: Dict[str, Any]) -> List[Epic]:
@@ -694,7 +696,7 @@ class PMAgent(BaseAgent):
 
                 # Check for blockers
                 if epic_result["status"] == "blocked":
-                    self.logger.warning(
+                    self.standard_logger.warning(
                         f"Epic {epic.id} is blocked: {epic_result.get('blocker_reason', 'Unknown')}"
                     )
                     # Handle blockers or escalate
@@ -711,7 +713,7 @@ class PMAgent(BaseAgent):
             }
 
         except Exception as e:
-            self.logger.error(f"Error orchestrating project execution: {e}")
+            self.standard_logger.error(f"Error orchestrating project execution: {e}")
             raise
 
     async def _create_epic_ticket(self, epic: Epic) -> str:
@@ -729,7 +731,7 @@ class PMAgent(BaseAgent):
             return ticket_id
 
         except Exception as e:
-            self.logger.error(f"Error creating epic ticket: {e}")
+            self.standard_logger.error(f"Error creating epic ticket: {e}")
             raise
 
     def _sort_epics_by_dependencies(self, epics: List[Epic]) -> List[Epic]:
@@ -750,7 +752,7 @@ class PMAgent(BaseAgent):
 
             if not ready_epics:
                 # Circular dependency or other issue
-                self.logger.warning("Circular dependency detected, proceeding with remaining epics")
+                self.standard_logger.warning("Circular dependency detected, proceeding with remaining epics")
                 ready_epics = remaining_epics
 
             # Add ready epics to sorted list
@@ -790,7 +792,7 @@ class PMAgent(BaseAgent):
             }
 
         except Exception as e:
-            self.logger.error(f"Error executing epic {epic.id}: {e}")
+            self.standard_logger.error(f"Error executing epic {epic.id}: {e}")
             return {"epic_id": epic.id, "status": "failed", "error": str(e), "agent_results": {}}
 
     async def _delegate_to_agent(self, agent_type: str, epic: Epic) -> Dict[str, Any]:
@@ -814,7 +816,7 @@ class PMAgent(BaseAgent):
                 return {"status": "completed", "message": f"Work delegated to {agent_type}"}
 
         except Exception as e:
-            self.logger.error(f"Error delegating to {agent_type}: {e}")
+            self.standard_logger.error(f"Error delegating to {agent_type}: {e}")
             return {"status": "failed", "error": str(e)}
 
     async def _simulate_architect_work(self, epic: Epic) -> Dict[str, Any]:
@@ -863,17 +865,17 @@ class PMAgent(BaseAgent):
             # Placeholder for trackdown service integration
             self.logger.info(f"Epic {epic_id} status updated to {status}")
         except Exception as e:
-            self.logger.error(f"Error updating epic status: {e}")
+            self.standard_logger.error(f"Error updating epic status: {e}")
 
     async def _handle_epic_blocker(self, epic: Epic, epic_result: Dict[str, Any]) -> None:
         """Handle epic blockers"""
         blocker_reason = epic_result.get("blocker_reason", "Unknown blocker")
 
         # Log the blocker
-        self.logger.warning(f"Epic {epic.id} blocked: {blocker_reason}")
+        self.standard_logger.warning(f"Epic {epic.id} blocked: {blocker_reason}")
 
         # Store blocker information (placeholder for memory integration)
-        self.logger.warning(f"Epic blocker recorded: {epic.id} - {blocker_reason}")
+        self.standard_logger.warning(f"Epic blocker recorded: {epic.id} - {blocker_reason}")
 
         # Attempt to resolve or escalate
         # For now, we'll just log it
@@ -932,7 +934,7 @@ class PMAgent(BaseAgent):
             # Initialize any required resources
             self.logger.info("PM Agent initialized successfully")
         except Exception as e:
-            self.logger.error(f"Failed to initialize PM Agent: {e}")
+            self.standard_logger.error(f"Failed to initialize PM Agent: {e}")
             raise
 
     async def _cleanup(self) -> None:
@@ -940,8 +942,11 @@ class PMAgent(BaseAgent):
         try:
             # Cleanup any resources
             self.logger.info("PM Agent cleanup completed")
+            # Finalize streaming logs to ensure final message is visible
+            finalize_streaming_logs(self.logger)
         except Exception as e:
-            self.logger.error(f"Failed to cleanup PM Agent: {e}")
+            self.standard_logger.error(f"Failed to cleanup PM Agent: {e}")
+            finalize_streaming_logs(self.logger)
             raise
 
     # ===============================================
@@ -1076,9 +1081,12 @@ class PMAgent(BaseAgent):
                 results["success"] = True
 
         except Exception as e:
-            self.logger.error(f"Framework initialization failed: {e}")
+            self.standard_logger.error(f"Framework initialization failed: {e}")
             results["errors"].append(f"Initialization failed: {str(e)}")
             results["success"] = False
+        finally:
+            # Finalize streaming logs to ensure final messages are visible
+            finalize_streaming_logs(self.logger)
 
         return results
 
@@ -1187,7 +1195,7 @@ class PMAgent(BaseAgent):
 
             return True
         except Exception as e:
-            self.logger.error(f"Failed to create directory structure: {e}")
+            self.standard_logger.error(f"Failed to create directory structure: {e}")
             return False
 
     def _create_initial_readme_files(self):
@@ -1526,7 +1534,7 @@ This directory is managed automatically by the PM agent's memory collection syst
 
             return True
         except Exception as e:
-            self.logger.error(f"Failed to generate configuration files: {e}")
+            self.standard_logger.error(f"Failed to generate configuration files: {e}")
             return False
 
     async def _verify_dependencies(self) -> Dict[str, Dict[str, str]]:
@@ -1753,7 +1761,7 @@ This directory is managed automatically by the PM agent's memory collection syst
             }
 
         except Exception as e:
-            self.logger.error(f"Error checking ai-trackdown-tools availability: {e}")
+            self.standard_logger.error(f"Error checking ai-trackdown-tools availability: {e}")
             return {
                 "available": False,
                 "version": "error",
@@ -1907,7 +1915,7 @@ This directory is managed automatically by the PM agent's memory collection syst
                 json.dump(memory_entry, f, indent=2)
                 
         except Exception as e:
-            self.logger.error(f"Failed to collect memory: {e}")
+            self.standard_logger.error(f"Failed to collect memory: {e}")
 
     # Enhanced method to handle system initialization operations
     async def handle_system_initialization(self, operation: str, **kwargs) -> Dict[str, Any]:

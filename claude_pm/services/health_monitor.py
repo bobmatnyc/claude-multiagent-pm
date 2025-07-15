@@ -429,3 +429,26 @@ class HealthMonitorService(BaseService):
                 "error": str(e),
                 "enhanced_timestamp": datetime.now().isoformat()
             }
+
+
+# Add check_framework_health method for backward compatibility
+def check_framework_health(self):
+    """Synchronous framework health check for backward compatibility."""
+    try:
+        # Run the async health check method synchronously
+        import asyncio
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            result = loop.run_until_complete(self._health_check())
+            return result
+        finally:
+            loop.close()
+    except Exception as e:
+        self.logger.error(f"Framework health check failed: {e}")
+        return {"framework_health_error": False, "error": str(e)}
+
+HealthMonitorService.check_framework_health = check_framework_health
+
+# Backward compatibility alias for expected HealthMonitor import
+HealthMonitor = HealthMonitorService
