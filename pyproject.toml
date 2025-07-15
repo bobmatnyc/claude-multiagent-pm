@@ -311,7 +311,7 @@ edit_uri = "edit/main/docs/"
 # Development and build tools
 [tool.setuptools_scm]
 write_to = "claude_pm/_version.py"
-fallback_version = "0.8.3"
+fallback_version = "0.13.0"
 
 [tool.wheel]
 universal = false
