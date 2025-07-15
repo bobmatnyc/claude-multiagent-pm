@@ -20,7 +20,8 @@ from rich.console import Console
 from rich.panel import Panel
 
 from ..core.config import Config
-from ..services.memory.cli_integration import MemoryIntegratedCLI
+# TEMPORARILY DISABLED: Memory integration causing import failures
+# from ..services.memory.cli_integration import MemoryIntegratedCLI
 from ..core.logging_config import setup_streaming_logger, finalize_streaming_logs
 
 console = Console()
@@ -31,15 +32,18 @@ _memory_integration = None
 
 
 async def get_memory_integration():
-    """Get or create global memory integration instance."""
+    """Get or create global memory integration instance. (DISABLED - memory system disabled)"""
     global _memory_integration
     if _memory_integration is None:
-        _memory_integration = MemoryIntegratedCLI()
-        try:
-            await _memory_integration.initialize()
-            logger.info("Memory trigger CLI integration initialized")
-        except Exception as e:
-            logger.warning(f"Failed to initialize memory integration: {e}")
+        # TEMPORARILY DISABLED: Memory integration causing import failures
+        # _memory_integration = MemoryIntegratedCLI()
+        # try:
+        #     await _memory_integration.initialize()
+        #     logger.info("Memory trigger CLI integration initialized")
+        # except Exception as e:
+        #     logger.warning(f"Failed to initialize memory integration: {e}")
+        logger.debug("Memory integration disabled - returning None")
+        _memory_integration = None
     return _memory_integration
 
 
@@ -135,18 +139,21 @@ def _display_directory_context_streaming():
 
 
 def _initialize_memory_reliability_background():
-    """Initialize memory reliability service in background."""
+    """Initialize memory reliability service in background. (DISABLED - memory system disabled)"""
     async def init_memory_reliability():
         try:
-            from ..services.memory_reliability import get_memory_reliability_service
-            reliability_service = await get_memory_reliability_service()
-            logger.debug("Memory reliability service initialized in background")
+            # TEMPORARILY DISABLED: Memory reliability service causing import failures
+            # from ..services.memory_reliability import get_memory_reliability_service
+            # reliability_service = await get_memory_reliability_service()
+            # logger.debug("Memory reliability service initialized in background")
+            logger.debug("Memory reliability service disabled")
         except Exception as e:
             logger.debug(f"Background memory reliability initialization failed: {e}")
     
-    # Run in background without blocking CLI startup
+    # Run in background without blocking CLI startup (disabled)
     try:
-        asyncio.create_task(init_memory_reliability())
+        # asyncio.create_task(init_memory_reliability())
+        logger.debug("Memory reliability background initialization disabled")
     except RuntimeError:
         # Event loop not running, skip background initialization
         pass
