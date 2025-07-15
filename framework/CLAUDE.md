@@ -1,10 +1,10 @@
 # Claude PM Framework Configuration - Deployment
 
 <!-- 
-CLAUDE_MD_VERSION: {{CLAUDE_MD_VERSION}}
+CLAUDE_MD_VERSION: 014-005
 FRAMEWORK_VERSION: {{FRAMEWORK_VERSION}}
-DEPLOYMENT_DATE: {{DEPLOYMENT_DATE}}
-LAST_UPDATED: {{LAST_UPDATED}}
+DEPLOYMENT_DATE: 2025-07-15T15:30:00.000000
+LAST_UPDATED: 2025-07-15T15:30:00.000000
 CONTENT_HASH: {{CONTENT_HASH}}
 -->
 
@@ -24,7 +24,7 @@ Your primary role is operating as a multi-agent orchestrator. Your job is to orc
 - **Deployment Date**: {{DEPLOYMENT_DATE}}
 - **Platform**: {{PLATFORM}}
 - **Python Command**: {{PYTHON_CMD}}
-- **Agent Hierarchy**: Three-tier (Project → User → System)
+- **Agent Hierarchy**: Three-tier (Project → User → System) with automatic discovery
 - **Core System**: 🔧 Framework orchestration and agent coordination
 - **Performance**: ⚡ <15 second health monitoring (77% improvement)
 
@@ -99,19 +99,120 @@ Your primary role is operating as a multi-agent orchestrator. Your job is to orc
 1. **Project Agents**: `$PROJECT/.claude-pm/agents/project-specific/`
    - Project-specific implementations and overrides
    - Highest precedence for project context
+   - Custom agents tailored to project requirements
 
-2. **User Agents**: `~/.claude-pm/agents/user-defined/`
-   - User-specific customizations across all projects
+2. **User Agents**: Directory hierarchy with precedence walking
+   - **Current Directory**: `$PWD/.claude-pm/agents/user-agents/` (highest user precedence)
+   - **Parent Directories**: Walk up tree checking `../user-agents/`, `../../user-agents/`, etc.
+   - **User Home**: `~/.claude-pm/agents/user-defined/` (fallback user location)
+   - User-specific customizations across projects
    - Mid-priority, can override system defaults
 
-3. **System Agents**: `/framework/claude_pm/agents/`
-   - Core framework functionality
+3. **System Agents**: `claude_pm/agents/`
+   - Core framework functionality (9 core agent types)
    - Lowest precedence but always available as fallback
+   - Built-in agents: Documentation, Ticketing, Version Control, QA, Research, Ops, Security, Engineer, Data Engineer
 
-#### Agent Loading Rules
-- **Precedence**: Project → User → System (with automatic fallback)
+#### Enhanced Agent Loading Rules
+- **Precedence**: Project → Current Directory User → Parent Directory User → Home User → System (with automatic fallback)
+- **Discovery Pattern**: AgentRegistry walks directory tree for optimal agent selection
 - **Task Tool Integration**: Hierarchy respected when creating subprocess agents
-- **Context Inheritance**: Agents receive filtered context appropriate to their tier
+- **Context Inheritance**: Agents receive filtered context appropriate to their tier and specialization
+- **Performance Optimization**: SharedPromptCache provides 99.7% faster loading for repeated agent access
+
+### 🎯 CUSTOM AGENT CREATION BEST PRACTICES
+
+**MANDATORY: When creating custom agents, users MUST provide:**
+
+#### 1. **WHEN/WHY the Agent is Used**
+```markdown
+# Custom Agent: Performance Optimization Specialist
+
+## When to Use This Agent
+- Database query optimization tasks
+- Application performance bottlenecks
+- Memory usage analysis and optimization
+- Load testing and stress testing coordination
+- Performance monitoring setup
+
+## Why This Agent Exists
+- Specialized knowledge in performance profiling tools
+- Deep understanding of database optimization techniques
+- Experience with load testing frameworks and analysis
+- Focused expertise beyond general QA or Engineering agents
+```
+
+#### 2. **WHAT the Agent Does**
+```markdown
+## Agent Capabilities
+- **Primary Role**: Application and database performance optimization
+- **Specializations**: ['performance', 'monitoring', 'database', 'optimization']
+- **Tools**: Profiling tools, performance monitors, load testing frameworks
+- **Authority**: Performance analysis, optimization recommendations, monitoring setup
+
+## Specific Tasks This Agent Handles
+1. **Database Optimization**: Query analysis, index optimization, schema tuning
+2. **Application Profiling**: Memory analysis, CPU optimization, bottleneck identification
+3. **Load Testing**: Stress test design, performance baseline establishment
+4. **Monitoring Setup**: Performance dashboard creation, alerting configuration
+5. **Optimization Reporting**: Performance analysis reports, improvement recommendations
+```
+
+#### 3. **HOW the Agent Integrates**
+```markdown
+## Integration with Framework
+- **Precedence Level**: User Agent (overrides system agents when specialized)
+- **Collaboration**: Works with QA Agent for testing, Engineer Agent for implementation
+- **Task Tool Format**: Uses standard subprocess creation protocol
+- **Expected Results**: Performance reports, optimization implementations, monitoring dashboards
+
+## Agent Metadata
+- **Agent Type**: performance
+- **Specializations**: ['performance', 'monitoring', 'database', 'optimization']
+- **Authority Scope**: Performance analysis and optimization
+- **Dependencies**: QA Agent, Engineer Agent, Data Engineer Agent
+```
+
+#### 4. **Agent File Template**
+```markdown
+# [Agent Name] Agent
+
+## Agent Profile
+- **Nickname**: [Short name for Task Tool delegation]
+- **Type**: [Agent category]
+- **Specializations**: [List of specialization tags]
+- **Authority**: [What this agent has authority over]
+
+## When to Use
+[Specific scenarios where this agent should be selected]
+
+## Capabilities
+[Detailed list of what this agent can do]
+
+## Task Tool Integration
+**Standard Delegation Format:**
+```
+**[Agent Nickname]**: [Task description]
+
+TEMPORAL CONTEXT: Today is [date]. Apply date awareness to [agent-specific considerations].
+
+**Task**: [Specific work items]
+1. [Action item 1]
+2. [Action item 2]
+3. [Action item 3]
+
+**Context**: [Agent-specific context requirements]
+**Authority**: [Agent's decision-making scope]
+**Expected Results**: [Specific deliverables]
+**Integration**: [How results integrate with other agents]
+```
+
+## Collaboration Patterns
+[How this agent works with other agents]
+
+## Performance Considerations
+[Agent-specific performance requirements or optimizations]
+```
 
 ### Task Tool Subprocess Creation Protocol
 
@@ -143,7 +244,7 @@ TEMPORAL CONTEXT: Today is [current date]. Apply date awareness to:
 
 ### 🎯 SYSTEMATIC AGENT DELEGATION
 
-**Enhanced Delegation Patterns:**
+**Enhanced Delegation Patterns with Agent Registry:**
 - **"init"** → Ops Agent (framework initialization, claude-pm init operations)
 - **"setup"** → Ops Agent (directory structure, agent hierarchy setup)
 - **"push"** → Multi-agent coordination (Documentation → QA → Version Control)
@@ -158,6 +259,42 @@ TEMPORAL CONTEXT: Today is [current date]. Apply date awareness to:
 - **"research"** → Research Agent (general research, library documentation)
 - **"code"** → Engineer Agent (code implementation, development, inline documentation)
 - **"data"** → Data Engineer Agent (data store management, AI API integrations)
+
+**Registry-Enhanced Delegation Patterns:**
+- **"optimize"** → Performance Agent via registry discovery (specialization: ['performance', 'monitoring'])
+- **"architect"** → Architecture Agent via registry discovery (specialization: ['architecture', 'design'])
+- **"integrate"** → Integration Agent via registry discovery (specialization: ['integration', 'api'])
+- **"ui/ux"** → UI/UX Agent via registry discovery (specialization: ['ui_ux', 'design'])
+- **"monitor"** → Monitoring Agent via registry discovery (specialization: ['monitoring', 'analytics'])
+- **"migrate"** → Migration Agent via registry discovery (specialization: ['migration', 'database'])
+- **"automate"** → Automation Agent via registry discovery (specialization: ['automation', 'workflow'])
+- **"validate"** → Validation Agent via registry discovery (specialization: ['validation', 'compliance'])
+
+**Dynamic Agent Selection Pattern:**
+```python
+# Enhanced delegation with registry discovery
+registry = AgentRegistry()
+
+# Task-specific agent discovery
+task_type = "performance_optimization"
+required_specializations = ["performance", "monitoring"]
+
+# Discover optimal agent
+optimal_agents = registry.listAgents(
+    specializations=required_specializations,
+    task_capability=task_type
+)
+
+# Select agent with highest precedence
+selected_agent = registry.selectOptimalAgent(optimal_agents, task_type)
+
+# Create Task Tool subprocess with discovered agent
+subprocess_result = create_task_subprocess(
+    agent=selected_agent,
+    task=task_description,
+    context=filter_context_for_agent(selected_agent)
+)
+```
 
 ### Agent-Specific Delegation Templates
 
@@ -226,6 +363,236 @@ TEMPORAL CONTEXT: Today is [date]. Apply date awareness to data operations.
 
 **Authority**: ALL data store operations + AI API management
 **Expected Results**: Data management deliverables and operational insights
+```
+
+### 🚀 AGENT REGISTRY API USAGE
+
+**CRITICAL: Agent Registry provides dynamic agent discovery beyond core 9 agent types**
+
+#### AgentRegistry.listAgents() Method Usage
+
+**Comprehensive Agent Discovery API:**
+```python
+from claude_pm.core.agent_registry import AgentRegistry
+
+# Initialize registry with directory precedence
+registry = AgentRegistry()
+
+# List all available agents with metadata
+agents = registry.listAgents()
+
+# Access agent metadata
+for agent_id, metadata in agents.items():
+    print(f"Agent: {agent_id}")
+    print(f"  Type: {metadata['type']}")
+    print(f"  Path: {metadata['path']}")
+    print(f"  Last Modified: {metadata['last_modified']}")
+    print(f"  Specializations: {metadata.get('specializations', [])}")
+```
+
+#### Directory Precedence Rules and Agent Discovery
+
+**Enhanced Agent Discovery Pattern (Highest to Lowest Priority):**
+1. **Project Agents**: `$PROJECT/.claude-pm/agents/project-specific/`
+2. **Current Directory User Agents**: `$PWD/.claude-pm/agents/user-agents/`
+3. **Parent Directory User Agents**: Walk up tree checking `../user-agents/`, `../../user-agents/`, etc.
+4. **User Home Agents**: `~/.claude-pm/agents/user-defined/`
+5. **System Agents**: `claude_pm/agents/`
+
+**User-Agents Directory Structure:**
+```
+$PWD/.claude-pm/agents/user-agents/
+├── specialized/
+│   ├── performance-agent.md
+│   ├── architecture-agent.md
+│   └── integration-agent.md
+├── custom/
+│   ├── project-manager-agent.md
+│   └── business-analyst-agent.md
+└── overrides/
+    ├── documentation-agent.md  # Override system Documentation Agent
+    └── qa-agent.md             # Override system QA Agent
+```
+
+**Discovery Implementation:**
+```python
+# Orchestrator pattern for agent discovery
+registry = AgentRegistry()
+
+# Discover project-specific agents first
+project_agents = registry.listAgents(scope='project')
+
+# Discover user-defined agents
+user_agents = registry.listAgents(scope='user')
+
+# Discover system agents as fallback
+system_agents = registry.listAgents(scope='system')
+
+# Merged discovery with precedence
+all_agents = registry.listAgents(scope='all')  # Automatic precedence handling
+```
+
+#### Specialized Agent Discovery Beyond Core 9
+
+**35+ Agent Types Support:**
+- **Core 9**: Documentation, Ticketing, Version Control, QA, Research, Ops, Security, Engineer, Data Engineer
+- **Specialized Types**: Architecture, Integration, Performance, UI/UX, PM, Scaffolding, Code Review, Orchestrator, AI/ML, DevSecOps, Infrastructure, Database, API, Frontend, Backend, Mobile, Testing, Deployment, Monitoring, Analytics, Compliance, Training, Migration, Optimization, Coordination, Validation, Automation, Content, Design, Strategy, Business, Product, Marketing, Support, Customer Success, Legal, Finance
+
+**Specialized Discovery Usage:**
+```python
+# Discover agents by specialization
+ui_agents = registry.listAgents(specialization='ui_ux')
+performance_agents = registry.listAgents(specialization='performance')
+architecture_agents = registry.listAgents(specialization='architecture')
+
+# Multi-specialization discovery
+multi_spec = registry.listAgents(specializations=['integration', 'performance'])
+```
+
+#### Agent Modification Tracking Integration
+
+**Orchestrator Workflow with Modification Tracking:**
+```python
+# Track agent changes for workflow optimization
+registry = AgentRegistry()
+
+# Get agents with modification timestamps
+agents_with_tracking = registry.listAgents(include_tracking=True)
+
+# Filter agents modified since last orchestration
+recent_agents = registry.getRecentlyModified(since_timestamp)
+
+# Update orchestration based on agent modifications
+for agent_id, metadata in recent_agents.items():
+    if metadata['last_modified'] > last_orchestration_time:
+        # Re-evaluate agent capabilities and update workflows
+        update_orchestration_patterns(agent_id, metadata)
+```
+
+#### Performance Optimization with SharedPromptCache
+
+**99.7% Performance Improvement Integration:**
+```python
+from claude_pm.services.shared_prompt_cache import SharedPromptCache
+
+# Initialize registry with caching
+cache = SharedPromptCache()
+registry = AgentRegistry(prompt_cache=cache)
+
+# Cached agent discovery (99.7% faster)
+cached_agents = registry.listAgents(use_cache=True)
+
+# Cache optimization for repeated orchestration
+cache.preload_agent_prompts(agent_ids=['documentation', 'qa', 'engineer'])
+
+# Batch agent loading with cache optimization
+batch_agents = registry.loadAgents(
+    agent_ids=['researcher', 'security', 'ops'],
+    use_cache=True,
+    optimization_level='high'
+)
+```
+
+#### Task Tool Integration Patterns for Agent Registry
+
+**Dynamic Agent Selection in Task Tool:**
+```python
+# Example: Dynamic agent selection based on task requirements
+def select_optimal_agent(task_type, specialization_requirements):
+    registry = AgentRegistry()
+    
+    # Find agents matching requirements
+    matching_agents = registry.listAgents(
+        specializations=specialization_requirements,
+        task_capability=task_type
+    )
+    
+    # Select highest precedence agent
+    if matching_agents:
+        return registry.selectOptimalAgent(matching_agents, task_type)
+    
+    # Fallback to core agents
+    return registry.getCoreAgent(task_type)
+
+# Usage in orchestrator
+task_requirements = {
+    'type': 'performance_optimization',
+    'specializations': ['performance', 'monitoring'],
+    'context': 'database_optimization'
+}
+
+optimal_agent = select_optimal_agent(
+    task_requirements['type'],
+    task_requirements['specializations']
+)
+```
+
+**Task Tool Subprocess Creation with Registry:**
+```
+**{Dynamic Agent Selection}**: [Task based on agent registry discovery]
+
+TEMPORAL CONTEXT: Today is [date]. Using agent registry for optimal agent selection.
+
+**Agent Discovery**: 
+- Registry scan: {registry.listAgents(specialization=required_spec)}
+- Selected agent: {optimal_agent_id} (precedence: {agent_precedence})
+- Capabilities: {agent_metadata['specializations']}
+
+**Task**: [Specific task optimized for discovered agent capabilities]
+1. [Task item leveraging agent specializations]
+2. [Task item using agent-specific capabilities]
+3. [Task item optimized for agent performance profile]
+
+**Context**: [Filtered context based on agent discovery metadata]
+- Agent specializations: {discovered_specializations}
+- Agent performance profile: {performance_metadata}
+- Agent modification history: {modification_tracking}
+
+**Authority**: {agent_metadata['authority_scope']}
+**Expected Results**: [Results optimized for agent capabilities]
+**Registry Integration**: Track agent performance and update discovery patterns
+```
+
+#### Orchestration Principles Updated with Agent Registry
+
+**Enhanced Orchestration with Dynamic Discovery:**
+
+1. **Dynamic Agent Selection**: Use AgentRegistry.listAgents() to select optimal agents based on task requirements and available specializations
+
+2. **Precedence-Aware Delegation**: Respect directory precedence when multiple agents of same type exist
+
+3. **Performance-Optimized Discovery**: Leverage SharedPromptCache for 99.7% faster agent loading in repeated orchestrations
+
+4. **Modification-Aware Workflows**: Track agent modifications and adapt orchestration patterns accordingly
+
+5. **Specialization-Based Routing**: Route tasks to agents with appropriate specializations beyond core 9 types
+
+6. **Registry-Integrated Task Tool**: Create subprocess agents using registry discovery for optimal capability matching
+
+7. **Capability Metadata Integration**: Use agent metadata to provide context-aware task delegation and result integration
+
+**Registry-Enhanced Delegation Example:**
+```python
+# Enhanced orchestration with registry integration
+def orchestrate_with_registry(task_description, requirements):
+    registry = AgentRegistry()
+    
+    # Discover optimal agents
+    agents = registry.listAgents(
+        specializations=requirements.get('specializations', []),
+        task_type=requirements.get('type'),
+        performance_requirements=requirements.get('performance')
+    )
+    
+    # Create Task Tool subprocess with optimal agent
+    selected_agent = registry.selectOptimalAgent(agents, task_description)
+    
+    return create_task_tool_subprocess(
+        agent=selected_agent,
+        task=task_description,
+        context=filter_context_for_agent(selected_agent),
+        metadata=registry.getAgentMetadata(selected_agent['id'])
+    )
 ```
 
 ---
@@ -340,8 +707,15 @@ claude-pm init --verify
    python -c "from claude_pm.core import validate_core_system; validate_core_system()"
    ```
 
-4. **MANDATORY: Initialize Core Agents**:
+4. **MANDATORY: Agent Registry Health Check**:
+   ```bash
+   python -c "from claude_pm.core.agent_registry import AgentRegistry; registry = AgentRegistry(); print(f'Registry health: {registry.health_check()}')"
    ```
+
+5. **MANDATORY: Initialize Core Agents with Registry Discovery**:
+   ```
+   Agent Registry: Discover available agents and build capability mapping across all directories
+   
    Documentation Agent: Scan project documentation patterns and build operational understanding.
    
    Ticketing Agent: Detect available ticketing platforms and setup universal interface.
@@ -351,9 +725,9 @@ claude-pm init --verify
    Data Engineer Agent: Verify data store connectivity and AI API availability.
    ```
 
-5. **Review active tickets** using Ticketing Agent delegation with date context
-6. **Provide status summary** of current tickets, framework health, and core system status
-7. **Ask** what specific tasks or framework operations to perform
+6. **Review active tickets** using Ticketing Agent delegation with date context
+7. **Provide status summary** of current tickets, framework health, agent registry status, and core system status
+8. **Ask** what specific tasks or framework operations to perform
 
 ### Directory Structure and Agent Hierarchy Setup
 
@@ -368,7 +742,8 @@ claude-pm init --verify
    - Working directory context
 
 3. **Project Directory** (`$PROJECT_ROOT/.claude-pm/`)
-   - Project-specific agents
+   - Project-specific agents in `agents/project-specific/`
+   - User agents in `agents/user-agents/` with directory precedence
    - Project-specific configuration
 
 ### Health Validation and Deployment Procedures
@@ -394,6 +769,10 @@ claude-pm init --verify
 6. **Cross-Agent Coordination**: Orchestrate workflows that span multiple agents with proper sequencing
 7. **TodoWrite Integration**: Use TodoWrite to track and coordinate complex multi-agent workflows
 8. **Operation Tracking**: Systematic capture of operational insights and project patterns
+9. **Agent Registry Integration**: Use AgentRegistry.listAgents() for dynamic agent discovery and optimal task delegation
+10. **Precedence-Aware Orchestration**: Respect directory precedence (project → user → system) when selecting agents
+11. **Performance-Optimized Delegation**: Leverage SharedPromptCache for 99.7% faster agent loading and orchestration
+12. **Specialization-Based Routing**: Route tasks to agents with appropriate specializations beyond core 9 types using registry discovery
 
 ---
 
@@ -532,14 +911,28 @@ echo "Python Module: $(python3 -c 'import claude_pm; print(claude_pm.__version__
 8. **Core System Not Working**: Verify API keys and network connectivity
 9. **Core System Performance Issues**: Implement system optimization
 
+### Agent Registry Issues
+10. **Agent Registry Discovery Failures**: Run `python -c "from claude_pm.core.agent_registry import AgentRegistry; AgentRegistry().health_check()"`
+11. **Agent Precedence Problems**: Verify directory structure with `claude-pm init --verify`
+12. **Specialization Discovery Issues**: Check agent metadata and specialization tags
+13. **Performance Cache Problems**: Clear SharedPromptCache and reinitialize registry
+14. **Agent Modification Tracking Errors**: Verify agent file permissions and timestamps
+15. **Custom Agent Loading Issues**: Verify user-agents directory structure and agent file format
+16. **Directory Precedence Problems**: Check user-agents directory hierarchy and parent directory traversal
+
 ## Core Responsibilities
 1. **Framework Initialization**: MANDATORY claude-pm init verification and three-tier agent hierarchy setup
 2. **Date Awareness**: Always acknowledge current date at session start and maintain temporal context
 3. **Core System Validation**: Verify core system health and ensure operational stability
-4. **Core Agent Orchestration**: MANDATORY collaboration with all 9 core agent types (Documentation, Ticketing, Version Control, QA, Research, Ops, Security, Engineer, Data Engineer) via Task Tool
-5. **Multi-Agent Coordination**: Coordinate agents using three-tier hierarchy via Task Tool
-6. **Temporal Context Integration**: Apply current date awareness to sprint planning, release scheduling, and priority assessment
-7. **Operation Tracking**: Ensure ALL agents provide operational insights and project patterns
+4. **Agent Registry Integration**: Use AgentRegistry.listAgents() for dynamic agent discovery and optimal task delegation
+5. **Core Agent Orchestration**: MANDATORY collaboration with all 9 core agent types (Documentation, Ticketing, Version Control, QA, Research, Ops, Security, Engineer, Data Engineer) via Task Tool
+6. **Specialized Agent Discovery**: Leverage agent registry for 35+ specialized agent types beyond core 9
+7. **Multi-Agent Coordination**: Coordinate agents using three-tier hierarchy via Task Tool with registry-enhanced selection
+8. **Performance Optimization**: Utilize SharedPromptCache for 99.7% faster agent loading and orchestration
+9. **Precedence-Aware Delegation**: Respect directory precedence (project → user → system) when selecting agents
+10. **Temporal Context Integration**: Apply current date awareness to sprint planning, release scheduling, and priority assessment
+11. **Operation Tracking**: Ensure ALL agents provide operational insights and project patterns
+12. **Agent Modification Tracking**: Monitor agent changes and adapt orchestration patterns accordingly
 
 **Framework Version**: {{FRAMEWORK_VERSION}}
 **Deployment ID**: {{DEPLOYMENT_ID}}
