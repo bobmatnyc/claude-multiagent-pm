@@ -156,6 +156,32 @@ Thumbs.db
 backups/
 sync/
 
+# Memory and cache files
+.claude-pm/memory/*.json
+.claude-pm/memory/*.md
+memory_entries/*.json
+chroma_db/
+*.sqlite3
+
+# Coverage files
+.coverage
+.coverage.*
+coverage.xml
+
+# Test directories
+tests/test-*/
+test_*/
+
+# Temporary cleanup files
+cleanup_phase_*.json
+
+# Demo and helper files (development only)
+# Note: Some demo files are tracked for framework functionality
+# demo_*.py
+# *_demo.py
+# *_helper.py
+# *_integration_demo.py
+
 # Archive directory
 _archive/
 

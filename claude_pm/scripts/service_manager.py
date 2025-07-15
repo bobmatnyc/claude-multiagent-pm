@@ -21,7 +21,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from claude_pm.core.service_manager import ServiceManager
 from claude_pm.services.health_monitor import HealthMonitorService
-from claude_pm.services.memory_service import MemoryService
 from claude_pm.services.project_service import ProjectService
 
 console = Console()
@@ -42,18 +41,14 @@ class ClaudePMServiceManager:
             health_service, dependencies=[], startup_order=1, auto_start=True, critical=True
         )
 
-        # Memory Service (depends on mem0AI being available)
-        memory_service = MemoryService()
-        self.service_manager.register_service(
-            memory_service, dependencies=[], startup_order=2, auto_start=True, critical=True
-        )
+        # Memory Service has been removed from framework
 
-        # Project Service
+        # Project Service - updated to not depend on removed memory_service
         project_service = ProjectService()
         self.service_manager.register_service(
             project_service,
-            dependencies=["memory_service"],
-            startup_order=3,
+            dependencies=[],  # memory_service dependency removed
+            startup_order=2,  # moved up in startup order
             auto_start=True,
             critical=False,
         )

@@ -180,17 +180,13 @@ class Config:
             "graceful_shutdown_timeout": 30,
             "startup_timeout": 60,
             # ai-trackdown-tools integration
-            "use_ai_trackdown_tools": True,
+            "use_ai_trackdown_tools": False,
             "ai_trackdown_tools_timeout": 30,
             "ai_trackdown_tools_fallback_logging": True,
             # Claude PM specific - dynamic path resolution
             "base_path": base_path,
             "claude_pm_path": claude_pm_path,
             "managed_path": managed_path,
-            # mem0AI integration
-            "mem0ai_host": "localhost",
-            "mem0ai_port": 8002,
-            "mem0ai_timeout": 30,
             # Alerting
             "enable_alerting": True,
             "alert_threshold": 60,

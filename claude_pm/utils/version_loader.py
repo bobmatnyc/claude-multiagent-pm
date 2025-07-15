@@ -185,12 +185,11 @@ class VersionLoader:
                 "health": "HEALTH_VERSION",
                 "framework": "FRAMEWORK_VERSION",
                 # Service-specific files
-                "memory_service": "claude_pm/services/memory/VERSION",
+                # "memory_service": "claude_pm/services/memory/VERSION",  # REMOVED - service deprecated
                 "agents_service": "claude_pm/agents/VERSION",
                 "cli_service": "claude_pm/cli/VERSION",
                 "services_core": "claude_pm/services/VERSION",
                 "version_control_service": "claude_pm/services/version_control/VERSION",
-                "ai_ops_service": "claude_pm/services/ai_ops/VERSION",
                 "framework_core": "framework/VERSION",
                 "script_system": "bin/VERSION",
                 "deployment_scripts": "scripts/VERSION"
@@ -228,9 +227,9 @@ class VersionLoader:
         # Add service versions
         service_names = [
             "memory", "agents", "ticketing", "documentation", "services", 
-            "cli", "integration", "health", "memory_service", "agents_service", 
+            "cli", "integration", "health", "agents_service", 
             "cli_service", "services_core", "version_control_service", 
-            "ai_ops_service", "framework_core", "script_system", "deployment_scripts"
+            "framework_core", "script_system", "deployment_scripts"
         ]
         
         for service_name in service_names:

@@ -37,21 +37,11 @@ from ..core.base_service import BaseService
 from ..core.logging_config import setup_logging
 
 # Import all CMPM services
-try:
-    from .template_manager import TemplateManager, TemplateVersion, TemplateSource, TemplateType
+# Template Manager removed - use Claude Code Task Tool instead
+TEMPLATE_MANAGER_AVAILABLE = False
 
-    TEMPLATE_MANAGER_AVAILABLE = True
-except ImportError as e:
-    logging.warning(f"Template Manager not available: {e}")
-    TEMPLATE_MANAGER_AVAILABLE = False
-
-try:
-    from .dependency_manager import DependencyManager, DependencyType, InstallationMethod
-
-    DEPENDENCY_MANAGER_AVAILABLE = True
-except ImportError as e:
-    logging.warning(f"Dependency Manager not available: {e}")
-    DEPENDENCY_MANAGER_AVAILABLE = False
+# Dependency Manager removed - use Claude Code Task Tool instead
+DEPENDENCY_MANAGER_AVAILABLE = False
 
 try:
     from .parent_directory_manager import ParentDirectoryManager, ParentDirectoryContext
@@ -134,8 +124,10 @@ class CMPMIntegrationService(BaseService):
         self.logger = setup_logging(__name__)
 
         # Service instances
-        self.template_manager: Optional[TemplateManager] = None
-        self.dependency_manager: Optional[DependencyManager] = None
+        # template_manager removed - use Claude Code Task Tool instead
+        self.template_manager: Optional[Any] = None
+        # dependency_manager removed - use Claude Code Task Tool instead
+        self.dependency_manager: Optional[Any] = None
         self.parent_directory_manager: Optional[ParentDirectoryManager] = None
 
         # Integration state
@@ -188,11 +180,9 @@ class CMPMIntegrationService(BaseService):
             # Cleanup all services
             cleanup_tasks = []
 
-            if self.template_manager:
-                cleanup_tasks.append(self.template_manager._cleanup())
+            # template_manager removed - no cleanup needed
 
-            if self.dependency_manager:
-                cleanup_tasks.append(self.dependency_manager._cleanup())
+            # dependency_manager removed - no cleanup needed
 
             if self.parent_directory_manager:
                 cleanup_tasks.append(self.parent_directory_manager._cleanup())
@@ -273,13 +263,11 @@ class CMPMIntegrationService(BaseService):
 
         initialization_tasks = []
 
-        # Initialize Template Manager (CMPM-102)
-        if TEMPLATE_MANAGER_AVAILABLE:
-            initialization_tasks.append(self._initialize_template_manager())
+        # Initialize Template Manager (CMPM-102) - REMOVED
+        # template_manager removed - use Claude Code Task Tool instead
 
-        # Initialize Dependency Manager (CMPM-103)
-        if DEPENDENCY_MANAGER_AVAILABLE:
-            initialization_tasks.append(self._initialize_dependency_manager())
+        # Initialize Dependency Manager (CMPM-103) - REMOVED
+        # dependency_manager removed - use Claude Code Task Tool instead
 
         # Initialize Parent Directory Manager (CMPM-104)
         if PARENT_DIRECTORY_MANAGER_AVAILABLE:
@@ -303,12 +291,9 @@ class CMPMIntegrationService(BaseService):
         self.services["deployment_detector"].last_health_check = datetime.now()
 
     async def _initialize_template_manager(self):
-        """Initialize the Template Manager service."""
-        try:
-            self.logger.debug("Initializing Template Manager...")
-            self.services["template_manager"].status = CMPMServiceStatus.INITIALIZING
-
-            self.template_manager = TemplateManager(self.deployment_config)
+        """Initialize the Template Manager service - SERVICE REMOVED."""
+        self.logger.debug("Template Manager removed - use Claude Code Task Tool instead")
+        return
             await self.template_manager._initialize()
 
             self.services["template_manager"].status = CMPMServiceStatus.OPERATIONAL
@@ -330,13 +315,9 @@ class CMPMIntegrationService(BaseService):
             self.services["template_manager"].error_message = str(e)
 
     async def _initialize_dependency_manager(self):
-        """Initialize the Dependency Manager service."""
-        try:
-            self.logger.debug("Initializing Dependency Manager...")
-            self.services["dependency_manager"].status = CMPMServiceStatus.INITIALIZING
-
-            self.dependency_manager = DependencyManager()
-            await self.dependency_manager._initialize()
+        """Initialize the Dependency Manager service - SERVICE REMOVED."""
+        self.logger.debug("Dependency Manager removed - use Claude Code Task Tool instead")
+        return
 
             self.services["dependency_manager"].status = CMPMServiceStatus.OPERATIONAL
             self.services["dependency_manager"].initialized = True

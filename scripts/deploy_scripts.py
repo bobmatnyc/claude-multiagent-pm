@@ -95,10 +95,10 @@ class ScriptDeploymentManager:
             with open(source_path, 'r') as f:
                 script_content = f.read()
             
-            # Inject the script version from bin/VERSION file
-            bin_version_file = self.bin_dir / "VERSION"
-            if bin_version_file.exists():
-                script_version = bin_version_file.read_text().strip()
+            # Inject the script version from scripts/VERSION file
+            scripts_version_file = self.framework_root / "scripts" / "VERSION"
+            if scripts_version_file.exists():
+                script_version = scripts_version_file.read_text().strip()
             else:
                 script_version = "001"  # Fallback serial version
             
@@ -109,21 +109,25 @@ class ScriptDeploymentManager:
             
             import re
             # Replace the get_script_version function
-            pattern = r'def get_script_version\(\):\s*""".*?""".*?return "1\.0\.0"  # Fallback'
+            pattern = r'def get_script_version\(\):\s*""".*?""".*?return "[\d\.]+"'
             updated_content = re.sub(pattern, version_function_replacement, script_content, flags=re.DOTALL)
             
             # Also try alternative patterns in case the exact match fails
             if f'return "{script_version}"' not in updated_content:
                 # Try simpler pattern for the function body
-                pattern2 = r'(def get_script_version\(\):.*?)return "1\.0\.0"  # Fallback'
+                pattern2 = r'(def get_script_version\(\):.*?)return "[\d\.]+"'
                 updated_content = re.sub(pattern2, f'\\1return "{script_version}"', script_content, flags=re.DOTALL)
                 
-                # If still not replaced, try direct string replacement
+                # If still not replaced, try direct string replacement of the return statement
                 if f'return "{script_version}"' not in updated_content:
-                    updated_content = script_content.replace(
-                        'return "1.0.0"  # Fallback',
-                        f'return "{script_version}"'
-                    )
+                    # Look for any return statement in the function and replace it
+                    lines = script_content.split('\n')
+                    for i, line in enumerate(lines):
+                        if 'return "' in line and 'def get_script_version' in '\n'.join(lines[max(0,i-5):i]):
+                            # Replace the return statement
+                            lines[i] = f'    return "{script_version}"'
+                            break
+                    updated_content = '\n'.join(lines)
             
             script_content = updated_content
             

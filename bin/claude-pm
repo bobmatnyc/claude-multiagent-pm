@@ -10,12 +10,13 @@ import sys
 import os
 import subprocess
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 # Script version - tracks claude-pm script updates independently
 def get_script_version():
     """Get script version - injected during deployment."""
-    return "003"
+    return "004"
 
 SCRIPT_VERSION = get_script_version()
 
@@ -266,7 +267,8 @@ def check_parent_claude_md_status():
     try:
         # Get current working directory and look for parent CLAUDE.md
         current_dir = Path.cwd()
-        parent_claude_md = current_dir / "CLAUDE.md"
+        parent_dir = current_dir.parent
+        parent_claude_md = parent_dir / "CLAUDE.md"
         
         # Get framework template path
         framework_template = framework_path / "framework" / "CLAUDE.md"
@@ -304,7 +306,7 @@ def check_parent_claude_md_status():
                 
                 # Perform automatic deployment using Parent Directory Manager
                 backup_result, update_result = perform_automatic_backup_and_update(
-                    current_dir, parent_claude_md, template_version
+                    current_dir, parent_claude_md, template_version, quiet_mode=True
                 )
                 
                 if update_result:
@@ -390,7 +392,7 @@ def check_parent_claude_md_status():
                 
                 # Perform automatic backup and update using Parent Directory Manager
                 backup_result, update_result = perform_automatic_backup_and_update(
-                    current_dir, parent_claude_md, template_version
+                    current_dir, parent_claude_md, template_version, quiet_mode=True
                 )
                 
                 if backup_result and update_result:
@@ -432,7 +434,7 @@ def check_parent_claude_md_status():
         }
 
 
-def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_version):
+def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_version, quiet_mode=False):
     """
     Perform automatic backup and update of CLAUDE.md using Parent Directory Manager.
     
@@ -445,6 +447,7 @@ def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_
         current_dir: Current working directory Path
         parent_claude_md: Path to existing CLAUDE.md file  
         template_version: Framework template version
+        quiet_mode: If True, suppress INFO level logging
         
     Returns:
         Tuple of (backup_path, success) where:
@@ -459,7 +462,7 @@ def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_
             from claude_pm.services.parent_directory_manager import ParentDirectoryManager
             
             # Initialize the Parent Directory Manager with proper configuration
-            manager = ParentDirectoryManager()
+            manager = ParentDirectoryManager(quiet_mode=quiet_mode)
             await manager._initialize()
             
             backup_path = None
@@ -467,7 +470,7 @@ def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_
             try:
                 # Step 1: Create timestamped backup of existing CLAUDE.md
                 console.print("[dim]🔄 Creating backup of existing CLAUDE.md...[/dim]")
-                backup_path = await manager.backup_parent_directory(current_dir)
+                backup_path = await manager.backup_parent_directory(parent_dir)
                 
                 if backup_path:
                     console.print(f"[green]✅ Backup created: {backup_path.name}[/green]")
@@ -477,7 +480,7 @@ def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_
                 # Step 2: Install new template from framework using force mode
                 console.print("[dim]🔄 Installing updated framework template...[/dim]")
                 operation = await manager.install_template_to_parent_directory(
-                    target_directory=current_dir,
+                    target_directory=parent_dir,
                     template_id="claude_md",  # Framework template ID for CLAUDE.md
                     template_variables=None,  # Use default deployment variables
                     force=True  # Force update to override version checking
@@ -491,7 +494,7 @@ def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_
                     # if hasattr(manager, 'logger'):
                     #     manager.logger.info(f"Automatic CLAUDE.md update completed: {template_version}")
                     #     manager.logger.info(f"Backup created: {backup_path}")
-                    #     manager.logger.info(f"Target directory: {current_dir}")
+                    #     manager.logger.info(f"Target directory: {parent_dir}")
                     
                     return backup_path, True
                 else:
@@ -806,7 +809,7 @@ def display_comprehensive_status():
     # Memory system status with mem0AI version and memory count
     memory_status = check_memory_status()
     memory_color = "green" if memory_status["healthy"] else "yellow" if memory_status["partial"] else "red"
-    console.print(f"🧠 Memory System: [{memory_color}]{memory_status['status']}[/{memory_color}]")
+    # console.print(f"🧠 Memory System: [{memory_color}]{memory_status['status']}[/{memory_color}]")
     
     # Framework deployment status
     deployment_valid = validate_framework_deployment()
@@ -1136,111 +1139,183 @@ def attempt_python_package_installation():
 
 def handle_init_command(args):
     """Handle the init command with intelligent auto-initialization."""
-    console.print("[bold blue]🛠️  Claude PM Framework Initialization[/bold blue]")
-    console.print("[dim]Intelligent initialization - detecting setup requirements...[/dim]")
-    
     # Parse command flags
     force = "--force" in args
     skip_postinstall = "--skip-postinstall" in args
     validate_only = "--validate" in args
     
-    try:
-        # Import required modules
-        from claude_pm.utils.installation_state import InstallationStateDetector
-        from claude_pm.agents.pm_agent import PMAgent
-        import asyncio
+    # Configure logging based on force flag
+    if force:
+        # Suppress INFO logging when --force is used
+        import logging
+        import os
+        # Set environment variable for services to respect quiet mode
+        os.environ['CLAUDE_PM_QUIET_MODE'] = 'true'
         
-        async def run_smart_init():
-            # Create detector and check installation state
-            detector = InstallationStateDetector(console)
-            state = await detector.detect_installation_state()
+        # Configure logging to suppress INFO messages
+        logging.basicConfig(level=logging.ERROR)
+        
+        # Suppress Rich console output for quiet mode
+        console.print = lambda *args, **kwargs: None
+        
+        # Use quiet logging module
+        sys.path.insert(0, str(framework_path))
+        try:
+            from claude_pm.core.quiet_logging import setup_quiet_logging
+            setup_quiet_logging()
+        except ImportError:
+            # Fallback if quiet_logging module not available
+            pass
+    else:
+        console.print("[bold blue]🛠️  Claude PM Framework Initialization[/bold blue]")
+        console.print("[dim]Intelligent initialization - detecting setup requirements...[/dim]")
+    
+    try:
+        # Basic framework initialization without agent system
+        import asyncio
+        import json
+        
+        async def run_basic_init():
+            if not force:  # Only show verbose output if not in force mode
+                console.print("\n[bold]🔧 Running basic framework initialization...[/bold]")
             
-            # Display current state
-            detector.display_installation_state(state)
+            # Create basic framework directories
+            framework_path = Path.home() / ".claude-pm"
+            framework_path.mkdir(parents=True, exist_ok=True)
             
-            # Handle validate-only mode
-            if validate_only:
-                is_valid, messages = await detector.validate_installation()
-                console.print("\n[bold blue]📋 Validation Results:[/bold blue]")
-                for message in messages:
-                    console.print(f"  {message}")
-                return is_valid
+            # Create basic config
+            config_path = framework_path / "config.json"
+            if not config_path.exists() or force:
+                config_data = {
+                    "version": get_framework_version(),
+                    "installationType": "python",
+                    "installationComplete": True,
+                    "timestamp": datetime.now().isoformat(),
+                    "framework_path": str(framework_path),
+                    "agent_system": "disabled"  # Agent system removed
+                }
+                
+                with open(config_path, 'w') as f:
+                    json.dump(config_data, f, indent=2)
+                
+                if not force:  # Only show verbose output if not in force mode
+                    console.print(f"✅ Created configuration: {config_path}")
             
-            # Check if post-install is needed
-            needs_post_install = state.needs_post_install or force
+            # Create basic directory structure
+            dirs_to_create = [
+                framework_path / "logs",
+                framework_path / "templates",
+                framework_path / "memory",
+            ]
             
-            # Handle skip-postinstall mode
-            if skip_postinstall:
-                console.print("[yellow]⚠️  Skipping post-install setup as requested[/yellow]")
-                needs_post_install = False
+            for dir_path in dirs_to_create:
+                dir_path.mkdir(parents=True, exist_ok=True)
+                if not force:  # Only show verbose output if not in force mode
+                    console.print(f"✅ Created directory: {dir_path}")
             
-            # Run post-install setup if needed
-            if needs_post_install:
-                console.print("\n[bold]🚀 Running post-install setup...[/bold]")
-                post_install_success = await detector.run_post_install_setup(force=force)
-                
-                if not post_install_success:
-                    console.print("[red]❌ Post-install setup failed![/red]")
-                    return False
-                
-                # Re-check state after post-install
-                state = await detector.detect_installation_state()
-                console.print("\n[bold]📋 Post-install state:[/bold]")
-                detector.display_installation_state(state)
-            
-            # If post-install was skipped or framework is already complete, run standard init
-            if not needs_post_install or state.is_complete:
-                console.print("\n[bold]🔧 Running framework initialization...[/bold]")
-                
-                # Run standard PM Agent initialization
-                agent = PMAgent()
-                await agent._initialize()
-                
-                # Run framework initialization  
-                results = await agent.initialize_framework(force=force)
-                
-                # Display the initialization report
-                await agent.display_initialization_report(results)
-                
-                await agent._cleanup()
-                return results["success"]
+            # Deploy CLAUDE.md to parent directory with force flag
+            if force:
+                try:
+                    from claude_pm.services.parent_directory_manager import ParentDirectoryManager
+                    
+                    # Initialize Parent Directory Manager with quiet mode if force is used
+                    manager = ParentDirectoryManager(quiet_mode=force)
+                    await manager._initialize()
+                    
+                    # Get current working directory and parent directory
+                    current_dir = Path.cwd()
+                    parent_dir = current_dir.parent
+                    
+                    # Deploy CLAUDE.md with force flag
+                    operation = await manager.install_template_to_parent_directory(
+                        target_directory=parent_dir,
+                        template_id="claude_md",
+                        template_variables=None,  # Use defaults
+                        force=True  # Force deployment when --force flag is used
+                    )
+                    
+                    # Only show output if not in force mode or if there's an error
+                    if not operation.success:
+                        console.print(f"❌ CLAUDE.md deployment failed: {operation.error_message}")
+                    
+                    await manager._cleanup()
+                    
+                except Exception as deploy_error:
+                    # Always show deployment errors
+                    console.print(f"❌ CLAUDE.md deployment error: {deploy_error}")
+                    # Continue with initialization even if deployment fails
             
             return True
         
-        # Run the smart initialization
-        success = asyncio.run(run_smart_init())
+        # Run the basic initialization
+        if force:
+            # Use quiet logging context for all operations
+            from claude_pm.core.quiet_logging import quiet_logging
+            with quiet_logging():
+                success = asyncio.run(run_basic_init())
+        else:
+            success = asyncio.run(run_basic_init())
         
         if success:
-            console.print("[green]\n✅ Framework initialization completed successfully![/green]")
-            console.print("[dim]🚀 Claude PM Framework is ready to use[/dim]")
-            console.print("[dim]   Try: claude-pm --help[/dim]")
+            # Load framework into Claude Code after successful deployment (when --force is used)
+            if force:
+                try:
+                    from claude_pm.services.claude_code_integration import load_framework_into_claude_code, create_framework_loading_summary
+                    
+                    # Load framework with retry logic (pass quiet_mode when force is used)
+                    framework_loaded = asyncio.run(load_framework_into_claude_code(quiet_mode=force))
+                    
+                    if framework_loaded:
+                        if not force:  # Only show verbose output if not in force mode
+                            console.print("[green]✅ Framework successfully loaded into Claude Code![/green]")
+                            console.print("[dim]🎯 Framework is now active and ready for use[/dim]")
+                    else:
+                        if not force:  # Only show verbose output if not in force mode
+                            console.print("[yellow]⚠️ Framework initialization completed but Claude Code loading failed[/yellow]")
+                            console.print("[dim]💡 You can still use claude-pm commands, but framework may not be fully active[/dim]")
+                            
+                except Exception as loading_error:
+                    if not force:  # Only show verbose output if not in force mode
+                        console.print(f"[red]❌ Framework loading error: {loading_error}[/red]")
+                        console.print("[dim]💡 Framework initialization completed but loading failed[/dim]")
+            
+            if not force:  # Only show verbose output if not in force mode
+                console.print("[green]\n✅ Framework initialization completed successfully![/green]")
+                console.print("[dim]🚀 Claude PM Framework is ready to use[/dim]")
+                console.print("[dim]📖 Use Claude Code Task Tool for agent functionality[/dim]")
+                console.print("[dim]   Try: claude-pm --help[/dim]")
             sys.exit(0)
         else:
-            console.print("[red]\n❌ Framework initialization failed![/red]")
-            console.print("[dim]🔧 Check the output above for errors[/dim]")
+            if not force:  # Only show verbose output if not in force mode
+                console.print("[red]\n❌ Framework initialization failed![/red]")
+                console.print("[dim]🔧 Check the output above for errors[/dim]")
             sys.exit(1)
             
     except ImportError as e:
-        console.print(f"[red]❌ Failed to import required modules: {e}[/red]")
-        console.print("[dim]This usually indicates the Python package is not installed[/dim]")
+        if not force:  # Only show verbose output if not in force mode
+            console.print(f"[red]❌ Failed to import required modules: {e}[/red]")
+            console.print("[dim]This usually indicates the Python package is not installed[/dim]")
         
         # Attempt automatic Python package installation
         if attempt_python_package_installation():
-            console.print("[green]✅ Package installed! Please run the command again.[/green]")
+            if not force:  # Only show verbose output if not in force mode
+                console.print("[green]✅ Package installed! Please run the command again.[/green]")
             sys.exit(0)
         else:
-            console.print("[red]❌ Automatic installation failed[/red]")
-            console.print("\n[bold]🔧 Manual installation required:[/bold]")
-            console.print("   1. Navigate to the framework directory:")
-            console.print(f"      cd {framework_path}")
-            console.print("   2. Install the Python package:")
-            console.print("      pip install -e .")
-            console.print("   3. Or run npm installation:")
-            console.print("      npm run install:dependencies")
-            console.print("   4. Then retry the command")
+            if not force:  # Only show verbose output if not in force mode
+                console.print("[red]❌ Automatic installation failed[/red]")
+                console.print("\n[bold]🔧 Manual installation required:[/bold]")
+                console.print("   1. Navigate to the framework directory:")
+                console.print(f"      cd {framework_path}")
+                console.print("   2. Install the Python package:")
+                console.print("      pip install -e .")
+                console.print("   3. Or run npm installation:")
+                console.print("      npm run install:dependencies")
+                console.print("   4. Then retry the command")
             sys.exit(1)
     except Exception as e:
-        console.print(f"[red]❌ Initialization error: {e}[/red]")
+        if not force:  # Only show verbose output if not in force mode
+            console.print(f"[red]❌ Initialization error: {e}[/red]")
         sys.exit(1)
 
 

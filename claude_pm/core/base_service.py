@@ -14,6 +14,7 @@ import asyncio
 import logging
 import signal
 import sys
+import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -69,7 +70,13 @@ class BaseService(ABC):
         """
         self.name = name
         self.config = Config(config or {}, config_path)
-        self.logger = setup_logging(name, self.config.get("log_level", "INFO"))
+        
+        # Check for quiet mode environment variable
+        default_log_level = "INFO"
+        if os.getenv('CLAUDE_PM_QUIET_MODE') == 'true':
+            default_log_level = "WARNING"
+        
+        self.logger = setup_logging(name, self.config.get("log_level", default_log_level))
 
         # Service state
         self._running = False
@@ -85,7 +92,9 @@ class BaseService(ABC):
         # Background tasks
         self._background_tasks: List[asyncio.Task] = []
 
-        self.logger.info(f"Initialized {self.name} service")
+        # Only log if not in quiet mode
+        if not os.environ.get('CLAUDE_PM_QUIET_MODE', '').lower() == 'true':
+            self.logger.info(f"Initialized {self.name} service")
 
     @property
     def running(self) -> bool:

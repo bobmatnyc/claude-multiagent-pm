@@ -19,17 +19,19 @@ import logging
 
 from .base_service import BaseService
 from .config import Config
-from ..services.memory.memory_trigger_service import MemoryTriggerService
-from ..services.memory.trigger_orchestrator import TriggerEvent
-from ..services.memory.trigger_types import TriggerType, TriggerPriority
-from ..services.memory.interfaces.models import MemoryCategory
-from ..services.memory.decorators import (
-    memory_trigger,
-    agent_memory_trigger,
-    error_memory_trigger,
-    trigger_immediate_memory,
-    agent_trigger_context,
-)
+# Memory system removed - use fallback MemoryCategory locally
+
+# Temporary fallback for MemoryCategory
+class MemoryCategory:
+    """Temporary fallback MemoryCategory class while memory system is disabled"""
+    PROJECT = "project"
+    ISSUE = "issue" 
+    DECISION = "decision"
+    ERROR = "error"
+    WORKFLOW = "workflow"
+    BUG = "bug"
+    USER_FEEDBACK = "user_feedback"
+    SYSTEM = "system"
 
 
 class BaseAgent(BaseService, ABC):
@@ -79,13 +81,7 @@ class BaseAgent(BaseService, ABC):
         self.pm_collaboration_enabled = True
         self.pm_notification_queue = []
 
-        # Memory integration
-        self.memory_service: Optional[MemoryTriggerService] = None
-        self.memory_enabled = config.get("memory_enabled", True) if config else True
-        self.memory_project_name = config.get("project_name", "default") if config else "default"
-        self.memory_auto_collect = config.get("memory_auto_collect", True) if config else True
-        
-        # Add memory capability to all agents
+        # Memory integration removed from framework
         if "memory_integration" not in self.capabilities:
             self.capabilities.append("memory_integration")
 
@@ -130,12 +126,12 @@ class BaseAgent(BaseService, ABC):
 
     # Memory Integration Methods
     
-    async def enable_memory_integration(self, memory_service: MemoryTriggerService) -> Dict[str, Any]:
+    async def enable_memory_integration(self, memory_service) -> Dict[str, Any]:
         """
         Enable memory integration for the agent.
         
         Args:
-            memory_service: Memory trigger service instance
+            memory_service: Memory service instance
             
         Returns:
             Dict[str, Any]: Integration status
@@ -144,18 +140,7 @@ class BaseAgent(BaseService, ABC):
             self.memory_service = memory_service
             self.memory_enabled = True
             
-            # Initialize memory service if not already done
-            if not memory_service._initialized:
-                await memory_service.initialize()
-            
             self.logger.info(f"Memory integration enabled for {self.agent_type} agent: {self.agent_id}")
-            
-            # Trigger memory collection for successful integration
-            await self._collect_memory(
-                "memory_integration_enabled",
-                MemoryCategory.SYSTEM,
-                {"agent_type": self.agent_type, "agent_id": self.agent_id, "tier": self.tier}
-            )
             
             return {
                 "success": True,
@@ -192,11 +177,6 @@ class BaseAgent(BaseService, ABC):
             "agent_id": self.agent_id
         }
     
-    @agent_memory_trigger(
-        agent_type="base",
-        priority=TriggerPriority.MEDIUM,
-        capture_result=True
-    )
     async def collect_memory(
         self,
         content: str,
@@ -260,20 +240,26 @@ class BaseAgent(BaseService, ABC):
                 *(tags or [])
             ]
             
-            # Get memory service from trigger service
-            memory_service = self.memory_service.get_memory_service()
-            if not memory_service:
-                self.logger.warning("Memory service not available for collection")
+            # Store memory if service is available
+            if hasattr(self.memory_service, 'store_memory'):
+                from ..services.memory.interfaces.models import MemoryItem
+                import uuid
+                
+                memory_item = MemoryItem(
+                    id=str(uuid.uuid4()),
+                    content=content,
+                    category=category,
+                    tags=enhanced_tags,
+                    metadata=enhanced_metadata,
+                    created_at=datetime.now().isoformat(),
+                    updated_at=datetime.now().isoformat()
+                )
+                
+                result = await self.memory_service.store_memory(memory_item)
+                memory_id = memory_item.id if result.success else None
+            else:
+                self.logger.warning("Memory service does not support store_memory method")
                 return None
-            
-            # Store memory
-            memory_id = await memory_service.add_memory(
-                project_name=self.memory_project_name,
-                content=content,
-                category=category,
-                tags=enhanced_tags,
-                metadata=enhanced_metadata
-            )
             
             if memory_id:
                 self.logger.debug(f"Memory collected: {memory_id[:8]}... for {category.value}")
@@ -284,10 +270,6 @@ class BaseAgent(BaseService, ABC):
             self.logger.error(f"Failed to collect memory: {e}")
             return None
     
-    @error_memory_trigger(
-        error_type="agent_operation",
-        priority=TriggerPriority.HIGH
-    )
     async def collect_error_memory(
         self,
         error: Exception,

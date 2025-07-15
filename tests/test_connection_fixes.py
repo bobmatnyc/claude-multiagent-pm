@@ -18,7 +18,7 @@ sys.path.insert(0, str(project_root))
 from claude_pm.services.health_dashboard import HealthDashboardOrchestrator
 from claude_pm.commands.health_commands import CMPMHealthMonitor
 from claude_pm.core.connection_manager import get_connection_manager
-from claude_pm.services.memory_service import MemoryService
+# from claude_pm.services.memory_service import MemoryService  # REMOVED - service no longer available
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -71,16 +71,16 @@ async def test_connection_management():
         
         logger.info(f"Initial connection stats: {initial_stats}")
         
-        # Test memory service connection
-        memory_service = MemoryService()
-        await memory_service._initialize()
+        # Test memory service connection - UPDATED: memory_service removed
+        # memory_service = MemoryService()  # REMOVED - service no longer available
+        # await memory_service._initialize()
         
-        # Check connection stats
+        # Check connection stats without memory service
         stats_after_init = conn_manager.get_stats()
-        logger.info(f"After memory service init: {stats_after_init}")
+        logger.info(f"Connection stats (memory_service removed): {stats_after_init}")
         
-        # Cleanup memory service
-        await memory_service._cleanup()
+        # Cleanup memory service - SKIPPED: service removed
+        # await memory_service._cleanup()
         
         # Check final stats
         final_stats = conn_manager.get_stats()

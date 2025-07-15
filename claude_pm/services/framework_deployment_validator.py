@@ -126,11 +126,6 @@ class FrameworkDeploymentValidator(BaseService):
                 path=base_path / "services",
                 required=False
             ),
-            'memory_config': FrameworkComponent(
-                name='Memory Configuration',
-                path=base_path / "memory" / "config.json",
-                required=False
-            )
         }
     
     async def validate_deployment(self, working_directory: Optional[Path] = None) -> DeploymentValidationResult:

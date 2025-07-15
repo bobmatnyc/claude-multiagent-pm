@@ -276,7 +276,6 @@ class HealthMonitorServiceAdapter(HealthCollector):
             "health_check_execution",
             "project_health_aggregate",
             "framework_compliance",
-            "mem0ai_mcp",
             "portfolio_manager",
             "git_portfolio_manager",
             "claude_pm_dashboard",

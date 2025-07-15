@@ -58,7 +58,7 @@ def register_deployment_commands(cli_group):
                 services_to_deploy = [service]
             else:
                 console.print("Deploying all Claude PM services")
-                services_to_deploy = ["health_monitor", "memory_service", "project_service"]
+                services_to_deploy = ["health_monitor", "project_service"]  # memory_service removed
 
             # Start deployment
             manager = ClaudePMServiceManager()
@@ -179,20 +179,20 @@ def register_deployment_commands(cli_group):
         environments = {
             "development": {
                 "description": "Local development environment",
-                "services": ["health_monitor", "memory_service", "project_service"],
-                "ports": {"mem0ai": 8002, "dashboard": 7001},
+                "services": ["health_monitor", "project_service"],
+                "ports": {"dashboard": 7001},
                 "status": "Active",
             },
             "staging": {
                 "description": "Staging environment for testing",
-                "services": ["health_monitor", "memory_service", "project_service"],
-                "ports": {"mem0ai": 8003, "dashboard": 7002},
+                "services": ["health_monitor", "project_service"],
+                "ports": {"dashboard": 7002},
                 "status": "Not configured",
             },
             "production": {
                 "description": "Production environment",
-                "services": ["health_monitor", "memory_service", "project_service"],
-                "ports": {"mem0ai": 8004, "dashboard": 7003},
+                "services": ["health_monitor", "project_service"],
+                "ports": {"dashboard": 7003},
                 "status": "Not configured",
             },
         }

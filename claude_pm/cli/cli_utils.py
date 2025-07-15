@@ -20,62 +20,10 @@ from rich.console import Console
 from rich.panel import Panel
 
 from ..core.config import Config
-# TEMPORARILY DISABLED: Memory integration causing import failures
-# from ..services.memory.cli_integration import MemoryIntegratedCLI
 from ..core.logging_config import setup_streaming_logger, finalize_streaming_logs
 
 console = Console()
 logger = logging.getLogger(__name__)
-
-# Global memory integration instance
-_memory_integration = None
-
-
-async def get_memory_integration():
-    """Get or create global memory integration instance. (DISABLED - memory system disabled)"""
-    global _memory_integration
-    if _memory_integration is None:
-        # TEMPORARILY DISABLED: Memory integration causing import failures
-        # _memory_integration = MemoryIntegratedCLI()
-        # try:
-        #     await _memory_integration.initialize()
-        #     logger.info("Memory trigger CLI integration initialized")
-        # except Exception as e:
-        #     logger.warning(f"Failed to initialize memory integration: {e}")
-        logger.debug("Memory integration disabled - returning None")
-        _memory_integration = None
-    return _memory_integration
-
-
-def memory_aware_command(func):
-    """Decorator to add memory trigger support to CLI commands."""
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        # For sync CLI commands, wrap the execution with memory triggers
-        async def execute_with_memory():
-            integration = await get_memory_integration()
-            if integration and integration.service:
-                try:
-                    return await integration.execute_with_memory_trigger(
-                        operation_name=func.__name__,
-                        operation_func=lambda **kw: func(*args, **kwargs),
-                        project_name="claude-multiagent-pm",
-                        operation_type="cli_command"
-                    )
-                except Exception as e:
-                    logger.warning(f"Memory trigger execution failed: {e}")
-                    return func(*args, **kwargs)
-            else:
-                return func(*args, **kwargs)
-        
-        # Run the async wrapper
-        try:
-            return asyncio.run(execute_with_memory())
-        except RuntimeError:
-            # If already in event loop, just run normally
-            return func(*args, **kwargs)
-    
-    return wrapper
 
 
 def get_framework_config():
@@ -138,25 +86,6 @@ def _display_directory_context_streaming():
         logger.debug(f"Failed to display directory context: {e}")
 
 
-def _initialize_memory_reliability_background():
-    """Initialize memory reliability service in background. (DISABLED - memory system disabled)"""
-    async def init_memory_reliability():
-        try:
-            # TEMPORARILY DISABLED: Memory reliability service causing import failures
-            # from ..services.memory_reliability import get_memory_reliability_service
-            # reliability_service = await get_memory_reliability_service()
-            # logger.debug("Memory reliability service initialized in background")
-            logger.debug("Memory reliability service disabled")
-        except Exception as e:
-            logger.debug(f"Background memory reliability initialization failed: {e}")
-    
-    # Run in background without blocking CLI startup (disabled)
-    try:
-        # asyncio.create_task(init_memory_reliability())
-        logger.debug("Memory reliability background initialization disabled")
-    except RuntimeError:
-        # Event loop not running, skip background initialization
-        pass
 
 
 def async_command(func):

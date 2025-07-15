@@ -35,18 +35,7 @@ __license__ = "MIT"
 from .core.base_service import BaseService
 from .core.service_manager import ServiceManager
 from .services.health_monitor import HealthMonitorService
-# TEMPORARILY DISABLED: Memory service causing import failures
-# from .services.memory_service import MemoryCategory
 from .services.project_service import ProjectService
-
-# Temporary fallback for MemoryCategory
-class MemoryCategory:
-    """Temporary fallback MemoryCategory class while memory system is disabled"""
-    PROJECT = "project"
-    ISSUE = "issue" 
-    DECISION = "decision"
-    ERROR = "error"
-    WORKFLOW = "workflow"
 
 __all__ = [
     "BaseService",

@@ -32,9 +32,9 @@ from datetime import datetime
 from enum import Enum
 
 from ..core.base_service import BaseService
-from ..core.logging_config import setup_logging
-from .template_manager import TemplateManager, TemplateVersion, TemplateSource, TemplateType
-from .dependency_manager import DependencyManager
+from ..core.logging_config import setup_logging, setup_streaming_logger, finalize_streaming_logs
+# TemplateManager and DependencyManager removed - use Claude Code Task Tool instead
+import os
 
 
 class ParentDirectoryContext(Enum):
@@ -114,19 +114,28 @@ class ParentDirectoryManager(BaseService):
     - Integration with CMPM-101, CMPM-102, and CMPM-103
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None, quiet_mode: bool = False):
         """
         Initialize the Parent Directory Manager.
 
         Args:
             config: Optional configuration dictionary
+            quiet_mode: If True, suppress INFO level logging
         """
         super().__init__(name="parent_directory_manager", config=config)
-        self.logger = setup_logging(__name__)
+        # Use streaming logger during initialization for clean startup output
+        if quiet_mode or os.getenv('CLAUDE_PM_QUIET_MODE') == 'true':
+            # Use WARNING level for quiet mode
+            self.logger = setup_logging(__name__, level="WARNING")
+        else:
+            self.logger = setup_streaming_logger(__name__)
+        self._startup_phase = True  # Track startup phase for logging behavior
+        self._quiet_mode = quiet_mode  # Store quiet mode setting
 
         # Integration with other CMPM services
-        self.template_manager: Optional[TemplateManager] = None
-        self.dependency_manager: Optional[DependencyManager] = None
+        # template_manager and dependency_manager removed - use Claude Code Task Tool instead
+        self.template_manager: Optional[Any] = None
+        self.dependency_manager: Optional[Any] = None
 
         # Parent directory management state
         self.managed_directories: Dict[str, ParentDirectoryConfig] = {}
@@ -154,9 +163,52 @@ class ParentDirectoryManager(BaseService):
         # Initialize paths
         self._initialize_paths()
 
+    def _log_info_if_not_quiet(self, message: str) -> None:
+        """Log INFO message only if not in quiet mode."""
+        if not self._quiet_mode:
+            self.logger.info(message)
+
+    def _log_protection_guidance(self, target_file: Path, skip_reason: str) -> None:
+        """
+        Log detailed guidance when permanent protection blocks deployment.
+        
+        Args:
+            target_file: The file that's being protected
+            skip_reason: The reason deployment was blocked
+        """
+        self.logger.error("")
+        self.logger.error("🚫 DEPLOYMENT BLOCKED BY PERMANENT PROTECTION")
+        self.logger.error("=" * 50)
+        self.logger.error(f"Target file: {target_file}")
+        self.logger.error(f"Protection reason: {skip_reason}")
+        self.logger.error("")
+        self.logger.error("📋 EXPLANATION:")
+        self.logger.error("The file you're trying to deploy to is NOT a framework deployment template.")
+        self.logger.error("This protection prevents overwriting project development files and custom CLAUDE.md files.")
+        self.logger.error("")
+        self.logger.error("✅ WHAT CAN BE REPLACED:")
+        self.logger.error("• Framework deployment templates (identified by specific title and metadata)")
+        self.logger.error("• Files with title: '# Claude PM Framework Configuration - Deployment'")
+        self.logger.error("• Files containing framework deployment metadata blocks")
+        self.logger.error("")
+        self.logger.error("🛡️  WHAT IS PROTECTED:")
+        self.logger.error("• Project development files")
+        self.logger.error("• Custom CLAUDE.md files")
+        self.logger.error("• Any file not matching framework deployment template pattern")
+        self.logger.error("")
+        self.logger.error("🔧 RESOLUTION OPTIONS:")
+        self.logger.error("1. If this is a project development file, keep it as-is (protection working correctly)")
+        self.logger.error("2. If you need framework deployment here, manually remove the file first")
+        self.logger.error("3. If you need both, rename the existing file to preserve your work")
+        self.logger.error("")
+        self.logger.error("⚠️  IMPORTANT:")
+        self.logger.error("The --force flag CANNOT override this protection by design.")
+        self.logger.error("This ensures your project development files are never accidentally overwritten.")
+        self.logger.error("=" * 50)
+
     async def _initialize(self) -> None:
         """Initialize the Parent Directory Manager service."""
-        self.logger.info("Initializing Parent Directory Manager...")
+        self._log_info_if_not_quiet("Initializing Parent Directory Manager...")
 
         try:
             # Create directory structure
@@ -178,7 +230,14 @@ class ParentDirectoryManager(BaseService):
             # Load subsystem versions
             await self._load_subsystem_versions()
 
-            self.logger.info("Parent Directory Manager initialized successfully")
+            self._log_info_if_not_quiet("Parent Directory Manager initialized successfully")
+            
+            # Finalize streaming logs after initialization
+            finalize_streaming_logs(self.logger)
+            
+            # Switch to normal logging after startup
+            self.logger = setup_logging(__name__)
+            self._startup_phase = False
 
         except Exception as e:
             self.logger.error(f"Failed to initialize Parent Directory Manager: {e}")
@@ -186,7 +245,7 @@ class ParentDirectoryManager(BaseService):
 
     async def _cleanup(self) -> None:
         """Cleanup the Parent Directory Manager service."""
-        self.logger.info("Cleaning up Parent Directory Manager...")
+        self._log_info_if_not_quiet("Cleaning up Parent Directory Manager...")
 
         try:
             # Save current state
@@ -196,13 +255,9 @@ class ParentDirectoryManager(BaseService):
             await self._cleanup_temporary_files()
 
             # Close CMPM integrations
-            if self.template_manager:
-                await self.template_manager._cleanup()
+            # template_manager and dependency_manager removed - no cleanup needed
 
-            if self.dependency_manager:
-                await self.dependency_manager._cleanup()
-
-            self.logger.info("Parent Directory Manager cleanup completed")
+            self._log_info_if_not_quiet("Parent Directory Manager cleanup completed")
 
         except Exception as e:
             self.logger.error(f"Failed to cleanup Parent Directory Manager: {e}")
@@ -255,15 +310,11 @@ class ParentDirectoryManager(BaseService):
     async def _initialize_cmpm_integrations(self):
         """Initialize integrations with other CMPM services."""
         try:
-            # Initialize Template Manager (CMPM-102)
-            self.template_manager = TemplateManager()
-            await self.template_manager._initialize()
+            # Template and dependency management removed - use Claude Code Task Tool instead
+            self.template_manager = None
+            self.dependency_manager = None
 
-            # Initialize Dependency Manager (CMPM-103)
-            self.dependency_manager = DependencyManager()
-            await self.dependency_manager._initialize()
-
-            self.logger.info("CMPM integrations initialized successfully")
+            self.logger.info("Loading CMPM integrations...")
 
         except Exception as e:
             self.logger.error(f"Failed to initialize CMPM integrations: {e}")
@@ -294,7 +345,7 @@ class ParentDirectoryManager(BaseService):
                     )
                     self.managed_directories[key] = config
 
-                self.logger.info(f"Loaded {len(self.managed_directories)} managed directories")
+                self.logger.info(f"Loading managed directories...")
 
         except Exception as e:
             self.logger.error(f"Failed to load managed directories: {e}")
@@ -331,17 +382,15 @@ class ParentDirectoryManager(BaseService):
                 return
 
             # Use dependency manager to get deployment context
-            if self.dependency_manager:
-                deployment_config = getattr(self.dependency_manager, "deployment_config", None)
-                if deployment_config:
-                    self.deployment_context = deployment_config
-                    self.logger.info(
-                        f"Deployment context validated: {deployment_config.get('strategy', 'unknown')}"
-                    )
-                else:
-                    self.logger.warning("No deployment context available from dependency manager")
+            # dependency_manager removed - use Claude Code Task Tool instead
+            deployment_config = None
+            if deployment_config:
+                self.deployment_context = deployment_config
+                self.logger.info(
+                    f"Deployment context validated: {deployment_config.get('strategy', 'unknown')}"
+                )
             else:
-                self.logger.warning("Dependency manager not available for deployment context")
+                self.logger.warning("No deployment context available - dependency manager removed")
 
         except Exception as e:
             self.logger.error(f"Failed to validate deployment context: {e}")
@@ -444,20 +493,22 @@ class ParentDirectoryManager(BaseService):
             ParentDirectoryOperation result
         """
         try:
+            # Use streaming logging during deployment if we're in startup phase
+            if hasattr(self, '_startup_phase') and self._startup_phase:
+                # Switch to streaming logger temporarily for deployment
+                original_logger = self.logger
+                self.logger = setup_streaming_logger(self.logger.name)
+                deployment_streaming = True
+            else:
+                deployment_streaming = False
             # FIXED: Get template from deployment framework path
             content, template_version = await self._get_framework_template(template_id)
             if not content:
                 # Fallback to template manager if framework template not found
-                if not self.template_manager:
-                    raise RuntimeError(
-                        "Template manager not available and framework template not found"
-                    )
-
-                template_data = await self.template_manager.get_template(template_id)
-                if not template_data:
-                    raise ValueError(f"Template not found: {template_id}")
-
-                content, template_version = template_data
+                # template_manager removed - use Claude Code Task Tool instead
+                raise RuntimeError(
+                    "Template manager removed - use Claude Code Task Tool for template management"
+                )
 
             # Determine target file path
             target_file = target_directory / "CLAUDE.md"
@@ -469,13 +520,16 @@ class ParentDirectoryManager(BaseService):
             # to ensure we have the complete template with variables
 
             # Check if file exists and handle conflicts
-            if target_file.exists() and not force:
+            if target_file.exists():
                 existing_content = target_file.read_text()
                 existing_checksum = hashlib.sha256(existing_content.encode()).hexdigest()
 
-                # Create backup if enabled
-                if self.auto_backup_enabled:
-                    backup_path = await self._create_backup(target_file)
+                # ALWAYS create backup before any file operations, regardless of force flag
+                backup_path = await self._create_backup(target_file)
+                if backup_path:
+                    self._log_info_if_not_quiet(f"📁 Backup created: {backup_path}")
+                else:
+                    self.logger.warning(f"⚠️ Failed to create backup for {target_file}")
 
             # Render template with variables including deployment context
             merged_variables = self._get_deployment_template_variables()
@@ -511,9 +565,9 @@ class ParentDirectoryManager(BaseService):
                 )
                 merged_variables["CLAUDE_MD_VERSION"] = claude_md_version
 
-                self.logger.info(f"🔢 Generated CLAUDE.md version: {claude_md_version}")
-                self.logger.info(f"   • Framework version: {framework_version}")
-                self.logger.info(f"   • Target file: {target_file}")
+                self._log_info_if_not_quiet(f"🔢 Generated CLAUDE.md version: {claude_md_version}")
+                self._log_info_if_not_quiet(f"   • Framework version: {framework_version}")
+                self._log_info_if_not_quiet(f"   • Target file: {target_file}")
 
             # Direct template rendering with handlebars substitution
             rendered_content = await self._render_template_content(content, merged_variables)
@@ -521,23 +575,48 @@ class ParentDirectoryManager(BaseService):
             if not rendered_content:
                 raise RuntimeError("Failed to render template")
 
-            # Check if deployment should be skipped based on version comparison
-            should_skip, skip_reason = self._should_skip_deployment(
+            # Check if deployment should be skipped based on version comparison and file type protection
+            should_skip, skip_reason, is_permanent_protection = self._should_skip_deployment(
                 target_file, rendered_content, force
             )
             if should_skip:
-                # Return successful operation but with warning about skipping
-                operation = ParentDirectoryOperation(
-                    action=ParentDirectoryAction.INSTALL,
-                    target_path=target_file,
-                    success=True,
-                    template_id=template_id,
-                    version=template_version.version if template_version else None,
-                    warnings=[f"Deployment skipped: {skip_reason}"],
-                )
-
-                self.logger.info(f"Skipped template installation: {skip_reason}")
-                return operation
+                if is_permanent_protection:
+                    # PERMANENT PROTECTION: Cannot be overridden by force flag
+                    self.logger.error(f"🚫 PERMANENT PROTECTION: {skip_reason}")
+                    self._log_info_if_not_quiet(f"🚫 Force flag cannot override project development file protection")
+                    self._log_info_if_not_quiet(f"   • This protection prevents overwriting non-framework files")
+                    self._log_info_if_not_quiet(f"   • Only framework deployment templates can be replaced")
+                    
+                    # Provide user guidance for permanent protection
+                    self._log_protection_guidance(target_file, skip_reason)
+                    
+                    return ParentDirectoryOperation(
+                        action=ParentDirectoryAction.INSTALL,
+                        target_path=target_file,
+                        success=False,
+                        template_id=template_id,
+                        error_message=f"Permanent protection active: {skip_reason}",
+                    )
+                elif not force:
+                    # OVERRIDABLE PROTECTION: Can be overridden by force flag
+                    operation = ParentDirectoryOperation(
+                        action=ParentDirectoryAction.INSTALL,
+                        target_path=target_file,
+                        success=True,
+                        template_id=template_id,
+                        version=template_version.version if template_version else None,
+                        warnings=[f"Deployment skipped: {skip_reason}"],
+                    )
+                    self.logger.info(f"Skipped template installation: {skip_reason}")
+                    return operation
+                else:
+                    # FORCE OVERRIDE: Force flag overrides version checks and template validation
+                    self.logger.warning(f"⚡ FORCE FLAG ACTIVE: Overriding version protection - {skip_reason}")
+                    self._log_info_if_not_quiet(f"⚡ Force deployment proceeding despite version checks")
+                    self._log_info_if_not_quiet(f"   • Force flag can override version checks and template validation")
+                    self._log_info_if_not_quiet(f"   • Force flag CANNOT override project development file protection")
+                    self._log_info_if_not_quiet(f"   • Deployment will proceed with framework template replacement")
+                    # Continue with deployment
 
             # Write the rendered content
             target_file.write_text(rendered_content)
@@ -556,13 +635,25 @@ class ParentDirectoryManager(BaseService):
             # Store operation in history
             self.operation_history.append(operation)
 
-            self.logger.info(f"Successfully installed template {template_id} to {target_file}")
+            self._log_info_if_not_quiet(f"Successfully installed template {template_id} to {target_file}")
+            
+            # Finalize streaming logs if we used streaming logger
+            if deployment_streaming:
+                finalize_streaming_logs(self.logger)
+                self.logger = original_logger
+            
             return operation
 
         except Exception as e:
             self.logger.error(
                 f"Failed to install template {template_id} to {target_directory}: {e}"
             )
+            
+            # Finalize streaming logs if we used streaming logger
+            if 'deployment_streaming' in locals() and deployment_streaming:
+                finalize_streaming_logs(self.logger)
+                self.logger = original_logger
+            
             return ParentDirectoryOperation(
                 action=ParentDirectoryAction.INSTALL,
                 target_path=target_directory / "CLAUDE.md",
@@ -607,19 +698,10 @@ class ParentDirectoryManager(BaseService):
                 config.template_variables.update(template_variables)
 
             # Get template and render
-            template_data = await self.template_manager.get_template(config.template_id)
-            if not template_data:
-                raise ValueError(f"Template not found: {config.template_id}")
-
-            content, template_version = template_data
-
-            # Render with updated variables
-            rendered_content = await self.template_manager.render_template(
-                config.template_id, config.template_variables
+            # template_manager removed - use Claude Code Task Tool instead
+            raise RuntimeError(
+                "Template manager removed - use Claude Code Task Tool for template management"
             )
-
-            if not rendered_content:
-                raise RuntimeError("Failed to render template")
 
             # Check if content has changed
             target_file = target_directory / "CLAUDE.md"
@@ -715,11 +797,8 @@ class ParentDirectoryManager(BaseService):
                 template_source = config.template_id
 
                 # Get template version
-                if self.template_manager:
-                    template_data = await self.template_manager.get_template(config.template_id)
-                    if template_data:
-                        _, template_version = template_data
-                        current_version = template_version.version
+                # template_manager removed - use Claude Code Task Tool instead
+                current_version = "unknown"
 
                 deployment_context = config.deployment_metadata.get("deployment_type")
 
@@ -877,20 +956,17 @@ class ParentDirectoryManager(BaseService):
             validation_errors = []
             validation_warnings = []
 
-            if self.template_manager:
-                # Get expected content
-                rendered_content = await self.template_manager.render_template(
-                    config.template_id, config.template_variables
-                )
+            # template_manager removed - use Claude Code Task Tool instead
+            rendered_content = None
 
-                if rendered_content:
-                    # Compare with actual content
-                    actual_content = target_file.read_text()
+            if rendered_content:
+                # Compare with actual content
+                actual_content = target_file.read_text()
 
-                    if actual_content != rendered_content:
-                        validation_warnings.append("Content differs from expected template output")
-                else:
-                    validation_errors.append("Failed to render template for validation")
+                if actual_content != rendered_content:
+                    validation_warnings.append("Content differs from expected template output")
+            else:
+                validation_errors.append("Failed to render template for validation")
 
             # Check file permissions
             if not os.access(target_file, os.R_OK):
@@ -1022,9 +1098,11 @@ class ParentDirectoryManager(BaseService):
                             "file_path": str(version_file),
                             "last_checked": datetime.now().isoformat()
                         }
-                        self.logger.debug(f"Loaded {subsystem} version: {version}")
+                        if not (hasattr(self, '_startup_phase') and self._startup_phase):
+                            self.logger.debug(f"Loaded {subsystem} version: {version}")
                     except Exception as e:
-                        self.logger.error(f"Failed to read {subsystem} version from {version_file}: {e}")
+                        if not (hasattr(self, '_startup_phase') and self._startup_phase):
+                            self.logger.error(f"Failed to read {subsystem} version from {version_file}: {e}")
                         self.subsystem_versions[subsystem] = {
                             "version": "unknown",
                             "file_path": str(version_file),
@@ -1032,14 +1110,15 @@ class ParentDirectoryManager(BaseService):
                             "last_checked": datetime.now().isoformat()
                         }
                 else:
-                    self.logger.warning(f"Subsystem version file not found: {version_file}")
+                    if not (hasattr(self, '_startup_phase') and self._startup_phase):
+                        self.logger.warning(f"Subsystem version file not found: {version_file}")
                     self.subsystem_versions[subsystem] = {
                         "version": "not_found",
                         "file_path": str(version_file),
                         "last_checked": datetime.now().isoformat()
                     }
 
-            self.logger.info(f"Loaded {len(self.subsystem_versions)} subsystem versions")
+            self.logger.info(f"Loading subsystem versions...")
 
         except Exception as e:
             self.logger.error(f"Failed to load subsystem versions: {e}")
@@ -1305,6 +1384,64 @@ class ParentDirectoryManager(BaseService):
 
     # Helper Methods
 
+    def _is_framework_deployment_template(self, content: str) -> bool:
+        """
+        Check if content is a framework deployment template by examining metadata header.
+        
+        Framework deployment templates have:
+        1. Title starting with "# Claude PM Framework Configuration - Deployment"
+        2. HTML comment block with metadata (CLAUDE_MD_VERSION, FRAMEWORK_VERSION, etc.)
+        
+        Args:
+            content: File content to check
+            
+        Returns:
+            True if content is a framework deployment template, False otherwise
+        """
+        try:
+            lines = content.split('\n')
+            
+            # Check for the specific title pattern
+            title_found = False
+            for line in lines[:5]:  # Check first 5 lines for title
+                if line.strip().startswith("# Claude PM Framework Configuration - Deployment"):
+                    title_found = True
+                    break
+            
+            if not title_found:
+                self.logger.debug("No framework deployment title found")
+                return False
+            
+            # Check for HTML comment metadata block
+            # Support both template format ({{VAR}}) and deployed format (actual values)
+            metadata_patterns = [
+                r"CLAUDE_MD_VERSION:\s*(?:\{\{CLAUDE_MD_VERSION\}\}|\d+-\d+)",
+                r"FRAMEWORK_VERSION:\s*(?:\{\{FRAMEWORK_VERSION\}\}|\d+)",
+                r"DEPLOYMENT_DATE:\s*(?:\{\{DEPLOYMENT_DATE\}\}|\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})",
+                r"LAST_UPDATED:\s*(?:\{\{LAST_UPDATED\}\}|.*)",
+                r"CONTENT_HASH:\s*(?:\{\{CONTENT_HASH\}\}|.*)"
+            ]
+            
+            # Look for metadata patterns in the first 20 lines (where metadata should be)
+            content_start = '\n'.join(lines[:20])
+            
+            # Check if we have at least 3 of the 5 expected metadata patterns
+            pattern_matches = 0
+            for pattern in metadata_patterns:
+                if re.search(pattern, content_start, re.IGNORECASE):
+                    pattern_matches += 1
+            
+            if pattern_matches >= 3:
+                self.logger.debug("Framework deployment template detected: found deployment title and metadata patterns")
+                return True
+            else:
+                self.logger.debug(f"Not a framework deployment template: found {pattern_matches}/5 metadata patterns")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"Failed to check framework deployment template: {e}")
+            return False
+
     def _extract_claude_md_version(self, content: str) -> Optional[str]:
         """
         Extract CLAUDE_MD_VERSION from file content.
@@ -1481,9 +1618,12 @@ class ParentDirectoryManager(BaseService):
 
     def _should_skip_deployment(
         self, target_file: Path, template_content: str, force: bool = False
-    ) -> Tuple[bool, Optional[str]]:
+    ) -> Tuple[bool, Optional[str], bool]:
         """
-        Check if deployment should be skipped based on version comparison.
+        Check if deployment should be skipped based on file type and version comparison.
+        
+        CRITICAL PROTECTION: Only replaces files that are identified as framework deployment templates.
+        Project development files and other custom CLAUDE.md files are protected.
 
         Args:
             target_file: Target CLAUDE.md file
@@ -1491,24 +1631,42 @@ class ParentDirectoryManager(BaseService):
             force: Force deployment even if versions match
 
         Returns:
-            Tuple of (should_skip, reason)
+            Tuple of (should_skip, reason, is_permanent_protection)
+            - should_skip: True if deployment should be skipped
+            - reason: Human-readable reason for skipping
+            - is_permanent_protection: True if protection cannot be overridden by force flag
         """
         try:
-            self.logger.info(f"🔍 Checking deployment for: {target_file}")
+            self._log_info_if_not_quiet(f"🔍 Checking deployment for: {target_file}")
+
+            if not target_file.exists():
+                self._log_info_if_not_quiet(f"📝 No existing CLAUDE.md found at: {target_file}")
+                return False, "Target file does not exist", False
+
+            # Get existing file content
+            existing_content = target_file.read_text()
+            
+            # CRITICAL: Check if existing file is a framework deployment template
+            is_framework_template = self._is_framework_deployment_template(existing_content)
+            
+            if not is_framework_template:
+                # This is a project development file or other custom CLAUDE.md - PERMANENT PROTECTION
+                reason = "Existing file is not a framework deployment template - protecting project development file"
+                self.logger.warning(f"🛡️  PERMANENT PROTECTION ACTIVE: {reason}")
+                self._log_info_if_not_quiet(f"   • File appears to be a project development file or custom CLAUDE.md")
+                self._log_info_if_not_quiet(f"   • Only framework deployment templates can be replaced")
+                self._log_info_if_not_quiet(f"   • Framework deployment templates have title: '# Claude PM Framework Configuration - Deployment'")
+                self._log_info_if_not_quiet(f"   • This protection CANNOT be overridden by --force flag")
+                return True, reason, True  # PERMANENT PROTECTION
+
+            self.logger.info(f"✅ Existing file is a framework deployment template - replacement allowed")
 
             if force:
                 self.logger.info("⚡ Force flag enabled - skipping version checks")
-                return False, "Force deployment requested"
+                return False, "Force deployment requested", False
 
-            if not target_file.exists():
-                self.logger.info(f"📝 No existing CLAUDE.md found at: {target_file}")
-                return False, "Target file does not exist"
-
-            # Get existing file content and version
-            existing_content = target_file.read_text()
+            # Get versions for comparison
             existing_version = self._extract_claude_md_version(existing_content)
-
-            # Get template version
             template_version = self._extract_claude_md_version(template_content)
 
             # Get framework template source path for logging
@@ -1524,11 +1682,11 @@ class ParentDirectoryManager(BaseService):
                 self.logger.info(
                     "⚠️  No version found in existing file - proceeding with deployment"
                 )
-                return False, "No version found in existing file"
+                return False, "No version found in existing file", False
 
             if not template_version:
                 self.logger.info("⚠️  No version found in template - proceeding with deployment")
-                return False, "No version found in template"
+                return False, "No version found in template", False
 
             # Compare versions
             comparison = self._compare_versions(existing_version, template_version)
@@ -1536,7 +1694,8 @@ class ParentDirectoryManager(BaseService):
             if comparison >= 0:
                 reason = f"Existing version {existing_version} is current or newer than template version {template_version}"
                 self.logger.info(f"⏭️  Skipping deployment: {reason}")
-                return True, reason
+                self._log_info_if_not_quiet(f"   • This is an overridable protection - can be bypassed with --force flag")
+                return True, reason, False  # Version check - can be overridden by force
 
             self.logger.info(
                 f"✅ Template version {template_version} is newer than existing version {existing_version} - proceeding with deployment"
@@ -1544,12 +1703,13 @@ class ParentDirectoryManager(BaseService):
             return (
                 False,
                 f"Template version {template_version} is newer than existing version {existing_version}",
+                False
             )
 
         except Exception as e:
-            self.logger.error(f"Error in version check: {e}")
-            # If version checking fails, proceed with deployment
-            return False, f"Version checking failed: {e}"
+            self.logger.error(f"Error in deployment check: {e}")
+            # If checking fails, err on the side of caution and skip deployment
+            return True, f"Deployment check failed: {e} - protecting existing file", True  # Error protection - permanent
 
     async def _create_backup(self, file_path: Path) -> Optional[Path]:
         """Create a backup of a file."""
@@ -1727,21 +1887,33 @@ class ParentDirectoryManager(BaseService):
                     content = framework_template_path.read_text()
 
                     # Create a simple template version object
-                    from .template_manager import TemplateVersion, TemplateSource
+                    # template_manager removed - use Claude Code Task Tool instead
                     from datetime import datetime
                     import hashlib
 
-                    template_version = TemplateVersion(
+                    # Use a simple dictionary instead of TemplateVersion
+                    # Create a simple template version object that has the expected attributes
+                    class SimpleTemplateVersion:
+                        def __init__(self, template_id, version, source, created_at, checksum, variables, metadata):
+                            self.template_id = template_id
+                            self.version = version
+                            self.source = source
+                            self.created_at = created_at
+                            self.checksum = checksum
+                            self.variables = variables
+                            self.metadata = metadata
+                    
+                    template_version = SimpleTemplateVersion(
                         template_id=template_id,
                         version="deployment-current",
-                        source=TemplateSource.FRAMEWORK,
+                        source="framework",
                         created_at=datetime.now(),
                         checksum=hashlib.sha256(content.encode()).hexdigest(),
                         variables={},
-                        metadata={"source_path": str(framework_template_path)},
+                        metadata={"source_path": str(framework_template_path)}
                     )
 
-                    self.logger.info(f"Using framework template from: {framework_template_path}")
+                    self._log_info_if_not_quiet(f"Using framework template from: {framework_template_path}")
                     return content, template_version
 
             return None, None
@@ -1758,6 +1930,7 @@ class ParentDirectoryManager(BaseService):
             Dictionary of deployment variables
         """
         import os
+        import hashlib
         from datetime import datetime
 
         # Get framework version
@@ -1798,6 +1971,14 @@ class ParentDirectoryManager(BaseService):
         except:
             deployment_date = datetime.now().isoformat()
 
+        # Generate current timestamp for LAST_UPDATED
+        current_timestamp = datetime.now().isoformat()
+
+        # Generate content hash based on template content and timestamp
+        # This ensures content hash changes when template is updated
+        template_content_seed = f"{framework_version}:{current_timestamp}:{self.framework_path}"
+        content_hash = hashlib.sha256(template_content_seed.encode()).hexdigest()[:16]
+
         variables = {
             "FRAMEWORK_VERSION": framework_version,
             "DEPLOYMENT_DATE": deployment_date,
@@ -1805,8 +1986,10 @@ class ParentDirectoryManager(BaseService):
             "PLATFORM": os.name,
             "PYTHON_CMD": "python3",
             "CURRENT_DATE": datetime.now().strftime("%Y-%m-%d"),
-            "CURRENT_TIMESTAMP": datetime.now().isoformat(),
+            "CURRENT_TIMESTAMP": current_timestamp,
             "WORKING_DIR": str(self.working_dir),
+            "LAST_UPDATED": current_timestamp,
+            "CONTENT_HASH": content_hash,
         }
 
         # Add deployment context if available
@@ -1991,7 +2174,7 @@ class ParentDirectoryManager(BaseService):
             # Rotate backups - keep only 2 most recent
             self._rotate_framework_backups()
             
-            self.logger.info(f"Framework template backup created: {backup_path}")
+            self._log_info_if_not_quiet(f"Framework template backup created: {backup_path}")
             return backup_path
             
         except Exception as e:
@@ -2027,7 +2210,7 @@ class ParentDirectoryManager(BaseService):
                     self.logger.error(f"Failed to remove old framework backup {old_backup}: {remove_error}")
             
             if files_to_remove:
-                self.logger.info(f"Rotated framework backups: kept 2 most recent, removed {len(files_to_remove)} old backups")
+                self._log_info_if_not_quiet(f"Rotated framework backups: kept 2 most recent, removed {len(files_to_remove)} old backups")
                 
         except Exception as e:
             self.logger.error(f"Failed to rotate framework backups: {e}")

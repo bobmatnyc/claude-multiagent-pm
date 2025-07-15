@@ -1,6 +1,6 @@
 {
   "name": "@bobmatnyc/claude-multiagent-pm",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "description": "Claude Multi-Agent PM Framework - Pure Python implementation with Click-based CLI and enhanced flags system",
   "main": "bin/claude-pm",
   "bin": {
@@ -122,7 +122,6 @@
     "claude_pm/",
     "config/",
     "requirements/",
-    "schemas/",
     "templates/",
     "framework/",
     "docs/",

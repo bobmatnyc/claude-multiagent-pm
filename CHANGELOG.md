@@ -10,13 +10,13 @@ All notable changes to the Claude Multi-Agent Project Management Framework will 
 - **pyproject.toml NPM Package Inclusion**: Fixed critical missing pyproject.toml in NPM package files array, resolving complete installation failures for fresh installations
 - **Enhanced Postinstall Error Handling**: Comprehensive error recovery in postinstall-minimal.js with graceful dependency fallbacks and detailed user guidance
 - **CLI Import Resolution**: Fixed critical CLI import error where missing main() function prevented claude-pm command execution
-- **Python Dependency Name Fixes**: Corrected import mismatches (pyyaml→yaml, mem0ai→mem0) that caused module not found errors
-- **AI Dependency Installation**: Enhanced automatic installation of mem0ai, chromadb, and aiosqlite with comprehensive error handling and fallback mechanisms
+- **Python Dependency Name Fixes**: Corrected import mismatches (pyyaml→yaml) that caused module not found errors
+- **AI Dependency Installation**: Enhanced automatic installation of core AI dependencies with comprehensive error handling and fallback mechanisms
 
 #### 🛠️ Installation System Enhancements (Patch)
 - **32-Point Installation Validation**: Comprehensive test suite covering all installation scenarios with 100% success rate validation
 - **Python Command Detection**: Enhanced Python executable detection with fallback from python3 → python → py for cross-platform compatibility
-- **Dependency Group Installation**: Structured installation with core dependencies (Click, Rich, PyYAML) installed before AI dependencies (mem0ai, ChromaDB)
+- **Dependency Group Installation**: Structured installation with core dependencies (Click, Rich, PyYAML) installed before AI dependencies
 - **Graceful Degradation**: Framework remains functional even when AI dependencies fail, with clear user guidance for manual installation
 - **User Directory Installation**: Fixed user-scoped package installation to prevent permission issues on restricted systems
 
@@ -41,7 +41,7 @@ npm install -g @bobmatnyc/claude-multiagent-pm
 
 # Automatic Python package installation with dependency resolution
 # Core dependencies: Click, Rich, PyYAML, python-dotenv, requests, openai
-# AI dependencies: mem0ai, chromadb, aiosqlite, tiktoken, sqlite-vec
+# AI dependencies: Core AI system components with automatic fallback
 
 # Framework initialization with comprehensive validation
 claude-pm init --verify
@@ -59,11 +59,11 @@ claude-pm init --verify
 1. **NPM Package Integrity**: pyproject.toml, package.json, and bin files present
 2. **Python Environment**: Python 3.8+ detected and available
 3. **Core Dependencies**: Click, Rich, PyYAML, python-dotenv, requests, openai
-4. **AI Dependencies**: mem0ai, chromadb, aiosqlite, tiktoken, sqlite-vec
+4. **AI Dependencies**: Core AI system components with automatic fallback
 5. **Package Installation**: claude_pm package importable with correct version
 6. **CLI Functionality**: claude-pm command executable and responding
 7. **Framework Initialization**: claude-pm init command functional
-8. **Memory System**: Memory collection and persistence system operational
+8. **Core System**: Core framework components operational
 
 ### 📊 Critical Fix Impact
 
@@ -72,7 +72,7 @@ claude-pm init --verify
 - **NPM Package Unusable**: All users unable to proceed past initial npm install
 - **Version Conflict Errors**: Python/NPM version mismatches causing dependency resolution failures
 - **CLI Import Errors**: Missing main() function preventing command execution
-- **Memory System Failures**: Missing AI dependencies breaking memory collection
+- **Core System Failures**: Missing AI dependencies breaking core functionality
 
 #### After v0.8.3 (Fully Functional)
 - **100% Installation Success**: All fresh installation scenarios working correctly
@@ -131,11 +131,7 @@ Core Dependencies (Required):
 └── openai>=1.0.0                  # AI API integration
 
 AI Dependencies (Optional with fallback):
-├── mem0ai>=0.1.0                  # Memory system (fixed import)
-├── chromadb>=0.4.0                # Vector database
-├── aiosqlite>=0.19.0              # Async SQLite
-├── tiktoken>=0.5.0                # Token counting
-└── sqlite-vec>=0.0.1a0            # Vector search
+└── Core AI system components       # Automatic fallback support
 ```
 
 ---
@@ -149,7 +145,7 @@ AI Dependencies (Optional with fallback):
 - **Interactive & Automatic Modes**: Multi-modal cleanup with user data protection and backup options
 - **Installation Detection**: Universal detection across NPM global, NVM, pip, and manual installations
 - **User Data Safety**: Automatic backup creation with timestamped directories and manifest files
-- **Memory Collection Integration**: Cleanup operations tracked for continuous improvement
+- **Operation Tracking**: Cleanup operations tracked for continuous improvement
 - **Verification System**: Post-cleanup validation ensures complete removal
 
 #### 🐍 Enhanced Python Environment Management (Minor)
@@ -171,7 +167,7 @@ AI Dependencies (Optional with fallback):
 - **Agent Registry Consolidation**: Streamlined agent registration and discovery system
 - **Three-Tier Hierarchy**: Project → User → System agent precedence with intelligent fallback
 - **Agent Nickname System**: Consistent delegation patterns with memorable agent identifiers
-- **Memory Collection Requirements**: Mandatory memory collection for all agent types
+- **Operation Tracking**: Operational insights collection available for all agent types
 
 #### 📋 Documentation & File Organization (Minor)
 - **CLAUDE.md Version 012**: Updated framework configuration with comprehensive agent definitions
@@ -181,7 +177,7 @@ AI Dependencies (Optional with fallback):
 
 #### 🛠️ Framework Infrastructure (Minor)
 - **claude-pm init**: Native initialization commands replacing cmcp-init system
-- **Memory System Expansion**: Dual backend architecture (mem0AI + SQLite) with migration tools
+- **Core System**: Dual backend architecture with migration tools
 - **Health Monitoring**: Enhanced framework health checks and validation systems
 - **Cross-Platform Support**: Improved platform detection and configuration management
 
@@ -215,12 +211,12 @@ Installation Locations:
 - **107M+ Data Detection**: Comprehensive scanning across all installation types
 - **100% Safety Record**: All user data protected with backup options
 - **Universal Coverage**: NPM, pip, NVM, and manual installation detection
-- **Memory Collection**: All cleanup activities tracked for improvement
+- **Operation Tracking**: All cleanup activities tracked for improvement
 
 #### Framework Infrastructure
 - **Version Consistency**: All 20+ subsystem versions synchronized to v0.8.2
 - **9 Core Agents**: Complete agent ecosystem with standardized coordination
-- **Memory System**: Dual backend architecture with automatic fallback
+- **Core System**: Dual backend architecture with automatic fallback
 - **Installation Reliability**: Critical NPM package dependency issues resolved
 
 ### 🔄 Migration & Compatibility
@@ -228,7 +224,7 @@ Installation Locations:
 #### Breaking Changes
 - **CLAUDE.md Format**: Updated to version 012 (automatic migration)
 - **Agent File Paths**: Restructured for three-tier hierarchy (affects custom agents)
-- **Memory Collection**: Now mandatory for all agent types
+- **Operation Tracking**: Now available for all agent types
 
 #### Maintained Compatibility
 - **Existing Workflows**: All existing functionality preserved
@@ -253,7 +249,7 @@ Installation Locations:
 - **Core Agents**: 9 specialized agent types with standardized interfaces
 - **Registry System**: Unified agent registration and discovery
 - **Hierarchy Management**: Three-tier precedence with automatic fallback
-- **Memory Integration**: Mandatory memory collection for operational insights
+- **Operation Tracking**: Operational insights collection available
 
 ### 🚨 Critical Issue Resolutions
 
@@ -267,12 +263,12 @@ Installation Locations:
 - **107M+ Detection**: Comprehensive scanning identifies all installation artifacts
 - **User Data Protection**: Automatic backup creation prevents data loss
 - **Complete Removal**: Verification system ensures thorough cleanup
-- **Memory Collection**: All cleanup activities tracked for continuous improvement
+- **Operation Tracking**: All cleanup activities tracked for continuous improvement
 
 #### Framework Reliability
 - **Version Consistency**: Synchronized all subsystem versions for stability
 - **Agent Loading**: Fixed hierarchy loading bugs and precedence issues
-- **Memory System**: Enhanced dual backend with improved reliability
+- **Core System**: Enhanced dual backend with improved reliability
 - **Health Monitoring**: Comprehensive framework health validation
 
 ### 📋 Installation & Usage
@@ -582,7 +578,7 @@ This patch release ensures that NPM package installation provides a complete, wo
 #### Maintained Compatibility
 - **Core Framework**: All existing functionality preserved
 - **Agent Roles**: Complete compatibility with existing agent ecosystem
-- **Memory Integration**: Enhanced mem0AI integration
+- **Core Integration**: Enhanced AI system integration
 - **CLI Commands**: Full backward compatibility with enhanced performance
 
 ### 📁 Key Files & Components
@@ -918,7 +914,7 @@ This represents a **significant governance milestone** establishing the design d
 #### ISS-0002 Completion - Comprehensive Health Slash Command
 - **100% Complete** - Full implementation of health dashboard functionality
 - **ai-trackdown Integration** - Native CLI testing and status reporting
-- **Memory System Testing** - mem0AI connectivity validation and performance monitoring
+- **Core System Testing** - AI connectivity validation and performance monitoring
 - **Task System Monitoring** - Epic and issue count tracking with operational status
 
 #### Performance Optimizations
@@ -1156,7 +1152,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 #### 🏗️ Architecture & Stability
 - **Resolved Critical Blocking Issues**: All QA-identified version alignment issues resolved
 - **Template System Restoration**: Complete CLAUDE.md template system restoration and protection
-- **Memory System Integration**: Restored and enhanced memory system with profile integration
+- **Core System Integration**: Restored and enhanced core system with profile integration
 - **Startup Sequence Optimization**: Improved framework initialization and agent loading
 
 #### 🔧 Framework Enhancements  
@@ -1172,7 +1168,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - **Version Consistency**: All components aligned to v0.7.0 for consistent experience
 
 #### 🧠 Memory & Intelligence
-- **Memory Collection**: Systematic capture of operational insights and patterns
+- **Operation Tracking**: Systematic capture of operational insights and patterns
 - **Profile-Aware Delegation**: Enhanced task delegation with agent-specific context
 - **Temporal Context**: Improved date awareness and sprint planning integration
 - **Cross-Agent Coordination**: Better coordination protocols between agent types
@@ -1183,7 +1179,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - **No Breaking Changes**: This release focuses on stability and framework improvements
 - **Automatic Upgrades**: Framework will automatically apply necessary updates
 - **Profile System**: New agent profile system enhances but doesn't replace existing workflows
-- **Memory Integration**: Memory system is now opt-in via MEMORY_COLLECTION flags
+- **Core Integration**: Core system is now opt-in via operation tracking flags
 
 #### Recommended Actions
 1. **Update Installation**: Run latest installation scripts for optimal setup
@@ -1231,7 +1227,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - **Enhanced Ticket System**: M0X-XXX (milestones), FEP-XXX (features), PROJ-XXX (projects), LRN-XXX (learning)
 - **Escalation Protocols**: Automatic PM intervention when subprocesses blocked >2-3 iterations
 - **TrackDown Integration**: Learning capture in project trackdown systems
-- **Future mem0ai Integration**: Planned persistent learning system
+- **Future AI Integration**: Planned persistent learning system
 
 #### Quality Assurance
 - **Best Practice Monitoring**: Continuous adherence checking to Claude Code standards

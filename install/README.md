@@ -75,7 +75,7 @@ Complete removal and cleanup system with user data handling.
 - Multi-platform installation detection (NPM, pip, manual)
 - Safety checks and user confirmations
 - Comprehensive file size analysis (detects 107MB+ installations)
-- Memory collection for cleanup insights
+- Operation tracking for cleanup insights
 - Verification system for complete removal
 
 **Usage:**
@@ -167,7 +167,7 @@ Legacy installation script (maintained for compatibility).
   },
   "features": {
     "aiTrackdownIntegration": true,
-    "memoryIntegration": true,
+    "coreIntegration": true,
     "multiAgentSupport": true,
     "portableDeployment": true
   }
@@ -365,7 +365,7 @@ Create environment-specific configuration files:
 
 - [Framework Overview](../docs/FRAMEWORK_OVERVIEW.md)
 - [AI-Trackdown Integration](../docs/TICKETING_SYSTEM.md)
-- [Memory Integration](../docs/MEMORY_SETUP_GUIDE.md)
+- [Core Integration](../docs/CORE_SETUP_GUIDE.md)
 - [Health Monitoring](../docs/HEALTH_MONITORING.md)
 
 ---

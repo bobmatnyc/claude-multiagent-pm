@@ -7,7 +7,6 @@ Provides centralized service management including:
 - Health monitoring across services
 - Dependency resolution
 - Graceful shutdown coordination
-- Hierarchical agent system integration
 """
 
 import asyncio
@@ -18,7 +17,6 @@ from datetime import datetime
 from pathlib import Path
 
 from .base_service import BaseService, ServiceHealth
-from ..utils.ai_trackdown_tools import get_ai_trackdown_tools
 
 
 @dataclass
@@ -38,8 +36,7 @@ class ServiceManager:
     Central service manager for Claude PM Framework.
 
     Manages the lifecycle of all services in the framework,
-    handles dependencies, provides service discovery, and
-    integrates with the hierarchical agent system.
+    handles dependencies, and provides service discovery.
     """
 
     def __init__(
@@ -48,26 +45,17 @@ class ServiceManager:
         user_home: Optional[Path] = None,
         project_path: Optional[Path] = None,
     ):
-        """Initialize the service manager with hierarchical agent system integration."""
+        """Initialize the service manager."""
         self.logger = logging.getLogger(__name__)
         self._services: Dict[str, ServiceInfo] = {}
         self._running = False
         self._start_order: List[str] = []
         self._stop_order: List[str] = []
 
-        # Hierarchical agent system components
+        # Path configuration
         self.framework_path = framework_path or Path.cwd()
         self.user_home = user_home or Path.home()
         self.project_path = project_path or Path.cwd()
-
-        # Agent system services (will be initialized during setup)
-        self._agent_loader = None
-        self._agent_discovery = None
-        self._agent_config_manager = None
-        self._agent_validator = None
-
-        # Agent system integration enabled
-        self._agent_system_enabled = True
 
     def register_service(
         self,
@@ -104,152 +92,6 @@ class ServiceManager:
 
         # Recalculate startup/shutdown order
         self._calculate_service_order()
-
-    async def initialize_agent_system(self) -> None:
-        """Initialize the hierarchical agent system."""
-        if not self._agent_system_enabled:
-            self.logger.info("Agent system is disabled")
-            return
-
-        try:
-            # Import agent system components
-            from ..agents.hierarchical_agent_loader import HierarchicalAgentLoader
-            from ..core.agent_config import AgentConfigurationManager
-            from ..services.agent_discovery_service import AgentDiscoveryService
-            from ..services.agent_hierarchy_validator import AgentHierarchyValidator
-
-            # Initialize agent configuration manager
-            self._agent_config_manager = AgentConfigurationManager(
-                framework_path=self.framework_path,
-                user_home=self.user_home,
-                project_path=self.project_path,
-            )
-
-            # Initialize hierarchical agent loader
-            self._agent_loader = HierarchicalAgentLoader(
-                framework_path=self.framework_path,
-                user_home=self.user_home,
-                project_path=self.project_path,
-            )
-
-            # Initialize agent discovery service
-            self._agent_discovery = AgentDiscoveryService(
-                framework_path=self.framework_path,
-                user_home=self.user_home,
-                project_path=self.project_path,
-            )
-
-            # Initialize agent hierarchy validator
-            self._agent_validator = AgentHierarchyValidator(
-                agent_loader=self._agent_loader,
-                config_manager=self._agent_config_manager,
-                discovery_service=self._agent_discovery,
-            )
-
-            # Register agent system services
-            self.register_service(
-                service=self._agent_config_manager,
-                dependencies=[],
-                startup_order=10,
-                auto_start=True,
-                critical=False,
-            )
-
-            self.register_service(
-                service=self._agent_loader,
-                dependencies=["agent_config_manager"],
-                startup_order=20,
-                auto_start=True,
-                critical=False,
-            )
-
-            self.register_service(
-                service=self._agent_discovery,
-                dependencies=["hierarchical_agent_loader"],
-                startup_order=30,
-                auto_start=True,
-                critical=False,
-            )
-
-            self.register_service(
-                service=self._agent_validator,
-                dependencies=["agent_discovery_service"],
-                startup_order=40,
-                auto_start=True,
-                critical=False,
-            )
-
-            # Initialize configuration manager
-            await self._agent_config_manager.initialize()
-
-            self.logger.info("Agent system initialized successfully")
-
-        except Exception as e:
-            self.logger.error(f"Failed to initialize agent system: {e}")
-            self._agent_system_enabled = False
-            raise
-
-    def disable_agent_system(self) -> None:
-        """Disable the hierarchical agent system."""
-        self._agent_system_enabled = False
-        self.logger.info("Agent system disabled")
-
-    def enable_agent_system(self) -> None:
-        """Enable the hierarchical agent system."""
-        self._agent_system_enabled = True
-        self.logger.info("Agent system enabled")
-
-    def get_agent_loader(self):
-        """Get the hierarchical agent loader."""
-        return self._agent_loader
-
-    def get_agent_discovery(self):
-        """Get the agent discovery service."""
-        return self._agent_discovery
-
-    def get_agent_config_manager(self):
-        """Get the agent configuration manager."""
-        return self._agent_config_manager
-
-    def get_agent_validator(self):
-        """Get the agent hierarchy validator."""
-        return self._agent_validator
-
-    async def load_agent(self, agent_type: str, **kwargs):
-        """Load an agent using the hierarchical agent loader."""
-        if not self._agent_system_enabled or not self._agent_loader:
-            raise RuntimeError("Agent system is not initialized")
-
-        return await self._agent_loader.load_agent(agent_type, **kwargs)
-
-    async def unload_agent(self, agent_type: str):
-        """Unload an agent using the hierarchical agent loader."""
-        if not self._agent_system_enabled or not self._agent_loader:
-            raise RuntimeError("Agent system is not initialized")
-
-        return await self._agent_loader.unload_agent(agent_type)
-
-    async def get_agent_hierarchy_status(self) -> Dict[str, Any]:
-        """Get agent hierarchy status."""
-        if not self._agent_system_enabled:
-            return {"enabled": False, "message": "Agent system is disabled"}
-
-        if not self._agent_discovery:
-            return {
-                "enabled": True,
-                "initialized": False,
-                "message": "Agent system not initialized",
-            }
-
-        return await self._agent_discovery.get_agent_hierarchy_status()
-
-    async def validate_agent_hierarchy(self) -> Dict[str, Any]:
-        """Validate the agent hierarchy."""
-        if not self._agent_system_enabled or not self._agent_validator:
-            return {"enabled": False, "message": "Agent system is not initialized"}
-
-        report = await self._agent_validator.validate_hierarchy_comprehensive()
-        return report.to_dict()
 
     def unregister_service(self, name: str) -> None:
         """Unregister a service."""
@@ -400,119 +242,7 @@ class ServiceManager:
                     timestamp=datetime.now().isoformat(),
                 )
 
-        # Add ai-trackdown-tools health check
-        ai_trackdown_health = self._check_ai_trackdown_tools_health()
-        health_results["ai-trackdown-tools"] = ai_trackdown_health
-
-        # Add agent system health check
-        if self._agent_system_enabled:
-            agent_system_health = await self._check_agent_system_health()
-            health_results["agent-system"] = agent_system_health
-
         return health_results
-
-    def _check_ai_trackdown_tools_health(self) -> ServiceHealth:
-        """Check ai-trackdown-tools health."""
-        try:
-            tools = get_ai_trackdown_tools()
-
-            if not tools.is_enabled():
-                return ServiceHealth(
-                    status="disabled",
-                    message="ai-trackdown-tools is disabled in configuration",
-                    timestamp=datetime.now().isoformat(),
-                )
-
-            if not tools.is_available():
-                return ServiceHealth(
-                    status="unavailable",
-                    message=f"ai-trackdown-tools CLI not found or not working. Fallback: {tools.get_fallback_method()}",
-                    timestamp=datetime.now().isoformat(),
-                )
-
-            # Try to get status to verify it's working
-            status = tools.get_status()
-            if status:
-                return ServiceHealth(
-                    status="healthy",
-                    message="ai-trackdown-tools is operational",
-                    timestamp=datetime.now().isoformat(),
-                )
-            else:
-                return ServiceHealth(
-                    status="degraded",
-                    message="ai-trackdown-tools available but status check failed",
-                    timestamp=datetime.now().isoformat(),
-                )
-
-        except Exception as e:
-            return ServiceHealth(
-                status="unhealthy",
-                message=f"ai-trackdown-tools health check error: {str(e)}",
-                timestamp=datetime.now().isoformat(),
-            )
-
-    async def _check_agent_system_health(self) -> ServiceHealth:
-        """Check agent system health."""
-        try:
-            if not self._agent_system_enabled:
-                return ServiceHealth(
-                    status="disabled",
-                    message="Agent system is disabled",
-                    timestamp=datetime.now().isoformat(),
-                )
-
-            # Check if components are initialized
-            if not all(
-                [
-                    self._agent_loader,
-                    self._agent_discovery,
-                    self._agent_config_manager,
-                    self._agent_validator,
-                ]
-            ):
-                return ServiceHealth(
-                    status="unhealthy",
-                    message="Agent system components not fully initialized",
-                    timestamp=datetime.now().isoformat(),
-                )
-
-            # Get agent hierarchy status
-            hierarchy_status = await self.get_agent_hierarchy_status()
-
-            # Check if there are any critical issues
-            if self._agent_validator:
-                validation_status = await self._agent_validator.get_validation_status()
-
-                if validation_status.get("known_issues_count", 0) > 0:
-                    return ServiceHealth(
-                        status="degraded",
-                        message=f"Agent system has {validation_status['known_issues_count']} known issues",
-                        timestamp=datetime.now().isoformat(),
-                        metrics={
-                            "total_agents": hierarchy_status.get("total_agents", 0),
-                            "loaded_agents": hierarchy_status.get("loaded_agents", 0),
-                            "issues_count": validation_status.get("known_issues_count", 0),
-                        },
-                    )
-
-            return ServiceHealth(
-                status="healthy",
-                message="Agent system is operational",
-                timestamp=datetime.now().isoformat(),
-                metrics={
-                    "total_agents": hierarchy_status.get("total_agents", 0),
-                    "loaded_agents": hierarchy_status.get("loaded_agents", 0),
-                    "agent_tiers": len(hierarchy_status.get("tiers", {})),
-                },
-            )
-
-        except Exception as e:
-            return ServiceHealth(
-                status="unhealthy",
-                message=f"Agent system health check error: {str(e)}",
-                timestamp=datetime.now().isoformat(),
-            )
 
     def get_service_status(self) -> Dict[str, Dict]:
         """Get status of all services."""
@@ -527,26 +257,6 @@ class ServiceManager:
                 "dependencies": service_info.dependencies,
                 "critical": service_info.critical,
                 "auto_start": service_info.auto_start,
-            }
-
-        # Add agent system status
-        if self._agent_system_enabled:
-            status["agent_system"] = {
-                "enabled": self._agent_system_enabled,
-                "initialized": all(
-                    [
-                        self._agent_loader,
-                        self._agent_discovery,
-                        self._agent_config_manager,
-                        self._agent_validator,
-                    ]
-                ),
-                "components": {
-                    "agent_loader": self._agent_loader is not None,
-                    "agent_discovery": self._agent_discovery is not None,
-                    "config_manager": self._agent_config_manager is not None,
-                    "validator": self._agent_validator is not None,
-                },
             }
 
         return status

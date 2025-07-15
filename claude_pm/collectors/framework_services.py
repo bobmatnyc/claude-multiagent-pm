@@ -6,6 +6,7 @@ memory services, and other framework components.
 """
 
 import asyncio
+import time
 from datetime import datetime
 from typing import List, Optional
 
@@ -165,7 +166,8 @@ class FrameworkServicesCollector(HealthCollector):
         service_checks = [
             ("memory_service", self._check_memory_service),
             ("project_service", self._check_project_service),
-            ("multi_agent_orchestrator", self._check_multi_agent_orchestrator),
+            ("shared_prompt_cache", self._check_shared_prompt_cache),
+            ("native_orchestration", self._check_native_orchestration),
         ]
 
         for service_name, check_func in service_checks:
@@ -184,55 +186,13 @@ class FrameworkServicesCollector(HealthCollector):
         return reports
 
     async def _check_memory_service(self) -> ServiceHealthReport:
-        """Check memory service availability using temporary service pattern."""
-        try:
-            from ..services.memory_service import MemoryService
-            from ..core.service_registry import get_service_registry
-
-            # Use service registry for proper lifecycle management
-            service_registry = await get_service_registry()
-
-            # Use temporary service for health check
-            async with service_registry.temporary_service(MemoryService) as memory_service:
-                # Perform actual health check on running service
-                health_data = await memory_service._health_check()
-
-                # Determine status based on health check
-                if health_data.get("mem0ai_connection", False):
-                    status = HealthStatus.HEALTHY
-                    message = "Memory service operational with mem0AI connection"
-                elif health_data.get("client_initialized", False):
-                    status = HealthStatus.DEGRADED
-                    message = "Memory service initialized but mem0AI connection failed"
-                else:
-                    status = HealthStatus.UNHEALTHY
-                    message = "Memory service client not properly initialized"
-
-                return create_service_health_report(
-                    name="memory_service",
-                    status=status,
-                    message=message,
-                    metrics={
-                        "client_initialized": health_data.get("client_initialized", False),
-                        "mem0ai_connection": health_data.get("mem0ai_connection", False),
-                        "service_uptime": memory_service.uptime or 0,
-                    },
-                )
-
-        except ImportError as e:
-            return create_service_health_report(
-                name="memory_service",
-                status=HealthStatus.ERROR,
-                message=f"Memory service import failed: {str(e)}",
-                error=str(e),
-            )
-        except Exception as e:
-            return create_service_health_report(
-                name="memory_service",
-                status=HealthStatus.ERROR,
-                message=f"Memory service health check failed: {str(e)}",
-                error=str(e),
-            )
+        """Check memory service availability - SERVICE REMOVED."""
+        return create_service_health_report(
+            name="memory_service",
+            status=HealthStatus.DOWN,
+            message="Memory service module removed from framework",
+            metrics={"removed": True},
+        )
 
     async def _check_project_service(self) -> ServiceHealthReport:
         """Check project service availability using temporary service pattern."""
@@ -284,23 +244,91 @@ class FrameworkServicesCollector(HealthCollector):
                 error=str(e),
             )
 
-    async def _check_multi_agent_orchestrator(self) -> ServiceHealthReport:
-        """Check multi-agent orchestrator availability."""
+    async def _check_shared_prompt_cache(self) -> ServiceHealthReport:
+        """Check SharedPromptCache service availability and performance."""
         try:
-            from ..services.multi_agent_orchestrator import MultiAgentOrchestrator
-
+            from ..services.shared_prompt_cache import SharedPromptCache
+            
+            start_time = asyncio.get_event_loop().time()
+            
+            # Get cache instance
+            cache = SharedPromptCache.get_instance()
+            
+            # Perform basic health check operations
+            test_key = f"__health_check_{int(time.time())}"
+            test_value = {"test": True, "timestamp": time.time()}
+            
+            # Test cache operations
+            set_success = cache.set(test_key, test_value, ttl=5)
+            get_result = cache.get(test_key)
+            delete_success = cache.delete(test_key)
+            
+            response_time = (asyncio.get_event_loop().time() - start_time) * 1000
+            
+            # Get cache metrics
+            metrics = cache.get_metrics()
+            
+            # Determine health status based on operations and performance
+            if set_success and get_result is not None and delete_success:
+                if metrics["hit_rate"] >= 0.8 and response_time <= 10:
+                    status = HealthStatus.HEALTHY
+                    message = f"SharedPromptCache optimal (hit rate: {metrics['hit_rate']:.1%}, {response_time:.1f}ms)"
+                elif metrics["hit_rate"] >= 0.5 and response_time <= 50:
+                    status = HealthStatus.DEGRADED
+                    message = f"SharedPromptCache acceptable (hit rate: {metrics['hit_rate']:.1%}, {response_time:.1f}ms)"
+                else:
+                    status = HealthStatus.UNHEALTHY
+                    message = f"SharedPromptCache slow (hit rate: {metrics['hit_rate']:.1%}, {response_time:.1f}ms)"
+            else:
+                status = HealthStatus.ERROR
+                message = "SharedPromptCache basic operations failed"
+            
             return create_service_health_report(
-                name="multi_agent_orchestrator",
-                status=HealthStatus.UNKNOWN,
-                message="Multi-agent orchestrator class available but not initialized",
-                metrics={"import_successful": True},
+                name="shared_prompt_cache",
+                status=status,
+                message=message,
+                response_time_ms=response_time,
+                metrics={
+                    "hit_rate": metrics["hit_rate"],
+                    "cache_entries": metrics["entry_count"],
+                    "cache_size_mb": metrics["size_mb"],
+                    "memory_usage_percent": metrics.get("memory_usage_percent", 0),
+                    "operations_successful": set_success and get_result is not None and delete_success,
+                }
             )
-
+            
         except ImportError as e:
             return create_service_health_report(
-                name="multi_agent_orchestrator",
+                name="shared_prompt_cache",
                 status=HealthStatus.ERROR,
-                message=f"Multi-agent orchestrator import failed: {str(e)}",
+                message=f"SharedPromptCache import failed: {str(e)}",
+                error=str(e),
+            )
+        except Exception as e:
+            return create_service_health_report(
+                name="shared_prompt_cache",
+                status=HealthStatus.ERROR,
+                message=f"SharedPromptCache health check failed: {str(e)}",
+                error=str(e),
+            )
+    
+    async def _check_native_orchestration(self) -> ServiceHealthReport:
+        """Check native Claude Code orchestration availability."""
+        try:
+            # Native orchestration uses TodoWrite + Task Tool patterns
+            # These are built into Claude Code, so always available
+            return create_service_health_report(
+                name="native_orchestration",
+                status=HealthStatus.HEALTHY,
+                message="Native Claude Code orchestration (TodoWrite + Task Tool) available",
+                metrics={"orchestration_type": "native", "patterns": ["TodoWrite", "Task Tool"]},
+            )
+
+        except Exception as e:
+            return create_service_health_report(
+                name="native_orchestration",
+                status=HealthStatus.ERROR,
+                message=f"Native orchestration check failed: {str(e)}",
                 error=str(e),
             )
 
@@ -314,10 +342,12 @@ class FrameworkServicesCollector(HealthCollector):
             "service_manager",
             "framework_memory_service",
             "framework_project_service",
-            "framework_multi_agent_orchestrator",
+            "framework_shared_prompt_cache",
+            "framework_native_orchestration",
             "memory_service",
             "project_service",
-            "multi_agent_orchestrator",
+            "shared_prompt_cache",
+            "native_orchestration",
         ]
 
     def set_service_manager(self, service_manager: ServiceManager) -> None:
@@ -357,73 +387,17 @@ class ProjectIndexingHealthCollector(HealthCollector):
         # Project Memory Manager health
         reports.append(await self._check_project_memory_manager())
 
-        # mem0AI connectivity health
-        reports.append(await self._check_mem0ai_connectivity())
 
         return reports
 
     async def _check_project_indexer(self) -> ServiceHealthReport:
-        """Check project indexer service health."""
-        try:
-            from ..services.project_indexer import create_project_indexer
-
-            start_time = asyncio.get_event_loop().time()
-
-            # Create and test indexer
-            indexer = create_project_indexer()
-
-            # Test initialization
-            init_success = await indexer.initialize()
-
-            response_time = (asyncio.get_event_loop().time() - start_time) * 1000
-
-            if init_success:
-                # Get statistics
-                stats = indexer.get_indexer_statistics()
-
-                # Determine health status based on statistics
-                cache_hit_rate = stats.get("cache_hit_rate", 0)
-                success_rate = stats.get("success_rate", 0)
-
-                if cache_hit_rate >= 70 and success_rate >= 90:
-                    status = HealthStatus.HEALTHY
-                    message = f"Indexer operational (cache: {cache_hit_rate:.1f}%, success: {success_rate:.1f}%)"
-                elif cache_hit_rate >= 50 and success_rate >= 70:
-                    status = HealthStatus.DEGRADED
-                    message = f"Indexer degraded (cache: {cache_hit_rate:.1f}%, success: {success_rate:.1f}%)"
-                else:
-                    status = HealthStatus.UNHEALTHY
-                    message = f"Indexer poor performance (cache: {cache_hit_rate:.1f}%, success: {success_rate:.1f}%)"
-
-                await indexer.cleanup()
-
-                return create_service_health_report(
-                    name="project_indexer",
-                    status=status,
-                    message=message,
-                    response_time_ms=response_time,
-                    metrics={
-                        "projects_indexed": stats.get("projects_indexed", 0),
-                        "cache_hit_rate": cache_hit_rate,
-                        "success_rate": success_rate,
-                        "memory_connected": stats.get("memory_connected", False),
-                    },
-                )
-            else:
-                return create_service_health_report(
-                    name="project_indexer",
-                    status=HealthStatus.UNHEALTHY,
-                    message="Failed to initialize project indexer",
-                    response_time_ms=response_time,
-                )
-
-        except Exception as e:
-            return create_service_health_report(
-                name="project_indexer",
-                status=HealthStatus.ERROR,
-                message=f"Project indexer error: {str(e)}",
-                error=str(e),
-            )
+        """Check project indexer service health - SERVICE REMOVED."""
+        return create_service_health_report(
+            name="project_indexer",
+            status=HealthStatus.DOWN,
+            message="Project indexer service removed - use native project discovery instead",
+            metrics={"removed": True, "alternative": "native_project_discovery"},
+        )
 
     async def _check_project_memory_manager(self) -> ServiceHealthReport:
         """Check project memory manager health."""
@@ -488,57 +462,6 @@ class ProjectIndexingHealthCollector(HealthCollector):
                 error=str(e),
             )
 
-    async def _check_mem0ai_connectivity(self) -> ServiceHealthReport:
-        """Check mem0AI service connectivity."""
-        try:
-            from ..integrations.mem0ai_integration import create_mem0ai_integration
-
-            start_time = asyncio.get_event_loop().time()
-
-            async with create_mem0ai_integration() as mem0ai:
-                if mem0ai.is_connected():
-                    # Test basic operation
-                    service_info = await mem0ai.get_service_info()
-                    response_time = (asyncio.get_event_loop().time() - start_time) * 1000
-
-                    # Check response time for health assessment
-                    if response_time <= 200:
-                        status = HealthStatus.HEALTHY
-                        message = f"mem0AI connected and responsive ({response_time:.0f}ms)"
-                    elif response_time <= 1000:
-                        status = HealthStatus.DEGRADED
-                        message = f"mem0AI connected but slow ({response_time:.0f}ms)"
-                    else:
-                        status = HealthStatus.UNHEALTHY
-                        message = f"mem0AI connected but very slow ({response_time:.0f}ms)"
-
-                    return create_service_health_report(
-                        name="mem0ai_service",
-                        status=status,
-                        message=message,
-                        response_time_ms=response_time,
-                        metrics={
-                            "endpoint": "http://localhost:8002",
-                            "service_info": service_info,
-                            "connected": True,
-                        },
-                    )
-                else:
-                    return create_service_health_report(
-                        name="mem0ai_service",
-                        status=HealthStatus.DOWN,
-                        message="mem0AI service not reachable on port 8002",
-                        metrics={"endpoint": "http://localhost:8002", "connected": False},
-                    )
-
-        except Exception as e:
-            return create_service_health_report(
-                name="mem0ai_service",
-                status=HealthStatus.ERROR,
-                message=f"mem0AI connectivity error: {str(e)}",
-                error=str(e),
-                metrics={"endpoint": "http://localhost:8002", "connected": False},
-            )
 
     def get_subsystem_name(self) -> str:
         """Get the subsystem name for this collector."""
@@ -546,4 +469,4 @@ class ProjectIndexingHealthCollector(HealthCollector):
 
     def get_service_names(self) -> List[str]:
         """Get the list of service names this collector monitors."""
-        return ["project_indexer", "project_memory_manager", "mem0ai_service"]
+        return ["project_memory_manager"]

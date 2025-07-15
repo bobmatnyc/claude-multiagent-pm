@@ -308,7 +308,6 @@ Managed Projects: {get_managed_path()}
 
 [bold]Services:[/bold]
 Health Monitor: Python-based health monitoring
-Memory Service: mem0AI integration (port 8002)
 Project Service: Framework compliance monitoring
 """
 
@@ -388,13 +387,6 @@ claude-pm test → Run tests with pytest integration
         )
         checks.append(("Managed directory", managed_path.exists(), f"Create {managed_path}"))
 
-        # mem0AI service check
-        try:
-            import aiohttp
-            mem0ai_available = True
-        except ImportError:
-            mem0ai_available = False
-        checks.append(("mem0AI dependencies", mem0ai_available, "pip install aiohttp"))
 
         # Framework dependencies check
         try:
@@ -443,8 +435,6 @@ claude-pm test → Run tests with pytest integration
         if not venv_active:
             recommendations.append("Activate virtual environment before running commands")
         
-        if not mem0ai_available:
-            recommendations.append("Install mem0AI dependencies for full memory features")
         
         if not pytest_available:
             recommendations.append("Install pytest for testing capabilities")
@@ -703,17 +693,6 @@ claude-pm test → Run tests with pytest integration
             # Service status (basic check)
             console.print("[bold]Service Status:[/bold]")
             
-            # Check if mem0AI is running
-            try:
-                import socket
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                result = sock.connect_ex(('localhost', 8002))
-                sock.close()
-                mem0_status = "🟢 Running" if result == 0 else "🔴 Not running"
-            except:
-                mem0_status = "🔴 Error checking"
-            
-            console.print(f"  mem0AI (port 8002): {mem0_status}")
             console.print("")
         
         if environment or not any([config, services, environment]):

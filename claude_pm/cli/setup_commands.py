@@ -25,11 +25,10 @@ from rich.prompt import Confirm
 
 from ..core.config import Config
 from ..services.health_monitor import HealthMonitorService
-from ..services.memory_service import MemoryService
 from ..services.project_service import ProjectService
-from ..services.template_deployment_integration import TemplateDeploymentIntegration
+# TemplateDeploymentIntegration removed - use Claude Code Task Tool instead
 from ..models.health import HealthStatus, create_service_health_report
-from ..agents.pm_agent import PMAgent
+# PMAgent removed - use Claude Code Task Tool instead
 
 console = Console()
 logger = logging.getLogger(__name__)
@@ -77,43 +76,13 @@ def _display_directory_context():
 
 
 async def _add_project_indexing_health_collector(orchestrator):
-    """Add project indexing health monitoring to orchestrator."""
+    """Add project indexing health monitoring to orchestrator - SERVICE REMOVED."""
     try:
-        from ..services.project_indexer import create_project_indexer
-        
-        indexer = await create_project_indexer()
-        if indexer:
-            # Add health check for project indexing
-            def check_indexing_health():
-                return HealthStatus.HEALTHY if indexer else HealthStatus.UNHEALTHY
-            
-            await orchestrator.add_health_collector(
-                "project_indexing",
-                check_indexing_health,
-                description="Project indexing service health"
-            )
+        logger.debug("Project indexing service removed - use native project discovery instead")
+        return None
     except Exception as e:
         logger.debug(f"Failed to add project indexing health collector: {e}")
 
-
-async def _add_memory_reliability_health_collector(orchestrator):
-    """Add memory reliability health monitoring to orchestrator."""
-    try:
-        from ..services.memory_reliability import get_memory_reliability_service
-        
-        reliability_service = await get_memory_reliability_service()
-        if reliability_service:
-            # Add health check for memory reliability
-            def check_memory_reliability():
-                return HealthStatus.HEALTHY if reliability_service else HealthStatus.UNHEALTHY
-            
-            await orchestrator.add_health_collector(
-                "memory_reliability",
-                check_memory_reliability,
-                description="Memory reliability service health"
-            )
-    except Exception as e:
-        logger.debug(f"Failed to add memory reliability health collector: {e}")
 
 
 async def _get_managed_projects_health():
@@ -171,42 +140,15 @@ def _display_unified_health_dashboard(dashboard, managed_projects_health, detail
         console.print(f"❌ Error displaying health dashboard: {e}")
 
 
-async def _display_memory_service_health(verbose):
-    """Display memory service specific health."""
-    try:
-        from ..services.memory_reliability import get_memory_reliability_service
-        
-        console.print("[bold]Memory Service Health[/bold]")
-        
-        reliability_service = await get_memory_reliability_service()
-        if reliability_service:
-            console.print("  🟢 Memory Reliability: HEALTHY")
-            if verbose:
-                console.print("    • Service initialized and ready")
-        else:
-            console.print("  🔴 Memory Reliability: UNAVAILABLE")
-        
-        console.print("")
-        
-    except Exception as e:
-        logger.error(f"Failed to display memory service health: {e}")
-        console.print(f"❌ Error checking memory service: {e}")
 
 
 async def _display_indexing_service_health(verbose):
-    """Display indexing service specific health."""
+    """Display indexing service specific health - SERVICE REMOVED."""
     try:
-        from ..services.project_indexer import create_project_indexer
-        
         console.print("[bold]Indexing Service Health[/bold]")
-        
-        indexer = await create_project_indexer()
-        if indexer:
-            console.print("  🟢 Project Indexing: HEALTHY")
-            if verbose:
-                console.print("    • Indexer service initialized")
-        else:
-            console.print("  🔴 Project Indexing: UNAVAILABLE")
+        console.print("  ❌ Project Indexing: REMOVED")
+        if verbose:
+            console.print("    • Service removed - use native project discovery instead")
         
         console.print("")
         
@@ -438,10 +380,7 @@ def register_setup_commands(cli_group):
 
         async def run():
             from ..services.health_dashboard import HealthDashboardOrchestrator
-            from ..services.project_indexer import create_project_indexer
-            from ..services.project_memory_manager import create_project_memory_manager
-            from ..services.memory_reliability import get_memory_reliability_service
-            from ..integrations.mem0ai_integration import create_mem0ai_integration
+            # project_indexer removed - use native project discovery instead
 
             start_time = time.time()
 
@@ -454,9 +393,6 @@ def register_setup_commands(cli_group):
 
                 # Add MEM-007 project indexing health monitoring
                 await _add_project_indexing_health_collector(orchestrator)
-                
-                # Add memory reliability health monitoring
-                await _add_memory_reliability_health_collector(orchestrator)
 
                 # Get comprehensive health dashboard
                 dashboard = await orchestrator.get_health_dashboard(force_refresh=True)
@@ -470,7 +406,9 @@ def register_setup_commands(cli_group):
                         dashboard, managed_projects_health, detailed, verbose
                     )
                 elif service == "memory":
-                    await _display_memory_service_health(verbose)
+                    console.print("[bold]Memory Service Health[/bold]")
+                    console.print("  🔴 Memory Service: DISABLED")
+                    console.print("    • Memory system removed for clean slate implementation")
                 elif service == "indexing":
                     await _display_indexing_service_health(verbose)
                 elif service == "projects":
@@ -540,113 +478,108 @@ def register_setup_commands(cli_group):
         
         async def run():
             try:
-                # Initialize the PM Agent with system initialization capabilities
-                agent = PMAgent()
-                await agent._initialize()
+                # Basic framework initialization without agent system
+                console.print("[bold blue]🔧 Framework Initialization[/bold blue]")
                 
-                # Handle validation modes
-                if validate or comprehensive_validation:
-                    if comprehensive_validation:
-                        console.print("[bold blue]🔍 Running Comprehensive Diagnostics[/bold blue]")
-                        validation_results = await agent.run_diagnostics()
-                        
-                        # Display comprehensive validation summary
-                        console.print(f"\n📋 [bold]Comprehensive Diagnostics Results:[/bold]")
-                        console.print(f"   • Timestamp: {validation_results.get('timestamp', 'Unknown')}")
-                        console.print(f"   • Framework Path: {validation_results.get('framework_path', 'Unknown')}")
-                        console.print(f"   • Config Exists: {'✅' if validation_results.get('local_config_exists') else '❌'}")
-                        
-                        # Display dependency status
-                        if validation_results.get('dependencies'):
-                            console.print(f"\n🔧 [bold]Dependencies Status:[/bold]")
-                            for dep_name, dep_info in validation_results['dependencies'].items():
-                                console.print(f"   • {dep_name.replace('_', ' ').title()}: {dep_info['status']}")
-                        
-                        # Display troubleshooting info
-                        if validation_results.get('troubleshooting', {}).get('issues'):
-                            console.print(f"\n❌ [bold red]Issues Found:[/bold red]")
-                            for issue in validation_results['troubleshooting']['issues']:
-                                console.print(f"   • {issue}")
-                        
-                        if validation_results.get('recommendations'):
-                            console.print(f"\n💡 [bold blue]Recommendations:[/bold blue]")
-                            for rec in validation_results['recommendations']:
-                                console.print(f"   • {rec}")
-                        
-                        await agent._cleanup()
-                        return validation_results.get('local_config_exists', False)
-                    else:
-                        console.print("[bold blue]🔍 Validating Framework Setup[/bold blue]")
-                        validation_results = await agent.run_diagnostics()
-                        
-                        console.print(f"\n📋 [bold]Validation Results:[/bold]")
-                        console.print(f"   • Valid: {'✅' if validation_results.get('local_config_exists') else '❌'}")
-                        console.print(f"   • Framework Path: {validation_results.get('framework_path', 'Unknown')}")
-                        console.print(f"   • Dependencies: {len(validation_results.get('dependencies', {}))}")
-                        
-                        if validation_results.get('troubleshooting', {}).get('issues'):
-                            console.print(f"\n❌ [bold red]Issues Found:[/bold red]")
-                            for issue in validation_results['troubleshooting']['issues']:
-                                console.print(f"   • {issue}")
-                        
-                        if validation_results.get('recommendations'):
-                            console.print(f"\n💡 [bold blue]Recommendations:[/bold blue]")
-                            for rec in validation_results['recommendations']:
-                                console.print(f"   • {rec}")
-                        
-                        await agent._cleanup()
-                        return validation_results.get('local_config_exists', False)
+                # Create basic framework directories
+                framework_path = Path.home() / ".claude-pm"
+                framework_path.mkdir(parents=True, exist_ok=True)
                 
-                # Handle post-installation only mode
-                if postinstall_only:
-                    console.print("[bold blue]📦 Running Framework Initialization (Post-Install Mode)[/bold blue]")
-                    results = await agent.initialize_framework(force=force)
+                # Create basic config
+                config_path = framework_path / "config.json"
+                if not config_path.exists() or force:
+                    config_data = {
+                        "version": _get_framework_version(),
+                        "installationType": "python",
+                        "installationComplete": True,
+                        "timestamp": datetime.now().isoformat(),
+                        "framework_path": str(framework_path),
+                        "agent_system": "disabled"  # Agent system removed
+                    }
                     
-                    if results["success"]:
-                        console.print("[green]\n✅ Framework initialization completed successfully![/green]")
-                        console.print("[dim]🚀 You can now run 'claude-pm init' for full setup[/dim]")
-                        return True
-                    else:
-                        console.print("[red]\n❌ Framework initialization failed![/red]")
-                        console.print("[dim]🔧 Check the output above for errors[/dim]")
-                        return False
+                    with open(config_path, 'w') as f:
+                        json.dump(config_data, f, indent=2)
+                    
+                    console.print(f"✅ Created configuration: {config_path}")
                 
-                # Handle combined or standard initialization
-                if run_post_install and run_framework_init:
-                    # Run enhanced initialization with post-installation
-                    results = await agent.initialize_framework(force=force)
-                    
-                    # Display the enhanced initialization report
-                    await agent.display_initialization_report(results)
-                    
-                elif run_framework_init:
-                    # Run standard initialization
-                    results = await agent.initialize_framework(force=force)
-                    
-                    # Display the standard initialization report
-                    await agent.display_initialization_report(results)
+                # Create basic directory structure
+                dirs_to_create = [
+                    framework_path / "logs",
+                    framework_path / "templates",
+                    framework_path / "memory",
+                ]
                 
-                await agent._cleanup()
+                for dir_path in dirs_to_create:
+                    dir_path.mkdir(parents=True, exist_ok=True)
+                    console.print(f"✅ Created directory: {dir_path}")
                 
-                if results["success"]:
-                    console.print("[green]\n✅ Framework initialization completed successfully![/green]")
-                    console.print("[dim]🚀 You can now use claude-pm commands[/dim]")
-                    
-                    # Show next steps based on what was run
-                    if run_post_install:
-                        console.print("[dim]📦 Post-installation components deployed to ~/.claude-pm/[/dim]")
-                        console.print("[dim]🔧 Run 'claude-pm health' to verify installation[/dim]")
-                    
-                    return True
-                else:
-                    console.print("[red]\n❌ Framework initialization failed![/red]")
-                    console.print("[dim]🔧 Check the output above for errors[/dim]")
-                    
-                    # Show specific troubleshooting based on what failed
-                    if run_post_install and results.get("post_install_results", {}).get("errors"):
-                        console.print("[dim]📦 Post-installation errors detected - check ~/.claude-pm/logs/[/dim]")
-                    
-                    return False
+                # Deploy CLAUDE.md to parent directory with force flag
+                if force:
+                    console.print("[bold blue]🚀 Deploying CLAUDE.md to parent directory[/bold blue]")
+                    try:
+                        from ..services.parent_directory_manager import ParentDirectoryManager
+                        
+                        # Initialize Parent Directory Manager
+                        manager = ParentDirectoryManager()
+                        await manager._initialize()
+                        
+                        # Get current working directory and parent directory
+                        current_dir = Path.cwd()
+                        parent_dir = current_dir.parent
+                        
+                        # Deploy CLAUDE.md with force flag
+                        operation = await manager.install_template_to_parent_directory(
+                            target_directory=parent_dir,
+                            template_id="claude_md",
+                            template_variables=None,  # Use defaults
+                            force=True  # Force deployment when --force flag is used
+                        )
+                        
+                        if operation.success:
+                            console.print(f"✅ CLAUDE.md deployed to: {operation.target_path}")
+                            if operation.backup_path:
+                                console.print(f"📁 Backup created: {operation.backup_path}")
+                        else:
+                            console.print(f"❌ CLAUDE.md deployment failed: {operation.error_message}")
+                            logger.error(f"CLAUDE.md deployment failed: {operation.error_message}")
+                        
+                        await manager._cleanup()
+                        
+                    except Exception as deploy_error:
+                        console.print(f"❌ CLAUDE.md deployment error: {deploy_error}")
+                        logger.error(f"CLAUDE.md deployment error: {deploy_error}")
+                        # Continue with initialization even if deployment fails
+                
+                # Load framework into Claude Code after successful deployment
+                if force:
+                    console.print("[bold blue]🔄 Loading framework into Claude Code...[/bold blue]")
+                    try:
+                        from ..services.claude_code_integration import load_framework_into_claude_code, create_framework_loading_summary
+                        
+                        # Load framework with retry logic
+                        framework_loaded = await load_framework_into_claude_code()
+                        
+                        # Create and display summary
+                        summary = await create_framework_loading_summary()
+                        console.print(summary)
+                        
+                        if framework_loaded:
+                            console.print("[green]✅ Framework successfully loaded into Claude Code![/green]")
+                            console.print("[dim]🎯 Framework is now active and ready for use[/dim]")
+                        else:
+                            console.print("[yellow]⚠️ Framework initialization completed but Claude Code loading failed[/yellow]")
+                            console.print("[dim]💡 You can still use claude-pm commands, but framework may not be fully active[/dim]")
+                            
+                    except Exception as loading_error:
+                        console.print(f"[red]❌ Framework loading error: {loading_error}[/red]")
+                        logger.error(f"Framework loading error: {loading_error}")
+                        console.print("[dim]💡 Framework initialization completed but loading failed[/dim]")
+                
+                console.print("[green]\n✅ Framework initialization completed successfully![/green]")
+                console.print("[dim]🚀 You can now use claude-pm commands[/dim]")
+                console.print("[dim]📖 Use Claude Code Task Tool for agent functionality[/dim]")
+                
+                return True
                     
             except Exception as e:
                 console.print(f"[red]❌ Initialization error: {e}[/red]")

@@ -20,7 +20,7 @@ claude-pm
 - **Testing**: Automated testing and quality checks
 - **Documentation**: Scans and explains your codebase
 - **Deployment**: Safe local and package deployment
-- **Memory**: Learns your project patterns over time
+- **Orchestration**: Coordinates specialized agents for workflow efficiency
 
 ## Three Commands
 
@@ -222,4 +222,4 @@ Try it on a simple utility first. The AI agents learn your style and get better 
 
 **Requirements**: Node.js 16+, Python 3.8+
 
-For complete documentation: [User Guide](./docs/user-guide/README.md)
+**📚 Complete Documentation**: [Quick Start Guide](./docs/QUICKSTART.md)

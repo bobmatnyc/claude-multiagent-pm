@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "claude-multiagent-pm"
-version = "0.8.4"
+version = "0.8.6"
 description = "Claude Multi-Agent Project Management Framework for AI-driven orchestration"
 readme = "README.md"
 license = {text = "MIT"}
@@ -147,7 +147,6 @@ exclude = ["tests*", "docs*", "examples*"]
 [tool.setuptools.package-data]
 claude_pm = [
     "py.typed",
-    "schemas/*.json",
     "templates/*.md",
     "templates/*.yml"
 ]

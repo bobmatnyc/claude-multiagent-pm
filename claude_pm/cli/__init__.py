@@ -13,10 +13,7 @@ import click
 from rich.console import Console
 
 from .cli_utils import (
-    get_memory_integration,
-    memory_aware_command,
     _display_directory_context,
-    _initialize_memory_reliability_background
 )
 
 console = Console()
@@ -51,9 +48,6 @@ class ModularCLI:
 
             # FIXED: Display deployment and working directories on every call
             _display_directory_context()
-            
-            # Initialize memory reliability service in background
-            _initialize_memory_reliability_background()
 
             if verbose:
                 console.print("[dim]Claude Multi-Agent PM Framework v3.0.0 - Python Edition[/dim]")

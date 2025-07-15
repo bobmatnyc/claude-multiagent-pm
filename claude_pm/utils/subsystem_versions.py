@@ -79,12 +79,11 @@ class SubsystemVersionManager:
     
     # Service-specific version files (relative to framework path)
     SERVICE_VERSION_FILES = {
-        "memory_service": "claude_pm/services/memory/VERSION",
+        # "memory_service": "claude_pm/services/memory/VERSION",  # REMOVED - service deprecated
         "agents_service": "claude_pm/agents/VERSION",
         "cli_service": "claude_pm/cli/VERSION",
         "services_core": "claude_pm/services/VERSION",
         "version_control_service": "claude_pm/services/version_control/VERSION",
-        "ai_ops_service": "claude_pm/services/ai_ops/VERSION",
         "framework_core": "framework/VERSION",
         "script_system": "bin/VERSION",
         "deployment_scripts": "scripts/VERSION"

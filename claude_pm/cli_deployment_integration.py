@@ -21,7 +21,7 @@ from .core.deployment_enforcement import (
     deployment_status_summary,
     get_deployment_enforcer
 )
-from .commands.deployment_commands import register_deployment_commands
+from .cli.deployment_commands import register_deployment_commands
 from .core.logging_config import get_logger
 
 logger = get_logger(__name__)
