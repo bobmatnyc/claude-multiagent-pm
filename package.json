@@ -1,6 +1,6 @@
 {
   "name": "@bobmatnyc/claude-multiagent-pm",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "description": "Claude Multi-Agent PM Framework - Pure Python implementation with Click-based CLI and enhanced flags system",
   "main": "bin/claude-pm",
   "bin": {
@@ -108,7 +108,7 @@
     "pre-publish:quick": "npm run docker:quick-test && npm run test",
     "pre-publish:full": "npm run pre-publish",
     "pre-publish:validation": "node scripts/comprehensive-pre-publish-validation.js",
-    "pre-publish:standard": "npm run test && npm run validate-deployment && echo '\u2705 Standard pre-publish validation completed'",
+    "pre-publish:standard": "npm run test && npm run validate-deployment && echo '✅ Standard pre-publish validation completed'",
     "pre-publish:comprehensive": "node scripts/comprehensive-pre-publish-validation.js --verbose",
     "pre-publish:no-docker": "node scripts/comprehensive-pre-publish-validation.js --skip-docker",
     "release": "standard-version",
