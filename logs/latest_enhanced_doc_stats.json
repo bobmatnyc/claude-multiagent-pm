@@ -608,6 +608,66 @@
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
       "target_path": "docs/archive/`:"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/import_fixes_v083.md",
+      "line_number": 15,
+      "description": "Potentially invalid path reference: /Users/masa/Projects/claude-multiagent-pm/claude_pm/services/memory/__init__.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "/Users/masa/Projects/claude-multiagent-pm/claude_pm/services/memory/__init__.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/import_fixes_v083.md",
+      "line_number": 15,
+      "description": "Potentially invalid path reference: claude_pm/services/memory/__init__.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/memory/__init__.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/import_fixes_v083.md",
+      "line_number": 25,
+      "description": "Potentially invalid path reference: /Users/masa/Projects/claude-multiagent-pm/claude_pm/services/memory/__init__.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "/Users/masa/Projects/claude-multiagent-pm/claude_pm/services/memory/__init__.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/import_fixes_v083.md",
+      "line_number": 25,
+      "description": "Potentially invalid path reference: claude_pm/services/memory/__init__.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/memory/__init__.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/import_fixes_v083.md",
+      "line_number": 32,
+      "description": "Potentially invalid path reference: /Users/masa/Projects/claude-multiagent-pm/claude_pm/services/health_monitor.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "/Users/masa/Projects/claude-multiagent-pm/claude_pm/services/health_monitor.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/import_fixes_v083.md",
+      "line_number": 32,
+      "description": "Potentially invalid path reference: claude_pm/services/health_monitor.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/health_monitor.py`"
     }
   ],
   "broken_links": [
@@ -1142,10 +1202,70 @@
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
       "target_path": "docs/archive/`:"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/import_fixes_v083.md",
+      "line_number": 15,
+      "description": "Potentially invalid path reference: /Users/masa/Projects/claude-multiagent-pm/claude_pm/services/memory/__init__.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "/Users/masa/Projects/claude-multiagent-pm/claude_pm/services/memory/__init__.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/import_fixes_v083.md",
+      "line_number": 15,
+      "description": "Potentially invalid path reference: claude_pm/services/memory/__init__.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/memory/__init__.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/import_fixes_v083.md",
+      "line_number": 25,
+      "description": "Potentially invalid path reference: /Users/masa/Projects/claude-multiagent-pm/claude_pm/services/memory/__init__.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "/Users/masa/Projects/claude-multiagent-pm/claude_pm/services/memory/__init__.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/import_fixes_v083.md",
+      "line_number": 25,
+      "description": "Potentially invalid path reference: claude_pm/services/memory/__init__.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/memory/__init__.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/import_fixes_v083.md",
+      "line_number": 32,
+      "description": "Potentially invalid path reference: /Users/masa/Projects/claude-multiagent-pm/claude_pm/services/health_monitor.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "/Users/masa/Projects/claude-multiagent-pm/claude_pm/services/health_monitor.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/import_fixes_v083.md",
+      "line_number": 32,
+      "description": "Potentially invalid path reference: claude_pm/services/health_monitor.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/health_monitor.py`"
     }
   ],
   "inconsistencies_found": [],
-  "last_update": "2025-07-14 20:26:08",
-  "files_validated": 11,
+  "last_update": "2025-07-14 21:01:14",
+  "files_validated": 12,
   "links_checked": 38
 }

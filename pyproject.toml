@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "claude-multiagent-pm"
-version = "0.8.3"
+version = "0.8.4"
 description = "Claude Multi-Agent Project Management Framework for AI-driven orchestration"
 readme = "README.md"
 license = {text = "MIT"}
