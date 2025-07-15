@@ -1,0 +1,8 @@
+{
+  "integration_method": "standard",
+  "timestamp": "2025-07-15T09:32:42.454458",
+  "framework_path": "/Users/masa/Projects/claude-multiagent-pm/CLAUDE.md",
+  "framework_size": 22262,
+  "framework_valid": true,
+  "instructions": "Use Claude Code with this directory. Framework configuration is ready."
+}

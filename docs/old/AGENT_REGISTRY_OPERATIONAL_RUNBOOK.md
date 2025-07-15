@@ -2,7 +2,7 @@
 
 **Date**: July 15, 2025  
 **Documentation Agent**: Agent Registry Operations Manual  
-**Framework Version**: 013  
+**Framework Version**: 014  
 **Context**: ISS-0118 Two-Tier Agent Hierarchy Operational Guide  
 
 ---

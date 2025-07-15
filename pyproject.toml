@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "claude-multiagent-pm"
-version = "0.8.6"
+version = "0.9.0"
 description = "Claude Multi-Agent Project Management Framework for AI-driven orchestration"
 readme = "README.md"
 license = {text = "MIT"}
@@ -122,8 +122,15 @@ ai = [
     "transformers>=4.35.0"
 ]
 
+evaluation = [
+    # Evaluation and prompt optimization
+    "mirascope>=0.1.0",
+    "pydantic>=2.5.0",
+    "asyncio>=3.4.0"
+]
+
 all = [
-    "claude-multiagent-pm[dev,production,ai]"
+    "claude-multiagent-pm[dev,production,ai,evaluation]"
 ]
 
 [project.urls]

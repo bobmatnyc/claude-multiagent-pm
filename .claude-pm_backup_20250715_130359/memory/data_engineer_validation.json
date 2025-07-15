@@ -1,0 +1,38 @@
+[
+  {
+    "timestamp": "2025-07-15T11:27:22.354706+00:00",
+    "category": "error:integration",
+    "priority": "high",
+    "content": "SQLite database missing at expected location",
+    "source_agent": "data_engineer",
+    "project_context": "claude-multiagent-pm",
+    "resolution_status": "open"
+  },
+  {
+    "timestamp": "2025-07-15T11:27:22.415368+00:00",
+    "category": "error:integration",
+    "priority": "critical",
+    "content": "mem0AI integration import failure: No module named 'claude_pm.services.memory_service'",
+    "source_agent": "data_engineer",
+    "project_context": "claude-multiagent-pm",
+    "resolution_status": "open"
+  },
+  {
+    "timestamp": "2025-07-15T11:27:22.415381+00:00",
+    "category": "error:integration",
+    "priority": "medium",
+    "content": "Anthropic API key not configured",
+    "source_agent": "data_engineer",
+    "project_context": "claude-multiagent-pm",
+    "resolution_status": "open"
+  },
+  {
+    "timestamp": "2025-07-15T11:27:22.415398+00:00",
+    "category": "error:integration",
+    "priority": "critical",
+    "content": "Framework memory system failure: No module named 'claude_pm.services.memory_service'",
+    "source_agent": "data_engineer",
+    "project_context": "claude-multiagent-pm",
+    "resolution_status": "open"
+  }
+]

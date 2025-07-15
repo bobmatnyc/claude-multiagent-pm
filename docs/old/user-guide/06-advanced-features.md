@@ -10,6 +10,7 @@
 7. [Advanced Orchestration](#advanced-orchestration)
 8. [Production Operations](#production-operations)
 9. [Troubleshooting & Monitoring](#troubleshooting--monitoring)
+10. [Template System](#template-system)
 
 ---
 
@@ -2767,7 +2768,136 @@ Each feature can be implemented incrementally, allowing you to adopt advanced ca
 
 ---
 
+## Template System
+
+### Overview
+
+The Claude Multi-Agent PM Framework uses a handlebars-based template system for framework configuration deployment. This system provides reliable, maintainable template processing without complex inclusion mechanisms.
+
+### Framework Template Architecture
+
+#### CLAUDE.md Template Hierarchy
+
+The framework uses a hierarchical approach for template deployment:
+
+```
+framework/CLAUDE.md (Master Template)
+    ↓ (Deployment with variable substitution)
+Project/.claude-pm/CLAUDE.md (Deployed Configuration)
+```
+
+#### Template Variables
+
+The framework template uses handlebars syntax for variable substitution:
+
+```handlebars
+# Example template variables
+CLAUDE_MD_VERSION: {{CLAUDE_MD_VERSION}}
+FRAMEWORK_VERSION: {{FRAMEWORK_VERSION}}
+DEPLOYMENT_DATE: {{DEPLOYMENT_DATE}}
+LAST_UPDATED: {{LAST_UPDATED}}
+PLATFORM: {{PLATFORM}}
+PYTHON_CMD: {{PYTHON_CMD}}
+```
+
+#### Template Processing
+
+The template system processes variables during deployment:
+
+1. **Variable Detection**: Handlebars `{{VARIABLE}}` patterns are identified
+2. **Value Substitution**: Variables are replaced with runtime values
+3. **Template Deployment**: Processed template is deployed to target directories
+4. **Version Tracking**: Template versions are tracked for consistency
+
+### Template Management
+
+#### Deployment Process
+
+The framework automatically handles template deployment:
+
+```python
+# Template deployment is handled by ParentDirectoryManager
+from claude_pm.services.parent_directory_manager import ParentDirectoryManager
+
+# Framework automatically:
+# 1. Reads framework/CLAUDE.md template
+# 2. Substitutes handlebars variables
+# 3. Deploys to .claude-pm/CLAUDE.md
+# 4. Tracks version consistency
+```
+
+#### Version Consistency
+
+The template system ensures version consistency:
+
+- **Version Comparison**: Compares deployed template versions
+- **Automatic Updates**: Updates templates when framework versions change
+- **Backup Creation**: Creates backups before template updates
+- **Rollback Support**: Maintains backup copies for recovery
+
+### Template Design Principles
+
+#### Reliability Over Complexity
+
+The framework prioritizes reliability over advanced features:
+
+- **No @include Directives**: Avoids complex inclusion mechanisms
+- **Direct Variable Substitution**: Uses simple handlebars replacement
+- **Explicit References**: Prefers explicit file paths over dynamic inclusion
+- **Single Template Source**: Master template provides consistency
+
+#### Maintenance and Evolution
+
+The template system is designed for maintainability:
+
+- **Clear Variable Naming**: Variables use descriptive names
+- **Documented Substitutions**: All variables are documented
+- **Version Tracking**: Template changes are tracked and versioned
+- **Backward Compatibility**: Updates maintain compatibility
+
+### Historical Context
+
+#### SuperClaude Template System Research
+
+During framework development, research was conducted on advanced template systems including SuperClaude's @include functionality. This research determined that:
+
+- **@include Directives**: Proved to have 0% reliability with Claude AI models
+- **Complex Inclusion**: Creates maintenance overhead without benefits
+- **Template Loaders**: SuperClaude-style loaders are incompatible with Claude
+- **Recursive Processing**: Adds complexity without improving functionality
+
+#### Current Architecture Decision
+
+The framework adopted a simpler, more reliable approach:
+
+- **Handlebars Variables**: Proven reliable for variable substitution
+- **Direct Template Processing**: Avoids complex inclusion mechanisms
+- **Framework Hierarchy**: Uses directory hierarchy for configuration precedence
+- **Explicit File Management**: Direct file operations ensure reliability
+
+### Best Practices
+
+#### Template Modification
+
+When working with framework templates:
+
+1. **Never Modify Deployed Templates**: Always modify the master template
+2. **Test Variable Substitution**: Verify all variables are properly defined
+3. **Maintain Version Consistency**: Ensure template versions align with framework
+4. **Document Changes**: Track template modifications for maintenance
+
+#### Development Workflow
+
+For framework development:
+
+1. **Update Master Template**: Make changes to `framework/CLAUDE.md`
+2. **Test Deployment**: Verify template deployment works correctly
+3. **Version Management**: Update template version numbers appropriately
+4. **Backup Validation**: Ensure backup system functions properly
+
+---
+
 **Framework Version**: 4.2.0  
-**Last Updated**: 2025-07-09  
+**Last Updated**: 2025-07-15  
 **Advanced Features Coverage**: 100%  
 **Enterprise Features**: Complete

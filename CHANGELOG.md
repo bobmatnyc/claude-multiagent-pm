@@ -2,6 +2,42 @@
 
 All notable changes to the Claude Multi-Agent Project Management Framework will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 0.8.4 (2025-07-15)
+
+### 🧹 SuperClaude Template System Cleanup (ISS-0110)
+
+#### 🔥 Template System Reliability Improvements
+- **SuperClaude Template Loader Removal**: Removed all non-functional SuperClaude template loader references that had 0% reliability with Claude AI models
+- **Orphaned Test File Cleanup**: Removed `tests/test_template_manager.py` which tested non-existent template management components
+- **Documentation Accuracy**: Updated documentation to reflect current handlebars-based template system architecture
+- **Historical Reference Preservation**: Properly archived SuperClaude-related analysis documents with historical context notes
+
+#### 🏗️ Template Architecture Clarification
+- **Current Template System**: Documented handlebars `{{VARIABLE}}` approach used by ParentDirectoryManager
+- **Framework Template Process**: Clarified framework/CLAUDE.md → project/.claude-pm/CLAUDE.md deployment process
+- **Template Design Principles**: Documented reliability-over-complexity approach avoiding complex inclusion mechanisms
+- **Historical Context**: Added comprehensive explanation of why @include directives and SuperClaude template features were rejected
+
+#### 📚 Documentation Updates
+- **Template System Section**: Added comprehensive template system documentation to user guide
+- **SuperClaude Research Context**: Documented research findings showing SuperClaude template features are incompatible with Claude AI models
+- **Archive Organization**: Enhanced archive documentation with proper historical context for SuperClaude references
+- **Best Practices**: Added template modification and development workflow guidelines
+
+#### 🔧 Technical Improvements
+- **Reliability Focus**: Emphasized simple, reliable template processing over complex inclusion mechanisms
+- **Version Consistency**: Maintained template version tracking and consistency validation
+- **Backup System**: Preserved template backup and recovery functionality
+- **Direct File Operations**: Confirmed direct file operations for template management reliability
+
+### 🎯 SuperClaude Compatibility Research Summary
+
+Based on comprehensive technical research:
+- **@include Directives**: Proven to have 0% reliability with Claude AI models
+- **SuperClaude Template Loaders**: Confirmed by creator to be incompatible with Claude
+- **Complex Inclusion Mechanisms**: Create maintenance overhead without functional benefits
+- **Current Architecture**: Handlebars variable substitution provides superior reliability and maintainability
+
 ## 0.8.3 (2025-07-14)
 
 ### 🚨 CRITICAL PATCH: Installer Reliability & Fresh Installation Support

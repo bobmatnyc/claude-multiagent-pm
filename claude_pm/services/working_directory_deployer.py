@@ -114,8 +114,8 @@ class WorkingDirectoryDeployer(BaseService):
         return npm_home
     
     async def deploy_to_working_directory(self, 
-                                        working_directory: Optional[Path] = None,
-                                        config: Optional[DeploymentConfig] = None) -> DeploymentResult:
+                                        config: Optional[DeploymentConfig] = None,
+                                        working_directory: Optional[Path] = None) -> DeploymentResult:
         """
         Deploy framework to working directory.
         
@@ -216,7 +216,28 @@ class WorkingDirectoryDeployer(BaseService):
             validation['details']['templates_exist'] = True
             
             # Check target directory permissions
-            parent_dir = config.target_path.parent
+            # FIXED: Added validation to prevent undefined variable error when target_path is None
+            if config.target_path is None:
+                validation['valid'] = False
+                validation['error'] = "Target path is not configured"
+                return validation
+            
+            # Initialize parent_dir to None to prevent undefined variable error
+            parent_dir = None
+            
+            try:
+                parent_dir = config.target_path.parent
+            except (AttributeError, TypeError) as e:
+                validation['valid'] = False
+                validation['error'] = f"Invalid target path configuration: {e}"
+                return validation
+            
+            # Additional safety check to ensure parent_dir is defined
+            if parent_dir is None:
+                validation['valid'] = False
+                validation['error'] = "Failed to determine parent directory"
+                return validation
+            
             if not parent_dir.exists():
                 try:
                     parent_dir.mkdir(parents=True, exist_ok=True)

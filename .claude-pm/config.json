@@ -1,38 +1,19 @@
 {
-  "version": "0.5.4",
-  "deployedAt": "2025-07-12T02:34:24.577Z",
-  "platform": "darwin",
-  "deploymentDir": "/Users/masa/Projects/claude-multiagent-pm",
-  "pythonCmd": "python3",
-  "aiTrackdownPath": "/Users/masa/.nvm/versions/node/v20.19.0/lib/node_modules/@bobmatnyc/ai-trackdown-tools/dist/index.js",
-  "paths": {
-    "framework": "/Users/masa/Projects/claude-multiagent-pm/claude_pm",
-    "templates": "/Users/masa/Projects/claude-multiagent-pm/templates",
-    "schemas": "/Users/masa/Projects/claude-multiagent-pm/schemas",
-    "tasks": "/Users/masa/Projects/claude-multiagent-pm/tasks",
-    "bin": "/Users/masa/Projects/claude-multiagent-pm/bin",
-    "config": "/Users/masa/Projects/claude-multiagent-pm/.claude-pm"
-  },
+  "deployment_type": "working_directory",
+  "source_installation": "/Users/masa/Projects/claude-multiagent-pm",
+  "deployed_at": "2025-07-15T14:14:16.004110",
+  "framework_version": "014",
+  "working_directory": "/Users/masa/Projects/claude-multiagent-pm",
   "features": {
-    "aiTrackdownIntegration": true,
-    "memoryIntegration": true,
-    "multiAgentSupport": true,
-    "portableDeployment": true,
-    "enhancedGlobalInstallation": true,
-    "improvedTemplateDeployment": true,
-    "productionDeploymentFixes": true
+    "agents": true,
+    "templates": true,
+    "health_monitoring": true,
+    "memory_integration": true
   },
-  "publication": {
-    "npmVersion": "0.5.4",
-    "publishedAt": "2025-07-12T02:34:24.387Z",
-    "registry": "https://registry.npmjs.org/",
-    "packageName": "@bobmatnyc/claude-multiagent-pm",
-    "deploymentFixes": [
-      "Enhanced global installation detection",
-      "Improved template deployment with fallback strategies",
-      "Enhanced custom npm global path support",
-      "Production deployment reliability improvements",
-      "Comprehensive deployment troubleshooting"
-    ]
+  "paths": {
+    "agents": "/Users/masa/Projects/claude-multiagent-pm/.claude-pm/agents",
+    "templates": "/Users/masa/Projects/claude-multiagent-pm/.claude-pm/templates",
+    "health": "/Users/masa/Projects/claude-multiagent-pm/.claude-pm/health",
+    "logs": "/Users/masa/Projects/claude-multiagent-pm/.claude-pm/logs"
   }
 }

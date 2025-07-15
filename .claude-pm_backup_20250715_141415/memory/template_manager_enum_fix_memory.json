@@ -1,0 +1,63 @@
+{
+  "timestamp": "2025-07-14T17:44:30.000000",
+  "category": "bug",
+  "priority": "high",
+  "source_agent": "engineer",
+  "project_context": "claude_pm_framework_template_management",
+  "related_tasks": ["template_manager_enum_attribute_error_fix"],
+  "resolution_status": "resolved",
+  "impact_scope": "framework",
+  "user_id": "system",
+  "bug_description": "Template manager was throwing 'str' object has no attribute 'value' errors",
+  "root_cause": "Code was trying to call .value on string objects that were loaded from JSON instead of enum objects",
+  "technical_details": {
+    "affected_file": "claude_pm/services/template_manager.py",
+    "error_pattern": "AttributeError: 'str' object has no attribute 'value'",
+    "locations": [
+      "Line 288: version.source.value during serialization",
+      "Line 306: conflict.existing_version.source.value during conflict serialization",
+      "Line 317: conflict.new_version.source.value during conflict serialization",
+      "Line 330: conflict.resolution.value during conflict serialization",
+      "Line 412: self._detect_template_type(template_file).value during registration",
+      "Line 616: TemplateSource(template_info['source']) during template update"
+    ],
+    "deserialization_issue": "TemplateVersion objects were created with string source values from JSON instead of TemplateSource enums"
+  },
+  "solution_implemented": {
+    "approach": "Added robust type checking and safe enum handling",
+    "new_methods": [
+      "_safe_enum_value(enum_or_str, enum_class): Safely get string value from enum or string",
+      "_ensure_enum_type(value, enum_class, default): Convert string to enum with fallback"
+    ],
+    "fixes_applied": [
+      "Updated _load_registries to convert string values to enums during deserialization",
+      "Added enum type conversion for TemplateSource and ConflictResolution during loading",
+      "Updated all serialization code to use _safe_enum_value method",
+      "Added fallback handling for invalid enum values",
+      "Updated template creation and update methods to use safe enum conversion"
+    ]
+  },
+  "validation": {
+    "test_cases": [
+      "Safe enum value conversion with both enum objects and strings",
+      "Enum type enforcement with invalid value fallbacks", 
+      "JSON serialization/deserialization roundtrip with mixed enum/string data",
+      "Error recovery with corrupted enum data",
+      "Template creation and listing with enum filters"
+    ],
+    "verification_status": "All tests passed - no more attribute errors"
+  },
+  "prevention_measures": {
+    "type_safety": "Added comprehensive type checking for all enum operations",
+    "error_recovery": "Graceful handling of invalid enum values with sensible defaults",
+    "logging": "Warning messages for invalid enum values to aid debugging",
+    "backwards_compatibility": "Supports both enum objects and string values seamlessly"
+  },
+  "lessons_learned": [
+    "Always validate enum types during JSON deserialization",
+    "Implement safe accessor methods for enum attributes", 
+    "Add comprehensive error recovery for data corruption scenarios",
+    "Test serialization/deserialization cycles thoroughly"
+  ],
+  "framework_impact": "Template management system now robustly handles mixed enum/string scenarios without attribute errors"
+}

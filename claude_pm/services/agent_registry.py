@@ -22,11 +22,11 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class AgentMetadata:
-    """Agent metadata structure for registry entries"""
+    """Enhanced agent metadata structure for registry entries with specialization support"""
     name: str
     type: str
     path: str
-    tier: str  # 'user', 'system'
+    tier: str  # 'user', 'system', 'project'
     description: Optional[str] = None
     version: Optional[str] = None
     capabilities: List[str] = None
@@ -34,10 +34,32 @@ class AgentMetadata:
     file_size: Optional[int] = None
     validated: bool = False
     error_message: Optional[str] = None
+    # Enhanced metadata for ISS-0118
+    specializations: List[str] = None
+    frameworks: List[str] = None
+    domains: List[str] = None
+    roles: List[str] = None
+    is_hybrid: bool = False
+    hybrid_types: List[str] = None
+    composite_agents: List[str] = None
+    validation_score: float = 0.0
+    complexity_level: str = 'basic'  # 'basic', 'intermediate', 'advanced', 'expert'
     
     def __post_init__(self):
         if self.capabilities is None:
             self.capabilities = []
+        if self.specializations is None:
+            self.specializations = []
+        if self.frameworks is None:
+            self.frameworks = []
+        if self.domains is None:
+            self.domains = []
+        if self.roles is None:
+            self.roles = []
+        if self.hybrid_types is None:
+            self.hybrid_types = []
+        if self.composite_agents is None:
+            self.composite_agents = []
 
 class AgentRegistry:
     """
@@ -60,6 +82,17 @@ class AgentRegistry:
         self.core_agent_types = {
             'documentation', 'ticketing', 'version_control', 'qa', 'research',
             'ops', 'security', 'engineer', 'data_engineer'
+        }
+        # Extended specialized agent types for ISS-0118
+        self.specialized_agent_types = {
+            'ui_ux', 'database', 'api', 'testing', 'performance', 'monitoring',
+            'analytics', 'deployment', 'integration', 'workflow', 'content',
+            'machine_learning', 'data_science', 'frontend', 'backend', 'mobile',
+            'devops', 'cloud', 'infrastructure', 'compliance', 'audit',
+            'project_management', 'business_analysis', 'customer_support',
+            'marketing', 'sales', 'finance', 'legal', 'hr', 'training',
+            'documentation_specialist', 'code_review', 'architecture',
+            'orchestrator', 'scaffolding', 'memory_management', 'knowledge_base'
         }
         self.last_discovery_time: Optional[float] = None
         self.discovery_cache_ttl = 300  # 5 minutes
@@ -215,6 +248,11 @@ class AgentRegistry:
             # Read file for additional metadata
             description, version, capabilities = await self._parse_agent_file(agent_file)
             
+            # Enhanced metadata extraction for ISS-0118
+            specializations, frameworks, domains, roles = self._extract_specialized_metadata(capabilities)
+            is_hybrid, hybrid_types = self._detect_hybrid_agent(agent_type, specializations)
+            complexity_level = self._assess_complexity_level(capabilities, specializations)
+            
             return AgentMetadata(
                 name=agent_name,
                 type=agent_type,
@@ -225,7 +263,14 @@ class AgentRegistry:
                 capabilities=capabilities,
                 last_modified=last_modified,
                 file_size=file_size,
-                validated=False  # Will be validated later
+                validated=False,  # Will be validated later
+                specializations=specializations,
+                frameworks=frameworks,
+                domains=domains,
+                roles=roles,
+                is_hybrid=is_hybrid,
+                hybrid_types=hybrid_types,
+                complexity_level=complexity_level
             )
             
         except Exception as e:
@@ -234,7 +279,8 @@ class AgentRegistry:
     
     async def _parse_agent_file(self, agent_file: Path) -> Tuple[Optional[str], Optional[str], List[str]]:
         """
-        Parse agent file for metadata information
+        Enhanced agent file parsing with specialized capability detection for ISS-0118.
+        Extracts comprehensive metadata including specialization indicators.
         
         Args:
             agent_file: Path to agent file
@@ -249,7 +295,7 @@ class AgentRegistry:
         try:
             content = agent_file.read_text(encoding='utf-8')
             
-            # Extract docstring description
+            # Extract docstring description with specialization detection
             if '"""' in content:
                 docstring_start = content.find('"""')
                 if docstring_start != -1:
@@ -258,6 +304,20 @@ class AgentRegistry:
                         docstring = content[docstring_start + 3:docstring_end].strip()
                         # Use first line as description
                         description = docstring.split('\n')[0].strip()
+                        
+                        # Extract specialization hints from docstring
+                        docstring_lower = docstring.lower()
+                        specialization_indicators = [
+                            'specializes in', 'specialized for', 'expert in', 'focused on',
+                            'handles', 'manages', 'responsible for', 'domain:', 'specialty:'
+                        ]
+                        for indicator in specialization_indicators:
+                            if indicator in docstring_lower:
+                                # Extract text after indicator as specialization capability
+                                spec_start = docstring_lower.find(indicator) + len(indicator)
+                                spec_text = docstring[spec_start:spec_start+100].strip()
+                                if spec_text:
+                                    capabilities.append(f"specialization:{spec_text.split('.')[0].strip()}")
             
             # Extract version information
             if 'VERSION' in content or '__version__' in content:
@@ -269,7 +329,7 @@ class AgentRegistry:
                             version = version_part
                             break
             
-            # Extract capabilities from methods/functions
+            # Enhanced capability extraction from methods/functions
             lines = content.split('\n')
             for line in lines:
                 line = line.strip()
@@ -283,15 +343,260 @@ class AgentRegistry:
                     method_name = line.split('(')[0].replace('async def ', '').strip()
                     if method_name not in ['__init__', '__str__', '__repr__']:
                         capabilities.append(f"async_{method_name}")
+            
+            # Extract capabilities from class definitions and inheritance
+            import ast
+            try:
+                tree = ast.parse(content)
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.ClassDef):
+                        # Add class name as capability
+                        capabilities.append(f"class:{node.name}")
+                        
+                        # Extract base classes as capability indicators
+                        for base in node.bases:
+                            if isinstance(base, ast.Name):
+                                capabilities.append(f"inherits:{base.id}")
+                            elif isinstance(base, ast.Attribute):
+                                capabilities.append(f"inherits:{base.attr}")
+            except SyntaxError:
+                pass  # Skip AST parsing if syntax errors
+            
+            # Extract framework and library capabilities from imports
+            framework_capabilities = self._extract_framework_capabilities(content)
+            capabilities.extend(framework_capabilities)
+            
+            # Extract role and domain capabilities from comments
+            role_capabilities = self._extract_role_capabilities(content)
+            capabilities.extend(role_capabilities)
         
         except Exception as e:
             logger.warning(f"Error parsing agent file {agent_file}: {e}")
         
         return description, version, capabilities
     
+    def _extract_framework_capabilities(self, content: str) -> List[str]:
+        """
+        Extract framework and library capabilities from import statements.
+        
+        Args:
+            content: File content
+            
+        Returns:
+            List of framework capabilities
+        """
+        capabilities = []
+        
+        framework_patterns = {
+            'fastapi': ['fastapi', 'pydantic'],
+            'django': ['django'],
+            'flask': ['flask'],
+            'react': ['react', '@types/react'],
+            'vue': ['vue', '@vue/'],
+            'angular': ['@angular/', 'angular'],
+            'express': ['express'],
+            'tensorflow': ['tensorflow', 'tf'],
+            'pytorch': ['torch', 'pytorch'],
+            'pandas': ['pandas'],
+            'numpy': ['numpy'],
+            'selenium': ['selenium'],
+            'pytest': ['pytest'],
+            'jest': ['jest'],
+            'docker': ['docker'],
+            'kubernetes': ['kubernetes', 'kubectl'],
+            'aws': ['boto3', 'aws-'],
+            'azure': ['azure-'],
+            'gcp': ['google-cloud-'],
+            'redis': ['redis'],
+            'mongodb': ['pymongo', 'mongodb'],
+            'postgresql': ['psycopg2', 'postgresql'],
+            'mysql': ['mysql', 'pymysql'],
+            'graphql': ['graphql'],
+            'rest_api': ['requests', 'urllib'],
+            'machine_learning': ['scikit-learn', 'sklearn'],
+            'data_analysis': ['matplotlib', 'seaborn'],
+            'async_processing': ['asyncio', 'aiohttp'],
+            'task_queue': ['celery', 'rq'],
+            'monitoring': ['prometheus', 'grafana'],
+            'logging': ['loguru', 'structlog']
+        }
+        
+        content_lower = content.lower()
+        
+        for framework, patterns in framework_patterns.items():
+            for pattern in patterns:
+                if f'import {pattern}' in content_lower or f'from {pattern}' in content_lower:
+                    capabilities.append(f'framework:{framework}')
+                    break
+        
+        return capabilities
+    
+    def _extract_role_capabilities(self, content: str) -> List[str]:
+        """
+        Extract role and domain capabilities from comments and docstrings.
+        
+        Args:
+            content: File content
+            
+        Returns:
+            List of role capabilities
+        """
+        capabilities = []
+        
+        role_patterns = {
+            'ui_designer': ['ui design', 'user interface', 'interface design'],
+            'ux_specialist': ['user experience', 'ux research', 'usability'],
+            'frontend_developer': ['frontend development', 'client-side', 'web development'],
+            'backend_developer': ['backend development', 'server-side', 'api development'],
+            'database_administrator': ['database admin', 'db management', 'database design'],
+            'devops_engineer': ['devops', 'ci/cd', 'deployment automation'],
+            'security_specialist': ['security analysis', 'vulnerability assessment', 'penetration testing'],
+            'performance_engineer': ['performance optimization', 'load testing', 'benchmarking'],
+            'quality_assurance': ['quality assurance', 'test automation', 'qa testing'],
+            'data_scientist': ['data science', 'machine learning', 'statistical analysis'],
+            'business_analyst': ['business analysis', 'requirements gathering', 'process mapping'],
+            'project_manager': ['project management', 'agile', 'scrum master'],
+            'technical_writer': ['technical writing', 'documentation', 'content creation'],
+            'integration_specialist': ['system integration', 'api integration', 'middleware'],
+            'architecture_specialist': ['system architecture', 'software architecture', 'design patterns']
+        }
+        
+        content_lower = content.lower()
+        
+        for role, patterns in role_patterns.items():
+            for pattern in patterns:
+                if pattern in content_lower:
+                    capabilities.append(f'role:{role}')
+                    break
+        
+        # Extract domain capabilities from comments
+        domain_keywords = {
+            'e_commerce': ['e-commerce', 'shopping', 'payment', 'order'],
+            'healthcare': ['healthcare', 'medical', 'patient', 'clinical'],
+            'finance': ['financial', 'banking', 'trading', 'investment'],
+            'education': ['education', 'learning', 'student', 'course'],
+            'gaming': ['gaming', 'game', 'player', 'score'],
+            'social_media': ['social', 'feed', 'post', 'like', 'share'],
+            'iot': ['iot', 'sensor', 'device', 'telemetry'],
+            'blockchain': ['blockchain', 'crypto', 'smart contract', 'web3'],
+            'ai_ml': ['artificial intelligence', 'machine learning', 'neural network'],
+            'cloud_native': ['cloud native', 'microservices', 'serverless']
+        }
+        
+        for domain, keywords in domain_keywords.items():
+            for keyword in keywords:
+                if keyword in content_lower:
+                    capabilities.append(f'domain:{domain}')
+                    break
+        
+        return capabilities
+    
+    def _extract_specialized_metadata(self, capabilities: List[str]) -> Tuple[List[str], List[str], List[str], List[str]]:
+        """
+        Extract specialized metadata from capabilities list.
+        
+        Args:
+            capabilities: List of agent capabilities
+            
+        Returns:
+            Tuple of (specializations, frameworks, domains, roles)
+        """
+        specializations = []
+        frameworks = []
+        domains = []
+        roles = []
+        
+        for capability in capabilities:
+            if capability.startswith('specialization:'):
+                specializations.append(capability.replace('specialization:', ''))
+            elif capability.startswith('framework:'):
+                frameworks.append(capability.replace('framework:', ''))
+            elif capability.startswith('domain:'):
+                domains.append(capability.replace('domain:', ''))
+            elif capability.startswith('role:'):
+                roles.append(capability.replace('role:', ''))
+        
+        return specializations, frameworks, domains, roles
+    
+    def _detect_hybrid_agent(self, agent_type: str, specializations: List[str]) -> Tuple[bool, List[str]]:
+        """
+        Detect if agent is hybrid (combines multiple agent types).
+        
+        Args:
+            agent_type: Primary agent type
+            specializations: List of specializations
+            
+        Returns:
+            Tuple of (is_hybrid, hybrid_types)
+        """
+        hybrid_types = []
+        
+        # Check if agent combines multiple core types
+        core_type_indicators = {
+            'documentation': ['docs', 'documentation', 'technical_writing'],
+            'ticketing': ['ticketing', 'issue', 'bug_tracking'],
+            'version_control': ['git', 'version', 'branching'],
+            'qa': ['testing', 'quality', 'validation'],
+            'research': ['research', 'analysis', 'investigation'],
+            'ops': ['operations', 'deployment', 'infrastructure'],
+            'security': ['security', 'auth', 'vulnerability'],
+            'engineer': ['engineering', 'development', 'coding'],
+            'data_engineer': ['data', 'pipeline', 'etl']
+        }
+        
+        primary_type = agent_type
+        detected_types = set()
+        
+        for spec in specializations:
+            for core_type, indicators in core_type_indicators.items():
+                if any(indicator in spec.lower() for indicator in indicators):
+                    detected_types.add(core_type)
+        
+        # If more than one core type detected, it's hybrid
+        if len(detected_types) > 1 or (len(detected_types) == 1 and primary_type not in detected_types):
+            hybrid_types = list(detected_types)
+            if primary_type not in hybrid_types:
+                hybrid_types.append(primary_type)
+            return True, hybrid_types
+        
+        return False, []
+    
+    def _assess_complexity_level(self, capabilities: List[str], specializations: List[str]) -> str:
+        """
+        Assess agent complexity level based on capabilities and specializations.
+        
+        Args:
+            capabilities: List of capabilities
+            specializations: List of specializations
+            
+        Returns:
+            Complexity level ('basic', 'intermediate', 'advanced', 'expert')
+        """
+        total_features = len(capabilities) + len(specializations)
+        
+        # Count advanced features
+        advanced_indicators = [
+            'async_', 'class:', 'framework:', 'machine_learning', 'ai',
+            'microservices', 'kubernetes', 'blockchain', 'neural_network'
+        ]
+        
+        advanced_count = sum(1 for cap in capabilities 
+                           if any(indicator in cap.lower() for indicator in advanced_indicators))
+        
+        # Assess complexity
+        if total_features >= 20 or advanced_count >= 5:
+            return 'expert'
+        elif total_features >= 15 or advanced_count >= 3:
+            return 'advanced'
+        elif total_features >= 8 or advanced_count >= 1:
+            return 'intermediate'
+        else:
+            return 'basic'
+    
     def _classify_agent_type(self, agent_name: str, agent_file: Path) -> str:
         """
-        Classify agent type based on name and path
+        Enhanced agent type classification supporting specialized agents beyond core 9 types.
+        Implements comprehensive pattern-based detection for ISS-0118.
         
         Args:
             agent_name: Agent name
@@ -300,35 +605,99 @@ class AgentRegistry:
         Returns:
             Agent type classification
         """
-        # Check for core agent types
         name_lower = agent_name.lower()
         
-        # Direct core agent type matches
+        # First check for core agent types (highest priority)
         for core_type in self.core_agent_types:
             if core_type in name_lower or name_lower in core_type:
                 return core_type
         
-        # Pattern-based classification
-        if 'doc' in name_lower:
-            return 'documentation'
-        elif 'ticket' in name_lower:
-            return 'ticketing'
-        elif any(term in name_lower for term in ['version', 'git', 'vcs']):
-            return 'version_control'
-        elif any(term in name_lower for term in ['qa', 'test', 'quality']):
-            return 'qa'
-        elif any(term in name_lower for term in ['research', 'analyze', 'investigate']):
-            return 'research'
-        elif any(term in name_lower for term in ['ops', 'deploy', 'infrastructure']):
-            return 'ops'
-        elif 'security' in name_lower:
-            return 'security'
-        elif any(term in name_lower for term in ['engineer', 'code', 'develop']):
-            return 'engineer'
-        elif any(term in name_lower for term in ['data', 'database', 'api']):
-            return 'data_engineer'
-        else:
-            return 'custom'
+        # Enhanced pattern-based classification for specialized agents
+        classification_patterns = {
+            # UI/UX and Frontend specializations
+            'ui_ux': ['ui', 'ux', 'design', 'interface', 'user_experience', 'frontend_design'],
+            'frontend': ['frontend', 'front_end', 'react', 'vue', 'angular', 'web_ui', 'client_side'],
+            
+            # Backend and Infrastructure specializations
+            'backend': ['backend', 'back_end', 'server', 'api_server', 'microservice'],
+            'database': ['database', 'db', 'sql', 'nosql', 'mysql', 'postgres', 'mongodb', 'redis'],
+            'api': ['api', 'rest', 'graphql', 'endpoint', 'service', 'web_service'],
+            
+            # Testing and Quality specializations
+            'testing': ['test', 'testing', 'unit_test', 'integration_test', 'e2e', 'automation'],
+            'performance': ['performance', 'benchmark', 'optimization', 'profiling', 'load_test'],
+            'monitoring': ['monitoring', 'observability', 'metrics', 'logging', 'alerting'],
+            
+            # DevOps and Infrastructure specializations
+            'devops': ['devops', 'ci_cd', 'pipeline', 'automation', 'build'],
+            'cloud': ['cloud', 'aws', 'azure', 'gcp', 'kubernetes', 'docker', 'container'],
+            'infrastructure': ['infrastructure', 'terraform', 'ansible', 'provisioning'],
+            'deployment': ['deployment', 'deploy', 'release', 'staging', 'production'],
+            
+            # Data and Analytics specializations
+            'analytics': ['analytics', 'metrics', 'reporting', 'business_intelligence', 'dashboard'],
+            'machine_learning': ['ml', 'machine_learning', 'ai', 'model', 'training', 'prediction'],
+            'data_science': ['data_science', 'data_scientist', 'analysis', 'statistics', 'modeling'],
+            
+            # Business and Process specializations
+            'project_management': ['pm', 'project_management', 'scrum', 'agile', 'planning'],
+            'business_analysis': ['business_analyst', 'requirements', 'specification', 'process'],
+            'compliance': ['compliance', 'audit', 'governance', 'policy', 'regulatory'],
+            
+            # Content and Communication specializations
+            'content': ['content', 'copywriting', 'documentation', 'technical_writing'],
+            'customer_support': ['support', 'helpdesk', 'customer_service', 'ticketing'],
+            'marketing': ['marketing', 'campaign', 'promotion', 'seo', 'social_media'],
+            
+            # Framework-specific specializations
+            'orchestrator': ['orchestrator', 'coordinator', 'workflow', 'pipeline'],
+            'scaffolding': ['scaffolding', 'template', 'generator', 'boilerplate'],
+            'architecture': ['architect', 'architecture', 'design_pattern', 'system_design'],
+            'code_review': ['code_review', 'review', 'quality_assurance', 'peer_review'],
+            'memory_management': ['memory', 'cache', 'storage', 'persistence'],
+            'knowledge_base': ['knowledge', 'kb', 'documentation', 'wiki', 'reference'],
+            
+            # Integration and Workflow specializations
+            'integration': ['integration', 'connector', 'bridge', 'adapter', 'sync'],
+            'workflow': ['workflow', 'process', 'automation', 'orchestration']
+        }
+        
+        # Check specialized agent patterns
+        for agent_type, patterns in classification_patterns.items():
+            if any(pattern in name_lower for pattern in patterns):
+                return agent_type
+        
+        # Enhanced core agent type pattern matching (fallback)
+        core_patterns = {
+            'documentation': ['doc', 'docs', 'manual', 'guide', 'readme'],
+            'ticketing': ['ticket', 'issue', 'bug', 'task', 'jira'],
+            'version_control': ['version', 'git', 'vcs', 'commit', 'branch', 'merge'],
+            'qa': ['qa', 'quality', 'assurance', 'validation', 'verification'],
+            'research': ['research', 'analyze', 'investigate', 'study', 'explore'],
+            'ops': ['ops', 'operations', 'maintenance', 'administration'],
+            'security': ['security', 'auth', 'permission', 'vulnerability', 'encryption'],
+            'engineer': ['engineer', 'code', 'develop', 'programming', 'implementation'],
+            'data_engineer': ['data_engineer', 'etl', 'pipeline', 'warehouse']
+        }
+        
+        for core_type, patterns in core_patterns.items():
+            if any(pattern in name_lower for pattern in patterns):
+                return core_type
+        
+        # Path-based classification hints
+        path_str = str(agent_file).lower()
+        if 'frontend' in path_str or 'ui' in path_str:
+            return 'frontend'
+        elif 'backend' in path_str or 'api' in path_str:
+            return 'backend'
+        elif 'database' in path_str or 'db' in path_str:
+            return 'database'
+        elif 'test' in path_str:
+            return 'testing'
+        elif 'deploy' in path_str:
+            return 'deployment'
+        
+        return 'custom'
     
     def _determine_tier(self, path: Path) -> str:
         """
@@ -368,34 +737,62 @@ class AgentRegistry:
     
     async def _validate_agents(self, agents: Dict[str, AgentMetadata]) -> Dict[str, AgentMetadata]:
         """
-        Validate discovered agents for correctness
+        Enhanced agent validation with specialized agent verification for ISS-0118.
         
         Args:
             agents: Dictionary of agents to validate
             
         Returns:
-            Validated agents dictionary
+            Validated agents dictionary with validation scores
         """
         validated = {}
         
         for name, metadata in agents.items():
             try:
+                validation_score = 0.0
+                validation_errors = []
+                
                 # Basic file validation
                 if not Path(metadata.path).exists():
                     metadata.validated = False
                     metadata.error_message = "File not found"
+                    metadata.validation_score = 0.0
+                    validated[name] = metadata
                     continue
+                
+                validation_score += 10  # File exists
                 
                 # Syntax validation (basic Python syntax check)
                 try:
                     with open(metadata.path, 'r', encoding='utf-8') as f:
                         content = f.read()
                     compile(content, metadata.path, 'exec')
-                    metadata.validated = True
-                    metadata.error_message = None
+                    validation_score += 20  # Valid syntax
                 except SyntaxError as e:
-                    metadata.validated = False
-                    metadata.error_message = f"Syntax error: {e}"
+                    validation_errors.append(f"Syntax error: {e}")
+                    validation_score -= 10
+                
+                # Enhanced validation for specialized agents
+                validation_score += await self._validate_specialized_agent(metadata, content)
+                
+                # Hybrid agent validation
+                if metadata.is_hybrid:
+                    validation_score += self._validate_hybrid_agent(metadata)
+                
+                # Capability consistency validation
+                validation_score += self._validate_capability_consistency(metadata)
+                
+                # Framework compatibility validation
+                validation_score += self._validate_framework_compatibility(metadata)
+                
+                # Set validation results
+                metadata.validation_score = max(0.0, min(100.0, validation_score))
+                metadata.validated = validation_score >= 50.0  # 50% threshold
+                
+                if validation_errors:
+                    metadata.error_message = "; ".join(validation_errors)
+                else:
+                    metadata.error_message = None
                 
                 validated[name] = metadata
                 
@@ -403,9 +800,143 @@ class AgentRegistry:
                 logger.warning(f"Validation error for agent {name}: {e}")
                 metadata.validated = False
                 metadata.error_message = str(e)
+                metadata.validation_score = 0.0
                 validated[name] = metadata
         
         return validated
+    
+    async def _validate_specialized_agent(self, metadata: AgentMetadata, content: str) -> float:
+        """
+        Validate specialized agent requirements and capabilities.
+        
+        Args:
+            metadata: Agent metadata
+            content: Agent file content
+            
+        Returns:
+            Validation score contribution
+        """
+        score = 0.0
+        
+        # Validate specialization alignment
+        if metadata.specializations:
+            score += 15  # Has specializations
+            
+            # Check if specializations align with agent type
+            type_alignment = any(spec.lower() in metadata.type.lower() or 
+                               metadata.type.lower() in spec.lower() 
+                               for spec in metadata.specializations)
+            if type_alignment:
+                score += 10
+        
+        # Validate framework usage
+        if metadata.frameworks:
+            score += 10  # Uses frameworks
+            
+            # Check for proper import statements
+            for framework in metadata.frameworks:
+                if framework.lower() in content.lower():
+                    score += 2  # Framework properly imported
+        
+        # Validate domain expertise
+        if metadata.domains:
+            score += 8  # Has domain expertise
+        
+        # Validate role definitions
+        if metadata.roles:
+            score += 7  # Has defined roles
+        
+        return score
+    
+    def _validate_hybrid_agent(self, metadata: AgentMetadata) -> float:
+        """
+        Validate hybrid agent configuration.
+        
+        Args:
+            metadata: Agent metadata
+            
+        Returns:
+            Validation score contribution
+        """
+        score = 0.0
+        
+        if metadata.is_hybrid and metadata.hybrid_types:
+            # Bonus for being hybrid
+            score += 5
+            
+            # Validate hybrid type consistency
+            if len(metadata.hybrid_types) >= 2:
+                score += 10  # Valid hybrid combination
+            
+            # Check for capability coverage across types
+            type_coverage = len(set(metadata.hybrid_types))
+            score += type_coverage * 2  # Coverage bonus
+        
+        return score
+    
+    def _validate_capability_consistency(self, metadata: AgentMetadata) -> float:
+        """
+        Validate capability consistency with agent type and specializations.
+        
+        Args:
+            metadata: Agent metadata
+            
+        Returns:
+            Validation score contribution
+        """
+        score = 0.0
+        
+        # Basic capability validation
+        if metadata.capabilities:
+            score += len(metadata.capabilities) * 0.5  # Base capability score
+            
+            # Check for consistent naming
+            consistent_caps = sum(1 for cap in metadata.capabilities 
+                                if not cap.startswith('_'))
+            score += consistent_caps * 0.3
+        
+        # Validate complexity assessment
+        complexity_levels = ['basic', 'intermediate', 'advanced', 'expert']
+        if metadata.complexity_level in complexity_levels:
+            score += 5
+            
+            # Bonus for higher complexity with sufficient capabilities
+            complexity_index = complexity_levels.index(metadata.complexity_level)
+            expected_caps = (complexity_index + 1) * 5
+            if len(metadata.capabilities) >= expected_caps:
+                score += 5
+        
+        return score
+    
+    def _validate_framework_compatibility(self, metadata: AgentMetadata) -> float:
+        """
+        Validate framework compatibility and integration.
+        
+        Args:
+            metadata: Agent metadata
+            
+        Returns:
+            Validation score contribution
+        """
+        score = 0.0
+        
+        if metadata.frameworks:
+            # Validate framework combinations
+            compatible_combinations = {
+                'react': ['typescript', 'javascript', 'webpack'],
+                'django': ['python', 'postgresql', 'redis'],
+                'fastapi': ['python', 'pydantic', 'asyncio'],
+                'kubernetes': ['docker', 'yaml', 'helm']
+            }
+            
+            for framework in metadata.frameworks:
+                if framework in compatible_combinations:
+                    compatible_techs = compatible_combinations[framework]
+                    compatibility_score = sum(1 for tech in compatible_techs 
+                                            if any(tech in cap.lower() for cap in metadata.capabilities))
+                    score += compatibility_score * 2
+        
+        return score
     
     def _is_discovery_cache_valid(self) -> bool:
         """Check if discovery cache is still valid"""
@@ -535,3 +1066,207 @@ class AgentRegistry:
         self.registry.clear()
         # Clear cache entry synchronously
         self.cache_service.invalidate("agent_registry_discovery")
+    
+    # Enhanced API methods for ISS-0118 specialized agent discovery
+    
+    async def get_specialized_agents(self, agent_type: str) -> List[AgentMetadata]:
+        """
+        Get all agents of a specific specialized type.
+        
+        Args:
+            agent_type: Specialized agent type to search for
+            
+        Returns:
+            List of matching specialized agents
+        """
+        if not self.registry:
+            await self.discover_agents()
+        
+        specialized_agents = []
+        for metadata in self.registry.values():
+            if (metadata.type == agent_type or 
+                agent_type in metadata.specializations or
+                agent_type in metadata.hybrid_types):
+                specialized_agents.append(metadata)
+        
+        return sorted(specialized_agents, key=lambda x: x.validation_score, reverse=True)
+    
+    async def get_agents_by_framework(self, framework: str) -> List[AgentMetadata]:
+        """
+        Get agents that use a specific framework.
+        
+        Args:
+            framework: Framework name to search for
+            
+        Returns:
+            List of agents using the framework
+        """
+        if not self.registry:
+            await self.discover_agents()
+        
+        return [metadata for metadata in self.registry.values() 
+                if framework.lower() in [f.lower() for f in metadata.frameworks]]
+    
+    async def get_agents_by_domain(self, domain: str) -> List[AgentMetadata]:
+        """
+        Get agents specialized in a specific domain.
+        
+        Args:
+            domain: Domain name to search for
+            
+        Returns:
+            List of domain-specialized agents
+        """
+        if not self.registry:
+            await self.discover_agents()
+        
+        return [metadata for metadata in self.registry.values() 
+                if domain.lower() in [d.lower() for d in metadata.domains]]
+    
+    async def get_agents_by_role(self, role: str) -> List[AgentMetadata]:
+        """
+        Get agents with a specific role.
+        
+        Args:
+            role: Role name to search for
+            
+        Returns:
+            List of agents with the role
+        """
+        if not self.registry:
+            await self.discover_agents()
+        
+        return [metadata for metadata in self.registry.values() 
+                if role.lower() in [r.lower() for r in metadata.roles]]
+    
+    async def get_hybrid_agents(self) -> List[AgentMetadata]:
+        """
+        Get all hybrid agents (combining multiple agent types).
+        
+        Returns:
+            List of hybrid agents
+        """
+        if not self.registry:
+            await self.discover_agents()
+        
+        return [metadata for metadata in self.registry.values() if metadata.is_hybrid]
+    
+    async def get_agents_by_complexity(self, complexity_level: str) -> List[AgentMetadata]:
+        """
+        Get agents by complexity level.
+        
+        Args:
+            complexity_level: Complexity level ('basic', 'intermediate', 'advanced', 'expert')
+            
+        Returns:
+            List of agents at the complexity level
+        """
+        if not self.registry:
+            await self.discover_agents()
+        
+        return [metadata for metadata in self.registry.values() 
+                if metadata.complexity_level == complexity_level]
+    
+    async def search_agents_by_capability(self, capability: str) -> List[AgentMetadata]:
+        """
+        Search agents by specific capability.
+        
+        Args:
+            capability: Capability to search for
+            
+        Returns:
+            List of agents with the capability
+        """
+        if not self.registry:
+            await self.discover_agents()
+        
+        matching_agents = []
+        capability_lower = capability.lower()
+        
+        for metadata in self.registry.values():
+            # Check direct capabilities
+            if any(capability_lower in cap.lower() for cap in metadata.capabilities):
+                matching_agents.append(metadata)
+            # Check specializations
+            elif any(capability_lower in spec.lower() for spec in metadata.specializations):
+                matching_agents.append(metadata)
+            # Check frameworks
+            elif any(capability_lower in fw.lower() for fw in metadata.frameworks):
+                matching_agents.append(metadata)
+        
+        return sorted(matching_agents, key=lambda x: x.validation_score, reverse=True)
+    
+    async def get_enhanced_registry_stats(self) -> Dict[str, Any]:
+        """
+        Get enhanced registry statistics including specialized agent metrics.
+        
+        Returns:
+            Dictionary of enhanced registry statistics
+        """
+        if not self.registry:
+            await self.discover_agents()
+        
+        base_stats = await self.get_registry_stats()
+        
+        # Enhanced statistics for specialized agents
+        enhanced_stats = base_stats.copy()
+        
+        # Specialization statistics
+        specialization_counts = {}
+        framework_counts = {}
+        domain_counts = {}
+        role_counts = {}
+        complexity_counts = {}
+        hybrid_count = 0
+        
+        validation_scores = []
+        
+        for metadata in self.registry.values():
+            # Count specializations
+            for spec in metadata.specializations:
+                specialization_counts[spec] = specialization_counts.get(spec, 0) + 1
+            
+            # Count frameworks
+            for fw in metadata.frameworks:
+                framework_counts[fw] = framework_counts.get(fw, 0) + 1
+            
+            # Count domains
+            for domain in metadata.domains:
+                domain_counts[domain] = domain_counts.get(domain, 0) + 1
+            
+            # Count roles
+            for role in metadata.roles:
+                role_counts[role] = role_counts.get(role, 0) + 1
+            
+            # Count complexity levels
+            complexity_counts[metadata.complexity_level] = complexity_counts.get(metadata.complexity_level, 0) + 1
+            
+            # Count hybrid agents
+            if metadata.is_hybrid:
+                hybrid_count += 1
+            
+            # Collect validation scores
+            validation_scores.append(metadata.validation_score)
+        
+        enhanced_stats.update({
+            'specialization_counts': specialization_counts,
+            'framework_counts': framework_counts,
+            'domain_counts': domain_counts,
+            'role_counts': role_counts,
+            'complexity_distribution': complexity_counts,
+            'hybrid_agents': hybrid_count,
+            'validation_metrics': {
+                'average_score': sum(validation_scores) / len(validation_scores) if validation_scores else 0,
+                'max_score': max(validation_scores) if validation_scores else 0,
+                'min_score': min(validation_scores) if validation_scores else 0,
+                'scores_above_threshold': len([s for s in validation_scores if s >= 50.0])
+            },
+            'discovery_beyond_core_9': {
+                'total_specialized_types': len(self.specialized_agent_types),
+                'discovered_specialized': len([a for a in self.registry.values() 
+                                             if a.type in self.specialized_agent_types]),
+                'custom_agents': len([a for a in self.registry.values() if a.type == 'custom'])
+            }
+        })
+        
+        return enhanced_stats

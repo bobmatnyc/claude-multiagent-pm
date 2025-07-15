@@ -1,0 +1,164 @@
+{
+  "collection_metadata": {
+    "version": "0.7.5",
+    "collection_date": "2025-07-14",
+    "collection_type": "module_path_fix_release",
+    "categories": ["integration", "deployment", "bug", "architecture:design"],
+    "priority": "high",
+    "release_type": "critical_bug_fix"
+  },
+  "module_path_resolution_patterns": {
+    "issue_identification": {
+      "pattern": "ModuleNotFoundError for claude_pm module in NPM global installs",
+      "root_cause": "Framework path detection failures in global installation contexts",
+      "symptoms": [
+        "NPM global installs failing with module import errors",
+        "Framework path resolution inconsistencies",
+        "Advanced commands not working due to module errors"
+      ],
+      "detection_method": "QA validation across deployment scenarios"
+    },
+    "solution_implementation": {
+      "approach": "Enhanced module path resolution with script version upgrade",
+      "technical_changes": [
+        "Upgraded bin/VERSION from 0.7.3 to 1.0.1",
+        "Enhanced framework path detection logic",
+        "Improved version detection system reliability",
+        "Fixed agent hierarchy directory path references"
+      ],
+      "validation_results": "100% effectiveness across all deployment scenarios"
+    },
+    "integration_insights": {
+      "npm_global_install_requirements": "Special framework path detection needed for global installs",
+      "version_alignment_strategy": "Script versions must progress with framework versions",
+      "directory_naming_conventions": "Consistent .claude-pm directory structure required",
+      "performance_impact": "Registry cleanup improves overall system performance"
+    }
+  },
+  "npm_global_install_reliability": {
+    "reliability_improvements": {
+      "before_state": "ModuleNotFoundError failures in global installs",
+      "after_state": "100% success rate for module imports",
+      "improvement_metrics": "Complete elimination of module path errors",
+      "user_experience_impact": "Reliable framework access across all deployment scenarios"
+    },
+    "deployment_context_handling": {
+      "global_vs_local_installs": "Different path resolution requirements identified",
+      "framework_detection_logic": "Enhanced detection across various deployment contexts",
+      "version_validation_system": "Robust validation across all installation types",
+      "configuration_synchronization": "Synchronized updates across framework components"
+    },
+    "best_practices_identified": {
+      "qa_validation_coverage": "Always validate all deployment scenarios before release",
+      "version_tracking_consistency": "Maintain consistent version tracking across components",
+      "path_resolution_validation": "Validate module imports after path resolution changes",
+      "configuration_cleanup": "Regular cleanup improves performance metrics"
+    }
+  },
+  "framework_configuration_management": {
+    "agent_hierarchy_updates": {
+      "directory_path_corrections": "Fixed .claude-multiagent-pm to .claude-pm path references",
+      "hierarchy_validation": "Ensured three-tier hierarchy works correctly",
+      "performance_optimization": "Registry cleanup improved system responsiveness",
+      "configuration_synchronization": "Aligned all configuration files with new structure"
+    },
+    "version_detection_enhancements": {
+      "script_version_system": "Upgraded to 1.0.1 with improved detection",
+      "framework_version_alignment": "Synchronized framework and script versions",
+      "dependency_tracking": "Enhanced version tracking across all components",
+      "validation_automation": "Improved automated version validation"
+    },
+    "performance_optimizations": {
+      "registry_cleanup": "Removed outdated agent entries",
+      "configuration_efficiency": "Streamlined configuration files",
+      "memory_management": "Improved memory usage patterns",
+      "system_responsiveness": "Enhanced overall system performance"
+    }
+  },
+  "release_process_insights": {
+    "git_operations_workflow": {
+      "version_update_sequence": [
+        "package.json version update",
+        "VERSION file update",
+        "Python package __init__.py update",
+        "Script version upgrade (bin/VERSION)"
+      ],
+      "staging_strategy": "Systematic staging of related files",
+      "commit_message_format": "Comprehensive description with technical details",
+      "tagging_approach": "Annotated tags with detailed release notes"
+    },
+    "qa_validation_effectiveness": {
+      "validation_coverage": "100% effectiveness across all deployment scenarios",
+      "testing_methodology": "Comprehensive scenario coverage",
+      "issue_resolution_validation": "Complete resolution of ModuleNotFoundError",
+      "regression_prevention": "Ensured no new issues introduced"
+    },
+    "documentation_standards": {
+      "workflow_documentation": "Comprehensive release workflow documentation",
+      "memory_collection": "Systematic collection of insights and patterns",
+      "integration_handoff": "Clear handoff documentation for next phase",
+      "performance_metrics": "Detailed performance impact analysis"
+    }
+  },
+  "architectural_design_patterns": {
+    "module_path_resolution_architecture": {
+      "design_pattern": "Enhanced framework path detection with fallback mechanisms",
+      "implementation_strategy": "Multi-level path resolution with validation",
+      "scalability_considerations": "Supports various deployment contexts",
+      "maintenance_approach": "Automated validation and monitoring"
+    },
+    "version_management_architecture": {
+      "version_alignment_strategy": "Synchronized versioning across all components",
+      "detection_system_design": "Robust version detection with error handling",
+      "upgrade_pathway": "Clear upgrade path for script and framework versions",
+      "validation_framework": "Comprehensive validation across all contexts"
+    },
+    "configuration_management_design": {
+      "hierarchy_architecture": "Three-tier agent hierarchy with proper precedence",
+      "directory_structure": "Consistent directory naming and organization",
+      "performance_optimization": "Registry cleanup and configuration efficiency",
+      "synchronization_strategy": "Coordinated updates across all configuration files"
+    }
+  },
+  "integration_coordination": {
+    "devops_agent_handoff": {
+      "status": "ready_for_npm_publication",
+      "version": "v0.7.5",
+      "script_version": "1.0.1",
+      "validation_status": "100% QA effectiveness confirmed",
+      "dependencies": "all module path issues resolved"
+    },
+    "memory_system_categories": {
+      "integration": "Module path resolution and NPM global install reliability",
+      "deployment": "Framework path detection and version alignment",
+      "bug": "ModuleNotFoundError resolution and configuration fixes",
+      "architecture:design": "Enhanced path resolution and version management systems"
+    },
+    "workflow_coordination": {
+      "release_packaging": "Git operations and version management",
+      "qa_validation": "Comprehensive scenario testing",
+      "configuration_management": "Framework configuration updates",
+      "documentation": "Release workflow and memory collection"
+    }
+  },
+  "future_considerations": {
+    "monitoring_requirements": {
+      "module_path_effectiveness": "Track resolution effectiveness across future releases",
+      "global_install_success_rates": "Monitor global install success and user experience",
+      "framework_performance": "Track performance metrics and system responsiveness",
+      "configuration_stability": "Monitor configuration consistency and reliability"
+    },
+    "enhancement_opportunities": {
+      "automated_path_validation": "Consider automated path validation in CI/CD",
+      "pre_installation_validation": "Explore pre-installation validation scripts",
+      "framework_path_caching": "Consider path caching for improved performance",
+      "automated_testing": "Explore automated global install testing"
+    },
+    "evolution_pathways": {
+      "version_management_evolution": "Enhanced version management systems",
+      "deployment_optimization": "Improved deployment and installation processes",
+      "performance_enhancement": "Continued performance optimization",
+      "user_experience_improvement": "Enhanced user experience across all scenarios"
+    }
+  }
+}

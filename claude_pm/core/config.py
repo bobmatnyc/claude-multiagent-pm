@@ -196,6 +196,45 @@ class Config:
             # Task and issue tracking
             "enable_persistent_tracking": True,
             "fallback_tracking_method": "logging",  # Options: "logging", "file", "disabled"
+            # Evaluation system - Phase 2 Mirascope integration
+            "enable_evaluation": True,
+            "evaluation_storage_path": str(Path.home() / ".claude-pm" / "training"),
+            "correction_capture_enabled": True,
+            "correction_storage_rotation_days": 30,
+            "evaluation_logging_enabled": True,
+            "auto_prompt_improvement": False,  # Disabled by default for Phase 1
+            # Mirascope evaluation settings
+            "evaluation_provider": "auto",  # auto, openai, anthropic
+            "evaluation_criteria": ["correctness", "relevance", "completeness", "clarity", "helpfulness"],
+            "evaluation_caching_enabled": True,
+            "evaluation_cache_ttl_hours": 24,
+            "evaluation_cache_max_size": 1000,
+            "evaluation_cache_memory_limit_mb": 100,
+            "evaluation_cache_strategy": "hybrid",  # lru, ttl, hybrid
+            "evaluation_async_enabled": True,
+            "evaluation_batch_size": 10,
+            "evaluation_max_concurrent": 10,
+            "evaluation_timeout_seconds": 30,
+            "evaluation_model_config": {},
+            # Integration settings
+            "auto_evaluate_corrections": True,
+            "auto_evaluate_responses": True,
+            "batch_evaluation_enabled": True,
+            "batch_evaluation_interval_minutes": 5,
+            # Performance optimization
+            "evaluation_performance_enabled": True,
+            "evaluation_batch_wait_ms": 100,
+            "evaluation_max_concurrent_batches": 5,
+            "evaluation_circuit_breaker_threshold": 5,
+            "evaluation_circuit_breaker_timeout": 60,
+            "evaluation_circuit_breaker_success_threshold": 3,
+            # Metrics and monitoring
+            "enable_evaluation_metrics": True,
+            "evaluation_monitoring_enabled": True,
+            # Additional configuration
+            "correction_max_file_size_mb": 10,
+            "correction_backup_enabled": True,
+            "correction_compression_enabled": True
         }
 
         # Apply defaults for missing keys

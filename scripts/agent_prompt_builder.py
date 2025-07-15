@@ -203,16 +203,55 @@ class AgentPromptBuilder:
         return self.working_directory
     
     def _initialize_tier_paths(self) -> None:
-        """Initialize paths for each tier."""
-        self._tier_paths = {
-            AgentTier.PROJECT: self.working_directory / '.claude-pm' / 'agents' / 'project-specific',
-            AgentTier.USER: self.working_directory / '.claude-pm' / 'agents' / 'user-defined',
-            AgentTier.SYSTEM: self.working_directory / '.claude-pm' / 'agents' / 'system'
-        }
+        """Initialize paths for each tier with directory precedence walking logic."""
+        # Implement directory precedence walking logic
+        self._tier_paths = self._walk_directory_precedence()
         
         # Create directories if they don't exist
         for tier_path in self._tier_paths.values():
-            tier_path.mkdir(parents=True, exist_ok=True)
+            if tier_path:
+                tier_path.mkdir(parents=True, exist_ok=True)
+    
+    def _walk_directory_precedence(self) -> Dict[AgentTier, Path]:
+        """
+        Walk directory precedence: current directory → parent directories → user directory → system.
+        
+        Returns:
+            Dictionary mapping AgentTier to Path with precedence hierarchy
+        """
+        tier_paths = {}
+        
+        # Current directory agents (highest precedence)
+        current_project_path = self.working_directory / '.claude-pm' / 'agents' / 'project-specific'
+        tier_paths[AgentTier.PROJECT] = current_project_path
+        
+        # Walk parent directories looking for agent directories
+        current_path = self.working_directory
+        parent_agent_paths = []
+        
+        while current_path.parent != current_path:  # Until we reach root
+            parent_claude_pm = current_path.parent / '.claude-pm' / 'agents'
+            if parent_claude_pm.exists():
+                parent_agent_paths.append(parent_claude_pm)
+            current_path = current_path.parent
+        
+        # User directory agents (medium precedence)
+        user_agents_path = self.user_home / '.claude-pm' / 'agents' / 'user-defined'
+        tier_paths[AgentTier.USER] = user_agents_path
+        
+        # System agents (lowest precedence)
+        system_agents_path = self.framework_path / 'agents' / 'system' if self.framework_path else None
+        if system_agents_path and system_agents_path.exists():
+            tier_paths[AgentTier.SYSTEM] = system_agents_path
+        else:
+            # Fallback to working directory system path
+            tier_paths[AgentTier.SYSTEM] = self.working_directory / '.claude-pm' / 'agents' / 'system'
+        
+        # Store parent paths for comprehensive discovery
+        self._parent_agent_paths = parent_agent_paths
+        
+        logger.info(f"Directory precedence walking completed: {len(parent_agent_paths)} parent directories discovered")
+        return tier_paths
     
     def _load_hierarchy_config(self) -> None:
         """Load hierarchy configuration from YAML file."""
@@ -229,8 +268,24 @@ class AgentPromptBuilder:
             logger.warning(f"No hierarchy config found at {config_path}")
             self._hierarchy_config = {}
     
+    def listAgents(self) -> Dict[str, 'AgentMetadata']:
+        """
+        Enhanced listAgents() method with comprehensive agent discovery and metadata integration.
+        
+        Returns:
+            Dictionary mapping agent names to AgentMetadata objects with complete information
+        """
+        logger.info("Starting comprehensive agent discovery with AgentRegistry integration")
+        
+        # Use AgentRegistry if available for enhanced discovery
+        if self._agent_registry:
+            return self._list_agents_with_metadata()
+        
+        # Fallback to legacy discovery with basic metadata
+        return self._list_agents_fallback_with_metadata()
+    
     def list_available_agents(self) -> Dict[AgentTier, List[str]]:
-        """List all available agents by tier."""
+        """List all available agents by tier (legacy method)."""
         # Use AgentRegistry if available for enhanced discovery
         if self._agent_registry:
             return self._list_agents_via_registry()
@@ -272,6 +327,168 @@ class AgentPromptBuilder:
             return self._list_agents_legacy()
         
         return available_agents
+    
+    def _list_agents_with_metadata(self) -> Dict[str, 'AgentMetadata']:
+        """
+        List agents with comprehensive metadata using AgentRegistry integration.
+        
+        Returns:
+            Dictionary mapping agent names to AgentMetadata objects
+        """
+        agents_metadata = {}
+        
+        try:
+            import asyncio
+            
+            # Ensure agents are discovered
+            asyncio.run(self._agent_registry.discover_agents())
+            
+            # Get all agents with metadata
+            all_agents = asyncio.run(self._agent_registry.list_agents())
+            
+            # Convert to dictionary format
+            for agent_metadata in all_agents:
+                agents_metadata[agent_metadata.name] = agent_metadata
+            
+            # Apply directory precedence walking for additional discovery
+            additional_agents = self._discover_agents_with_precedence()
+            
+            # Merge with precedence (existing takes priority)
+            for name, metadata in additional_agents.items():
+                if name not in agents_metadata:
+                    agents_metadata[name] = metadata
+            
+            logger.info(f"Enhanced agent discovery completed: {len(agents_metadata)} agents with metadata")
+            
+        except Exception as e:
+            logger.warning(f"Error in enhanced agent discovery: {e}")
+            # Fallback to basic discovery
+            return self._list_agents_fallback_with_metadata()
+        
+        return agents_metadata
+    
+    def _discover_agents_with_precedence(self) -> Dict[str, 'AgentMetadata']:
+        """
+        Discover agents using directory precedence walking with metadata.
+        
+        Returns:
+            Dictionary of discovered agents with metadata
+        """
+        discovered_agents = {}
+        
+        # Walk through parent directories if available
+        if hasattr(self, '_parent_agent_paths'):
+            for parent_path in self._parent_agent_paths:
+                if parent_path.exists():
+                    for agent_file in parent_path.rglob('*.py'):
+                        if agent_file.name.startswith('__'):
+                            continue
+                        
+                        agent_name = self._extract_agent_name(agent_file.stem)
+                        if agent_name not in discovered_agents:
+                            # Create basic metadata for discovered agent
+                            try:
+                                stat = agent_file.stat()
+                                # Create AgentMetadata if available, otherwise basic dict
+                                if AGENT_REGISTRY_AVAILABLE:
+                                    from claude_pm.services.agent_registry import AgentMetadata
+                                    metadata = AgentMetadata(
+                                        name=agent_name,
+                                        type=self._classify_agent_type_basic(agent_name),
+                                        path=str(agent_file),
+                                        tier='project',
+                                        description=f"Agent discovered in parent directory: {parent_path.name}",
+                                        file_size=stat.st_size,
+                                        last_modified=stat.st_mtime,
+                                        validated=True
+                                    )
+                                    discovered_agents[agent_name] = metadata
+                                
+                            except Exception as e:
+                                logger.warning(f"Error creating metadata for {agent_name}: {e}")
+        
+        return discovered_agents
+    
+    def _classify_agent_type_basic(self, agent_name: str) -> str:
+        """
+        Basic agent type classification for fallback scenarios.
+        
+        Args:
+            agent_name: Agent name to classify
+            
+        Returns:
+            Classified agent type
+        """
+        name_lower = agent_name.lower()
+        
+        # Core agent type mappings
+        if 'doc' in name_lower:
+            return 'documentation'
+        elif 'ticket' in name_lower:
+            return 'ticketing'
+        elif any(term in name_lower for term in ['version', 'git', 'vcs']):
+            return 'version_control'
+        elif any(term in name_lower for term in ['qa', 'test', 'quality']):
+            return 'qa'
+        elif any(term in name_lower for term in ['research', 'analyze']):
+            return 'research'
+        elif any(term in name_lower for term in ['ops', 'deploy']):
+            return 'ops'
+        elif 'security' in name_lower:
+            return 'security'
+        elif any(term in name_lower for term in ['engineer', 'code']):
+            return 'engineer'
+        elif any(term in name_lower for term in ['data', 'database']):
+            return 'data_engineer'
+        else:
+            return 'custom'
+    
+    def _list_agents_fallback_with_metadata(self) -> Dict[str, dict]:
+        """
+        Fallback agent discovery with basic metadata when AgentRegistry unavailable.
+        
+        Returns:
+            Dictionary mapping agent names to basic metadata dictionaries
+        """
+        agents_metadata = {}
+        
+        # Use legacy discovery but enhance with metadata
+        legacy_agents = self._list_agents_legacy()
+        
+        for tier, agent_list in legacy_agents.items():
+            for agent_name in agent_list:
+                if agent_name not in agents_metadata:
+                    # Create basic metadata dictionary
+                    tier_path = self._tier_paths.get(tier)
+                    agent_file_path = None
+                    
+                    # Find actual agent file
+                    if tier_path and tier_path.exists():
+                        for ext in ['.py', '.md']:
+                            potential_path = tier_path / f"{agent_name}{ext}"
+                            if potential_path.exists():
+                                agent_file_path = potential_path
+                                break
+                    
+                    # Create basic metadata
+                    metadata = {
+                        'name': agent_name,
+                        'type': self._classify_agent_type_basic(agent_name),
+                        'tier': tier.value,
+                        'path': str(agent_file_path) if agent_file_path else 'unknown',
+                        'description': f"Agent discovered in {tier.value} tier",
+                        'version': None,
+                        'capabilities': [],
+                        'validated': agent_file_path is not None,
+                        'error_message': None if agent_file_path else 'File not found',
+                        'file_size': agent_file_path.stat().st_size if agent_file_path else 0,
+                        'last_modified': agent_file_path.stat().st_mtime if agent_file_path else None
+                    }
+                    
+                    agents_metadata[agent_name] = metadata
+        
+        logger.info(f"Fallback agent discovery completed: {len(agents_metadata)} agents with basic metadata")
+        return agents_metadata
     
     def _list_agents_legacy(self) -> Dict[AgentTier, List[str]]:
         """Legacy agent discovery via directory scanning."""
@@ -868,6 +1085,207 @@ TEMPORAL CONTEXT: {task_context.temporal_context}
         
         return metrics
     
+    def load_agent_with_hierarchy_precedence(self, agent_name: str) -> Optional[AgentProfile]:
+        """
+        Load agent profile with enhanced hierarchy precedence support including parent directories.
+        
+        Args:
+            agent_name: Name of agent profile to load
+            
+        Returns:
+            AgentProfile with highest precedence, None if not found
+        """
+        # Check shared cache first if available
+        if self._shared_cache:
+            shared_cache_key = f"agent_profile_enhanced:{agent_name}:{self.working_directory.name}"
+            cached_profile = self._shared_cache.get(shared_cache_key)
+            if cached_profile:
+                logger.debug(f"Loaded {agent_name} profile from enhanced shared cache")
+                return cached_profile
+        
+        # Search through enhanced hierarchy (Project → Parent Directories → User → System)
+        search_paths = []
+        
+        # Add project tier
+        if AgentTier.PROJECT in self._tier_paths:
+            search_paths.append((self._tier_paths[AgentTier.PROJECT], AgentTier.PROJECT))
+        
+        # Add parent directories
+        if hasattr(self, '_parent_agent_paths'):
+            for parent_path in self._parent_agent_paths:
+                search_paths.append((parent_path, AgentTier.PROJECT))  # Treat as project tier
+        
+        # Add user tier
+        if AgentTier.USER in self._tier_paths:
+            search_paths.append((self._tier_paths[AgentTier.USER], AgentTier.USER))
+        
+        # Add system tier
+        if AgentTier.SYSTEM in self._tier_paths:
+            search_paths.append((self._tier_paths[AgentTier.SYSTEM], AgentTier.SYSTEM))
+        
+        # Search through paths in precedence order
+        for search_path, tier in search_paths:
+            if profile := self._load_profile_from_path(agent_name, search_path, tier):
+                # Cache in shared cache if available
+                if self._shared_cache:
+                    shared_cache_key = f"agent_profile_enhanced:{agent_name}:{self.working_directory.name}"
+                    self._shared_cache.set(shared_cache_key, profile, ttl=1800)  # 30 minutes
+                
+                logger.debug(f"Loaded {agent_name} profile from enhanced hierarchy: {search_path}")
+                return profile
+        
+        logger.warning(f"No profile found for agent: {agent_name} in enhanced hierarchy")
+        return None
+    
+    def _load_profile_from_path(self, agent_name: str, search_path: Path, tier: AgentTier) -> Optional[AgentProfile]:
+        """
+        Load profile from specific path with enhanced search logic.
+        
+        Args:
+            agent_name: Agent name to search for
+            search_path: Path to search in
+            tier: Hierarchy tier for metadata
+            
+        Returns:
+            AgentProfile if found, None otherwise
+        """
+        if not search_path.exists():
+            return None
+        
+        # Try different file naming conventions and locations
+        profile_patterns = [
+            f"{agent_name}.md",
+            f"{agent_name}-agent.md",
+            f"{agent_name}_agent.md", 
+            f"{agent_name}-profile.md",
+            f"{agent_name}.py",
+            f"{agent_name}_agent.py",
+            # Special case for capital letter naming
+            f"{agent_name.title()}.md",
+            f"{agent_name.title()}.py"
+        ]
+        
+        # Search in root of path and subdirectories
+        search_locations = [search_path]
+        
+        # Add common subdirectories
+        for subdir in ['agents', 'profiles', 'project-specific', 'user-defined', 'system']:
+            subdir_path = search_path / subdir
+            if subdir_path.exists():
+                search_locations.append(subdir_path)
+        
+        for location in search_locations:
+            for pattern in profile_patterns:
+                profile_path = location / pattern
+                if profile_path.exists():
+                    try:
+                        return self._parse_profile_file(profile_path, tier)
+                    except Exception as e:
+                        logger.warning(f"Error parsing profile {profile_path}: {e}")
+                        continue
+        
+        return None
+    
+    def build_task_tool_prompt(self, agent_name: str, task_context: TaskContext) -> str:
+        """
+        Build complete Task Tool subprocess prompt with enhanced agent profile integration.
+        
+        Args:
+            agent_name: Name of agent to load
+            task_context: Task context and requirements
+            
+        Returns:
+            Complete formatted prompt ready for Task Tool subprocess creation
+        """
+        # Check shared cache for complete prompt first
+        if self._shared_cache:
+            prompt_cache_key = f"task_prompt_enhanced:{agent_name}:{hash(str(task_context))}"
+            cached_prompt = self._shared_cache.get(prompt_cache_key)
+            if cached_prompt:
+                logger.debug(f"Retrieved cached enhanced prompt for {agent_name}")
+                return cached_prompt
+        
+        # Load agent profile with enhanced hierarchy precedence
+        profile = self.load_agent_with_hierarchy_precedence(agent_name)
+        if not profile:
+            # Fallback to standard loading
+            profile = self.load_agent_profile(agent_name)
+            if not profile:
+                raise ValueError(f"No profile found for agent: {agent_name}")
+        
+        # Build prompt with enhanced metadata
+        prompt = self._generate_enhanced_task_tool_prompt(profile, task_context)
+        
+        # Cache the generated prompt if shared cache is available
+        if self._shared_cache:
+            prompt_cache_key = f"task_prompt_enhanced:{agent_name}:{hash(str(task_context))}"
+            self._shared_cache.set(prompt_cache_key, prompt, ttl=600)  # 10 minutes TTL for prompts
+        
+        return prompt
+    
+    def _generate_enhanced_task_tool_prompt(self, profile: AgentProfile, task_context: TaskContext) -> str:
+        """
+        Generate enhanced Task Tool prompt with comprehensive profile integration and directory precedence context.
+        
+        Args:
+            profile: Agent profile with metadata
+            task_context: Task context and requirements
+            
+        Returns:
+            Enhanced formatted prompt
+        """
+        # Set default memory categories if not provided
+        if not task_context.memory_categories:
+            task_context.memory_categories = self._get_default_memory_categories(profile.name)
+        
+        # Build enhanced prompt with directory precedence information
+        prompt = f"""**{profile.nickname}**: {task_context.description}
+
+TEMPORAL CONTEXT: {task_context.temporal_context}
+
+**Enhanced Agent Profile Integration**: 
+- **Role**: {profile.role}
+- **Tier**: {profile.tier.value.title()} ({profile.path.parent.name})
+- **Profile ID**: {profile.profile_id}
+- **Discovery Method**: {'AgentRegistry' if self._agent_registry else 'Legacy'} + Directory Precedence Walking
+- **Cache Optimization**: {'Enabled' if self._shared_cache else 'Disabled'} (99.7% improvement available)
+
+**Core Capabilities**:
+{chr(10).join(f"- {cap}" for cap in profile.capabilities[:5])}
+
+**Authority Scope**:
+{chr(10).join(f"- {auth}" for auth in profile.authority_scope[:4])}
+
+**Task Requirements**:
+{chr(10).join(f"- {req}" for req in task_context.specific_requirements)}
+
+**Context Preferences**:
+{chr(10).join(f"- {key.replace('_', ' ').title()}: {value}" for key, value in profile.context_preferences.items())}
+
+**Quality Standards**:
+{chr(10).join(f"- {std}" for std in profile.quality_standards[:3])}
+
+**Integration Patterns**:
+{chr(10).join(f"- With {agent.title()}: {desc}" for agent, desc in profile.integration_patterns.items())}
+
+**Escalation Criteria**:
+{chr(10).join(f"- {crit}" for crit in profile.escalation_criteria[:3])}
+
+**Expected Deliverables**:
+{chr(10).join(f"- {deliverable}" for deliverable in task_context.expected_deliverables)}
+
+**Dependencies**:
+{chr(10).join(f"- {dep}" for dep in task_context.dependencies)}
+
+**Authority**: {profile.role} operations with enhanced discovery
+**Priority**: {task_context.priority}
+**Discovery Context**: Enhanced AgentPromptBuilder with directory precedence walking and SharedPromptCache optimization
+
+**Enhanced Profile Context**: This subprocess operates with enhanced context from {profile.tier.value}-tier agent profile, providing specialized knowledge, capability awareness, and performance optimization for optimal task execution. Directory precedence walking ensures highest-priority agent implementations are utilized.
+"""
+        
+        return prompt
+
     async def list_agents_detailed(self) -> Dict[str, Dict[str, Any]]:
         """
         List all agents with detailed metadata using AgentRegistry.
@@ -911,13 +1329,46 @@ TEMPORAL CONTEXT: {task_context.temporal_context}
             logger.error(f"Error getting detailed agent listing: {e}")
             return {}
     
+    def get_directory_precedence_info(self) -> Dict[str, Any]:
+        """
+        Get information about directory precedence walking implementation.
+        
+        Returns:
+            Dictionary with directory precedence details
+        """
+        info = {
+            'precedence_order': ['current_directory', 'parent_directories', 'user_directory', 'system_directory'],
+            'tier_paths': {tier.value: str(path) for tier, path in self._tier_paths.items()},
+            'parent_paths': [str(p) for p in getattr(self, '_parent_agent_paths', [])],
+            'framework_path': str(self.framework_path),
+            'working_directory': str(self.working_directory),
+            'user_home': str(self.user_home)
+        }
+        
+        # Check path existence
+        info['path_existence'] = {}
+        for tier, path in self._tier_paths.items():
+            info['path_existence'][tier.value] = path.exists() if path else False
+        
+        # Check parent path existence
+        info['parent_path_existence'] = []
+        for parent_path in getattr(self, '_parent_agent_paths', []):
+            info['parent_path_existence'].append({
+                'path': str(parent_path),
+                'exists': parent_path.exists()
+            })
+        
+        return info
+    
     def get_registry_integration_status(self) -> Dict[str, Any]:
         """Get status of AgentRegistry integration."""
         status = {
             'agent_registry_available': self._agent_registry is not None,
             'shared_cache_available': self._shared_cache is not None,
             'discovery_method': 'registry' if self._agent_registry else 'legacy',
-            'performance_optimization': 'enabled' if self._shared_cache else 'disabled'
+            'performance_optimization': 'enabled' if self._shared_cache else 'disabled',
+            'enhanced_listAgents_available': True,
+            'directory_precedence_walking': True
         }
         
         if self._agent_registry:
@@ -927,6 +1378,9 @@ TEMPORAL CONTEXT: {task_context.temporal_context}
                 status['registry_stats'] = stats
             except Exception as e:
                 status['registry_stats_error'] = str(e)
+        
+        # Add directory precedence information
+        status['directory_precedence'] = self.get_directory_precedence_info()
         
         return status
 
@@ -943,7 +1397,9 @@ def main():
     parser.add_argument('--memory-categories', type=str, nargs='*', help='Memory categories')
     parser.add_argument('--list-agents', action='store_true', help='List all available agents')
     parser.add_argument('--list-agents-detailed', action='store_true', help='List agents with detailed metadata via AgentRegistry')
+    parser.add_argument('--list-agents-enhanced', action='store_true', help='List agents using enhanced listAgents() method')
     parser.add_argument('--registry-status', action='store_true', help='Show AgentRegistry integration status')
+    parser.add_argument('--directory-precedence', action='store_true', help='Show directory precedence walking information')
     parser.add_argument('--validate', action='store_true', help='Validate agent hierarchy')
     parser.add_argument('--create-structure', action='store_true', help='Create deployment structure')
     parser.add_argument('--working-dir', type=str, help='Working directory path')
@@ -1032,6 +1488,95 @@ def main():
             
             if 'registry_stats_error' in status:
                 print(f"Registry Stats Error: {status['registry_stats_error']}")
+        
+        elif args.list_agents_enhanced:
+            # Enhanced agent listing using listAgents() method
+            enhanced_agents = builder.listAgents()
+            print("\n🚀 Enhanced Agent Discovery (listAgents() method):")
+            print("=" * 60)
+            
+            if enhanced_agents:
+                for agent_name, metadata in enhanced_agents.items():
+                    # Handle both AgentMetadata objects and dictionaries
+                    if hasattr(metadata, 'name'):  # AgentMetadata object
+                        print(f"\n🤖 {metadata.name} ({metadata.type})")
+                        print(f"  Tier: {metadata.tier}")
+                        print(f"  Path: {metadata.path}")
+                        print(f"  Description: {metadata.description or 'No description'}")
+                        print(f"  Version: {metadata.version or 'Unknown'}")
+                        print(f"  Validated: {'✓' if metadata.validated else '✗'}")
+                        if metadata.error_message:
+                            print(f"  Error: {metadata.error_message}")
+                        if metadata.capabilities:
+                            print(f"  Capabilities: {', '.join(metadata.capabilities[:3])}...")
+                        print(f"  File Size: {metadata.file_size} bytes")
+                        if metadata.last_modified:
+                            mod_time = datetime.fromtimestamp(metadata.last_modified)
+                            print(f"  Last Modified: {mod_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                    else:  # Dictionary fallback
+                        print(f"\n🤖 {metadata['name']} ({metadata['type']})")
+                        print(f"  Tier: {metadata['tier']}")
+                        print(f"  Path: {metadata['path']}")
+                        print(f"  Description: {metadata['description']}")
+                        print(f"  Validated: {'✓' if metadata['validated'] else '✗'}")
+                        if metadata['error_message']:
+                            print(f"  Error: {metadata['error_message']}")
+                        print(f"  File Size: {metadata['file_size']} bytes")
+                        if metadata['last_modified']:
+                            mod_time = datetime.fromtimestamp(metadata['last_modified'])
+                            print(f"  Last Modified: {mod_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                
+                print(f"\n📊 Discovery Summary: {len(enhanced_agents)} agents discovered")
+                
+                # Show tier distribution
+                tier_counts = {}
+                for metadata in enhanced_agents.values():
+                    tier = metadata.tier if hasattr(metadata, 'tier') else metadata['tier']
+                    tier_counts[tier] = tier_counts.get(tier, 0) + 1
+                
+                print("\n📈 Tier Distribution:")
+                for tier, count in tier_counts.items():
+                    print(f"  {tier}: {count} agents")
+                
+                # Show type distribution
+                type_counts = {}
+                for metadata in enhanced_agents.values():
+                    agent_type = metadata.type if hasattr(metadata, 'type') else metadata['type']
+                    type_counts[agent_type] = type_counts.get(agent_type, 0) + 1
+                
+                print("\n🏷️ Type Distribution:")
+                for agent_type, count in type_counts.items():
+                    print(f"  {agent_type}: {count} agents")
+            else:
+                print("No agents found via enhanced discovery")
+        
+        elif args.directory_precedence:
+            # Show directory precedence information
+            precedence_info = builder.get_directory_precedence_info()
+            print("\n📁 Directory Precedence Walking Information:")
+            print("=" * 60)
+            
+            print("\n🎯 Precedence Order:")
+            for i, order in enumerate(precedence_info['precedence_order'], 1):
+                print(f"  {i}. {order.replace('_', ' ').title()}")
+            
+            print("\n📂 Tier Paths:")
+            for tier, path in precedence_info['tier_paths'].items():
+                exists = precedence_info['path_existence'][tier]
+                status_icon = "✓" if exists else "✗"
+                print(f"  {tier}: {path} {status_icon}")
+            
+            print(f"\n🏠 Framework Path: {precedence_info['framework_path']}")
+            print(f"📍 Working Directory: {precedence_info['working_directory']}")
+            print(f"👤 User Home: {precedence_info['user_home']}")
+            
+            if precedence_info['parent_paths']:
+                print("\n⬆️ Parent Directory Paths:")
+                for parent_info in precedence_info['parent_path_existence']:
+                    status_icon = "✓" if parent_info['exists'] else "✗"
+                    print(f"  {parent_info['path']} {status_icon}")
+            else:
+                print("\n⬆️ No parent directory paths discovered")
             
         elif args.validate:
             # Validate hierarchy

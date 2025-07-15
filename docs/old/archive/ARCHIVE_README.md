@@ -66,7 +66,7 @@ This archive contains documentation that was moved from the main docs/ directory
 - FRAMEWORK_DOCUMENTATION_UPDATE_RECOMMENDATIONS.md
 - PRACTICAL_IMPLEMENTATION_ROADMAP.md
 - DOCUMENTATION_CONSOLIDATION_SUMMARY.md
-- SuperClaude-Inspired-Framework-Enhancement-Design.md
+- SuperClaude-Inspired-Framework-Enhancement-Design.md (HISTORICAL: SuperClaude template features were found incompatible with Claude AI models)
 - memory_architecture_review.md
 
 #### `/epic-documents/`

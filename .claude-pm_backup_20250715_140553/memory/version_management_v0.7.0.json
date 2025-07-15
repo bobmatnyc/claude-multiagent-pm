@@ -1,0 +1,49 @@
+{
+  "timestamp": "2025-07-14T09:35:30.000Z",
+  "category": "architecture:design",
+  "priority": "high",
+  "source_agent": "version_control_agent",
+  "project_context": "claude_pm_framework",
+  "related_tasks": ["framework_enhancement", "core_agent_expansion"],
+  "resolution_status": "completed",
+  "impact_scope": "framework",
+  "version_bump": {
+    "type": "MINOR",
+    "previous_version": "0.6.5",
+    "new_version": "0.7.0",
+    "framework_version": {
+      "previous": "4.6.0",
+      "new": "4.7.0"
+    },
+    "claude_md_version": {
+      "previous": "1.0.0", 
+      "new": "1.1.0"
+    }
+  },
+  "framework_evolution": {
+    "core_agents_expanded": {
+      "from": 3,
+      "to": 8,
+      "new_agents": [
+        "QA Agent",
+        "Operations Agent", 
+        "Security Agent",
+        "Research Agent",
+        "Project Management Agent"
+      ]
+    },
+    "enhancement_type": "backward_compatible",
+    "breaking_changes": false,
+    "api_changes": false,
+    "delegation_patterns_enhanced": true,
+    "user_feedback_addressed": true
+  },
+  "release_metadata": {
+    "commit_hash": "ef2f354",
+    "tag": "v0.7.0",
+    "branch": "emergency-patch-iss-0109-memory-leak-resolution",
+    "release_date": "2025-07-14",
+    "semantic_version_rationale": "New agent framework capabilities - backward compatible feature enhancement"
+  },
+  "memory_collection_notes": "Version management operation successfully completed. Framework evolution from 3 to 8 core agent types represents significant enhancement to framework design based on user feedback about agent responsibility separation."
+}

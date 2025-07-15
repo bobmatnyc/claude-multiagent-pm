@@ -21,7 +21,7 @@ This directory contains research and analysis documents that were created during
 ### Process and Documentation Analysis
 
 - **DOCUMENTATION_CONSOLIDATION_SUMMARY.md** - Analysis of documentation organization
-- **SuperClaude-Inspired-Framework-Enhancement-Design.md** - Framework enhancement design research
+- **SuperClaude-Inspired-Framework-Enhancement-Design.md** - Framework enhancement design research (HISTORICAL NOTE: SuperClaude template features were determined to be incompatible with Claude AI models and were not implemented)
 
 ### Why These Were Archived
 

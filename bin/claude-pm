@@ -16,7 +16,7 @@ from pathlib import Path
 # Script version - tracks claude-pm script updates independently
 def get_script_version():
     """Get script version - injected during deployment."""
-    return "004"
+    return "005"
 
 SCRIPT_VERSION = get_script_version()
 
@@ -470,6 +470,7 @@ def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_
             try:
                 # Step 1: Create timestamped backup of existing CLAUDE.md
                 console.print("[dim]🔄 Creating backup of existing CLAUDE.md...[/dim]")
+                parent_dir = current_dir.parent
                 backup_path = await manager.backup_parent_directory(parent_dir)
                 
                 if backup_path:
@@ -969,7 +970,7 @@ def check_memory_status():
 
 
 def launch_claude_cli_yolo():
-    """Launch Claude CLI in proper YOLO mode with essential flags."""
+    """Launch Claude CLI in proper YOLO mode with essential flags and AbortSignal configuration."""
     validation = validate_claude_cli()
     
     if not validation["valid"]:
@@ -981,7 +982,7 @@ def launch_claude_cli_yolo():
         console.print("   • Restart your terminal")
         sys.exit(1)
     
-    # Launch Claude CLI with essential YOLO mode flags
+    # Launch Claude CLI with essential YOLO mode flags using wrapper
     try:
         import shutil
         claude_path = shutil.which("claude")
@@ -989,17 +990,41 @@ def launch_claude_cli_yolo():
             console.print("[red]❌ Claude CLI not found in PATH[/red]")
             sys.exit(1)
         
-        # Essential YOLO mode arguments
-        claude_args = [
-            "claude",
-            "--model", "sonnet", 
-            "--dangerously-skip-permissions"
-        ]
+        # Check if Node.js wrapper exists for AbortSignal MaxListeners configuration
+        # This wrapper resolves "MaxListeners exceeded" warnings from multi-agent coordination
+        wrapper_path = framework_path / "scripts" / "claude-wrapper.js"
         
-        console.print(f"[dim]Launching Claude with: {' '.join(claude_args[1:])}[/dim]")
-        
-        # Use os.execvp for proper terminal handling in YOLO mode
-        os.execvp("claude", claude_args)
+        if wrapper_path.exists():
+            # Use Node.js wrapper to configure AbortSignal MaxListeners to 25
+            # This prevents "11 abort listeners added to [AbortSignal]. MaxListeners is 10" warnings
+            console.print("[dim]Using enhanced Claude wrapper for multi-agent coordination[/dim]")
+            
+            # Essential YOLO mode arguments for wrapper
+            wrapper_args = [
+                "node", str(wrapper_path),
+                "--model", "sonnet", 
+                "--dangerously-skip-permissions"
+            ]
+            
+            console.print(f"[dim]Launching Claude with wrapper: {' '.join(wrapper_args[2:])}[/dim]")
+            
+            # Use os.execvp with the wrapper
+            os.execvp("node", wrapper_args)
+        else:
+            # Fallback to direct Claude launch
+            console.print("[dim]Wrapper not found, using direct Claude launch[/dim]")
+            
+            # Essential YOLO mode arguments
+            claude_args = [
+                "claude",
+                "--model", "sonnet", 
+                "--dangerously-skip-permissions"
+            ]
+            
+            console.print(f"[dim]Launching Claude with: {' '.join(claude_args[1:])}[/dim]")
+            
+            # Use os.execvp for proper terminal handling in YOLO mode
+            os.execvp("claude", claude_args)
         
     except Exception as e:
         console.print(f"[red]❌ Failed to launch Claude CLI: {e}[/red]")
@@ -1007,7 +1032,7 @@ def launch_claude_cli_yolo():
 
 
 def launch_claude_cli_with_args(args):
-    """Launch Claude CLI with pass-through arguments."""
+    """Launch Claude CLI with pass-through arguments and AbortSignal configuration."""
     validation = validate_claude_cli()
     
     if not validation["valid"]:
@@ -1015,7 +1040,7 @@ def launch_claude_cli_with_args(args):
         console.print(f"   Error: {validation['error']}")
         sys.exit(1)
     
-    # Launch Claude CLI with pass-through args plus essential flags
+    # Launch Claude CLI with pass-through args plus essential flags using wrapper
     try:
         import shutil
         claude_path = shutil.which("claude")
@@ -1023,17 +1048,41 @@ def launch_claude_cli_with_args(args):
             console.print("[red]❌ Claude CLI not found in PATH[/red]")
             sys.exit(1)
         
-        # Build command with essential flags + pass-through args
-        claude_args = [
-            "claude",
-            "--model", "sonnet",
-            "--dangerously-skip-permissions"
-        ] + args
+        # Check if Node.js wrapper exists for AbortSignal MaxListeners configuration
+        # This wrapper resolves "MaxListeners exceeded" warnings from multi-agent coordination
+        wrapper_path = framework_path / "scripts" / "claude-wrapper.js"
         
-        console.print(f"[dim]Launching Claude with: {' '.join(claude_args[1:])}[/dim]")
-        
-        # Use os.execvp for proper terminal handling
-        os.execvp("claude", claude_args)
+        if wrapper_path.exists():
+            # Use Node.js wrapper to configure AbortSignal MaxListeners to 25
+            # This prevents "11 abort listeners added to [AbortSignal]. MaxListeners is 10" warnings
+            console.print("[dim]Using enhanced Claude wrapper for multi-agent coordination[/dim]")
+            
+            # Build command with essential flags + pass-through args for wrapper
+            wrapper_args = [
+                "node", str(wrapper_path),
+                "--model", "sonnet",
+                "--dangerously-skip-permissions"
+            ] + args
+            
+            console.print(f"[dim]Launching Claude with wrapper: {' '.join(wrapper_args[2:])}[/dim]")
+            
+            # Use os.execvp with the wrapper
+            os.execvp("node", wrapper_args)
+        else:
+            # Fallback to direct Claude launch
+            console.print("[dim]Wrapper not found, using direct Claude launch[/dim]")
+            
+            # Build command with essential flags + pass-through args
+            claude_args = [
+                "claude",
+                "--model", "sonnet",
+                "--dangerously-skip-permissions"
+            ] + args
+            
+            console.print(f"[dim]Launching Claude with: {' '.join(claude_args[1:])}[/dim]")
+            
+            # Use os.execvp for proper terminal handling
+            os.execvp("claude", claude_args)
         
     except Exception as e:
         console.print(f"[red]❌ Failed to launch Claude CLI: {e}[/red]")
@@ -1041,7 +1090,7 @@ def launch_claude_cli_with_args(args):
 
 
 def launch_claude_cli():
-    """Launch Claude CLI directly (legacy method)."""
+    """Launch Claude CLI directly (legacy method) with AbortSignal configuration."""
     validation = validate_claude_cli()
     
     if not validation["valid"]:
@@ -1053,9 +1102,26 @@ def launch_claude_cli():
         console.print("   • Restart your terminal")
         sys.exit(1)
     
-    # Launch Claude CLI
+    # Launch Claude CLI with wrapper support
     try:
-        os.execvp("claude", ["claude"])
+        # Check if Node.js wrapper exists for AbortSignal MaxListeners configuration
+        # This wrapper resolves "MaxListeners exceeded" warnings from multi-agent coordination
+        wrapper_path = framework_path / "scripts" / "claude-wrapper.js"
+        
+        if wrapper_path.exists():
+            # Use Node.js wrapper to configure AbortSignal MaxListeners to 25
+            # This prevents "11 abort listeners added to [AbortSignal]. MaxListeners is 10" warnings
+            console.print("[dim]Using enhanced Claude wrapper for multi-agent coordination[/dim]")
+            
+            # Launch with wrapper (no additional args for legacy mode)
+            wrapper_args = ["node", str(wrapper_path)]
+            
+            # Use os.execvp with the wrapper
+            os.execvp("node", wrapper_args)
+        else:
+            # Fallback to direct Claude launch
+            console.print("[dim]Wrapper not found, using direct Claude launch[/dim]")
+            os.execvp("claude", ["claude"])
     except FileNotFoundError:
         console.print("[red]❌ Failed to launch Claude CLI[/red]")
         sys.exit(1)

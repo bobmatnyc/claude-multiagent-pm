@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-07-15T07:35:25.235556",
+  "category": "error:subprocess_validation",
+  "priority": "critical",
+  "content": "Version Control Agent reported task completion but actual CLI output still shows v0.8.3 instead of expected v0.8.5. This demonstrates the subprocess validation protocol issue where agents report success without actual functionality changes.",
+  "source_agent": "pm_agent",
+  "project_context": "claude-multiagent-pm",
+  "resolution_status": "open",
+  "impact_scope": "framework",
+  "subprocess_claims": "Version Control Agent reported completion of version synchronization",
+  "actual_reality": "CLI still outputs v0.8.3, Python module correctly shows 0.8.5"
+}

@@ -15,6 +15,79 @@
 
 ---
 
+## 🔄 CLAUDE.md FILE SYSTEM DISTINCTION
+
+### 📍 TWO TYPES OF CLAUDE.md FILES
+
+**This project uses a dual CLAUDE.md system with distinct purposes and locations:**
+
+#### 1. **PROJECT CLAUDE.md** (THIS FILE)
+- **Location**: `/Users/masa/Projects/claude-multiagent-pm/CLAUDE.md`
+- **Purpose**: Development rules for framework contributors
+- **Audience**: Developers working on the claude-multiagent-pm framework itself
+- **Content**: Framework protection rules, development workflows, testing protocols
+- **Scope**: Framework development and maintenance
+- **Authority**: Framework development team and contributors
+
+#### 2. **FRAMEWORK CLAUDE.md** (DEPLOYMENT TEMPLATE)
+- **Location**: `/Users/masa/Projects/claude-multiagent-pm/framework/CLAUDE.md`
+- **Purpose**: Deployment template for end-user projects
+- **Audience**: End-users implementing the framework in their projects
+- **Content**: Orchestration rules, agent delegation patterns, runtime configuration
+- **Scope**: Framework deployment and orchestration
+- **Authority**: Framework runtime system and project managers
+
+### 🚨 CRITICAL PLACEMENT RULES
+
+**FRAMEWORK CLAUDE.md Always Goes in PARENT Directory:**
+- When deployed, `framework/CLAUDE.md` is copied to the parent directory (e.g., `../CLAUDE.md`)
+- This ensures the orchestrator has access to runtime configuration
+- The framework template is the source of truth for deployment behavior
+
+**PROJECT CLAUDE.md Stays in PROJECT Root:**
+- The project development rules remain in the framework repository
+- This file guides framework contributors and maintainers
+- Never deployed to parent directories - only for framework development
+
+### 📂 Directory Structure Example
+
+```
+/Users/masa/Projects/                          # Parent directory
+├── CLAUDE.md                                  # ← FRAMEWORK deployment (runtime rules)
+└── claude-multiagent-pm/                     # Project directory
+    ├── CLAUDE.md                             # ← PROJECT development (this file)
+    └── framework/
+        └── CLAUDE.md                         # ← FRAMEWORK template (source)
+```
+
+### 🔧 When to Use Each Type
+
+**Use PROJECT CLAUDE.md when:**
+- Contributing to the framework codebase
+- Modifying framework core functionality
+- Running framework development tests
+- Understanding framework protection mechanisms
+
+**Use FRAMEWORK CLAUDE.md when:**
+- Deploying the framework to a project
+- Orchestrating agents in a project
+- Managing project workflows
+- Running project-specific operations
+
+### ⚠️ PREVENTION OF CONFUSION
+
+**To avoid accidental overwrites:**
+1. **Never modify** the deployed `../CLAUDE.md` directly
+2. **Always update** `framework/CLAUDE.md` as the source template
+3. **Redeploy** after template changes to propagate updates
+4. **Verify** file locations before making changes
+
+**File Protection Status:**
+- PROJECT CLAUDE.md: Version controlled, manual updates
+- FRAMEWORK CLAUDE.md: Protected by backup system, template-based deployment
+
+---
+
 ## 🚨 CRITICAL FRAMEWORK PROTECTION RULES
 
 ### ⛔ ABSOLUTE PROHIBITIONS - NEVER DO THESE

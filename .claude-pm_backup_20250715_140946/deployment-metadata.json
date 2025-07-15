@@ -1,0 +1,22 @@
+{
+  "deployment_id": "ed036794",
+  "deployed_at": "2025-07-15T14:05:53.918984",
+  "source_path": "/Users/masa/Projects/claude-multiagent-pm",
+  "target_path": "/Users/masa/Projects/claude-multiagent-pm/.claude-pm",
+  "deployed_files": [
+    "CLAUDE.md",
+    "config.json",
+    "agents/project-agents.json",
+    "templates/project-template.md",
+    "health/config.json",
+    "core-config.json"
+  ],
+  "deployment_config": {
+    "force_deployment": false,
+    "preserve_existing": true,
+    "create_backup": true,
+    "verify_after_deployment": true
+  },
+  "framework_version": "0.8.6",
+  "deployer_version": "1.0.0"
+}

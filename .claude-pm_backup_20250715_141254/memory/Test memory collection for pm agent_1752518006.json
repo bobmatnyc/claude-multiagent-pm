@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-07-14 14:33:26",
+  "category": "Test memory collection for pm agent",
+  "priority": {
+    "test": true,
+    "agent_type": "pm"
+  },
+  "source_agent": "pm_agent",
+  "project_context": "/Users/masa/Projects/claude-multiagent-pm",
+  "content": "system",
+  "integration_context": "system_init_agent_consolidation"
+}

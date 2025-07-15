@@ -300,10 +300,28 @@ function resolveVersion() {{
                 # Extract version from Python script
                 with open(script_path, 'r') as f:
                     content = f.read()
+                    
+                    # Look for return statement in get_script_version function
+                    import re
+                    version_match = re.search(r'def get_script_version\(\):\s*""".*?"""\s*return "([^"]+)"', content, re.DOTALL)
+                    if version_match:
+                        return version_match.group(1)
+                    
+                    # Fallback: look for SCRIPT_VERSION variable
+                    version_match = re.search(r'SCRIPT_VERSION = get_script_version\(\)', content)
+                    if version_match:
+                        # Try to extract from function call
+                        func_match = re.search(r'return "([^"]+)"', content)
+                        if func_match:
+                            return func_match.group(1)
+                    
+                    # Another fallback: look for version in comments or strings
                     for line in content.split('\n'):
-                        if 'version' in line.lower() or '__version__' in line:
-                            # Try to extract version
-                            pass
+                        if 'return "' in line and ('version' in line.lower() or 'get_script_version' in line):
+                            version_match = re.search(r'return "([^"]+)"', line)
+                            if version_match:
+                                return version_match.group(1)
+                                
                 return "unknown"
             else:
                 return "unknown"

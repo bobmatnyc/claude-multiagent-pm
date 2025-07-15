@@ -306,8 +306,8 @@ def register_setup_commands(cli_group):
                         framework_version = "001"
                 
                 template_variables = {
-                    "FRAMEWORK_VERSION": framework_version,  # Serial from FRAMEWORK_VERSION (010)
-                    "CLAUDE_MD_VERSION": _get_framework_version(),  # Main version from VERSION (0.4.6)
+                    "FRAMEWORK_VERSION": framework_version,  # Serial from FRAMEWORK_VERSION (014)
+                    "CLAUDE_MD_VERSION": f"{framework_version}-004",  # Serial format framework_version-serial
                     "DEPLOYMENT_DATE": datetime.now().isoformat(),
                     "PLATFORM": platform.system().lower(),
                     "PYTHON_CMD": "python3",

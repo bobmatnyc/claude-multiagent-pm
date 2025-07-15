@@ -53,6 +53,25 @@ except ImportError as e:
     def collect_pm_orchestrator_memory(**kwargs):
         return {"success": True, "memory_id": "fallback"}
 
+# Import correction capture system
+try:
+    from claude_pm.services.correction_capture import CorrectionCapture, CorrectionType, capture_subprocess_correction
+except ImportError as e:
+    logging.error(f"Failed to import correction capture: {e}")
+    # Fallback implementation
+    class CorrectionCapture:
+        def __init__(self):
+            self.enabled = False
+        
+        def create_task_tool_integration_hook(self, *args, **kwargs):
+            return {"hook_id": "disabled"}
+    
+    def capture_subprocess_correction(*args, **kwargs):
+        return "disabled"
+    
+    class CorrectionType:
+        CONTENT_CORRECTION = "content_correction"
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -66,6 +85,8 @@ class TaskToolConfiguration:
     auto_escalation: bool = True
     progress_tracking: bool = True
     integration_validation: bool = True
+    correction_capture_enabled: bool = True
+    correction_capture_auto_hook: bool = True
 
 
 class TaskToolHelper:
@@ -83,6 +104,16 @@ class TaskToolHelper:
         self.pm_orchestrator = PMOrchestrator(self.working_directory)
         self._active_subprocesses: Dict[str, Dict[str, Any]] = {}
         self._subprocess_history: List[Dict[str, Any]] = []
+        
+        # Initialize correction capture system
+        self.correction_capture = None
+        if self.config.correction_capture_enabled:
+            try:
+                self.correction_capture = CorrectionCapture()
+                logger.info("Correction capture system initialized")
+            except Exception as e:
+                logger.error(f"Failed to initialize correction capture: {e}")
+                self.correction_capture = None
         
         logger.info(f"TaskToolHelper initialized with working directory: {self.working_directory}")
     
@@ -173,6 +204,19 @@ class TaskToolHelper:
                     delegation_id=subprocess_id
                 )
             
+            # Create correction capture hook
+            correction_hook = None
+            if self.config.correction_capture_auto_hook and self.correction_capture:
+                try:
+                    correction_hook = self.correction_capture.create_task_tool_integration_hook(
+                        subprocess_id=subprocess_id,
+                        agent_type=agent_type,
+                        task_description=task_description
+                    )
+                    logger.info(f"Created correction capture hook: {correction_hook.get('hook_id', 'unknown')}")
+                except Exception as e:
+                    logger.error(f"Failed to create correction capture hook: {e}")
+            
             logger.info(f"Created Task Tool subprocess: {subprocess_id}")
             
             return {
@@ -180,7 +224,8 @@ class TaskToolHelper:
                 "subprocess_id": subprocess_id,
                 "subprocess_info": subprocess_info,
                 "prompt": prompt,
-                "usage_instructions": self._generate_usage_instructions(subprocess_info)
+                "usage_instructions": self._generate_usage_instructions(subprocess_info),
+                "correction_hook": correction_hook
             }
             
         except Exception as e:
@@ -202,6 +247,8 @@ class TaskToolHelper:
     
     def _generate_usage_instructions(self, subprocess_info: Dict[str, Any]) -> str:
         """Generate usage instructions for Task Tool subprocess."""
+        correction_status = "enabled" if self.correction_capture else "disabled"
+        
         return f"""
 Task Tool Subprocess Usage Instructions:
 ========================================
@@ -227,6 +274,12 @@ Integration Notes:
 - Memory collection is required for all operations
 - Escalation triggers are configured for automatic PM notification
 - Progress updates should be provided regularly
+- Correction capture is {correction_status} for automatic prompt improvement
+
+Correction Capture Usage:
+- If the subprocess response needs correction, use the capture_correction method
+- This will help improve future agent responses automatically
+- Corrections are stored for evaluation and prompt optimization
 """
     
     def get_subprocess_status(self, subprocess_id: Optional[str] = None) -> Dict[str, Any]:
@@ -281,6 +334,89 @@ Integration Notes:
         
         return False
     
+    def capture_correction(
+        self,
+        subprocess_id: str,
+        original_response: str,
+        user_correction: str,
+        correction_type: str = "content_correction",
+        severity: str = "medium",
+        user_feedback: Optional[str] = None
+    ) -> str:
+        """
+        Capture a correction for a subprocess response.
+        
+        Args:
+            subprocess_id: ID of the subprocess
+            original_response: Original agent response
+            user_correction: User's correction
+            correction_type: Type of correction
+            severity: Severity level
+            user_feedback: Additional feedback
+            
+        Returns:
+            Correction ID
+        """
+        if not self.correction_capture:
+            logger.warning("Correction capture not enabled")
+            return ""
+        
+        # Get subprocess info
+        subprocess_info = self._active_subprocesses.get(subprocess_id)
+        if not subprocess_info:
+            # Check history
+            for entry in self._subprocess_history:
+                if entry["subprocess_id"] == subprocess_id:
+                    subprocess_info = entry
+                    break
+        
+        if not subprocess_info:
+            logger.error(f"Subprocess {subprocess_id} not found")
+            return ""
+        
+        try:
+            # Convert string correction type to enum
+            correction_type_enum = getattr(CorrectionType, correction_type.upper(), CorrectionType.CONTENT_CORRECTION)
+            
+            correction_id = self.correction_capture.capture_correction(
+                agent_type=subprocess_info["agent_type"],
+                original_response=original_response,
+                user_correction=user_correction,
+                context={
+                    "subprocess_id": subprocess_id,
+                    "task_description": subprocess_info.get("task_description", ""),
+                    "working_directory": str(self.working_directory)
+                },
+                correction_type=correction_type_enum,
+                subprocess_id=subprocess_id,
+                task_description=subprocess_info.get("task_description", ""),
+                severity=severity,
+                user_feedback=user_feedback
+            )
+            
+            logger.info(f"Captured correction {correction_id} for subprocess {subprocess_id}")
+            return correction_id
+            
+        except Exception as e:
+            logger.error(f"Failed to capture correction: {e}")
+            return ""
+    
+    def get_correction_statistics(self) -> Dict[str, Any]:
+        """Get correction capture statistics."""
+        if not self.correction_capture:
+            return {"enabled": False, "message": "Correction capture not enabled"}
+        
+        try:
+            stats = self.correction_capture.get_correction_stats()
+            return {
+                "enabled": True,
+                "statistics": stats,
+                "storage_path": str(self.correction_capture.storage_config.storage_path)
+            }
+        except Exception as e:
+            logger.error(f"Failed to get correction statistics: {e}")
+            return {"enabled": True, "error": str(e)}
+    
     def list_available_agents(self) -> Dict[str, List[str]]:
         """List all available agents for Task Tool subprocess creation."""
         return self.pm_orchestrator.list_available_agents()
@@ -315,7 +451,13 @@ Integration Notes:
                     "memory_collection_required": self.config.memory_collection_required,
                     "auto_escalation": self.config.auto_escalation,
                     "progress_tracking": self.config.progress_tracking,
-                    "integration_validation": self.config.integration_validation
+                    "integration_validation": self.config.integration_validation,
+                    "correction_capture_enabled": self.config.correction_capture_enabled,
+                    "correction_capture_auto_hook": self.config.correction_capture_auto_hook
+                },
+                "correction_capture": {
+                    "enabled": self.correction_capture is not None,
+                    "service_active": self.correction_capture.enabled if self.correction_capture else False
                 }
             }
             

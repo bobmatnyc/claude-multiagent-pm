@@ -2,7 +2,7 @@
 
 **Date**: July 15, 2025  
 **Documentation Agent**: Comprehensive deployment and operational documentation  
-**Framework Version**: 013  
+**Framework Version**: 014  
 **Context**: ISS-0118 Two-Tier Agent Hierarchy Implementation and System Cleanup  
 
 ---
@@ -27,7 +27,7 @@
 **Platform Details:**
 - **Operating System**: macOS Darwin 24.5.0
 - **Python Version**: 3.13
-- **Framework Version**: 013
+- **Framework Version**: 014
 - **Working Directory**: `/Users/masa/Projects/claude-multiagent-pm`
 - **Test Date**: July 15, 2025
 

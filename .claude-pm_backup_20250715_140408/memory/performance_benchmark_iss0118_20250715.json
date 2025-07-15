@@ -1,0 +1,85 @@
+{
+  "timestamp": "2025-07-15T11:51:16.106119",
+  "framework_version": "013",
+  "test_environment": "macOS_Python3",
+  "benchmark_results": {
+    "shared_prompt_cache": {
+      "write_performance": {
+        "average": 0.008,
+        "p95": 0.018,
+        "unit": "ms"
+      },
+      "read_performance": {
+        "average": 0.001,
+        "p95": 0.001,
+        "unit": "ms"
+      },
+      "cache_hit_ratio": {
+        "value": 100.0,
+        "unit": "%"
+      },
+      "target_compliance": "PASS"
+    },
+    "concurrent_subprocess": {
+      "single_process": {
+        "average": 0.02,
+        "unit": "ms"
+      },
+      "concurrent_20": {
+        "average": 0.001,
+        "unit": "ms"
+      },
+      "performance_under_load": "EXCELLENT",
+      "target_compliance": "PASS"
+    },
+    "directory_scanning": {
+      "hierarchy_scan": {
+        "average": 0.048,
+        "p95": 0.049,
+        "unit": "ms"
+      },
+      "directories_validated": 3,
+      "target_compliance": "PASS"
+    },
+    "cache_workload_analysis": {
+      "repeated_calls": {
+        "hit_ratio": 97.0,
+        "response_time": 0.039,
+        "compliance": "PASS"
+      },
+      "mixed_workload": {
+        "hit_ratio": 87.5,
+        "response_time": 0.163,
+        "compliance": "FAIL"
+      },
+      "burst_pattern": {
+        "hit_ratio": 30.0,
+        "response_time": 0.888,
+        "compliance": "FAIL"
+      }
+    }
+  },
+  "iss_0118_compliance": {
+    "discovery_target_100ms": true,
+    "loading_target_50ms": true,
+    "cache_hit_ratio_95pct": "conditional",
+    "overall_assessment": "MOSTLY_COMPLIANT"
+  },
+  "performance_summary": {
+    "excellent_metrics": [
+      "cache_read_write",
+      "concurrent_scaling",
+      "directory_scanning"
+    ],
+    "optimization_needed": [
+      "mixed_workload_caching",
+      "burst_pattern_efficiency"
+    ],
+    "recommendations": [
+      "cache_warming",
+      "predictive_caching",
+      "optimized_eviction_policy",
+      "agent_type_partitioning"
+    ]
+  }
+}

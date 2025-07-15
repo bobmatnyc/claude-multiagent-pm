@@ -1,0 +1,9 @@
+{
+  "timestamp": "2025-07-14T20:26:06.597954",
+  "category": "bug",
+  "priority": "high",
+  "content": "Version inconsistency detected across system components: {'package_json': '0.13.0', 'version_file': '0.13.0', 'bin_version': '0.13.0', 'pyproject_toml': '0.13.0', 'python_module': 'get_package_version()'}. All components should show 0.8.3 but showing mixed versions.",
+  "source_agent": "version_control_agent",
+  "project_context": "claude-multiagent-pm",
+  "resolution_status": "open"
+}

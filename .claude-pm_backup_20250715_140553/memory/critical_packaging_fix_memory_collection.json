@@ -1,0 +1,75 @@
+{
+  "timestamp": "2025-07-14T19:05:56.000Z",
+  "category": "bug",
+  "priority": "critical",
+  "source_agent": "engineer_agent",
+  "project_context": "claude-multiagent-pm",
+  "related_tasks": ["fix-python-config", "test-installation", "verify-functionality", "document-issue"],
+  "resolution_status": "resolved",
+  "impact_scope": "project",
+  "user_id": "masa",
+  "memory_content": {
+    "title": "Critical PyProject.toml Version Synchronization Fix",
+    "description": "NPM package v0.8.2 was missing synchronized Python project configuration, causing installation failures for all users.",
+    "problem": {
+      "npm_version": "0.8.2",
+      "python_version": "0.7.0",
+      "impact": "Users unable to initialize framework after NPM install",
+      "severity": "critical_blocker"
+    },
+    "solution": {
+      "updated_pyproject_version": "0.8.2",
+      "fixed_invalid_references": [
+        "pytest minversion: 0.7.0 → 6.0",
+        "mypy python_version: 0.7.0 → 3.9",
+        "setuptools_scm fallback_version: 0.7.0 → 0.8.2"
+      ],
+      "added_cli_entry_point": "claude-pm = claude_pm.cli:main"
+    },
+    "testing_results": {
+      "python_package_install": "success",
+      "version_verification": "0.8.2",
+      "dependency_resolution": "success",
+      "framework_import": "success",
+      "cli_functionality": "blocked_by_separate_bug"
+    },
+    "workaround_provided": {
+      "test_script": "test_framework_functionality.py",
+      "programmatic_usage": "import claude_pm",
+      "user_guidance": "Framework functional for Python import while CLI bug is fixed"
+    },
+    "prevention_recommendations": [
+      "Automated version synchronization script",
+      "Pre-publish validation for version consistency",
+      "Integration testing for Python package installation",
+      "Release checklist with version verification"
+    ],
+    "related_issues": {
+      "cli_parameter_conflict": "TypeError: got multiple values for argument 'verbose'",
+      "requires_separate_fix": true
+    }
+  },
+  "tags": [
+    "packaging",
+    "version_sync",
+    "npm_python_integration",
+    "critical_fix",
+    "user_blocker"
+  ],
+  "metadata": {
+    "files_modified": [
+      "/Users/masa/Projects/claude-multiagent-pm/pyproject.toml"
+    ],
+    "documentation_created": [
+      "/Users/masa/Projects/claude-multiagent-pm/docs/reports/2025-07-14_BUGFIX_pyproject_version_sync.md"
+    ],
+    "workaround_scripts": [
+      "/Users/masa/Projects/claude-multiagent-pm/test_framework_functionality.py"
+    ],
+    "memory_collection_categories": [
+      "error:integration",
+      "bug",
+      "architecture:design"
+    ]
+  }
+}

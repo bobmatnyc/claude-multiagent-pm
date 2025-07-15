@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-07-14T17:30:16.004338",
+  "category": "bug",
+  "priority": "high",
+  "source_agent": "engineer",
+  "project_context": "claude-pm-framework",
+  "related_tasks": [
+    "template-manager-startup-errors"
+  ],
+  "resolution_status": "resolved",
+  "impact_scope": "framework",
+  "content": "Fixed two critical TemplateType JSON serialization and timedelta import errors in template_manager.py:\n\n1. FIXED: TemplateType JSON serialization error at line 341\n   - Issue: TemplateType enum objects were being stored directly in template_registry\n   - Root cause: _detect_template_type() returned TemplateType enum, but json.dump() cannot serialize enum objects\n   - Solution: Changed line 412 to use .value property: \"type\": self._detect_template_type(template_file).value\n   - Impact: Template registry can now be saved without JSON serialization errors\n\n2. FIXED: timedelta import error at line 1169 in _cleanup_old_backups()\n   - Issue: timedelta was used but not imported\n   - Root cause: Line 30 only imported datetime from datetime module \n   - Solution: Changed import to: from datetime import datetime, timedelta\n   - Impact: Backup cleanup operations now work without NameError\n\nBoth fixes tested and validated successfully. Framework startup errors eliminated.",
+  "metadata": {
+    "files_modified": [
+      "claude_pm/services/template_manager.py"
+    ],
+    "lines_changed": [
+      30,
+      412
+    ],
+    "error_types": [
+      "JSON serialization",
+      "missing import"
+    ],
+    "test_status": "passed"
+  }
+}

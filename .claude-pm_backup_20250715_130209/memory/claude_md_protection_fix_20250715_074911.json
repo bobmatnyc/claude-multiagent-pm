@@ -1,0 +1,29 @@
+{
+  "timestamp": "2025-07-15T07:49:10.999971",
+  "category": "bug",
+  "priority": "critical",
+  "content": "Fixed CLAUDE.md replacement logic to only replace framework deployment templates. Added file identification by metadata header detection. Project development rules and custom CLAUDE.md files are now protected from replacement.",
+  "metadata": {
+    "source_agent": "engineer",
+    "project_context": "claude-multiagent-pm",
+    "related_files": [
+      "claude_pm/services/parent_directory_manager.py",
+      "CLAUDE.md",
+      "framework/CLAUDE.md"
+    ],
+    "fix_components": [
+      "_is_framework_deployment_template() method",
+      "_should_skip_deployment() protection logic",
+      "Always create backup before file operations",
+      "Framework deployment template detection by metadata header"
+    ],
+    "protection_mechanism": "Detects framework deployment templates by title and metadata patterns",
+    "validation_tests": [
+      "test_protection_logic.py",
+      "test_current_project_protection.py"
+    ]
+  },
+  "resolution_status": "resolved",
+  "impact_scope": "framework",
+  "user_id": "engineer_agent"
+}

@@ -1,6 +1,6 @@
 # Claude PM Framework
 
-[![Version](https://img.shields.io/badge/version-0.8.6-blue.svg)](https://www.npmjs.com/package/@bobmatnyc/claude-multiagent-pm)
+[![Version](https://img.shields.io/badge/version-0.9.0-blue.svg)](https://www.npmjs.com/package/@bobmatnyc/claude-multiagent-pm)
 [![Framework](https://img.shields.io/badge/framework-014--005-green.svg)](./framework/CLAUDE.md)
 [![Node.js](https://img.shields.io/badge/node->=16.0.0-green.svg)](https://nodejs.org/)
 [![Python](https://img.shields.io/badge/python->=3.8.0-green.svg)](https://python.org/)
