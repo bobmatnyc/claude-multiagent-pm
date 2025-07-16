@@ -2,6 +2,14 @@
 
 All notable changes to the Claude Multi-Agent Project Management Framework will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.9.2] - 2025-07-16
+
+### Documentation
+- Updated README positioning to correctly reflect framework as lightweight solution for small teams
+- Added Agent Training & Continuous Learning as core value proposition
+- Emphasized unlimited user-generated agents capability (10 concurrent)
+- Clarified framework differentiators vs enterprise solutions
+
 ## 0.9.1 (2025-07-16)
 
 ### 🚨 CRITICAL PATCH: Import Resolution and Agent System Restoration
