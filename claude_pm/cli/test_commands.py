@@ -179,15 +179,15 @@ def register_test_commands(cli_group):
         pass
 
     @monitoring.command()
-    @click.option("--verbose", "-v", is_flag=True, help="Verbose output")
     @click.pass_context
-    def check(ctx, verbose):
+    def check(ctx):
         """Run a comprehensive health check."""
         try:
             health_script = Path(__file__).parent.parent.parent / "scripts" / "automated_health_monitor.py"
 
             cmd = ["python", str(health_script), "once"]
-            if verbose or ctx.obj.get("verbose"):
+            verbose = ctx.obj.get("verbose", False) if ctx.obj else False
+            if verbose:
                 cmd.append("--verbose")
 
             console.print("[bold blue]🏥 Running comprehensive health check...[/bold blue]")
@@ -216,9 +216,8 @@ def register_test_commands(cli_group):
         help="Output format",
     )
     @click.option("--force-refresh", is_flag=True, help="Force refresh (skip cache)")
-    @click.option("--verbose", "-v", is_flag=True, help="Verbose output with detailed metrics")
     @click.pass_context
-    def comprehensive(ctx, format, force_refresh, verbose):
+    def comprehensive(ctx, format, force_refresh):
         """Run comprehensive health dashboard for all subsystems (M01-044)."""
 
         async def run():
@@ -226,6 +225,9 @@ def register_test_commands(cli_group):
 
             try:
                 console.print("[bold blue]🚀 Generating comprehensive health dashboard...[/bold blue]")
+
+                # Get verbose from parent context
+                verbose = ctx.obj.get("verbose", False) if ctx.obj else False
 
                 # Initialize orchestrator
                 orchestrator = HealthDashboardOrchestrator()
@@ -243,7 +245,7 @@ def register_test_commands(cli_group):
 
             except Exception as e:
                 console.print(f"[bold red]❌ Error generating health dashboard: {e}[/bold red]")
-                if verbose or ctx.obj.get("verbose"):
+                if verbose:
                     import traceback
                     console.print(traceback.format_exc())
                 sys.exit(1)

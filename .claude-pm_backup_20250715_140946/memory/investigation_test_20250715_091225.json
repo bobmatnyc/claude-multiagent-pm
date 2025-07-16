@@ -1,9 +1,0 @@
-{
-  "timestamp": "2025-07-15T09:12:25.778418",
-  "category": "test:investigation",
-  "priority": "medium",
-  "content": "Testing memory collection mechanism identification",
-  "source_agent": "investigation:engineer",
-  "project_context": "claude-multiagent-pm",
-  "resolution_status": "open"
-}

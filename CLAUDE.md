@@ -300,6 +300,21 @@ python scripts/validate_version_consistency.py
 **These files are NOT temporary and MUST persist across all operations.**
 **Deletion will cascade to break ALL managed project deployments.**
 
+### 📄 AD-HOC DOCUMENT FILE STORAGE
+
+**MANDATORY: All ad-hoc document files MUST be stored in `docs/` directory:**
+- Analysis reports, research findings, implementation notes
+- Temporary documentation, draft specifications, design documents
+- Investigation results, benchmarking reports, meeting notes
+- All non-permanent documentation that supports development work
+
+**Storage Rules:**
+- **Location**: `docs/` (project root)
+- **Organization**: Use subdirectories for categorization (e.g., `docs/analysis/`, `docs/design/`)
+- **Naming**: Use descriptive, date-prefixed names when appropriate
+- **Cleanup**: Periodic review and archival of outdated documents
+- **Version Control**: Include in repository for team collaboration and history
+
 ### Configuration Files
 - `.claude-pm/parent_directory_manager/` - Service state
 - `.claude-pm/config.json` - Framework configuration

@@ -1002,7 +1002,7 @@ def launch_claude_cli_yolo():
             # Essential YOLO mode arguments for wrapper
             wrapper_args = [
                 "node", str(wrapper_path),
-                "--model", "sonnet", 
+                "--model", "opus", 
                 "--dangerously-skip-permissions"
             ]
             
@@ -1017,7 +1017,7 @@ def launch_claude_cli_yolo():
             # Essential YOLO mode arguments
             claude_args = [
                 "claude",
-                "--model", "sonnet", 
+                "--model", "opus", 
                 "--dangerously-skip-permissions"
             ]
             
@@ -1060,7 +1060,7 @@ def launch_claude_cli_with_args(args):
             # Build command with essential flags + pass-through args for wrapper
             wrapper_args = [
                 "node", str(wrapper_path),
-                "--model", "sonnet",
+                "--model", "opus",
                 "--dangerously-skip-permissions"
             ] + args
             
@@ -1075,7 +1075,7 @@ def launch_claude_cli_with_args(args):
             # Build command with essential flags + pass-through args
             claude_args = [
                 "claude",
-                "--model", "sonnet",
+                "--model", "opus",
                 "--dangerously-skip-permissions"
             ] + args
             

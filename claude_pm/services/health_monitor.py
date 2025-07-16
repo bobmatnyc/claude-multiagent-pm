@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from ..core.base_service import BaseService
+from ..core.response_types import TaskToolResponse
 
 
 class HealthMonitorService(BaseService):
@@ -142,7 +143,12 @@ class HealthMonitorService(BaseService):
 
         except Exception as e:
             self.logger.error(f"Error running health check: {e}")
-            return {"status": "error", "error": str(e), "timestamp": datetime.now().isoformat()}
+            return TaskToolResponse(
+                request_id=f"health_check_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                success=False,
+                error=str(e),
+                performance_metrics={"status": "error", "timestamp": datetime.now().isoformat()}
+            ).__dict__
 
     async def _load_health_report(self) -> Optional[Dict]:
         """Load the latest health report from file."""
@@ -349,10 +355,12 @@ class HealthMonitorService(BaseService):
             
         except Exception as e:
             self.logger.error(f"Failed to get subsystem versions: {e}")
-            return {
-                "error": str(e),
-                "timestamp": datetime.now().isoformat()
-            }
+            return TaskToolResponse(
+                request_id=f"subsystem_versions_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                success=False,
+                error=str(e),
+                performance_metrics={"timestamp": datetime.now().isoformat()}
+            ).__dict__
 
     async def get_subsystem_version_report(self) -> Dict:
         """Get comprehensive subsystem version report."""
@@ -374,10 +382,12 @@ class HealthMonitorService(BaseService):
             
         except Exception as e:
             self.logger.error(f"Failed to get subsystem version report: {e}")
-            return {
-                "error": str(e),
-                "report_timestamp": datetime.now().isoformat()
-            }
+            return TaskToolResponse(
+                request_id=f"version_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                success=False,
+                error=str(e),
+                performance_metrics={"report_timestamp": datetime.now().isoformat()}
+            ).__dict__
 
     async def validate_subsystem_compatibility(self, required_versions: Dict[str, str]) -> Dict:
         """Validate subsystem version compatibility."""
@@ -399,11 +409,12 @@ class HealthMonitorService(BaseService):
             
         except Exception as e:
             self.logger.error(f"Failed to validate subsystem compatibility: {e}")
-            return {
-                "compatible": False,
-                "error": str(e),
-                "validation_timestamp": datetime.now().isoformat()
-            }
+            return TaskToolResponse(
+                request_id=f"compatibility_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                success=False,
+                error=str(e),
+                performance_metrics={"compatible": False, "validation_timestamp": datetime.now().isoformat()}
+            ).__dict__
 
     async def get_enhanced_health_status(self) -> Dict:
         """Get enhanced health status including subsystem versions."""
@@ -425,10 +436,12 @@ class HealthMonitorService(BaseService):
             
         except Exception as e:
             self.logger.error(f"Failed to get enhanced health status: {e}")
-            return {
-                "error": str(e),
-                "enhanced_timestamp": datetime.now().isoformat()
-            }
+            return TaskToolResponse(
+                request_id=f"enhanced_health_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                success=False,
+                error=str(e),
+                performance_metrics={"enhanced_timestamp": datetime.now().isoformat()}
+            ).__dict__
 
 
 # Add check_framework_health method for backward compatibility
@@ -446,7 +459,12 @@ def check_framework_health(self):
             loop.close()
     except Exception as e:
         self.logger.error(f"Framework health check failed: {e}")
-        return {"framework_health_error": False, "error": str(e)}
+        return TaskToolResponse(
+            request_id=f"framework_health_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            success=False,
+            error=str(e),
+            performance_metrics={"framework_health_error": False}
+        ).__dict__
 
 HealthMonitorService.check_framework_health = check_framework_health
 

@@ -1,187 +1,201 @@
 """
-Core Service Interfaces for Claude PM Framework v0.8.0
-======================================================
+Core Service Interfaces for Claude PM Framework
+==============================================
 
-This module defines the core interfaces for the framework's service-oriented architecture.
-All services implement these interfaces to ensure consistency, testability, and loose coupling.
+This module defines the core service interfaces that establish contracts for 
+dependency injection, service discovery, and framework orchestration.
 
-Key Features:
-- Service lifecycle management
-- Configuration abstraction
-- Health monitoring and metrics
-- Cache management
-- Agent registry operations
-- Dependency injection support
+Phase 1 Refactoring: Interface extraction and dependency injection foundation
+- IServiceContainer: Dependency injection container
+- IAgentRegistry: Agent discovery and management
+- IPromptCache: Performance-critical caching 
+- IHealthMonitor: Service health monitoring
+- IConfigurationManager: Configuration management
+- ITemplateManager: Template processing and rendering
+- IServiceFactory: Service creation patterns
+
+These interfaces reduce cyclomatic complexity and establish clean separation of concerns.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
-from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, TypeVar, Generic
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 import asyncio
 
-
-@dataclass
-class ServiceHealth:
-    """Standard health status for all services."""
-    status: str  # healthy, degraded, unhealthy, unknown
-    message: str
-    timestamp: str
-    metrics: Dict[str, Any]
-    checks: Dict[str, bool]
+# Type variables for generic interfaces
+T = TypeVar('T')
+ServiceType = TypeVar('ServiceType')
 
 
-@dataclass
-class ServiceMetrics:
-    """Standard metrics collection for all services."""
-    requests_total: int = 0
-    requests_failed: int = 0
-    response_time_avg: float = 0.0
-    uptime_seconds: int = 0
-    memory_usage_mb: float = 0.0
-    custom_metrics: Dict[str, Any] = None
+# Core dependency injection interfaces
+class IServiceContainer(ABC):
+    """Service container interface for dependency injection"""
     
-    def __post_init__(self):
-        if self.custom_metrics is None:
-            self.custom_metrics = {}
-
-
-# Core Infrastructure Interfaces
-
-class IService(ABC):
-    """Base interface for all framework services."""
-    
-    @property
     @abstractmethod
-    def name(self) -> str:
-        """Service name for identification."""
-        pass
-    
-    @property
-    @abstractmethod
-    def running(self) -> bool:
-        """Check if service is currently running."""
+    def register(self, service_type: type, implementation: type, singleton: bool = True) -> None:
+        """Register a service implementation"""
         pass
     
     @abstractmethod
-    async def start(self) -> None:
-        """Start the service."""
+    def register_instance(self, service_type: type, instance: Any) -> None:
+        """Register a service instance"""
         pass
     
     @abstractmethod
-    async def stop(self) -> None:
-        """Stop the service gracefully."""
+    def resolve(self, service_type: type) -> Any:
+        """Resolve a service by type"""
         pass
     
     @abstractmethod
-    async def health_check(self) -> ServiceHealth:
-        """Perform comprehensive health check."""
+    def resolve_all(self, service_type: type) -> List[Any]:
+        """Resolve all implementations of a service type"""
         pass
     
     @abstractmethod
-    def get_metrics(self) -> ServiceMetrics:
-        """Get current service metrics."""
+    def is_registered(self, service_type: type) -> bool:
+        """Check if a service type is registered"""
         pass
 
 
+# Configuration management interfaces
 class IConfigurationService(ABC):
-    """Interface for configuration management services."""
+    """Interface for configuration service (legacy compatibility)"""
     
     @abstractmethod
     def get(self, key: str, default: Any = None) -> Any:
-        """Get configuration value."""
+        """Get configuration value by key"""
         pass
     
     @abstractmethod
     def set(self, key: str, value: Any) -> None:
-        """Set configuration value."""
+        """Set configuration value"""
         pass
     
     @abstractmethod
-    def update(self, config: Dict[str, Any]) -> None:
-        """Update configuration with new values."""
+    async def initialize(self) -> bool:
+        """Initialize configuration service"""
         pass
     
     @abstractmethod
-    def validate(self, schema: Dict[str, Any]) -> bool:
-        """Validate configuration against schema."""
+    async def shutdown(self) -> None:
+        """Shutdown configuration service"""
+        pass
+
+class IConfigurationManager(ABC):
+    """Interface for configuration management and validation"""
+    
+    @abstractmethod
+    def get(self, key: str, default: Any = None) -> Any:
+        """Get configuration value by key"""
         pass
     
     @abstractmethod
-    def load_file(self, file_path: Union[str, Path]) -> None:
-        """Load configuration from file."""
+    def set(self, key: str, value: Any) -> None:
+        """Set configuration value"""
         pass
     
     @abstractmethod
-    def save(self, file_path: Union[str, Path], format: str = "json") -> None:
-        """Save configuration to file."""
+    def get_section(self, section: str) -> Dict[str, Any]:
+        """Get entire configuration section"""
+        pass
+    
+    @abstractmethod
+    def validate_schema(self, schema: Dict[str, Any]) -> bool:
+        """Validate configuration against schema"""
+        pass
+    
+    @abstractmethod
+    def reload(self) -> None:
+        """Reload configuration from sources"""
+        pass
+    
+    @abstractmethod
+    def watch_changes(self, callback: callable) -> None:
+        """Watch for configuration changes"""
         pass
 
 
-class IHealthMonitor(ABC):
-    """Interface for health monitoring services."""
-    
-    @abstractmethod
-    async def register_service(self, service: IService) -> None:
-        """Register a service for monitoring."""
-        pass
-    
-    @abstractmethod
-    async def unregister_service(self, service_name: str) -> None:
-        """Unregister a service from monitoring."""
-        pass
-    
-    @abstractmethod
-    async def check_all_services(self) -> Dict[str, ServiceHealth]:
-        """Check health of all registered services."""
-        pass
-    
-    @abstractmethod
-    async def get_system_health(self) -> ServiceHealth:
-        """Get overall system health status."""
-        pass
-
-
+# Cache service interface
 class ICacheService(ABC):
-    """Interface for caching services."""
+    """Interface for cache service operations"""
     
     @abstractmethod
-    def get(self, key: str) -> Optional[Any]:
-        """Get cached value by key."""
+    def get(self, key: str) -> Any:
+        """Get value from cache"""
         pass
     
     @abstractmethod
-    def set(self, key: str, value: Any, ttl: Optional[float] = None) -> bool:
-        """Set cached value with optional TTL."""
+    def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
+        """Set value in cache with optional TTL"""
         pass
     
     @abstractmethod
     def delete(self, key: str) -> bool:
-        """Delete cached value."""
+        """Delete key from cache"""
         pass
     
     @abstractmethod
     def invalidate(self, pattern: str) -> int:
-        """Invalidate cache entries matching pattern."""
+        """Invalidate keys matching pattern"""
         pass
     
     @abstractmethod
     def clear(self) -> None:
-        """Clear all cache entries."""
+        """Clear all cache entries"""
         pass
     
     @abstractmethod
     def get_cache_metrics(self) -> Dict[str, Any]:
-        """Get cache performance metrics."""
+        """Get cache performance metrics"""
         pass
 
 
-# Agent-Specific Interfaces
+# Health monitoring interface
+@dataclass
+class HealthStatus:
+    """Health status data structure"""
+    status: str  # healthy, degraded, unhealthy, unknown
+    message: str
+    timestamp: datetime
+    checks: Dict[str, bool]
+    metrics: Dict[str, Any]
 
+
+class IHealthMonitor(ABC):
+    """Interface for service health monitoring"""
+    
+    @abstractmethod
+    async def check_health(self, service_name: str) -> HealthStatus:
+        """Check health of a specific service"""
+        pass
+    
+    @abstractmethod
+    async def get_system_health(self) -> HealthStatus:
+        """Get overall system health"""
+        pass
+    
+    @abstractmethod
+    def register_health_check(self, service_name: str, check_func: callable) -> None:
+        """Register a health check function"""
+        pass
+    
+    @abstractmethod
+    async def start_monitoring(self) -> None:
+        """Start health monitoring"""
+        pass
+    
+    @abstractmethod
+    async def stop_monitoring(self) -> None:
+        """Stop health monitoring"""
+        pass
+
+
+# Agent registry interface
 @dataclass
 class AgentMetadata:
-    """Standard agent metadata structure."""
+    """Enhanced agent metadata with specialization and model configuration support"""
     name: str
     type: str
     path: str
@@ -193,11 +207,15 @@ class AgentMetadata:
     frameworks: List[str] = None
     domains: List[str] = None
     roles: List[str] = None
-    last_modified: Optional[float] = None
-    validated: bool = False
+    is_hybrid: bool = False
     validation_score: float = 0.0
+    last_modified: Optional[float] = None
+    # Model configuration fields
+    preferred_model: Optional[str] = None
+    model_config: Optional[Dict[str, Any]] = None
     
     def __post_init__(self):
+        """Initialize default values for list fields"""
         if self.capabilities is None:
             self.capabilities = []
         if self.specializations is None:
@@ -208,329 +226,314 @@ class AgentMetadata:
             self.domains = []
         if self.roles is None:
             self.roles = []
+        if self.model_config is None:
+            self.model_config = {}
 
 
 class IAgentRegistry(ABC):
-    """Interface for agent discovery and management."""
+    """Interface for agent discovery and management"""
     
     @abstractmethod
     async def discover_agents(self, force_refresh: bool = False) -> Dict[str, AgentMetadata]:
-        """Discover all available agents across hierarchy."""
+        """Discover all available agents"""
         pass
     
     @abstractmethod
     async def get_agent(self, agent_name: str) -> Optional[AgentMetadata]:
-        """Get specific agent metadata."""
+        """Get specific agent metadata"""
         pass
     
     @abstractmethod
     async def list_agents(self, agent_type: Optional[str] = None, tier: Optional[str] = None) -> List[AgentMetadata]:
-        """List agents with optional filtering."""
+        """List agents with optional filtering"""
         pass
     
     @abstractmethod
     async def get_specialized_agents(self, agent_type: str) -> List[AgentMetadata]:
-        """Get all agents of a specific specialized type."""
+        """Get agents of a specific specialized type"""
         pass
     
     @abstractmethod
-    async def search_agents_by_capability(self, capability: str) -> List[AgentMetadata]:
-        """Search agents by specific capability."""
+    async def search_by_capability(self, capability: str) -> List[AgentMetadata]:
+        """Search agents by capability"""
         pass
     
     @abstractmethod
-    async def refresh_agent(self, agent_name: str) -> Optional[AgentMetadata]:
-        """Refresh specific agent metadata."""
-        pass
-    
-    @abstractmethod
-    def clear_cache(self) -> None:
-        """Clear discovery cache and force refresh."""
+    async def get_registry_stats(self) -> Dict[str, Any]:
+        """Get registry statistics"""
         pass
 
 
-# Service Management Interfaces
-
-class IServiceContainer(ABC):
-    """Interface for dependency injection container."""
+# Prompt cache interface
+@dataclass
+class CacheEntry:
+    """Cache entry with metadata"""
+    key: str
+    value: Any
+    created_at: float
+    ttl: Optional[float] = None
+    access_count: int = 0
+    last_accessed: float = 0.0
+    size_bytes: int = 0
+    metadata: Dict[str, Any] = None
     
-    @abstractmethod
-    def register_service(self, interface: type, implementation: type, singleton: bool = True) -> None:
-        """Register a service implementation for an interface."""
-        pass
-    
-    @abstractmethod
-    def register_instance(self, interface: type, instance: Any) -> None:
-        """Register a service instance for an interface."""
-        pass
-    
-    @abstractmethod
-    def get_service(self, interface: type) -> Any:
-        """Get service instance for interface."""
-        pass
-    
-    @abstractmethod
-    def has_service(self, interface: type) -> bool:
-        """Check if service is registered for interface."""
-        pass
-    
-    @abstractmethod
-    def create_scope(self) -> 'IServiceScope':
-        """Create a new service scope for scoped services."""
-        pass
+    def __post_init__(self):
+        if self.metadata is None:
+            self.metadata = {}
 
 
-class IServiceScope(ABC):
-    """Interface for service scope management."""
+class IPromptCache(ABC):
+    """Interface for high-performance prompt caching"""
     
     @abstractmethod
-    def get_service(self, interface: type) -> Any:
-        """Get service instance within this scope."""
+    def get(self, key: str) -> Optional[Any]:
+        """Get cached value by key"""
         pass
     
     @abstractmethod
-    def dispose(self) -> None:
-        """Dispose of all scoped services."""
-        pass
-
-
-class IServiceFactory(ABC):
-    """Interface for service factories."""
-    
-    @abstractmethod
-    def create(self, *args, **kwargs) -> Any:
-        """Create a new service instance."""
+    def set(self, key: str, value: Any, ttl: Optional[float] = None, metadata: Optional[Dict[str, Any]] = None) -> bool:
+        """Set cached value with optional TTL"""
         pass
     
     @abstractmethod
-    def can_create(self, service_type: type) -> bool:
-        """Check if factory can create service type."""
+    def delete(self, key: str) -> bool:
+        """Delete cached value"""
+        pass
+    
+    @abstractmethod
+    def invalidate(self, pattern: str) -> int:
+        """Invalidate cached values matching pattern"""
+        pass
+    
+    @abstractmethod
+    def clear(self) -> None:
+        """Clear all cached values"""
+        pass
+    
+    @abstractmethod
+    def get_metrics(self) -> Dict[str, Any]:
+        """Get cache performance metrics"""
         pass
 
 
-# Logging and Error Handling Interfaces
+# Template management interface
+@dataclass
+class TemplateRenderContext:
+    """Context for template rendering"""
+    variables: Dict[str, Any]
+    metadata: Dict[str, Any]
+    target_path: Optional[Path] = None
+    template_id: Optional[str] = None
 
-class ILogger(ABC):
-    """Interface for structured logging services."""
+
+class ITemplateManager(ABC):
+    """Interface for template processing and rendering"""
+    
+    @abstractmethod
+    async def render_template(self, template_content: str, context: TemplateRenderContext) -> str:
+        """Render template with given context"""
+        pass
+    
+    @abstractmethod
+    async def load_template(self, template_id: str) -> Optional[str]:
+        """Load template by ID"""
+        pass
+    
+    @abstractmethod
+    async def validate_template(self, template_content: str) -> Tuple[bool, List[str]]:
+        """Validate template syntax and variables"""
+        pass
+    
+    @abstractmethod
+    def register_template_function(self, name: str, func: callable) -> None:
+        """Register custom template function"""
+        pass
+
+
+# Service factory interface
+class IServiceFactory(Generic[ServiceType], ABC):
+    """Generic interface for service factories"""
+    
+    @abstractmethod
+    def create(self, **kwargs) -> ServiceType:
+        """Create service instance"""
+        pass
+    
+    @abstractmethod
+    def create_with_config(self, config: Dict[str, Any]) -> ServiceType:
+        """Create service instance with configuration"""
+        pass
+    
+    @abstractmethod
+    def supports_type(self, service_type: type) -> bool:
+        """Check if factory supports service type"""
+        pass
+
+
+# Logging interface
+class IStructuredLogger(ABC):
+    """Interface for structured logging"""
     
     @abstractmethod
     def debug(self, message: str, **kwargs) -> None:
-        """Log debug message."""
+        """Log debug message with structured data"""
         pass
     
     @abstractmethod
     def info(self, message: str, **kwargs) -> None:
-        """Log info message."""
+        """Log info message with structured data"""
         pass
     
     @abstractmethod
     def warning(self, message: str, **kwargs) -> None:
-        """Log warning message."""
+        """Log warning message with structured data"""
         pass
     
     @abstractmethod
     def error(self, message: str, **kwargs) -> None:
-        """Log error message."""
+        """Log error message with structured data"""
         pass
     
     @abstractmethod
     def critical(self, message: str, **kwargs) -> None:
-        """Log critical message."""
+        """Log critical message with structured data"""
+        pass
+    
+    @abstractmethod
+    def set_context(self, **kwargs) -> None:
+        """Set logging context for all subsequent messages"""
         pass
 
 
+# Service lifecycle interface
+class IServiceLifecycle(ABC):
+    """Interface for service lifecycle management"""
+    
+    @abstractmethod
+    async def initialize(self) -> None:
+        """Initialize the service"""
+        pass
+    
+    @abstractmethod
+    async def start(self) -> None:
+        """Start the service"""
+        pass
+    
+    @abstractmethod
+    async def stop(self) -> None:
+        """Stop the service"""
+        pass
+    
+    @abstractmethod
+    async def restart(self) -> None:
+        """Restart the service"""
+        pass
+    
+    @abstractmethod
+    def is_running(self) -> bool:
+        """Check if service is running"""
+        pass
+
+
+# Error handling interface
 class IErrorHandler(ABC):
-    """Interface for centralized error handling."""
+    """Interface for centralized error handling"""
     
     @abstractmethod
-    async def handle_error(self, error: Exception, context: Dict[str, Any]) -> None:
-        """Handle an error with context."""
+    def handle_error(self, error: Exception, context: Dict[str, Any]) -> None:
+        """Handle error with context"""
         pass
     
     @abstractmethod
-    def register_handler(self, error_type: type, handler: callable) -> None:
-        """Register error handler for specific error type."""
+    def register_error_handler(self, error_type: type, handler: callable) -> None:
+        """Register error handler for specific error type"""
+        pass
+    
+    @abstractmethod
+    def get_error_stats(self) -> Dict[str, Any]:
+        """Get error statistics"""
         pass
 
 
-# Event and Notification Interfaces
+# Performance monitoring interface
+class IPerformanceMonitor(ABC):
+    """Interface for performance monitoring"""
+    
+    @abstractmethod
+    def start_timer(self, operation: str) -> str:
+        """Start timing an operation"""
+        pass
+    
+    @abstractmethod
+    def stop_timer(self, timer_id: str) -> float:
+        """Stop timing and return duration"""
+        pass
+    
+    @abstractmethod
+    def record_metric(self, name: str, value: float, tags: Optional[Dict[str, str]] = None) -> None:
+        """Record a performance metric"""
+        pass
+    
+    @abstractmethod
+    def get_metrics(self) -> Dict[str, Any]:
+        """Get performance metrics"""
+        pass
 
+
+# Event system interface
 class IEventBus(ABC):
-    """Interface for event publishing and subscription."""
+    """Interface for event-driven communication"""
     
     @abstractmethod
-    async def publish(self, event: str, data: Any) -> None:
-        """Publish an event."""
+    def publish(self, event_type: str, data: Any) -> None:
+        """Publish an event"""
         pass
     
     @abstractmethod
-    def subscribe(self, event: str, handler: callable) -> None:
-        """Subscribe to an event."""
+    def subscribe(self, event_type: str, handler: callable) -> str:
+        """Subscribe to events"""
         pass
     
     @abstractmethod
-    def unsubscribe(self, event: str, handler: callable) -> None:
-        """Unsubscribe from an event."""
-        pass
-
-
-# Data Access Interfaces
-
-class IRepository(ABC):
-    """Base interface for data repositories."""
-    
-    @abstractmethod
-    async def get_by_id(self, id: Any) -> Optional[Any]:
-        """Get entity by ID."""
+    def unsubscribe(self, subscription_id: str) -> None:
+        """Unsubscribe from events"""
         pass
     
     @abstractmethod
-    async def save(self, entity: Any) -> Any:
-        """Save entity."""
-        pass
-    
-    @abstractmethod
-    async def delete(self, id: Any) -> bool:
-        """Delete entity by ID."""
-        pass
-    
-    @abstractmethod
-    async def find_all(self) -> List[Any]:
-        """Find all entities."""
+    async def publish_async(self, event_type: str, data: Any) -> None:
+        """Publish an event asynchronously"""
         pass
 
 
-class IUnitOfWork(ABC):
-    """Interface for unit of work pattern."""
+# Interface registry for dependency injection discovery
+class InterfaceRegistry:
+    """Registry of all core interfaces for dependency injection"""
     
-    @abstractmethod
-    async def begin(self) -> None:
-        """Begin transaction."""
-        pass
+    _interfaces = {
+        'service_container': IServiceContainer,
+        'configuration_manager': IConfigurationManager,
+        'health_monitor': IHealthMonitor,
+        'agent_registry': IAgentRegistry,
+        'prompt_cache': IPromptCache,
+        'template_manager': ITemplateManager,
+        'structured_logger': IStructuredLogger,
+        'service_lifecycle': IServiceLifecycle,
+        'error_handler': IErrorHandler,
+        'performance_monitor': IPerformanceMonitor,
+        'event_bus': IEventBus,
+    }
     
-    @abstractmethod
-    async def commit(self) -> None:
-        """Commit transaction."""
-        pass
+    @classmethod
+    def get_interface(cls, name: str) -> Optional[type]:
+        """Get interface by name"""
+        return cls._interfaces.get(name)
     
-    @abstractmethod
-    async def rollback(self) -> None:
-        """Rollback transaction."""
-        pass
-
-
-# Framework-Specific Service Interfaces
-
-class IParentDirectoryManager(ABC):
-    """Interface for parent directory management."""
+    @classmethod
+    def get_all_interfaces(cls) -> Dict[str, type]:
+        """Get all registered interfaces"""
+        return cls._interfaces.copy()
     
-    @abstractmethod
-    async def install_template(self, target_directory: Path, template_id: str, 
-                              variables: Optional[Dict[str, Any]] = None, 
-                              force: bool = False) -> bool:
-        """Install template to parent directory."""
-        pass
-    
-    @abstractmethod
-    async def get_directory_status(self, target_directory: Path) -> Dict[str, Any]:
-        """Get parent directory status."""
-        pass
-    
-    @abstractmethod
-    async def backup_directory(self, target_directory: Path) -> Optional[Path]:
-        """Create backup of parent directory."""
-        pass
-
-
-class IAgentPromptBuilder(ABC):
-    """Interface for agent prompt building."""
-    
-    @abstractmethod
-    async def build_prompt(self, agent_name: str, context: Dict[str, Any]) -> str:
-        """Build prompt for agent."""
-        pass
-    
-    @abstractmethod
-    async def get_prompt_template(self, agent_name: str) -> Optional[str]:
-        """Get prompt template for agent."""
-        pass
-    
-    @abstractmethod
-    def register_template(self, agent_name: str, template: str) -> None:
-        """Register prompt template for agent."""
-        pass
-
-
-# Integration and Extension Interfaces
-
-class IPluginManager(ABC):
-    """Interface for plugin management."""
-    
-    @abstractmethod
-    def load_plugin(self, plugin_path: Path) -> None:
-        """Load plugin from path."""
-        pass
-    
-    @abstractmethod
-    def unload_plugin(self, plugin_name: str) -> None:
-        """Unload plugin by name."""
-        pass
-    
-    @abstractmethod
-    def get_plugins(self) -> List[Dict[str, Any]]:
-        """Get list of loaded plugins."""
-        pass
-
-
-class ITaskExecutor(ABC):
-    """Interface for task execution."""
-    
-    @abstractmethod
-    async def execute_task(self, task_name: str, parameters: Dict[str, Any]) -> Any:
-        """Execute a task with parameters."""
-        pass
-    
-    @abstractmethod
-    def register_task(self, task_name: str, task_handler: callable) -> None:
-        """Register a task handler."""
-        pass
-    
-    @abstractmethod
-    def get_task_status(self, task_id: str) -> Dict[str, Any]:
-        """Get status of a running task."""
-        pass
-
-
-# Validation and Quality Assurance Interfaces
-
-class IValidator(ABC):
-    """Interface for validation services."""
-    
-    @abstractmethod
-    def validate(self, data: Any, schema: Dict[str, Any]) -> Tuple[bool, List[str]]:
-        """Validate data against schema."""
-        pass
-    
-    @abstractmethod
-    def register_validator(self, data_type: str, validator: callable) -> None:
-        """Register custom validator."""
-        pass
-
-
-class IQualityMonitor(ABC):
-    """Interface for quality monitoring."""
-    
-    @abstractmethod
-    async def check_code_quality(self, file_path: Path) -> Dict[str, Any]:
-        """Check code quality metrics."""
-        pass
-    
-    @abstractmethod
-    async def check_test_coverage(self, project_path: Path) -> Dict[str, Any]:
-        """Check test coverage metrics."""
-        pass
-    
-    @abstractmethod
-    def get_quality_metrics(self) -> Dict[str, Any]:
-        """Get overall quality metrics."""
-        pass
+    @classmethod
+    def register_interface(cls, name: str, interface: type) -> None:
+        """Register a new interface"""
+        cls._interfaces[name] = interface

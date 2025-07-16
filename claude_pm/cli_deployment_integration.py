@@ -39,7 +39,8 @@ def add_deployment_enforcement_to_cli(cli_group):
     # Commands that should skip deployment checking (deployment-related commands)
     SKIP_DEPLOYMENT_CHECK = {
         'deploy', 'verify', 'status', 'diagnose', 'list', 'undeploy',
-        'version', 'help'
+        'version', 'help', 'util', 'agents', 'monitoring', 'service',
+        'project-index', 'analytics', 'workflow', 'tickets'
     }
     
     # Wrap all existing commands with deployment enforcement
@@ -59,37 +60,58 @@ def add_deployment_enforcement_to_cli(cli_group):
 def _create_deployment_enforced_command(original_command, command_name):
     """Create a deployment-enforced version of a CLI command."""
     
-    @click.command(name=command_name, help=original_command.help)
-    @click.pass_context
-    def enforced_command(ctx, *args, **kwargs):
-        """Wrapper command that enforces deployment before execution."""
+    # Create a wrapper function that preserves the original command's signature
+    def create_wrapper():
+        # Get the original callback function
+        original_callback = original_command.callback
         
-        async def run_with_enforcement():
-            try:
-                # Validate deployment requirement
-                enforcer = get_deployment_enforcer()
-                await enforcer.enforce_deployment_requirement(
-                    working_directory=Path.cwd(),
-                    operation_name=command_name
-                )
-                
-                # If validation passes, execute original command
-                return original_command.callback(ctx, *args, **kwargs)
-                
-            except Exception as e:
-                logger.error(f"Deployment enforcement failed for {command_name}: {e}")
-                console.print(f"❌ [red]Cannot execute '{command_name}': {e}[/red]")
-                sys.exit(1)
+        @click.pass_context
+        def enforced_wrapper(ctx, *args, **kwargs):
+            """Wrapper that enforces deployment before execution."""
+            
+            async def run_with_enforcement():
+                try:
+                    # Validate deployment requirement
+                    enforcer = get_deployment_enforcer()
+                    await enforcer.enforce_deployment_requirement(
+                        working_directory=Path.cwd(),
+                        operation_name=command_name
+                    )
+                    
+                    # If validation passes, execute original command through context
+                    return ctx.invoke(original_callback, *args, **kwargs)
+                    
+                except Exception as e:
+                    logger.error(f"Deployment enforcement failed for {command_name}: {e}")
+                    console.print(f"❌ [red]Cannot execute '{command_name}': {e}[/red]")
+                    sys.exit(1)
+            
+            # Handle both sync and async commands
+            if asyncio.iscoroutinefunction(original_callback):
+                return asyncio.run(run_with_enforcement())
+            else:
+                return asyncio.run(run_with_enforcement())
         
-        # Handle both sync and async commands
-        if asyncio.iscoroutinefunction(original_command.callback):
-            return asyncio.run(run_with_enforcement())
-        else:
-            return asyncio.run(run_with_enforcement())
+        return enforced_wrapper
     
-    # Copy original command attributes
-    enforced_command.params = original_command.params
-    enforced_command.callback = enforced_command
+    # Create the wrapper function
+    wrapper_function = create_wrapper()
+    
+    # Create a new command with the same parameters and attributes
+    # Only include parameters that exist in the Click version being used
+    command_kwargs = {
+        'name': command_name,
+        'callback': wrapper_function,
+        'params': original_command.params.copy(),  # Properly copy parameters
+        'help': original_command.help,
+    }
+    
+    # Conditionally add attributes that might exist
+    for attr in ['epilog', 'short_help', 'options_metavar', 'add_help_option', 'context_settings']:
+        if hasattr(original_command, attr):
+            command_kwargs[attr] = getattr(original_command, attr)
+    
+    enforced_command = click.Command(**command_kwargs)
     
     return enforced_command
 
@@ -123,15 +145,18 @@ def _enhance_cli_startup_with_deployment_status(cli_group):
     original_callback = cli_group.callback
     
     @click.pass_context
-    def enhanced_callback(ctx, *args, **kwargs):
+    def enhanced_callback(ctx, **kwargs):
         """Enhanced CLI callback with deployment status."""
         
         # Display deployment status on startup
         _display_startup_deployment_status()
         
-        # Call original callback
+        # Call original callback with proper context handling
         if original_callback:
-            return original_callback(ctx, *args, **kwargs)
+            # The original callback has @click.pass_context decorator,
+            # so it expects to get the context automatically injected.
+            # We need to call it through Click's context invoke mechanism.
+            return ctx.invoke(original_callback, **kwargs)
     
     # Replace CLI callback
     cli_group.callback = enhanced_callback

@@ -624,12 +624,81 @@ TEMPORAL CONTEXT: Today is {datetime.now().strftime('%B %d, %Y')}. Apply date aw
         except Exception as e:
             logger.error(f"Error getting request history: {e}")
             return []
+    
+    async def enhance_task_delegation(self, agent_name: str, task_description: str, context: str = "") -> str:
+        """
+        Enhance task delegation with agent profile integration.
+        
+        Args:
+            agent_name: Name of the agent to delegate to
+            task_description: Description of the task
+            context: Additional context for the task
+            
+        Returns:
+            Enhanced delegation prompt
+        """
+        try:
+            # Create a TaskToolRequest
+            request = TaskToolRequest(
+                agent_name=agent_name,
+                task_description=task_description,
+                context={'additional_context': context},
+                requirements=[],
+                deliverables=[],
+                priority='medium'
+            )
+            
+            # Create enhanced subprocess
+            response = await self.create_enhanced_subprocess(request)
+            
+            if response.success and response.enhanced_prompt:
+                return response.enhanced_prompt
+            else:
+                # Fallback to basic delegation
+                return f"""**{agent_name.title()}**: {task_description}
+
+TEMPORAL CONTEXT: Today is {datetime.now().strftime('%B %d, %Y')}. Apply date awareness to task execution.
+
+**Task Context**: {context}
+
+**Authority**: {agent_name} operations
+**Expected Results**: Task completion with operational insights
+"""
+                
+        except Exception as e:
+            logger.error(f"Error enhancing task delegation: {e}")
+            # Fallback to basic delegation
+            return f"""**{agent_name.title()}**: {task_description}
+
+TEMPORAL CONTEXT: Today is {datetime.now().strftime('%B %d, %Y')}. Apply date awareness to task execution.
+
+**Task Context**: {context}
+
+**Authority**: {agent_name} operations
+**Expected Results**: Task completion with operational insights
+"""
 
 
 # Factory function
 def create_task_tool_integration(config: Optional[Config] = None) -> TaskToolProfileIntegration:
     """Create a TaskToolProfileIntegration instance."""
     return TaskToolProfileIntegration(config)
+
+
+# Factory function for getting integrator instance
+async def get_task_tool_integrator(config: Optional[Config] = None) -> TaskToolProfileIntegration:
+    """
+    Get a configured and initialized TaskToolProfileIntegration instance.
+    
+    Args:
+        config: Optional configuration object
+        
+    Returns:
+        Initialized TaskToolProfileIntegration instance
+    """
+    integration = create_task_tool_integration(config)
+    await integration.start()
+    return integration
 
 
 # Convenience functions for common operations
@@ -731,3 +800,17 @@ if __name__ == "__main__":
     
     # Run demo
     asyncio.run(demo())
+
+
+# Alias for backwards compatibility with test imports
+TaskToolProfileIntegrator = TaskToolProfileIntegration
+
+__all__ = [
+    'TaskToolProfileIntegration',
+    'TaskToolProfileIntegrator',
+    'TaskToolRequest', 
+    'TaskToolResponse',
+    'create_task_tool_integration',
+    'get_task_tool_integrator',
+    'create_enhanced_subprocess_prompt',
+]

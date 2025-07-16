@@ -38,6 +38,7 @@ import asyncio
 import uuid
 
 from claude_pm.core.config import Config
+from claude_pm.core.response_types import TaskToolResponse
 
 logger = logging.getLogger(__name__)
 
@@ -395,7 +396,12 @@ class CorrectionCapture:
             
         except Exception as e:
             logger.error(f"Failed to get correction stats: {e}")
-            return {"error": str(e)}
+            return TaskToolResponse(
+                request_id=f"correction_stats_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                success=False,
+                error=str(e),
+                performance_metrics={"total_corrections": 0}
+            ).__dict__
     
     def cleanup_old_corrections(self, days_to_keep: Optional[int] = None) -> Dict[str, Any]:
         """
@@ -459,7 +465,12 @@ class CorrectionCapture:
             
         except Exception as e:
             logger.error(f"Failed to cleanup old corrections: {e}")
-            return {"error": str(e)}
+            return TaskToolResponse(
+                request_id=f"cleanup_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                success=False,
+                error=str(e),
+                performance_metrics={"removed_files": 0, "removed_directories": 0}
+            ).__dict__
     
     def validate_storage_integrity(self) -> Dict[str, Any]:
         """Validate storage integrity and fix any issues."""
@@ -513,7 +524,12 @@ class CorrectionCapture:
             
         except Exception as e:
             logger.error(f"Storage integrity validation failed: {e}")
-            return {"error": str(e)}
+            return TaskToolResponse(
+                request_id=f"integrity_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                success=False,
+                error=str(e),
+                performance_metrics={"issues_found": -1, "integrity_ok": False}
+            ).__dict__
     
     def export_corrections(self, format: str = "json") -> str:
         """
@@ -589,7 +605,12 @@ class CorrectionCapture:
             
         except Exception as e:
             logger.error(f"Failed to create Task Tool integration hook: {e}")
-            return {"error": str(e)}
+            return TaskToolResponse(
+                request_id=f"hook_{subprocess_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                success=False,
+                error=str(e),
+                performance_metrics={"hook_created": False, "subprocess_id": subprocess_id}
+            ).__dict__
 
 
 # Helper functions for easy integration
@@ -663,7 +684,12 @@ def initialize_correction_capture_system() -> Dict[str, Any]:
         
     except Exception as e:
         logger.error(f"Failed to initialize correction capture system: {e}")
-        return {"initialized": False, "error": str(e)}
+        return TaskToolResponse(
+            request_id=f"init_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            success=False,
+            error=str(e),
+            performance_metrics={"initialized": False, "service_enabled": False}
+        ).__dict__
 
 
 if __name__ == "__main__":
