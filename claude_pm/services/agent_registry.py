@@ -1196,6 +1196,22 @@ class AgentRegistry:
         
         return agents
     
+    async def listAgents(self, agent_type: Optional[str] = None, tier: Optional[str] = None) -> List[AgentMetadata]:
+        """
+        List agents with optional filtering (camelCase wrapper for compatibility)
+        
+        This method provides a camelCase interface to maintain compatibility with
+        the CLAUDE.md documentation while preserving the snake_case Python convention.
+        
+        Args:
+            agent_type: Filter by agent type
+            tier: Filter by hierarchy tier
+            
+        Returns:
+            List of matching AgentMetadata
+        """
+        return await self.list_agents(agent_type=agent_type, tier=tier)
+    
     async def get_agent_types(self) -> Set[str]:
         """
         Get all discovered agent types

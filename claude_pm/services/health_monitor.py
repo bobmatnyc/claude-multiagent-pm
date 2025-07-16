@@ -443,30 +443,48 @@ class HealthMonitorService(BaseService):
                 performance_metrics={"enhanced_timestamp": datetime.now().isoformat()}
             ).__dict__
 
-
-# Add check_framework_health method for backward compatibility
-def check_framework_health(self):
-    """Synchronous framework health check for backward compatibility."""
-    try:
-        # Run the async health check method synchronously
-        import asyncio
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+    def check_framework_health(self):
+        """Synchronous framework health check for backward compatibility."""
         try:
-            result = loop.run_until_complete(self._health_check())
-            return result
+            # Run the async health check method synchronously
+            import asyncio
+            
+            # Check if we're already in an event loop
+            try:
+                loop = asyncio.get_running_loop()
+                # We're in an async context, create a new thread
+                import concurrent.futures
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(self._sync_health_check)
+                    return future.result()
+            except RuntimeError:
+                # No event loop, we can create one
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    result = loop.run_until_complete(self._health_check())
+                    return result
+                finally:
+                    loop.close()
+        except Exception as e:
+            if hasattr(self, 'logger'):
+                self.logger.error(f"Framework health check failed: {e}")
+            return {
+                "request_id": f"framework_health_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                "success": False,
+                "error": str(e),
+                "performance_metrics": {"framework_health_error": False}
+            }
+    
+    def _sync_health_check(self):
+        """Helper method for synchronous health check in new event loop."""
+        new_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(new_loop)
+        try:
+            return new_loop.run_until_complete(self._health_check())
         finally:
-            loop.close()
-    except Exception as e:
-        self.logger.error(f"Framework health check failed: {e}")
-        return TaskToolResponse(
-            request_id=f"framework_health_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
-            success=False,
-            error=str(e),
-            performance_metrics={"framework_health_error": False}
-        ).__dict__
+            new_loop.close()
 
-HealthMonitorService.check_framework_health = check_framework_health
 
 # Backward compatibility alias for expected HealthMonitor import
 HealthMonitor = HealthMonitorService

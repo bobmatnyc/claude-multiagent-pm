@@ -59,3 +59,30 @@ def get_specialized_agent_types():
     """
     registry = AgentRegistry()
     return registry.specialized_agent_types
+
+# Add convenience method for synchronous access with camelCase naming
+def listAgents():
+    """
+    Synchronous wrapper for listing all agents (camelCase compatibility)
+    
+    This provides a non-async interface for simple agent listing operations
+    that matches the camelCase naming convention in CLAUDE.md documentation.
+    
+    Returns:
+        Dictionary of agent name -> agent metadata
+    """
+    import asyncio
+    registry = AgentRegistry()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        agents = loop.run_until_complete(registry.discover_agents())
+        return {name: {
+            'type': metadata.type,
+            'path': metadata.path,
+            'tier': metadata.tier,
+            'last_modified': metadata.last_modified,
+            'specializations': metadata.specializations
+        } for name, metadata in agents.items()}
+    finally:
+        loop.close()
