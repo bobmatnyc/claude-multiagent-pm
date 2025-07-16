@@ -4,7 +4,24 @@ All notable changes to the Claude Multi-Agent Project Management Framework will 
 
 ## 0.9.1 (2025-07-16)
 
-### 🧹 PATCH RELEASE: CLI Reliability & User Experience Enhancement
+### 🚀 MINOR RELEASE: Interface Extraction & Model Selection Features
+
+#### 🎯 Claude 4 Model Selection Features (Minor)
+- **CLI Model Flag**: Added `--model` / `-m` flag to main CLI group with comprehensive model selection
+- **Model Aliases**: Smart alias system (sonnet → claude-sonnet-4-20250514, opus → claude-4-opus, haiku → claude-3-haiku-20240307)
+- **Model Resolution System**: Full model ID validation, partial matching, and numbered variants support
+- **Models Command**: New `claude-pm models` command with verbose mode, aliases display, and configuration tables
+- **Environment Integration**: Automatic environment variable setting (`CLAUDE_PM_MODEL_OVERRIDE`)
+- **Backward Compatibility**: Existing ModelSelector code automatically picks up CLI overrides
+
+#### 🏗️ Project-Specific Agent Implementation (Minor)
+- **Codebase Research Agent**: Complete implementation with project-specific agent architecture
+- **Agent Registry Integration**: YAML-based agent configuration with specialization support
+- **Project Agent Directory**: `.claude-pm/agents/project-specific/` structure for custom agents
+- **Agent Testing Framework**: Comprehensive test suite for agent integration validation
+- **Agent Guide Documentation**: Implementation guides and best practices for project agents
+
+#### 🧹 Interface Extraction & Cleanup (Patch)
 
 #### 🔧 CLI Interface Improvements (Patch)
 - **CMPM Executable Cleanup**: Removed broken slash command interface from cmpm executable that referenced missing functions
