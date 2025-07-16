@@ -1,0 +1,125 @@
+# Agent Registry Configuration for Claude PM Framework
+# Project-Specific Agents with Highest Precedence
+
+agents:
+  codebase_research_agent:
+    # Agent Metadata
+    name: "codebase-research-agent"
+    type: "research"
+    tier: "project"
+    priority: 3
+    authority: "codebase_research_highest"
+    
+    # Specializations for Agent Discovery
+    specializations:
+      - "codebase"
+      - "architecture" 
+      - "business_logic"
+      - "framework"
+      - "claude_pm_framework"
+    
+    # Implementation Details
+    class_name: "CodebaseResearchAgent"
+    module_path: "codebase_research_agent"
+    file_path: ".claude-pm/agents/project-specific/codebase_research_agent.py"
+    
+    # Agent Configuration
+    config:
+      framework_version: "0.9.0"
+      max_knowledge_size: "10000"
+      performance_targets:
+        response_time: "< 100ms"
+        accuracy: "> 95%"
+        coverage: "comprehensive"
+      
+      # Embedded Knowledge Configuration
+      knowledge_scope: "complete_framework"
+      knowledge_categories:
+        - "architecture"
+        - "business_logic"
+        - "deployment_patterns"
+        - "performance_optimization"
+        - "critical_file_locations"
+      
+      # Operation Configuration
+      primary_operations:
+        - "answer_codebase_question"
+        - "analyze_architecture"
+        - "explain_business_logic"
+        - "guide_implementation"
+        - "research_patterns"
+    
+    # Agent Capabilities
+    capabilities:
+      - "codebase_question_answering"
+      - "architecture_analysis"
+      - "business_logic_explanation"
+      - "implementation_guidance"
+      - "pattern_research"
+      - "framework_knowledge"
+      - "optimization_recommendations"
+      - "integration_guidance"
+    
+    # Usage Guidelines
+    usage:
+      primary_purpose: "FIRST PLACE TO GO when planning work on Claude PM Framework codebase"
+      delegation_pattern: "PM Agent → Codebase Research Agent for all framework planning questions"
+      authority_scope: "Complete framework knowledge and architectural guidance"
+      
+      when_to_use:
+        - "Planning framework modifications or extensions"
+        - "Understanding framework architecture and patterns"
+        - "Getting implementation guidance for framework tasks"
+        - "Researching framework business logic and workflows"
+        - "Analyzing framework performance and optimization"
+      
+      integration_points:
+        - "Task Tool subprocess creation for codebase research"
+        - "TodoWrite integration with 'Researcher:' prefix"
+        - "Agent hierarchy precedence as project-tier agent"
+        - "SharedPromptCache optimization for repeated queries"
+    
+    # Performance Metrics
+    performance:
+      initialization_target: "< 200ms"
+      query_response_target: "< 100ms"
+      knowledge_coverage: "complete_framework"
+      cache_hit_ratio_target: "> 95%"
+    
+    # Integration Requirements
+    integration:
+      agent_hierarchy: "project_tier_highest_precedence"
+      task_tool_compatible: true
+      todowrite_prefix: "Researcher"
+      shared_prompt_cache: true
+      performance_monitoring: true
+    
+    # Maintenance
+    maintenance:
+      knowledge_updates: "Manual - when framework changes"
+      version_alignment: "Must match framework version"
+      testing_requirements: "Comprehensive async operation testing"
+      backup_strategy: "Source code in project-specific directory"
+
+# Registry Metadata
+registry_metadata:
+  version: "1.0.0"
+  created: "2025-07-15"
+  purpose: "Project-specific agent registry for Claude PM Framework"
+  precedence: "highest (project-tier)"
+  framework_version: "0.9.0"
+  
+  # Discovery Configuration
+  discovery:
+    scan_patterns:
+      - "*.py"
+    specialization_routing: true
+    performance_optimization: true
+    cache_integration: true
+  
+  # Performance Configuration
+  performance:
+    agent_discovery_target: "< 100ms"
+    agent_loading_target: "< 50ms"
+    registry_init_target: "< 200ms"
+    cache_hit_ratio_target: "> 95%"

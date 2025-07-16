@@ -5,7 +5,36 @@
 [![Node.js](https://img.shields.io/badge/node->=16.0.0-green.svg)](https://nodejs.org/)
 [![Python](https://img.shields.io/badge/python->=3.8.0-green.svg)](https://python.org/)
 
-AI project manager that orchestrates specialized agents for your development workflow.
+A comprehensive multi-agent framework for orchestrating AI-driven development workflows across teams and complex projects.
+
+## Framework Positioning
+
+**Claude PM Framework vs claude-flow:**
+
+| Feature | Claude PM Framework | claude-flow |
+|---------|-------------------|-------------|
+| **Target Users** | Teams, enterprises, complex projects | Individuals, small teams, quick tasks |
+| **Setup Complexity** | Comprehensive setup with agent hierarchy | Lightweight, minimal configuration |
+| **Agent System** | 9 core + custom agent creation | Simple task delegation |
+| **Project Scale** | Multi-repository, monorepo, enterprise | Single projects, personal workflows |
+| **Customization** | Full agent customization and precedence | Basic prompt customization |
+| **Integration** | Ticketing systems, CI/CD, deployment | File-based workflows |
+| **Learning Curve** | Moderate (framework concepts) | Minimal (direct AI interaction) |
+| **Best For** | Team coordination, complex workflows | Quick development tasks, prototyping |
+
+**Choose Claude PM Framework when:**
+- Working with teams that need coordination
+- Managing complex multi-component projects
+- Requiring specialized agent expertise (security, architecture, performance)
+- Need integrated ticketing and project management
+- Want consistent development practices across projects
+
+**Choose claude-flow when:**
+- Individual development or small teams
+- Quick tasks and rapid prototyping
+- Minimal setup requirements
+- Simple file-based workflows
+- Direct AI interaction without orchestration overhead
 
 ## Install & Run
 
@@ -15,14 +44,25 @@ cd your-project
 claude-pm
 ```
 
-## What It Does
+## 📖 Getting Started
 
-- **🤖 AI Agent Orchestration**: 9 specialized agents handle documentation, testing, deployment, and quality assurance
-- **📋 Smart Ticketing**: Integrated ticket management with GitHub Issues sync (Linear, JIRA, Asana coming soon)
-- **📝 Intelligent Documentation**: Auto-generates and maintains project documentation
-- **🔍 Code Quality**: Automated testing, linting, and security scanning
-- **🚀 Safe Deployment**: Validates deployments locally and to production
-- **🧠 Memory Integration**: Learns from your patterns and preferences over time
+**New to Claude PM Framework?** Start with our comprehensive user guide:
+
+**👉 [Complete User Guide](./docs/user-guide.md)** - Your essential starting point for understanding and using the framework effectively.
+
+The user guide covers everything from basic concepts to advanced workflows, including practical examples and best practices for orchestrating AI-driven development workflows.
+
+## Key Features (v0.9.0)
+
+- **🎯 Custom Agent Creation**: Create project-specific agents tailored to your domain - architecture, performance, UI/UX, compliance, and more
+- **🤖 Agent Registry & Hierarchical Discovery**: Dynamic agent discovery with project → user → system precedence
+- **⚡ Performance Optimization**: 99.7% improvement through SharedPromptCache integration
+- **📋 AI Trackdown Tools Integration**: GitHub Issues sync with hierarchical Epic → Issue → Task → PR structure
+- **🏗️ Two-Tier Agent Architecture**: Simplified architecture with extensible custom agent support
+- **🔄 Real-Time Agent Modification Tracking**: Monitors agent changes and adapts workflows
+- **📝 Comprehensive Documentation**: Auto-generated changelogs, semantic versioning, and project documentation
+- **🔍 Quality Assurance**: Automated testing, linting, and security scanning across agent workflows
+- **🚀 Deployment Coordination**: Multi-agent deployment validation and management
 
 ## Three Essential Commands
 
@@ -30,27 +70,27 @@ claude-pm
 - **`deploy`** - Local deployment with validation and health checks
 - **`publish`** - Package publication with validation and registry deployment
 
-## Orchestrated Development Best Practices
+## Development Best Practices
 
 ### Model Recommendations
 
-**Claude Sonnet**: Recommended for orchestrated development due to superior speed and efficiency. The framework's multi-agent architecture benefits from Sonnet's rapid task delegation and coordination.
+**Claude Sonnet**: Recommended for multi-agent orchestration due to fast response times and efficient task delegation capabilities. The framework's architecture is optimized for Sonnet's coordination patterns.
 
-**YOLO Mode**: Enable for extended development sessions. Reduces permission bottlenecks and enables fluid multi-agent workflows. Particularly effective for feature development and refactoring sessions.
+**YOLO Mode**: Reduces approval prompts during extended development sessions. Enables continuous multi-agent workflows for feature development and refactoring tasks.
 
 ### Agent-Driven Workflow
 
-**QA Agents**: Automatically catch most coding errors before they reach your codebase. The orchestrated approach means quality validation happens at every step, not just at the end.
+**QA Agents**: Provide automated testing, linting, and quality validation throughout the development process. Integrated validation occurs at multiple workflow points rather than only at project completion.
 
-**Feature Branch Strategy**: Essential for safe orchestrated development:
+**Feature Branch Strategy**: Recommended approach for team development:
 ```bash
 git checkout -b feature/my-feature
 claude-pm  # Work with agents in isolated branch
-# Agents handle testing, documentation, and validation
-push  # Comprehensive quality pipeline before merge
+# Agents coordinate testing, documentation, and validation
+push  # Multi-agent quality pipeline before merge
 ```
 
-**Agent Specialization**: 9 core agent types + 35+ specialized agents focus on their domain expertise:
+**Agent Specialization**: 9 core agent types + custom agent creation enables domain-specific expertise:
 - **Documentation Agent (`Documenter`)**: Pattern analysis and operational understanding
 - **Ticketing Agent (`Ticketer`)**: Universal ticketing with GitHub Issues sync
 - **QA Agent (`QA`)**: Testing, linting, and quality validation
@@ -60,53 +100,53 @@ push  # Comprehensive quality pipeline before merge
 - **Security Agent (`Security`)**: Security analysis and vulnerability assessment
 - **Engineer Agent (`Engineer`)**: Code implementation and development
 - **Data Engineer Agent (`Data Engineer`)**: Data store and AI API management
-- **Plus Specialized Agents**: Architecture, Performance, UI/UX, Integration, and more via AgentRegistry
+- **Plus Custom Agents**: Create specialized agents for Architecture, Performance, UI/UX, Integration, and more via AgentRegistry
 
-### Development Speed Benefits
+### Development Workflow Comparison
 
 **Traditional Development**: Manual testing → Manual documentation → Manual review → Deploy
 
-**Orchestrated Development**: AI agents handle testing, documentation, and review automatically while you focus on core logic and architecture decisions.
+**Orchestrated Development**: Coordinated agents handle testing, documentation, and review processes while developers focus on core logic and architecture decisions. Reduces manual coordination overhead in team environments.
 
 ## Common Use Cases
 
 ### 🌱 New Project Setup
-Starting a fresh project? Get AI-enhanced development from day one:
+Establish framework-based development patterns from project start:
 ```bash
 npm install -g @bobmatnyc/claude-multiagent-pm
 cd my-new-project
 claude-pm
-# AI agents help establish patterns, testing, and documentation
+# Agents assist with establishing patterns, testing setup, and documentation structure
 ```
 
-**💡 Orchestrated Development**: Use feature branches with agent coordination:
+**💡 Orchestrated Development**: Feature branch workflow with agent coordination:
 ```bash
 git checkout -b feature/auth-system
-# Work with specialized agents for each aspect
-# QA Agents handle testing, Documentation Agents handle docs
-push  # Comprehensive validation pipeline
+# Coordinate with specialized agents for different development aspects
+# QA Agents manage testing, Documentation Agents handle documentation
+push  # Multi-agent validation pipeline
 ```
 
-**💡 Recommendation**: Create a design document before major feature development. Example prompt:
+**💡 Recommendation**: Create design documents before major feature development. Example prompt:
 > "Help me design a user authentication system with JWT tokens and role-based access control"
 
 ### 🔧 Refactor Existing Project
-Safely modernize your codebase with AI guidance:
+Apply framework-guided modernization to existing codebases:
 ```bash
-# Install globally (safe for mono-repos)
+# Install globally (compatible with monorepos)
 npm install -g @bobmatnyc/claude-multiagent-pm
 cd existing-project
 claude-pm
-# AI suggests improvements, never applies automatically
-# Your existing scripts remain untouched
+# Agents suggest improvements without automatic application
+# Existing scripts and workflows remain unchanged
 ```
 
-**💡 Orchestrated Refactoring**: Leverage agent specialization for safe, comprehensive refactoring:
+**💡 Orchestrated Refactoring**: Coordinate agent specialization for systematic refactoring:
 ```bash
 git checkout -b refactor/typescript-migration
 # Documentation Agents analyze current patterns
-# QA Agents ensure no regressions during refactoring
-# Version Control Agents manage branch strategy
+# QA Agents validate against regressions during refactoring
+# Version Control Agents coordinate branch strategy
 push  # Validate all changes before merge
 ```
 
@@ -115,21 +155,21 @@ push  # Validate all changes before merge
 > "Refactor files in src/components/ to use TypeScript with strict typing" --> research which best practices should be used with code patterns in those files
 
 ### 📋 Take Over Project
-Understanding inherited or unfamiliar code:
+Understand inherited or unfamiliar codebases through systematic analysis:
 ```bash
 cd inherited-project
 claude-pm
-# AI agents scan and explain codebase patterns
-# Get up to speed faster with intelligent analysis
+# Agents scan and analyze codebase patterns
+# Accelerated project understanding through coordinated analysis
 ```
 
-**💡 Orchestrated Analysis**: Use specialized agents for comprehensive project understanding:
+**💡 Orchestrated Analysis**: Coordinate specialized agents for comprehensive project understanding:
 - **Documentation Agent**: Analyze existing patterns and architectural decisions
 - **QA Agent**: Identify testing gaps and quality issues
-- **Security Agent**: Scan for security vulnerabilities and compliance
-- **Ticketing Agent**: Create organized task breakdown and tracking
+- **Security Agent**: Scan for security vulnerabilities and compliance concerns
+- **Ticketing Agent**: Create organized task breakdown and tracking system
 
-**💡 Recommendation**: Document your understanding in a project analysis design document first. Example prompt:
+**💡 Recommendation**: Document findings in a project analysis design document. Example prompt:
 > "Analyze the current authentication flow and document any security concerns or improvement opportunities"
 
 ### 🏢 Monorepo Best Practices
@@ -169,32 +209,38 @@ push  # Comprehensive validation across all packages
 
 ---
 
-## Custom Agent Development
+## Custom Agent Creation (v0.9.0)
 
-### Creating Custom Agents
+### Extend the Framework with Your Own Agents
 
-The Claude PM Framework supports custom agents through a three-tier hierarchy system with automatic discovery. Create specialized agents for your specific project needs.
+The Claude PM Framework is fully extensible through custom agent creation. Instead of providing a fixed set of agents, the framework enables you to create project-specific agents tailored to your domain, technology stack, and workflow needs.
 
-#### Agent Hierarchy and Precedence
+**Why Create Custom Agents?**
+- **Domain Expertise**: Build agents that understand your specific industry, technology stack, or business processes
+- **Project Specialization**: Create agents for unique project requirements (e.g., compliance, architecture patterns, deployment workflows)
+- **Team Workflows**: Develop agents that match your team's specific development practices and standards
+- **Technology Integration**: Build agents that integrate with your specific tools, APIs, and infrastructure
+- **Override Defaults**: Customize core agent behavior for your project's specific needs
+
+**How It Works:**
+Build specialized agents through a two-tier hierarchy system with dynamic discovery via AgentRegistry and real-time modification tracking. Your custom agents automatically integrate with the framework's orchestration system.
+
+#### Agent Hierarchy and Precedence (Simplified Two-Tier)
 
 **Directory Precedence (Highest to Lowest Priority):**
-1. **Project Agents**: `$PROJECT/.claude-pm/agents/project-specific/`
-   - Project-specific implementations and overrides
-   - Highest precedence for project context
+1. **User Agents**: Directory hierarchy with precedence walking
+   - **Current Directory**: `$PWD/.claude-pm/agents/` (highest precedence)
+   - **Parent Directories**: Walk up tree checking `../.claude-pm/agents/`, `../../.claude-pm/agents/`, etc.
+   - **User Home**: `~/.claude-pm/agents/` (fallback user location)
 
-2. **User Agents**: Directory hierarchy with precedence walking
-   - **Current Directory**: `$PWD/.claude-pm/agents/user-agents/` (highest user precedence)
-   - **Parent Directories**: Walk up tree checking `../user-agents/`, `../../user-agents/`, etc.
-   - **User Home**: `~/.claude-pm/agents/user-defined/` (fallback user location)
-
-3. **System Agents**: `claude_pm/agents/`
+2. **System Agents**: `claude_pm/agents/`
    - Core framework functionality (9 core agent types)
    - Always available as fallback
 
-#### User-Agents Directory Structure
+#### User-Agents Directory Structure (v0.9.0)
 
 ```
-$PWD/.claude-pm/agents/user-agents/
+$PWD/.claude-pm/agents/
 ├── specialized/
 │   ├── performance-agent.md
 │   ├── architecture-agent.md
@@ -293,24 +339,24 @@ TEMPORAL CONTEXT: Today is [date]. Apply date awareness to [agent-specific consi
 [Agent-specific performance requirements or optimizations]
 ```
 
-### Agent Registry Integration
+### Agent Registry Integration (v0.9.0)
 
-**Dynamic Agent Discovery:**
+**Dynamic Agent Discovery with 99.7% Performance Improvement:**
 ```python
 from claude_pm.core.agent_registry import AgentRegistry
 
-# Initialize registry with directory precedence
+# Initialize registry with SharedPromptCache integration
 registry = AgentRegistry()
 
-# List all available agents with metadata
+# List all available agents with metadata (cached for performance)
 agents = registry.listAgents()
 
-# Discover agents by specialization
+# Discover agents by specialization (optimized lookup)
 performance_agents = registry.listAgents(specialization='performance')
 ui_agents = registry.listAgents(specialization='ui_ux')
 architecture_agents = registry.listAgents(specialization='architecture')
 
-# Multi-specialization discovery
+# Multi-specialization discovery with cache optimization
 multi_spec = registry.listAgents(specializations=['integration', 'performance'])
 ```
 
@@ -328,22 +374,22 @@ multi_spec = registry.listAgents(specializations=['integration', 'performance'])
 - Provide comprehensive context filtering
 - Specify expected results and integration patterns
 
-#### Performance Considerations
-- Leverage SharedPromptCache for 99.7% faster loading
-- Design for repeated orchestration optimization
-- Consider agent modification tracking
-- Optimize for cache hit ratios >95%
+#### Performance Considerations (v0.9.0)
+- **SharedPromptCache Integration**: 99.7% faster agent loading through intelligent caching
+- **Real-Time Modification Tracking**: Monitor agent changes and adapt workflows automatically
+- **Optimized Discovery**: <100ms agent discovery for typical projects
+- **Cache Efficiency**: Target >95% cache hit ratios for repeated operations
 
-### Specialized Agent Types Beyond Core 9
+### Custom Agent Types You Can Create
 
-**35+ Agent Types Supported:**
+**Extensible Agent System:**
 - **Core 9**: Documentation, Ticketing, Version Control, QA, Research, Ops, Security, Engineer, Data Engineer
-- **Architecture & Design**: Architecture, UI/UX, Design, Strategy
-- **Development**: Frontend, Backend, Mobile, API, Integration
-- **Operations**: Infrastructure, Deployment, Monitoring, Performance
-- **Business**: PM, Product, Marketing, Business, Customer Success
-- **Compliance**: Legal, Finance, Security, Compliance
-- **Specialized**: Migration, Optimization, Automation, Analytics
+- **Architecture & Design**: Create agents for Architecture, UI/UX, Design, Strategy
+- **Development**: Build agents for Frontend, Backend, Mobile, API, Integration
+- **Operations**: Define agents for Infrastructure, Deployment, Monitoring, Performance
+- **Business**: Develop agents for PM, Product, Marketing, Business, Customer Success
+- **Compliance**: Create agents for Legal, Finance, Security, Compliance
+- **Specialized**: Build agents for Migration, Optimization, Automation, Analytics
 
 ### Registry-Enhanced Delegation Patterns
 
@@ -354,7 +400,52 @@ multi_spec = registry.listAgents(specializations=['integration', 'performance'])
 - **"ui/ux"** → UI/UX Agent via registry discovery (specialization: ['ui_ux', 'design'])
 - **"monitor"** → Monitoring Agent via registry discovery (specialization: ['monitoring', 'analytics'])
 
-### Getting Started with Custom Agents
+### Quick Start: Creating Your First Custom Agent
+
+**5-Minute Setup:**
+```bash
+# 1. Create agent directory in your project
+mkdir -p .claude-pm/agents/specialized/
+
+# 2. Create a custom agent (example: API Testing Agent)
+cat > .claude-pm/agents/specialized/api-testing-agent.md << 'EOF'
+# API Testing Agent
+
+## Agent Profile
+- **Nickname**: APITester
+- **Type**: testing
+- **Specializations**: ['api', 'testing', 'integration']
+- **Authority**: API testing strategies and validation
+
+## When to Use
+- API endpoint testing and validation needed
+- Integration testing between services
+- API documentation and contract testing
+
+## Why This Agent Exists
+- Specialized knowledge of API testing frameworks
+- Understanding of REST/GraphQL testing patterns
+- Focused expertise beyond general QA testing
+
+## Capabilities
+- API endpoint testing with multiple frameworks
+- Contract testing and schema validation
+- Load testing for API performance
+- API documentation generation and validation
+EOF
+
+# 3. Test agent discovery
+python -c "from claude_pm.core.agent_registry import AgentRegistry; registry = AgentRegistry(); print('Custom agent discovered:', 'api-testing-agent' in str(registry.listAgents()))"
+```
+
+**Usage in Workflows:**
+```bash
+claude-pm
+# Your custom APITester agent is now available for delegation
+# Task Tool can automatically discover and use it for API-related tasks
+```
+
+### Complete Setup Guide
 
 1. **Identify Specialization Gap**: Determine what expertise your project needs beyond core agents
 2. **Create Agent Directory**: Set up user-agents directory structure in your project
@@ -362,49 +453,23 @@ multi_spec = registry.listAgents(specializations=['integration', 'performance'])
 4. **Test Agent Discovery**: Verify the agent is discovered by AgentRegistry
 5. **Integrate with Workflows**: Update your orchestration patterns to leverage the custom agent
 
-**Example Custom Agent Creation:**
-```bash
-# Create user-agents directory
-mkdir -p .claude-pm/agents/user-agents/specialized/
+### Custom Agent Benefits Summary
 
-# Create custom performance agent
-cat > .claude-pm/agents/user-agents/specialized/performance-agent.md << 'EOF'
-# Performance Optimization Agent
+**Extensibility Over Fixed Sets**: Rather than providing a predetermined list of agents, the Claude PM Framework empowers you to build exactly what your project needs. Whether you're working with specific cloud platforms, compliance requirements, architectural patterns, or unique deployment workflows, you can create agents that understand your context and provide specialized expertise.
 
-## Agent Profile
-- **Nickname**: Optimizer
-- **Type**: performance
-- **Specializations**: ['performance', 'monitoring', 'optimization']
-- **Authority**: Performance analysis and optimization recommendations
+**Seamless Integration**: Custom agents automatically integrate with the framework's orchestration system, AgentRegistry discovery, and Task Tool delegation patterns. Your custom agents work alongside the 9 core agents to provide comprehensive project coverage.
 
-## When to Use
-- Database query optimization needed
-- Application performance bottlenecks identified
-- Load testing and performance monitoring required
+**Performance Optimized**: Custom agents benefit from the same 99.7% performance improvements through SharedPromptCache integration and real-time modification tracking that core agents enjoy.
 
-## Why This Agent Exists
-- Specialized expertise in performance profiling
-- Deep knowledge of optimization techniques
-- Focused beyond general QA capabilities
-
-## Capabilities
-- Performance analysis and bottleneck identification
-- Database query optimization
-- Load testing coordination
-- Monitoring setup and configuration
-EOF
-
-# Test agent discovery
-python -c "from claude_pm.core.agent_registry import AgentRegistry; registry = AgentRegistry(); print(registry.listAgents(specialization='performance'))"
-```
+---
 
 ## Developer Workflow
 
 ### Orchestrated vs Traditional Development
 
-**Traditional Approach**: You handle all aspects manually - testing, documentation, deployment, quality checks.
+**Traditional Approach**: Manual handling of testing, documentation, deployment, and quality checks.
 
-**Orchestrated Approach**: Specialized AI agents handle their domains while you focus on architecture and core logic:
+**Orchestrated Approach**: Specialized agents coordinate their respective domains while developers focus on architecture and core logic:
 
 ```bash
 # Start feature development
@@ -461,15 +526,15 @@ push  # Multi-agent quality pipeline before commit
 4. **Continuous Validation**: Use `push` command for comprehensive quality checks
 5. **YOLO Mode**: Enable for extended development sessions without interruptions
 
-## Start Small
+## Getting Started
 
-Try it on a simple utility first. The AI agents learn your style and get better over time.
+Begin with smaller projects to understand the framework's coordination patterns before applying to larger codebases.
 
-**Safety First**: AI only suggests, never applies automatically. Start with:
+**Safety Approach**: Agents provide recommendations and coordinate workflows without automatic code application. Recommended starting points:
 - Personal utilities or side projects
-- Non-mission-critical codebases
-- Projects where you can easily review changes
+- Non-critical development environments
+- Projects where changes can be easily reviewed and validated
 
-**Requirements**: Node.js 16+, Python 3.8+
+**Technical Requirements**: Node.js 16+, Python 3.8+
 
-**📚 Complete Documentation**: [Quick Start Guide](./docs/QUICKSTART.md) | [Framework Guide](./framework/CLAUDE.md) | [Custom Agents](./docs/old/user-guide/README.md)
+**📚 Documentation**: [**User Guide**](./docs/user-guide.md) | [Quick Start Guide](./docs/QUICKSTART.md) | [Framework Guide](./framework/CLAUDE.md) | [Custom Agents](./docs/old/user-guide/README.md)

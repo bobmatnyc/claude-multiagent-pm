@@ -1,19 +1,42 @@
 {
+  "version": "0.9.0",
+  "deployedAt": "2025-07-15T14:14:16.004110",
+  "platform": "darwin",
+  "deploymentDir": "/Users/masa/Projects/claude-multiagent-pm",
+  "pythonCmd": "python3",
+  "aiTrackdownPath": "/Users/masa/.claude-pm/bin/aitrackdown",
   "deployment_type": "working_directory",
   "source_installation": "/Users/masa/Projects/claude-multiagent-pm",
-  "deployed_at": "2025-07-15T14:14:16.004110",
-  "framework_version": "014",
+  "framework_version": "0.9.0",
   "working_directory": "/Users/masa/Projects/claude-multiagent-pm",
+  "paths": {
+    "framework": "/Users/masa/Projects/claude-multiagent-pm/claude_pm",
+    "templates": "/Users/masa/Projects/claude-multiagent-pm/templates",
+    "schemas": "/Users/masa/Projects/claude-multiagent-pm/schemas",
+    "tasks": "/Users/masa/Projects/claude-multiagent-pm/tasks",
+    "bin": "/Users/masa/Projects/claude-multiagent-pm/bin",
+    "config": "/Users/masa/Projects/claude-multiagent-pm/.claude-pm",
+    "agents": "/Users/masa/Projects/claude-multiagent-pm/.claude-pm/agents",
+    "health": "/Users/masa/Projects/claude-multiagent-pm/.claude-pm/health",
+    "logs": "/Users/masa/Projects/claude-multiagent-pm/.claude-pm/logs"
+  },
   "features": {
+    "aiTrackdownIntegration": true,
+    "memoryIntegration": true,
+    "multiAgentSupport": true,
+    "portableDeployment": true,
+    "enhancedGlobalInstallation": true,
+    "improvedTemplateDeployment": true,
+    "productionDeploymentFixes": true,
     "agents": true,
     "templates": true,
     "health_monitoring": true,
     "memory_integration": true
   },
-  "paths": {
-    "agents": "/Users/masa/Projects/claude-multiagent-pm/.claude-pm/agents",
-    "templates": "/Users/masa/Projects/claude-multiagent-pm/.claude-pm/templates",
-    "health": "/Users/masa/Projects/claude-multiagent-pm/.claude-pm/health",
-    "logs": "/Users/masa/Projects/claude-multiagent-pm/.claude-pm/logs"
+  "publication": {
+    "npmVersion": "0.9.0",
+    "publishedAt": "2025-07-15T20:15:00.000Z",
+    "registry": "https://registry.npmjs.org/",
+    "packageName": "@bobmatnyc/claude-multiagent-pm"
   }
 }
