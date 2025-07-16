@@ -2,6 +2,23 @@
 
 All notable changes to the Claude Multi-Agent Project Management Framework will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.9.3] - 2025-07-16
+
+### Added
+- Structured CLAUDE.md generation system with `framework_claude_md_generator.py`
+- Auto-versioning for CLAUDE_MD_VERSION serial numbers
+- Programmatic section management for framework deployment stability
+- Validation methods for required sections and template variables
+
+### Changed
+- Updated `parent_directory_manager.py` to use new generator system
+- Framework CLAUDE.md now generated programmatically instead of manual template
+- Improved deployment stability with structured generation
+
+### Documentation
+- Updated framework/CLAUDE.md with prompt improvement notification instructions
+- Added clear ticket delegation requirements (ticket keyword = immediate delegation)
+
 ## [0.9.2] - 2025-07-16
 
 ### Documentation
