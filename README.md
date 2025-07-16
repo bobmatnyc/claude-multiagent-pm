@@ -5,36 +5,42 @@
 [![Node.js](https://img.shields.io/badge/node->=16.0.0-green.svg)](https://nodejs.org/)
 [![Python](https://img.shields.io/badge/python->=3.8.0-green.svg)](https://python.org/)
 
-A comprehensive multi-agent framework for orchestrating AI-driven development workflows across teams and complex projects.
+A lightweight, flexible multi-agent framework for orchestrating AI-driven development workflows with unlimited custom agent creation.
 
 ## Framework Positioning
 
-**Claude PM Framework vs claude-flow:**
+### Claude PM Framework vs claude-flow:
 
 | Feature | Claude PM Framework | claude-flow |
 |---------|-------------------|-------------|
-| **Target Users** | Teams, enterprises, complex projects | Individuals, small teams, quick tasks |
-| **Setup Complexity** | Comprehensive setup with agent hierarchy | Lightweight, minimal configuration |
-| **Agent System** | 9 core + custom agent creation | Simple task delegation |
-| **Project Scale** | Multi-repository, monorepo, enterprise | Single projects, personal workflows |
-| **Customization** | Full agent customization and precedence | Basic prompt customization |
-| **Integration** | Ticketing systems, CI/CD, deployment | File-based workflows |
-| **Learning Curve** | Moderate (framework concepts) | Minimal (direct AI interaction) |
-| **Best For** | Team coordination, complex workflows | Quick development tasks, prototyping |
+| **Target Users** | Individuals, small teams, agile developers | Large enterprises, complex organizations |
+| **Setup Complexity** | Lightweight, quick setup | Comprehensive enterprise configuration |
+| **Agent System** | **Unlimited custom agents** (10 concurrent) + 9 core agents | Fixed enterprise agent set |
+| **Project Scale** | Single projects to small team coordination | Multi-repository, enterprise scale |
+| **Customization** | **User-generated agents**, dynamic discovery | Enterprise templates, rigid structure |
+| **Integration** | Flexible, plugin-based, user-defined | Heavy enterprise tooling required |
+| **Learning Curve** | Minimal - start creating agents immediately | Steep - requires enterprise architecture knowledge |
+| **Agent Training** | **Self-improving agents**, continuous learning, pattern capture | Static agents, manual updates only |
+| **Best For** | **Rapid development**, creative workflows, custom automation | Enterprise governance, compliance, large teams |
 
-**Choose Claude PM Framework when:**
-- Working with teams that need coordination
-- Managing complex multi-component projects
-- Requiring specialized agent expertise (security, architecture, performance)
-- Need integrated ticketing and project management
-- Want consistent development practices across projects
+### Choose Claude PM Framework when:
+- You want to **create your own custom agents** for specific tasks
+- Working solo or in small, agile teams
+- Need **flexibility** to define new agent types on the fly
+- Want **lightweight setup** without enterprise overhead
+- Building creative, adaptive workflows
+- Running up to **10 specialized agents concurrently**
+- Prefer **user-driven customization** over rigid templates
+- Want agents that **learn and improve** from usage patterns
+- Need **self-optimizing workflows** that get better over time
 
-**Choose claude-flow when:**
-- Individual development or small teams
-- Quick tasks and rapid prototyping
-- Minimal setup requirements
-- Simple file-based workflows
-- Direct AI interaction without orchestration overhead
+### Choose claude-flow when:
+- Large enterprise with 50+ developers
+- Need strict governance and compliance
+- Require heavy integration with enterprise tools
+- Have dedicated DevOps teams for setup
+- Need standardized workflows across many teams
+- Compliance and audit trails are critical
 
 ## Install & Run
 
@@ -57,12 +63,38 @@ The user guide covers everything from basic concepts to advanced workflows, incl
 - **🎯 Custom Agent Creation**: Create project-specific agents tailored to your domain - architecture, performance, UI/UX, compliance, and more
 - **🤖 Agent Registry & Hierarchical Discovery**: Dynamic agent discovery with project → user → system precedence
 - **⚡ Performance Optimization**: 99.7% improvement through SharedPromptCache integration
+- **🧠 Agent Training System**: Self-improving agents that learn from experience
 - **📋 AI Trackdown Tools Integration**: GitHub Issues sync with hierarchical Epic → Issue → Task → PR structure
 - **🏗️ Two-Tier Agent Architecture**: Simplified architecture with extensible custom agent support
 - **🔄 Real-Time Agent Modification Tracking**: Monitors agent changes and adapts workflows
 - **📝 Comprehensive Documentation**: Auto-generated changelogs, semantic versioning, and project documentation
 - **🔍 Quality Assurance**: Automated testing, linting, and security scanning across agent workflows
 - **🚀 Deployment Coordination**: Multi-agent deployment validation and management
+
+## 🧠 Agent Training & Continuous Learning
+
+One of Claude PM Framework's most powerful features is its **built-in agent training system** that enables continuous improvement:
+
+### Self-Improving Agents
+- **Automatic Pattern Learning**: Agents learn from successful task completions
+- **Error Correction Capture**: Failed attempts become learning opportunities
+- **Performance Optimization**: Agents optimize their approaches based on metrics
+- **Knowledge Accumulation**: Each agent builds domain-specific expertise over time
+
+### Training Features
+- **Continuous Learning Engine**: Agents improve with every interaction
+- **Pattern Analysis**: Automatic detection of successful patterns
+- **Cross-Agent Learning**: Agents share learnings within their specialization
+- **User Feedback Integration**: Direct corrections improve agent behavior
+- **Performance Metrics**: Track agent improvement over time
+
+### How It Works
+1. **Task Execution**: Agents perform their specialized tasks
+2. **Outcome Analysis**: Success/failure patterns are captured
+3. **Learning Integration**: Patterns update agent knowledge base
+4. **Continuous Improvement**: Next execution benefits from learnings
+
+This means your custom agents get **smarter and more efficient** the more you use them, without manual intervention.
 
 ## Three Essential Commands
 
@@ -106,7 +138,7 @@ push  # Multi-agent quality pipeline before merge
 
 **Traditional Development**: Manual testing → Manual documentation → Manual review → Deploy
 
-**Orchestrated Development**: Coordinated agents handle testing, documentation, and review processes while developers focus on core logic and architecture decisions. Reduces manual coordination overhead in team environments.
+**Orchestrated Development**: Your custom agents handle testing, documentation, and review processes while you focus on creative problem-solving and core logic. Enables rapid prototyping and agile development with minimal setup overhead.
 
 ## Common Use Cases
 
@@ -224,6 +256,12 @@ The Claude PM Framework is fully extensible through custom agent creation. Inste
 
 **How It Works:**
 Build specialized agents through a two-tier hierarchy system with dynamic discovery via AgentRegistry and real-time modification tracking. Your custom agents automatically integrate with the framework's orchestration system.
+
+The framework includes a sophisticated **Agent Training System** that enables:
+- Continuous learning from task outcomes
+- Pattern recognition and optimization
+- Performance improvement over time
+- Knowledge sharing between similar agents
 
 #### Agent Hierarchy and Precedence (Simplified Two-Tier)
 
