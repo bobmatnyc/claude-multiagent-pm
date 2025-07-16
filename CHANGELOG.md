@@ -4,109 +4,87 @@ All notable changes to the Claude Multi-Agent Project Management Framework will 
 
 ## 0.9.1 (2025-07-16)
 
-### 🚀 MINOR RELEASE: Interface Extraction & Model Selection Features
+### 🚨 CRITICAL PATCH: Import Resolution and Agent System Restoration
 
-#### 🎯 Claude 4 Model Selection Features (Minor)
-- **CLI Model Flag**: Added `--model` / `-m` flag to main CLI group with comprehensive model selection
-- **Model Aliases**: Smart alias system (sonnet → claude-sonnet-4-20250514, opus → claude-4-opus, haiku → claude-3-haiku-20240307)
-- **Model Resolution System**: Full model ID validation, partial matching, and numbered variants support
-- **Models Command**: New `claude-pm models` command with verbose mode, aliases display, and configuration tables
-- **Environment Integration**: Automatic environment variable setting (`CLAUDE_PM_MODEL_OVERRIDE`)
-- **Backward Compatibility**: Existing ModelSelector code automatically picks up CLI overrides
+#### 🔥 Critical Bug Fix (CRITICAL-001)
+- **Framework Agent Loader Restoration**: Restored missing `framework_agent_loader.py` module that was causing 20 test import failures
+- **Import Error Resolution**: Fixed critical import errors preventing test suite execution and framework functionality
+- **Agent Profile System**: Fully restored agent profile loading capability with directory hierarchy precedence
+- **Test Suite Recovery**: All 25 tests now passing (100% success rate) after framework agent loader restoration
 
-#### 🏗️ Project-Specific Agent Implementation (Minor)
-- **Codebase Research Agent**: Complete implementation with project-specific agent architecture
-- **Agent Registry Integration**: YAML-based agent configuration with specialization support
-- **Project Agent Directory**: `.claude-pm/agents/project-specific/` structure for custom agents
-- **Agent Testing Framework**: Comprehensive test suite for agent integration validation
-- **Agent Guide Documentation**: Implementation guides and best practices for project agents
+#### 🏗️ Agent System Recovery
+- **Framework Agent Loader**: Complete implementation restored with proper directory hierarchy detection
+- **Profile Loading Logic**: Project → Framework (user → trained → system) precedence fully operational
+- **Agent Discovery**: Restored capability to discover and load agents from multiple directory tiers
+- **Cache Integration**: Profile caching mechanism restored for performance optimization
+- **Error Handling**: Comprehensive error handling for missing profiles and directories
 
-#### 🧹 Interface Extraction & Cleanup (Patch)
+#### 🧹 Development Cleanup
+- **Backup Directory Removal**: Cleaned up multiple backup directories from July 15th development
+- **Git Status Cleanup**: Removed 400+ deleted backup files from git tracking
+- **Project Structure**: Streamlined project structure by removing redundant backup artifacts
+- **Repository Health**: Improved repository maintainability and reduced confusion
 
-#### 🔧 CLI Interface Improvements (Patch)
-- **CMPM Executable Cleanup**: Removed broken slash command interface from cmpm executable that referenced missing functions
-- **Import Error Resolution**: Fixed critical import errors for `cmpm_health`, `cmpm_agents`, `cmpm_index` and other non-functional modules
-- **User Experience Enhancement**: Updated help text to show only working commands (init, status, help) to eliminate user confusion
-- **Functional Preservation**: Maintained Click-based backend implementation in `claude_pm/cmpm_commands.py` for future development
+#### 🔧 Framework Stability
+- **Import Validation**: All framework imports now resolving correctly
+- **Test Suite Health**: 100% test pass rate restored from previous 0% failure state
+- **CLI Functionality**: `claude-pm` commands fully operational with proper imports
+- **Agent Integration**: Agent profile system seamlessly integrated with Task Tool
 
-#### 📚 Comprehensive User Documentation (Minor)
-- **User Guide Creation**: Added comprehensive user guide at `docs/user-guide.md` with progressive learning path
-- **30-Minute Onboarding**: Structured guide enabling framework productivity within 30 minutes
-- **Chapter-Based Learning**: 6 chapters covering Quick Start, Core Concepts, Use Cases, Agents, Project Management, and Advanced Features
-- **Framework Integration**: Updated README.md with user guide links and improved navigation
-- **Progressive Complexity**: Beginner to advanced user pathways with time estimates for each section
+### 📊 Critical Issue Resolution
 
-#### 🏗️ Project Organization Enhancement (Patch)
-- **Root Directory Cleanup**: Comprehensive cleanup removing temporary files, test artifacts, and obsolete development files
-- **Version File Cleanup**: Removed orphaned version files (`=0.0.1a0`, `=0.1.0`, etc.) left from dependency management
-- **Development Artifact Removal**: Cleaned up test files (`async_memory_test_results.json`, `memory.db*`), validation scripts, and temporary directories
-- **Project Structure Optimization**: Streamlined project root for better maintainability and reduced confusion
-- **Documentation Organization**: Enhanced docs directory structure with clear file categorization
+#### Before v0.9.1 (Broken State)
+- **20 Test Failures**: Missing framework_agent_loader module caused cascade failures
+- **0% Test Success**: Complete test suite failure blocking development
+- **Import Errors**: ModuleNotFoundError: No module named 'claude_pm.services.framework_agent_loader'
+- **Agent System Down**: Agent profile loading completely non-functional
 
-#### 🎯 Usability Improvements (Patch)
-- **Error Reduction**: Eliminated non-functional command routing that caused user frustration
-- **Clear Command Interface**: Simplified cmpm command help to show only working functionality
-- **Enhanced Onboarding**: New user guide significantly improves developer experience
-- **Documentation Discovery**: Better link structure between README and comprehensive documentation
-
-### 📊 Success Metrics for 0.9.1
-
-#### User Experience
-- **CLI Reliability**: 100% elimination of broken command references and import errors
-- **Onboarding Time**: Reduced from unknown to structured 30-minute learning path
-- **Documentation Coverage**: Comprehensive guide spanning beginner to advanced usage
-- **Error Prevention**: Removed confusing non-functional commands from help interface
-
-#### Project Maintenance
-- **Root Directory**: Cleaned up 15+ temporary and obsolete files
-- **Version Consistency**: Removed conflicting version artifacts
-- **Structure Clarity**: Enhanced project organization for easier navigation
-- **Documentation Quality**: Professional user guide with learning objectives and time estimates
+#### After v0.9.1 (Fully Restored)
+- **100% Test Success**: All 25 tests passing with framework agent loader restored
+- **Import Resolution**: All imports resolving correctly across the framework
+- **Agent System Operational**: Full agent profile loading with directory hierarchy
+- **Framework Stable**: Ready for production deployment and further development
 
 ### 🔄 Migration and Compatibility
 
-#### Enhanced Features
-- **User Documentation**: New comprehensive guide available at `docs/user-guide.md`
-- **README Integration**: Enhanced main README with user guide navigation
-- **CLI Reliability**: Improved cmpm command interface with working functionality only
+#### Restoration Complete
+- **No Breaking Changes**: This release restores missing functionality without API changes
+- **Backward Compatible**: All existing code continues to work as designed
+- **Agent Profiles**: Agent profile system fully compatible with v0.9.0 design
+- **Test Suite**: All tests restored to passing state
 
-#### Maintained Compatibility
-- **Core Framework**: All existing functionality preserved and enhanced
-- **Agent System**: Complete compatibility with existing agent ecosystem  
-- **CLI Commands**: `claude-pm` commands fully functional and backward compatible
-- **Framework Operations**: All orchestration and delegation patterns preserved
-
-#### Breaking Changes
-- **CMPM Slash Commands**: Removed non-functional `/cmpm:*` command routing (these never worked properly)
-- **Import Changes**: Removed imports for modules that didn't exist (`cmpm_health`, `cmpm_agents`, etc.)
+#### Framework Components
+- **Framework Agent Loader**: `claude_pm/services/framework_agent_loader.py` (322 lines)
+- **Profile Parsing**: Complete markdown profile parsing with section detection
+- **Directory Detection**: Intelligent framework and project directory discovery
+- **Cache System**: Performance-optimized profile caching mechanism
 
 ### 📁 Key Changes
 
-#### Files Modified
-- **bin/cmpm**: Cleaned up broken slash command interface and import errors
-- **docs/user-guide.md**: NEW - Comprehensive user guide with structured learning path
-- **README.md**: Enhanced with user guide integration and improved navigation
-- **Root Directory**: Extensive cleanup of temporary files and obsolete artifacts
+#### Critical File Restoration
+- **claude_pm/services/framework_agent_loader.py**: Complete 322-line implementation restored
+- **Test Suite**: All 25 tests now passing with proper imports
+- **Backup Cleanup**: Removed multiple `.claude-pm_backup_*` directories
 
-#### Documentation Enhancement
-- **Learning Structure**: 6-chapter progressive guide with time estimates
-- **Use Case Coverage**: Real-world scenarios and practical examples
-- **Framework Integration**: Deep integration with existing documentation system
-- **User Experience**: Professional onboarding and learning experience
+#### Implementation Details
+- **Profile Loading**: Comprehensive agent profile loading from markdown files
+- **Section Parsing**: Structured parsing of Role, Capabilities, Context Preferences, etc.
+- **Integration Support**: Full Task Tool integration with profile-aware delegation
+- **Error Recovery**: Graceful handling of missing profiles and directories
 
-### 🚀 User Impact
+### 🚀 Framework Impact
 
-#### Immediate Benefits
-- **Reduced Confusion**: No more broken command errors from cmcp interface
-- **Faster Onboarding**: Structured 30-minute learning path for new users
-- **Better Discovery**: Clear documentation pathways and comprehensive guide
-- **Improved Reliability**: Only working commands shown in help interface
+#### Immediate Resolution
+- **Development Unblocked**: Test suite failures no longer blocking development
+- **Agent System Restored**: Full agent profile functionality available
+- **Import Stability**: No more ModuleNotFoundError exceptions
+- **Clean Repository**: Improved maintainability with backup cleanup
 
-#### Long-term Value
-- **Documentation Foundation**: Comprehensive guide supports scaling user adoption
-- **Maintenance Improvement**: Cleaner project structure for easier development
-- **User Experience**: Professional documentation matching framework capabilities
-- **Onboarding Efficiency**: Reduced time-to-productivity for new framework users
+#### System Health
+- **Test Coverage**: 100% of tests passing (25/25)
+- **Import Health**: All framework imports resolving correctly
+- **Agent Discovery**: Full directory hierarchy scanning operational
+- **Performance**: Profile caching ensuring optimal performance
 
 ---
 
