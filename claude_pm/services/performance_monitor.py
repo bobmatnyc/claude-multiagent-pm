@@ -389,3 +389,33 @@ class PerformanceMonitor(BaseService):
         # This would implement service optimization logic
         self.logger.info("Optimizing service configurations")
         return True
+    
+    async def _initialize(self) -> None:
+        """Initialize the performance monitor service."""
+        try:
+            # Initialize metrics history
+            self.metrics_history = []
+            self.request_count = 0
+            self.error_count = 0
+            self.total_response_time = 0.0
+            self.last_optimization_check = datetime.now()
+            
+            self.logger.info("Performance monitor initialized")
+        except Exception as e:
+            self.logger.error(f"Failed to initialize performance monitor: {e}")
+            raise
+    
+    async def _cleanup(self) -> None:
+        """Cleanup performance monitor resources."""
+        try:
+            # Clear metrics history
+            self.metrics_history.clear()
+            
+            # Reset counters
+            self.request_count = 0
+            self.error_count = 0
+            self.total_response_time = 0.0
+            
+            self.logger.info("Performance monitor cleanup complete")
+        except Exception as e:
+            self.logger.error(f"Error during performance monitor cleanup: {e}")

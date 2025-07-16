@@ -43,6 +43,123 @@ def get_managed_path():
     return Path(config.get("managed_projects_path"))
 
 
+def get_model_override(ctx: click.Context) -> Optional[str]:
+    """
+    Get model override from CLI context if specified.
+    
+    Args:
+        ctx: Click context object
+        
+    Returns:
+        Model ID string if specified via --model flag, None otherwise
+    """
+    if ctx and ctx.obj and "model" in ctx.obj:
+        return ctx.obj["model"]
+    return None
+
+
+def create_model_selector_with_override(ctx: click.Context):
+    """
+    Create ModelSelector with CLI model override if specified.
+    
+    Args:
+        ctx: Click context object
+        
+    Returns:
+        ModelSelector instance configured with CLI override
+    """
+    from ..services.model_selector import ModelSelector
+    import os
+    
+    # Get CLI override
+    model_override = get_model_override(ctx)
+    
+    if model_override:
+        # Set environment variable temporarily for this operation
+        old_value = os.environ.get('CLAUDE_PM_MODEL_OVERRIDE')
+        os.environ['CLAUDE_PM_MODEL_OVERRIDE'] = model_override
+        
+        try:
+            selector = ModelSelector()
+            return selector
+        finally:
+            # Restore original environment
+            if old_value is not None:
+                os.environ['CLAUDE_PM_MODEL_OVERRIDE'] = old_value
+            else:
+                os.environ.pop('CLAUDE_PM_MODEL_OVERRIDE', None)
+    else:
+        return ModelSelector()
+
+
+def create_pm_orchestrator_with_cli_context(ctx: click.Context, working_directory: Optional[Path] = None):
+    """
+    Create PM Orchestrator with CLI model override if specified.
+    
+    Args:
+        ctx: Click context object
+        working_directory: Working directory path
+        
+    Returns:
+        PMOrchestrator instance configured with CLI override
+    """
+    from ..services.pm_orchestrator import PMOrchestrator
+    
+    # Get CLI model override
+    model_override = get_model_override(ctx)
+    
+    # Create model config metadata
+    model_config = {}
+    if model_override:
+        model_config = {
+            "source": "cli_override",
+            "selection_method": "user_specified",
+            "override_active": True,
+            "cli_context": True
+        }
+    
+    return PMOrchestrator(
+        working_directory=working_directory,
+        model_override=model_override,
+        model_config=model_config
+    )
+
+
+def create_task_tool_helper_with_cli_context(ctx: click.Context, working_directory: Optional[Path] = None, config=None):
+    """
+    Create Task Tool Helper with CLI model override if specified.
+    
+    Args:
+        ctx: Click context object
+        working_directory: Working directory path
+        config: TaskToolConfiguration instance
+        
+    Returns:
+        TaskToolHelper instance configured with CLI override
+    """
+    from ..utils.task_tool_helper import TaskToolHelper
+    
+    # Get CLI model override
+    model_override = get_model_override(ctx)
+    
+    # Create model config metadata
+    model_config = {}
+    if model_override:
+        model_config = {
+            "source": "cli_override",
+            "selection_method": "user_specified",
+            "override_active": True,
+            "cli_context": True
+        }
+    
+    return TaskToolHelper(
+        working_directory=working_directory,
+        config=config,
+        model_override=model_override,
+        model_config=model_config
+    )
+
+
 def _get_framework_version():
     """Get framework version from VERSION file."""
     try:
@@ -340,10 +457,19 @@ config_option = click.option("--config", "-c", type=click.Path(exists=True), hel
 dry_run_option = click.option("--dry-run", is_flag=True, help="Show what would be done without executing")
 force_option = click.option("--force", is_flag=True, help="Force operation without confirmation")
 quiet_option = click.option("--quiet", "-q", is_flag=True, help="Suppress non-essential output")
+model_option = click.option("--model", "-m", type=str, help="Override AI model selection")
 
 
 def common_options(func):
     """Decorator to add common CLI options."""
     func = verbose_option(func)
     func = config_option(func)
+    return func
+
+
+def common_options_with_model(func):
+    """Decorator to add common CLI options including model override."""
+    func = verbose_option(func)
+    func = config_option(func)
+    func = model_option(func)
     return func

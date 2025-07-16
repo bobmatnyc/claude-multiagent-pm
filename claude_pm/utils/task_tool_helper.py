@@ -37,6 +37,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 
+# Import TaskToolResponse for standardized response format
+from claude_pm.core.response_types import TaskToolResponse
+
 # Import PM orchestrator
 try:
     from claude_pm.services.pm_orchestrator import PMOrchestrator, AgentDelegationContext, collect_pm_orchestrator_memory
@@ -52,6 +55,32 @@ except ImportError as e:
     
     def collect_pm_orchestrator_memory(**kwargs):
         return {"success": True, "memory_id": "fallback"}
+
+# Import model selection services
+try:
+    from claude_pm.services.agent_registry import AgentRegistry
+    from claude_pm.services.model_selector import ModelSelector, ModelSelectionCriteria
+except ImportError as e:
+    logging.error(f"Failed to import model selection services: {e}")
+    # Fallback implementations
+    class AgentRegistry:
+        def __init__(self):
+            self.available = False
+        
+        async def get_agent_model_configuration(self, agent_name):
+            return None
+    
+    class ModelSelector:
+        def __init__(self):
+            self.available = False
+        
+        def select_model_for_agent(self, agent_type, criteria=None):
+            return ("claude-sonnet-4-20250514", {"fallback": True})
+    
+    class ModelSelectionCriteria:
+        def __init__(self, **kwargs):
+            for key, value in kwargs.items():
+                setattr(self, key, value)
 
 # Import correction capture system
 try:
@@ -87,6 +116,11 @@ class TaskToolConfiguration:
     integration_validation: bool = True
     correction_capture_enabled: bool = True
     correction_capture_auto_hook: bool = True
+    # Model selection configuration
+    enable_model_selection: bool = True
+    auto_model_optimization: bool = True
+    model_override: Optional[str] = None
+    performance_priority: str = "balanced"  # "speed", "quality", "balanced"
 
 
 class TaskToolHelper:
@@ -97,13 +131,40 @@ class TaskToolHelper:
     delegation tracking, and PM orchestrator integration.
     """
     
-    def __init__(self, working_directory: Optional[Path] = None, config: Optional[TaskToolConfiguration] = None):
-        """Initialize Task Tool helper with PM orchestrator integration."""
+    def __init__(self, working_directory: Optional[Path] = None, config: Optional[TaskToolConfiguration] = None, model_override: Optional[str] = None, model_config: Optional[Dict[str, Any]] = None):
+        """Initialize Task Tool helper with PM orchestrator and model selection integration."""
         self.working_directory = Path(working_directory or os.getcwd())
         self.config = config or TaskToolConfiguration()
-        self.pm_orchestrator = PMOrchestrator(self.working_directory)
+        
+        # Use CLI model override if provided
+        if model_override and not self.config.model_override:
+            self.config.model_override = model_override
+        
+        # Initialize PM orchestrator with model override support
+        self.pm_orchestrator = PMOrchestrator(
+            working_directory=self.working_directory,
+            model_override=self.config.model_override,
+            model_config=model_config
+        )
         self._active_subprocesses: Dict[str, Dict[str, Any]] = {}
         self._subprocess_history: List[Dict[str, Any]] = []
+        
+        # Initialize model selection services
+        self.agent_registry = None
+        self.model_selector = None
+        if self.config.enable_model_selection:
+            try:
+                # Use shared prompt cache singleton for consistency
+                from claude_pm.services.shared_prompt_cache import SharedPromptCache
+                shared_cache = SharedPromptCache.get_instance()
+                
+                self.model_selector = ModelSelector()
+                self.agent_registry = AgentRegistry(cache_service=shared_cache, model_selector=self.model_selector)
+                logger.info("Model selection services initialized with shared cache")
+            except Exception as e:
+                logger.error(f"Failed to initialize model selection services: {e}")
+                self.agent_registry = None
+                self.model_selector = None
         
         # Initialize correction capture system
         self.correction_capture = None
@@ -117,7 +178,7 @@ class TaskToolHelper:
         
         logger.info(f"TaskToolHelper initialized with working directory: {self.working_directory}")
     
-    def create_agent_subprocess(
+    async def create_agent_subprocess(
         self,
         agent_type: str,
         task_description: str,
@@ -128,7 +189,9 @@ class TaskToolHelper:
         memory_categories: Optional[List[str]] = None,
         timeout_seconds: Optional[int] = None,
         escalation_triggers: Optional[List[str]] = None,
-        integration_notes: str = ""
+        integration_notes: str = "",
+        model_override: Optional[str] = None,
+        performance_requirements: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Create Task Tool subprocess with automatic prompt generation.
@@ -152,7 +215,15 @@ class TaskToolHelper:
             # Generate subprocess ID
             subprocess_id = f"{agent_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
             
-            # Generate prompt using PM orchestrator
+            # Select optimal model for this agent and task
+            selected_model, model_config = await self._select_model_for_subprocess(
+                agent_type=agent_type,
+                task_description=task_description,
+                model_override=model_override or self.config.model_override,
+                performance_requirements=performance_requirements
+            )
+            
+            # Generate prompt using PM orchestrator with model configuration
             prompt = self.pm_orchestrator.generate_agent_prompt(
                 agent_type=agent_type,
                 task_description=task_description,
@@ -162,7 +233,9 @@ class TaskToolHelper:
                 priority=priority,
                 memory_categories=memory_categories,
                 escalation_triggers=escalation_triggers,
-                integration_notes=integration_notes
+                integration_notes=integration_notes,
+                selected_model=selected_model,
+                model_config=model_config
             )
             
             # Create subprocess information
@@ -180,7 +253,11 @@ class TaskToolHelper:
                 "priority": priority,
                 "memory_categories": memory_categories or [],
                 "escalation_triggers": escalation_triggers or [],
-                "integration_notes": integration_notes
+                "integration_notes": integration_notes,
+                # Model configuration
+                "selected_model": selected_model,
+                "model_config": model_config,
+                "performance_requirements": performance_requirements or {}
             }
             
             # Track active subprocess
@@ -239,11 +316,274 @@ class TaskToolHelper:
                     priority="high"
                 )
             
-            return {
-                "success": False,
+            # Generate request_id for error response
+            error_request_id = f"error_{agent_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            
+            return TaskToolResponse(
+                request_id=error_request_id,
+                success=False,
+                error=str(e),
+                enhanced_prompt=f"**{agent_type.title()}**: {task_description} + MEMORY COLLECTION REQUIRED"
+            )
+    
+    async def _select_model_for_subprocess(
+        self,
+        agent_type: str,
+        task_description: str,
+        model_override: Optional[str] = None,
+        performance_requirements: Optional[Dict[str, Any]] = None
+    ) -> Tuple[str, Dict[str, Any]]:
+        """
+        Select optimal model for subprocess based on agent type and task requirements.
+        
+        Args:
+            agent_type: Type of agent
+            task_description: Description of the task
+            model_override: Optional model override
+            performance_requirements: Optional performance requirements
+            
+        Returns:
+            Tuple of (model_id, model_configuration)
+        """
+        try:
+            # Check for explicit model override
+            if model_override:
+                logger.debug(f"Using model override for {agent_type}: {model_override}")
+                # Validate the override model if possible
+                if self.model_selector:
+                    validation = self.model_selector.validate_model_selection(agent_type, model_override)
+                    if not validation["valid"]:
+                        logger.warning(f"Invalid model override {model_override} for {agent_type}: {validation.get('error')}")
+                        # Fall through to normal selection
+                    else:
+                        return model_override, {
+                            "override": True,
+                            "source": "explicit_override",
+                            "max_tokens": 4096,  # Default
+                            "validation": validation
+                        }
+                else:
+                    return model_override, {
+                        "override": True,
+                        "source": "explicit_override",
+                        "max_tokens": 4096  # Default
+                    }
+            
+            # Try to get agent-specific model configuration from Agent Registry
+            selected_model = None
+            model_config = None
+            
+            if self.agent_registry and self.config.enable_model_selection:
+                try:
+                    # First check if we have a specific agent configuration
+                    agent_model_config = await self.agent_registry.get_agent_model_configuration(agent_type)
+                    if agent_model_config and agent_model_config.get("preferred_model"):
+                        selected_model = agent_model_config["preferred_model"]
+                        model_config = {
+                            "max_tokens": agent_model_config.get("model_config", {}).get("max_tokens", 4096),
+                            "context_window": agent_model_config.get("model_config", {}).get("context_window", 200000),
+                            "capabilities": agent_model_config.get("capabilities", []),
+                            "complexity_level": agent_model_config.get("complexity_level", "medium"),
+                            "specializations": agent_model_config.get("specializations", []),
+                            "selection_method": "agent_registry_configuration",
+                            "source": "agent_specific_config"
+                        }
+                        logger.debug(f"Using Agent Registry configuration for {agent_type}: {selected_model}")
+                except Exception as e:
+                    logger.warning(f"Failed to get agent model configuration from registry: {e}")
+            
+            # If no agent-specific config, use ModelSelector with criteria
+            if not selected_model and self.model_selector and self.config.enable_model_selection:
+                try:
+                    # Create selection criteria from task analysis
+                    criteria = self._create_selection_criteria(
+                        agent_type=agent_type,
+                        task_description=task_description,
+                        performance_requirements=performance_requirements
+                    )
+                    
+                    # Select model using ModelSelector
+                    model_type, model_configuration = self.model_selector.select_model_for_agent(
+                        agent_type, criteria
+                    )
+                    
+                    selected_model = model_type.value
+                    model_config = {
+                        "max_tokens": model_configuration.max_tokens,
+                        "context_window": model_configuration.context_window,
+                        "capabilities": model_configuration.capabilities,
+                        "performance_profile": model_configuration.performance_profile,
+                        "selection_method": "intelligent_selection",
+                        "source": "model_selector",
+                        "criteria": {
+                            "task_complexity": criteria.task_complexity,
+                            "reasoning_depth": criteria.reasoning_depth_required,
+                            "speed_priority": criteria.speed_priority,
+                            "creativity_required": criteria.creativity_required
+                        }
+                    }
+                    logger.debug(f"Using ModelSelector for {agent_type}: {selected_model}")
+                except Exception as e:
+                    logger.warning(f"ModelSelector failed for {agent_type}: {e}")
+            
+            # Fallback to default model mapping if all else fails
+            if not selected_model:
+                default_models = {
+                    'orchestrator': 'claude-4-opus',
+                    'engineer': 'claude-4-opus',
+                    'architecture': 'claude-4-opus',
+                    'documentation': 'claude-sonnet-4-20250514',
+                    'qa': 'claude-sonnet-4-20250514',
+                    'research': 'claude-sonnet-4-20250514',
+                    'ops': 'claude-sonnet-4-20250514',
+                    'security': 'claude-sonnet-4-20250514',
+                    'data_engineer': 'claude-sonnet-4-20250514'
+                }
+                
+                selected_model = default_models.get(agent_type, 'claude-sonnet-4-20250514')
+                model_config = {
+                    "selection_method": "fallback",
+                    "max_tokens": 4096,
+                    "source": "default_mapping"
+                }
+                logger.debug(f"Using fallback model for {agent_type}: {selected_model}")
+            
+            return selected_model, model_config
+            
+        except Exception as e:
+            logger.error(f"Error selecting model for {agent_type}: {e}")
+            # Ultimate fallback
+            return 'claude-sonnet-4-20250514', {
+                "selection_method": "error_fallback",
                 "error": str(e),
-                "fallback_prompt": f"**{agent_type.title()}**: {task_description} + MEMORY COLLECTION REQUIRED"
+                "max_tokens": 4096
             }
+    
+    def _create_selection_criteria(
+        self,
+        agent_type: str,
+        task_description: str,
+        performance_requirements: Optional[Dict[str, Any]] = None
+    ) -> 'ModelSelectionCriteria':
+        """
+        Create model selection criteria from task analysis.
+        
+        Args:
+            agent_type: Type of agent
+            task_description: Task description
+            performance_requirements: Performance requirements
+            
+        Returns:
+            ModelSelectionCriteria instance
+        """
+        # Analyze task complexity
+        task_complexity = self._analyze_task_complexity(task_description)
+        
+        # Determine reasoning depth requirement
+        reasoning_depth = self._determine_reasoning_depth(agent_type, task_description)
+        
+        # Check for creativity requirements
+        creativity_required = self._check_creativity_requirements(task_description)
+        
+        # Check for speed priority
+        speed_priority = self._check_speed_priority(task_description, performance_requirements)
+        
+        # Apply performance priority from config
+        if self.config.performance_priority == "speed":
+            speed_priority = True
+        elif self.config.performance_priority == "quality":
+            if task_complexity == "low":
+                task_complexity = "medium"
+        
+        return ModelSelectionCriteria(
+            agent_type=agent_type,
+            task_complexity=task_complexity,
+            performance_requirements=performance_requirements or {},
+            reasoning_depth_required=reasoning_depth,
+            creativity_required=creativity_required,
+            speed_priority=speed_priority
+        )
+    
+    def _analyze_task_complexity(self, task_description: str) -> str:
+        """Analyze task complexity from description."""
+        if not task_description:
+            return "medium"
+        
+        task_lower = task_description.lower()
+        
+        # Expert complexity indicators
+        expert_indicators = [
+            "architecture", "design pattern", "complex system", "optimization",
+            "machine learning", "ai", "algorithm", "performance tuning"
+        ]
+        if any(indicator in task_lower for indicator in expert_indicators):
+            return "expert"
+        
+        # High complexity indicators
+        high_indicators = [
+            "implement", "develop", "create", "build", "integrate",
+            "analyze", "engineer", "design", "system"
+        ]
+        if any(indicator in task_lower for indicator in high_indicators):
+            return "high"
+        
+        # Low complexity indicators
+        low_indicators = [
+            "list", "show", "display", "format", "simple", "basic", "quick"
+        ]
+        if any(indicator in task_lower for indicator in low_indicators):
+            return "low"
+        
+        return "medium"
+    
+    def _determine_reasoning_depth(self, agent_type: str, task_description: str) -> str:
+        """Determine reasoning depth requirement."""
+        task_lower = task_description.lower()
+        
+        # Agent type-based defaults
+        if agent_type in ['engineer', 'architecture', 'orchestrator']:
+            base_depth = "expert"
+        elif agent_type in ['research', 'analysis', 'qa']:
+            base_depth = "deep"
+        else:
+            base_depth = "standard"
+        
+        # Task-based adjustments
+        if any(word in task_lower for word in ["strategy", "planning", "architecture"]):
+            return "expert"
+        elif any(word in task_lower for word in ["analyze", "investigate", "research"]):
+            return "deep"
+        elif any(word in task_lower for word in ["simple", "basic", "quick"]):
+            return "simple"
+        
+        return base_depth
+    
+    def _check_creativity_requirements(self, task_description: str) -> bool:
+        """Check if task requires creativity."""
+        task_lower = task_description.lower()
+        creativity_indicators = [
+            "creative", "innovative", "design", "brainstorm", "ideate",
+            "generate", "invent", "original", "novel"
+        ]
+        return any(indicator in task_lower for indicator in creativity_indicators)
+    
+    def _check_speed_priority(
+        self, 
+        task_description: str, 
+        performance_requirements: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """Check if speed is a priority."""
+        # Check explicit performance requirements
+        if performance_requirements and performance_requirements.get("speed_priority"):
+            return True
+        
+        # Check task description
+        task_lower = task_description.lower()
+        speed_indicators = [
+            "urgent", "quick", "fast", "immediate", "asap", "rapid",
+            "real-time", "instant", "responsive"
+        ]
+        return any(indicator in task_lower for indicator in speed_indicators)
     
     def _generate_usage_instructions(self, subprocess_info: Dict[str, Any]) -> str:
         """Generate usage instructions for Task Tool subprocess."""
@@ -275,6 +615,11 @@ Integration Notes:
 - Escalation triggers are configured for automatic PM notification
 - Progress updates should be provided regularly
 - Correction capture is {correction_status} for automatic prompt improvement
+
+Model Configuration:
+- Selected Model: {subprocess_info.get('selected_model', 'Not specified')}
+- Model Config: {subprocess_info.get('model_config', {}).get('selection_method', 'default')}
+- Performance Profile: {subprocess_info.get('model_config', {}).get('performance_profile', {}).get('reasoning_quality', 'standard')}
 
 Correction Capture Usage:
 - If the subprocess response needs correction, use the capture_correction method
@@ -415,7 +760,14 @@ Correction Capture Usage:
             }
         except Exception as e:
             logger.error(f"Failed to get correction statistics: {e}")
-            return {"enabled": True, "error": str(e)}
+            # Generate error response with TaskToolResponse for consistency
+            error_request_id = f"stats_error_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            return TaskToolResponse(
+                request_id=error_request_id,
+                success=False,
+                error=str(e),
+                performance_metrics={"enabled": True}
+            )
     
     def list_available_agents(self) -> Dict[str, List[str]]:
         """List all available agents for Task Tool subprocess creation."""
@@ -453,11 +805,29 @@ Correction Capture Usage:
                     "progress_tracking": self.config.progress_tracking,
                     "integration_validation": self.config.integration_validation,
                     "correction_capture_enabled": self.config.correction_capture_enabled,
-                    "correction_capture_auto_hook": self.config.correction_capture_auto_hook
+                    "correction_capture_auto_hook": self.config.correction_capture_auto_hook,
+                    "enable_model_selection": self.config.enable_model_selection,
+                    "auto_model_optimization": self.config.auto_model_optimization,
+                    "model_override": self.config.model_override,
+                    "performance_priority": self.config.performance_priority
                 },
                 "correction_capture": {
                     "enabled": self.correction_capture is not None,
                     "service_active": self.correction_capture.enabled if self.correction_capture else False
+                },
+                "model_selection": {
+                    "enabled": self.model_selector is not None,
+                    "agent_registry_available": self.agent_registry is not None,
+                    "model_selector_available": self.model_selector is not None and hasattr(self.model_selector, 'select_model_for_agent'),
+                    "agent_registry_models": self.agent_registry is not None and hasattr(self.agent_registry, 'get_agent_model_configuration'),
+                    "configuration": {
+                        "enable_model_selection": self.config.enable_model_selection,
+                        "auto_model_optimization": self.config.auto_model_optimization,
+                        "model_override": self.config.model_override,
+                        "performance_priority": self.config.performance_priority
+                    },
+                    "available_models": self.get_available_models() if self.model_selector else [],
+                    "model_mapping_available": bool(self.model_selector and hasattr(self.model_selector, 'get_agent_model_mapping'))
                 }
             }
             
@@ -469,7 +839,7 @@ Correction Capture Usage:
                 "working_directory": str(self.working_directory)
             }
     
-    def create_shortcut_subprocess(self, shortcut_type: str, **kwargs) -> Dict[str, Any]:
+    async def create_shortcut_subprocess(self, shortcut_type: str, **kwargs) -> Dict[str, Any]:
         """Create subprocess for common PM orchestrator shortcuts."""
         shortcut_mapping = {
             "push": {
@@ -499,17 +869,19 @@ Correction Capture Usage:
         }
         
         if shortcut_type not in shortcut_mapping:
-            return {
-                "success": False,
-                "error": f"Unknown shortcut type: {shortcut_type}",
-                "available_shortcuts": list(shortcut_mapping.keys())
-            }
+            error_request_id = f"shortcut_error_{shortcut_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            return TaskToolResponse(
+                request_id=error_request_id,
+                success=False,
+                error=f"Unknown shortcut type: {shortcut_type}",
+                performance_metrics={"available_shortcuts": list(shortcut_mapping.keys())}
+            )
         
         # Merge shortcut defaults with provided kwargs
         shortcut_config = shortcut_mapping[shortcut_type]
         shortcut_config.update(kwargs)
         
-        return self.create_agent_subprocess(**shortcut_config)
+        return await self.create_agent_subprocess(**shortcut_config)
     
     def generate_delegation_summary(self) -> str:
         """Generate a summary of current Task Tool delegations."""
@@ -557,10 +929,214 @@ Recent History:
             summary += "  (No delegation history)\n"
         
         return summary
+    
+    # Model selection and configuration methods
+    
+    async def get_agent_model_recommendation(
+        self, 
+        agent_type: str, 
+        task_description: str = ""
+    ) -> Dict[str, Any]:
+        """
+        Get model recommendation for an agent type and task.
+        
+        Args:
+            agent_type: Type of agent
+            task_description: Optional task description for analysis
+            
+        Returns:
+            Model recommendation with analysis
+        """
+        if not self.model_selector:
+            return {
+                "error": "Model selection not available",
+                "fallback_model": "claude-sonnet-4-20250514"
+            }
+        
+        try:
+            return self.model_selector.get_model_recommendation(agent_type, task_description)
+        except Exception as e:
+            logger.error(f"Error getting model recommendation: {e}")
+            return {
+                "error": str(e),
+                "fallback_model": "claude-sonnet-4-20250514"
+            }
+    
+    async def validate_model_configuration(
+        self, 
+        agent_type: str, 
+        model_id: str
+    ) -> Dict[str, Any]:
+        """
+        Validate model configuration for an agent type.
+        
+        Args:
+            agent_type: Type of agent
+            model_id: Model identifier to validate
+            
+        Returns:
+            Validation results
+        """
+        if not self.model_selector:
+            return {"valid": False, "error": "Model selection not available"}
+        
+        try:
+            return self.model_selector.validate_model_selection(agent_type, model_id)
+        except Exception as e:
+            logger.error(f"Error validating model configuration: {e}")
+            return {"valid": False, "error": str(e)}
+    
+    def get_available_models(self) -> List[str]:
+        """
+        Get list of available models.
+        
+        Returns:
+            List of available model IDs
+        """
+        if not self.model_selector:
+            return ["claude-sonnet-4-20250514", "claude-4-opus"]
+        
+        try:
+            stats = self.model_selector.get_selection_statistics()
+            return list(stats.get("configuration_summary", {}).keys())
+        except Exception as e:
+            logger.error(f"Error getting available models: {e}")
+            return ["claude-sonnet-4-20250514", "claude-4-opus"]
+    
+    def get_model_selection_statistics(self) -> Dict[str, Any]:
+        """
+        Get model selection statistics.
+        
+        Returns:
+            Model selection statistics
+        """
+        if not self.model_selector:
+            return {"error": "Model selection not available"}
+        
+        try:
+            return self.model_selector.get_selection_statistics()
+        except Exception as e:
+            logger.error(f"Error getting model selection statistics: {e}")
+            return {"error": str(e)}
+    
+    async def get_agent_registry_model_stats(self) -> Dict[str, Any]:
+        """
+        Get model usage statistics from agent registry.
+        
+        Returns:
+            Agent registry model statistics
+        """
+        if not self.agent_registry:
+            return {"error": "Agent registry not available"}
+        
+        try:
+            return await self.agent_registry.get_model_usage_statistics()
+        except Exception as e:
+            logger.error(f"Error getting agent registry model stats: {e}")
+            return {"error": str(e)}
+    
+    def configure_model_selection(
+        self,
+        enable_model_selection: Optional[bool] = None,
+        auto_model_optimization: Optional[bool] = None,
+        model_override: Optional[str] = None,
+        performance_priority: Optional[str] = None
+    ) -> bool:
+        """
+        Configure model selection settings.
+        
+        Args:
+            enable_model_selection: Enable/disable model selection
+            auto_model_optimization: Enable/disable auto optimization
+            model_override: Global model override
+            performance_priority: Performance priority setting
+            
+        Returns:
+            True if configuration updated successfully
+        """
+        try:
+            if enable_model_selection is not None:
+                self.config.enable_model_selection = enable_model_selection
+            
+            if auto_model_optimization is not None:
+                self.config.auto_model_optimization = auto_model_optimization
+            
+            if model_override is not None:
+                self.config.model_override = model_override
+            
+            if performance_priority is not None:
+                if performance_priority in ["speed", "quality", "balanced"]:
+                    self.config.performance_priority = performance_priority
+                else:
+                    logger.warning(f"Invalid performance priority: {performance_priority}")
+                    return False
+            
+            logger.info("Model selection configuration updated")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error configuring model selection: {e}")
+            return False
+    
+    async def validate_model_configuration_for_subprocess(
+        self,
+        agent_type: str,
+        model_id: str
+    ) -> Dict[str, Any]:
+        """
+        Validate model configuration for subprocess creation.
+        
+        Args:
+            agent_type: Type of agent
+            model_id: Model identifier to validate
+            
+        Returns:
+            Validation results with recommendations
+        """
+        if not self.model_selector:
+            return {"valid": False, "error": "Model selection service not available"}
+        
+        try:
+            return await self.validate_model_configuration(agent_type, model_id)
+        except Exception as e:
+            logger.error(f"Error validating model configuration: {e}")
+            return {"valid": False, "error": str(e)}
+    
+    async def get_optimal_model_for_subprocess(
+        self,
+        agent_type: str,
+        task_description: str,
+        performance_requirements: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Get optimal model recommendation for subprocess creation.
+        
+        Args:
+            agent_type: Type of agent
+            task_description: Description of the task
+            performance_requirements: Performance requirements
+            
+        Returns:
+            Model recommendation with configuration
+        """
+        if not self.model_selector:
+            return {
+                "error": "Model selection service not available",
+                "fallback_model": "claude-3-5-sonnet-20241022"
+            }
+        
+        try:
+            return await self.get_agent_model_recommendation(agent_type, task_description)
+        except Exception as e:
+            logger.error(f"Error getting optimal model: {e}")
+            return {
+                "error": str(e),
+                "fallback_model": "claude-sonnet-4-20250514"
+            }
 
 
 # Helper functions for easy integration
-def quick_create_subprocess(
+async def quick_create_subprocess(
     agent_type: str,
     task_description: str,
     requirements: Optional[List[str]] = None,
@@ -581,7 +1157,7 @@ def quick_create_subprocess(
         Subprocess creation result with generated prompt
     """
     helper = TaskToolHelper(working_directory)
-    return helper.create_agent_subprocess(
+    return await helper.create_agent_subprocess(
         agent_type=agent_type,
         task_description=task_description,
         requirements=requirements,
@@ -589,7 +1165,7 @@ def quick_create_subprocess(
     )
 
 
-def create_pm_shortcuts() -> Dict[str, Dict[str, Any]]:
+async def create_pm_shortcuts() -> Dict[str, Dict[str, Any]]:
     """Create all PM orchestrator shortcuts as Task Tool subprocesses."""
     helper = TaskToolHelper()
     
@@ -597,7 +1173,7 @@ def create_pm_shortcuts() -> Dict[str, Dict[str, Any]]:
     shortcut_types = ["push", "deploy", "test", "publish"]
     
     for shortcut_type in shortcut_types:
-        shortcuts[shortcut_type] = helper.create_shortcut_subprocess(shortcut_type)
+        shortcuts[shortcut_type] = await helper.create_shortcut_subprocess(shortcut_type)
     
     return shortcuts
 

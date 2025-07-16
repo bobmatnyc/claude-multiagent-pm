@@ -15,9 +15,119 @@ from rich.console import Console
 from .cli_utils import (
     _display_directory_context,
 )
+from ..services.model_selector import ModelType
 
 console = Console()
 logger = logging.getLogger(__name__)
+
+
+def _resolve_model_selection(model_input: str) -> Optional[str]:
+    """
+    Resolve model selection from user input to valid ModelType.
+    
+    Supports both full model IDs and friendly aliases:
+    - 'sonnet' -> 'claude-sonnet-4-20250514'
+    - 'opus' -> 'claude-4-opus'
+    - 'haiku' -> 'claude-3-haiku-20240307'
+    - Direct model IDs are validated against ModelType enum
+    
+    Args:
+        model_input: User input for model selection
+        
+    Returns:
+        Valid model ID string or None if invalid
+    """
+    if not model_input:
+        return None
+    
+    # Define friendly aliases
+    model_aliases = {
+        'sonnet': ModelType.SONNET_4.value,
+        'sonnet4': ModelType.SONNET_4.value,
+        'opus': ModelType.OPUS_4.value,
+        'opus4': ModelType.OPUS_4.value,
+        'haiku': ModelType.HAIKU.value,
+        'sonnet3': ModelType.SONNET.value,
+        'opus3': ModelType.OPUS.value,
+    }
+    
+    # Normalize input
+    normalized_input = model_input.lower().strip()
+    
+    # CRITICAL FIX: Check if normalized input is empty after stripping
+    # This prevents whitespace-only inputs (spaces, tabs, newlines) from 
+    # matching against all model strings in the partial match logic
+    if not normalized_input:
+        return None
+    
+    # Check aliases first
+    if normalized_input in model_aliases:
+        return model_aliases[normalized_input]
+    
+    # Check if it's a valid ModelType directly
+    try:
+        for model_type in ModelType:
+            if model_type.value.lower() == normalized_input:
+                return model_type.value
+    except Exception:
+        pass
+    
+    # Check partial matches for convenience
+    for model_type in ModelType:
+        if normalized_input in model_type.value.lower():
+            return model_type.value
+    
+    return None
+
+
+def get_available_models() -> Dict[str, str]:
+    """
+    Get available models and their aliases for help text and validation.
+    
+    Returns:
+        Dictionary mapping aliases to full model IDs
+    """
+    return {
+        'sonnet': ModelType.SONNET_4.value,
+        'sonnet4': ModelType.SONNET_4.value,
+        'opus': ModelType.OPUS_4.value,
+        'opus4': ModelType.OPUS_4.value,
+        'haiku': ModelType.HAIKU.value,
+        'sonnet3': ModelType.SONNET.value,
+        'opus3': ModelType.OPUS.value,
+    }
+
+
+def format_model_help() -> str:
+    """Format help text for model selection flag."""
+    aliases = get_available_models()
+    help_lines = ["Available models and aliases:"]
+    
+    # Group by model type
+    claude4_models = []
+    claude3_models = []
+    
+    for alias, model_id in aliases.items():
+        if "claude-4" in model_id or "claude-sonnet-4" in model_id:
+            claude4_models.append(f"  {alias} -> {model_id}")
+        else:
+            claude3_models.append(f"  {alias} -> {model_id}")
+    
+    if claude4_models:
+        help_lines.extend(["", "Claude 4 models (recommended):"] + claude4_models)
+    
+    if claude3_models:
+        help_lines.extend(["", "Claude 3 models (legacy):"] + claude3_models)
+    
+    help_lines.extend([
+        "",
+        "Examples:",
+        "  --model sonnet      # Use Claude Sonnet 4 (default for most agents)",
+        "  --model opus        # Use Claude 4 Opus (for complex tasks)",
+        "  --model haiku       # Use Claude 3 Haiku (for simple tasks)"
+    ])
+    
+    return "\n".join(help_lines)
 
 
 class ModularCLI:
@@ -34,8 +144,10 @@ class ModularCLI:
         @click.version_option(prog_name="Claude Multi-Agent PM Framework")
         @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
         @click.option("--config", "-c", type=click.Path(exists=True), help="Configuration file path")
+        @click.option("--model", "-m", type=str, 
+                     help="Override AI model selection. Use 'sonnet' (Claude Sonnet 4), 'opus' (Claude 4 Opus), 'haiku' (Claude 3 Haiku), or full model ID.")
         @click.pass_context
-        def cli(ctx, verbose, config):
+        def cli(ctx, verbose, config, model):
             """
             Claude Multi-Agent Project Management Framework - Multi-Agent Orchestration for AI-driven Project Management
 
@@ -45,7 +157,18 @@ class ModularCLI:
             ctx.ensure_object(dict)
             ctx.obj["verbose"] = verbose
             ctx.obj["config"] = config
-
+            
+            # Process and validate model selection
+            resolved_model = None
+            if model:
+                resolved_model = _resolve_model_selection(model)
+                if resolved_model:
+                    ctx.obj["model"] = resolved_model
+                    if verbose:
+                        console.print(f"[dim]Using model: {resolved_model}[/dim]")
+                else:
+                    console.print(f"[red]Warning: Invalid model '{model}'. Using default model selection.[/red]")
+            
             # FIXED: Display deployment and working directories on every call
             _display_directory_context()
 
@@ -173,5 +296,8 @@ __all__ = [
     'get_cli', 
     'create_modular_cli',
     'register_external_commands',
-    'main'
+    'main',
+    'get_available_models',
+    'format_model_help',
+    '_resolve_model_selection'
 ]

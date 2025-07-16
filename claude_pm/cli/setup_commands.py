@@ -373,9 +373,8 @@ def register_setup_commands(cli_group):
     )
     @click.option("--export", type=click.Choice(["json", "yaml"]), help="Export health data")
     @click.option("--report", is_flag=True, help="Generate detailed health report")
-    @click.option("--verbose", "-v", is_flag=True, help="Verbose output with full diagnostics")
     @click.pass_context
-    def health(ctx, detailed, service, export, report, verbose):
+    def health(ctx, detailed, service, export, report):
         """🏥 Unified Health Dashboard - Central monitoring for all framework subsystems (M01-044)."""
 
         async def run():
@@ -383,6 +382,9 @@ def register_setup_commands(cli_group):
             # project_indexer removed - use native project discovery instead
 
             start_time = time.time()
+            
+            # Get verbose from parent context
+            verbose = ctx.obj.get("verbose", False) if ctx.obj else False
 
             try:
                 console.print("[bold blue]🟢 Claude PM Framework Health Dashboard[/bold blue]")

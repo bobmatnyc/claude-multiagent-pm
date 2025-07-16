@@ -1,7 +1,0 @@
-Requirement already satisfied: tiktoken in /opt/homebrew/lib/python3.13/site-packages (0.9.0)
-Requirement already satisfied: regex>=2022.1.18 in /opt/homebrew/lib/python3.13/site-packages (from tiktoken) (2024.11.6)
-Requirement already satisfied: requests>=2.26.0 in /opt/homebrew/lib/python3.13/site-packages (from tiktoken) (2.32.4)
-Requirement already satisfied: charset_normalizer<4,>=2 in /opt/homebrew/lib/python3.13/site-packages (from requests>=2.26.0->tiktoken) (3.4.2)
-Requirement already satisfied: idna<4,>=2.5 in /opt/homebrew/lib/python3.13/site-packages (from requests>=2.26.0->tiktoken) (3.10)
-Requirement already satisfied: urllib3<3,>=1.21.1 in /opt/homebrew/lib/python3.13/site-packages (from requests>=2.26.0->tiktoken) (2.4.0)
-Requirement already satisfied: certifi>=2017.4.17 in /opt/homebrew/lib/python3.13/site-packages (from requests>=2.26.0->tiktoken) (2025.6.15)

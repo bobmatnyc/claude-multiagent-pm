@@ -35,6 +35,7 @@ from enum import Enum
 
 from ..core.base_service import BaseService
 from ..core.logging_config import setup_logging
+from ..core.response_types import TaskToolResponse
 
 # Import all CMPM services
 # Template Manager removed - use Claude Code Task Tool instead
@@ -294,48 +295,11 @@ class CMPMIntegrationService(BaseService):
         """Initialize the Template Manager service - SERVICE REMOVED."""
         self.logger.debug("Template Manager removed - use Claude Code Task Tool instead")
         return
-            await self.template_manager._initialize()
-
-            self.services["template_manager"].status = CMPMServiceStatus.OPERATIONAL
-            self.services["template_manager"].initialized = True
-            self.services["template_manager"].last_health_check = datetime.now()
-
-            # Get template count for metadata
-            templates = await self.template_manager.list_templates()
-            self.services["template_manager"].metadata = {
-                "template_count": len(templates),
-                "deployment_integration": True,
-            }
-
-            self.logger.info("Template Manager initialized successfully")
-
-        except Exception as e:
-            self.logger.error(f"Failed to initialize Template Manager: {e}")
-            self.services["template_manager"].status = CMPMServiceStatus.ERROR
-            self.services["template_manager"].error_message = str(e)
 
     async def _initialize_dependency_manager(self):
         """Initialize the Dependency Manager service - SERVICE REMOVED."""
         self.logger.debug("Dependency Manager removed - use Claude Code Task Tool instead")
         return
-
-            self.services["dependency_manager"].status = CMPMServiceStatus.OPERATIONAL
-            self.services["dependency_manager"].initialized = True
-            self.services["dependency_manager"].last_health_check = datetime.now()
-
-            # Get dependency count for metadata
-            dependencies = self.dependency_manager.get_dependencies()
-            self.services["dependency_manager"].metadata = {
-                "dependencies_tracked": len(dependencies),
-                "deployment_integration": True,
-            }
-
-            self.logger.info("Dependency Manager initialized successfully")
-
-        except Exception as e:
-            self.logger.error(f"Failed to initialize Dependency Manager: {e}")
-            self.services["dependency_manager"].status = CMPMServiceStatus.ERROR
-            self.services["dependency_manager"].error_message = str(e)
 
     async def _initialize_parent_directory_manager(self):
         """Initialize the Parent Directory Manager service."""
@@ -572,7 +536,12 @@ class CMPMIntegrationService(BaseService):
     async def get_service_diagnostics(self, service_id: str) -> Dict[str, Any]:
         """Get detailed diagnostics for a specific service."""
         if service_id not in self.services:
-            return {"error": f"Service {service_id} not found"}
+            return TaskToolResponse(
+                request_id=f"diagnostics_{service_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                success=False,
+                error=f"Service {service_id} not found",
+                performance_metrics={"service_found": False}
+            ).__dict__
 
         service_info = self.services[service_id]
         diagnostics = {
@@ -702,7 +671,12 @@ class CMPMIntegrationService(BaseService):
                 "status": "operational",
             }
         except Exception as e:
-            return {"error": str(e), "initialized": False, "status": "error"}
+            return TaskToolResponse(
+                request_id=f"template_status_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                success=False,
+                error=str(e),
+                performance_metrics={"initialized": False, "status": "error"}
+            ).__dict__
 
     async def handle_cli_dependency_status(self) -> Dict[str, Any]:
         """Handle CLI dependency status command."""
@@ -729,7 +703,12 @@ class CMPMIntegrationService(BaseService):
                 "status": "operational",
             }
         except Exception as e:
-            return {"error": str(e), "initialized": False, "status": "error"}
+            return TaskToolResponse(
+                request_id=f"dependency_status_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                success=False,
+                error=str(e),
+                performance_metrics={"initialized": False, "status": "error"}
+            ).__dict__
 
     async def handle_cli_parent_directory_status(self) -> Dict[str, Any]:
         """Handle CLI parent directory status command."""
@@ -754,4 +733,9 @@ class CMPMIntegrationService(BaseService):
                 "status": "operational",
             }
         except Exception as e:
-            return {"error": str(e), "initialized": False, "status": "error"}
+            return TaskToolResponse(
+                request_id=f"parent_directory_status_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                success=False,
+                error=str(e),
+                performance_metrics={"initialized": False, "status": "error"}
+            ).__dict__

@@ -148,7 +148,6 @@ def register_system_commands(cli_group):
     @click.option("--coverage", is_flag=True, help="Generate coverage report")
     @click.option("--watch", is_flag=True, help="Watch for changes and re-run tests")
     @click.option("--pattern", help="Run tests matching pattern")
-    @click.option("--verbose", "-v", is_flag=True, help="Verbose output")
     @click.option("--quiet", "-q", is_flag=True, help="Quiet output")
     @click.option("--failfast", is_flag=True, help="Stop on first failure")
     @click.option("--html", is_flag=True, help="Generate HTML coverage report")
@@ -157,13 +156,14 @@ def register_system_commands(cli_group):
     @click.option("--parallel", is_flag=True, help="Run tests in parallel")
     @click.option("--workers", type=int, default=4, help="Number of parallel workers")
     @click.argument("pytest_args", nargs=-1, type=click.UNPROCESSED)
+    @click.pass_context
     def test(
+        ctx,
         unit,
         integration,
         coverage,
         watch,
         pattern,
-        verbose,
         quiet,
         failfast,
         html,
@@ -210,7 +210,8 @@ def register_system_commands(cli_group):
             if xml:
                 cmd.extend(["--cov-report=xml"])
 
-        # Add output options
+        # Add output options (get verbose from parent context)
+        verbose = ctx.obj.get("verbose", False) if ctx.obj else False
         if verbose:
             cmd.append("--verbose")
         elif quiet:
@@ -702,5 +703,107 @@ claude-pm test → Run tests with pytest integration
             console.print(f"  VIRTUAL_ENV: {os.environ.get('VIRTUAL_ENV', 'not set')}")
             console.print(f"  PATH: {os.environ.get('PATH', 'not set')[:100]}...")
             console.print("")
+
+    # Model Management Commands
+    @cli_group.command()
+    @click.option("--show-details", is_flag=True, help="Show detailed model information")
+    @click.option("--aliases", is_flag=True, help="Show model aliases and mappings")
+    @click.pass_context
+    def models(ctx, show_details, aliases):
+        """Show available AI models and their configurations."""
+        from ..services.model_selector import ModelSelector, ModelType
+        from . import get_available_models, format_model_help
+        
+        console.print("[bold blue]🤖 Available AI Models[/bold blue]\n")
+        
+        if aliases:
+            # Show alias mappings
+            available_models = get_available_models()
+            
+            table = Table(title="Model Aliases")
+            table.add_column("Alias", style="cyan")
+            table.add_column("Model ID", style="green")
+            table.add_column("Type", style="yellow")
+            
+            for alias, model_id in available_models.items():
+                model_type = "Claude 4" if ("claude-4" in model_id or "claude-sonnet-4" in model_id) else "Claude 3"
+                table.add_row(alias, model_id, model_type)
+            
+            console.print(table)
+            console.print()
+        
+        # Get verbose from parent context or use show_details flag
+        verbose = ctx.obj.get("verbose", False) if ctx.obj else False
+        
+        if show_details:
+            # Show detailed model information
+            selector = ModelSelector()
+            
+            table = Table(title="Model Configurations")
+            table.add_column("Model", style="cyan")
+            table.add_column("Type", style="green")
+            table.add_column("Max Tokens", style="yellow")
+            table.add_column("Context Window", style="blue")
+            table.add_column("Cost Tier", style="magenta")
+            table.add_column("Speed Tier", style="red")
+            table.add_column("Reasoning", style="bright_green")
+            
+            for model_type in ModelType:
+                config = selector.model_configurations[model_type]
+                table.add_row(
+                    model_type.value,
+                    model_type.name,
+                    str(config.max_tokens),
+                    str(config.context_window),
+                    config.cost_tier,
+                    config.speed_tier,
+                    config.reasoning_tier
+                )
+            
+            console.print(table)
+            console.print()
+            
+            # Show agent mappings
+            agent_mapping = selector.get_agent_model_mapping()
+            
+            table = Table(title="Agent Model Assignments")
+            table.add_column("Agent Type", style="cyan")
+            table.add_column("Assigned Model", style="green")
+            
+            # Group by model for better visualization
+            model_groups = {}
+            for agent_type, model_id in agent_mapping.items():
+                if model_id not in model_groups:
+                    model_groups[model_id] = []
+                model_groups[model_id].append(agent_type)
+            
+            for model_id, agent_types in model_groups.items():
+                for i, agent_type in enumerate(agent_types):
+                    display_model = model_id if i == 0 else ""
+                    table.add_row(agent_type, display_model)
+                if len(agent_types) > 1:
+                    table.add_row("", "")  # Add separator
+            
+            console.print(table)
+            console.print()
+        
+        # Show current override if set
+        from .cli_utils import get_model_override
+        current_override = get_model_override(ctx)
+        if current_override:
+            console.print(f"[bold yellow]Current Override:[/bold yellow] {current_override}")
+            console.print()
+        
+        # Show usage examples
+        console.print("[bold]Usage Examples:[/bold]")
+        console.print("  claude-pm --model sonnet status     # Use Sonnet 4 for status command")
+        console.print("  claude-pm --model opus test         # Use Opus 4 for test command")
+        console.print("  claude-pm models --show-details     # Show detailed model info")
+        console.print("  claude-pm models --aliases          # Show model aliases")
+        console.print()
+        
+        console.print("[bold]Environment Override Examples:[/bold]")
+        console.print("  export CLAUDE_PM_MODEL_OVERRIDE=claude-4-opus")
+        console.print("  export CLAUDE_PM_MODEL_ENGINEER=claude-sonnet-4-20250514")
 
     return cli_group

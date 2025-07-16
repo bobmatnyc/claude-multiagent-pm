@@ -17,12 +17,13 @@ from datetime import datetime
 import logging
 
 from claude_pm.services.shared_prompt_cache import SharedPromptCache
+from claude_pm.services.model_selector import ModelSelector, ModelSelectionCriteria
 
 logger = logging.getLogger(__name__)
 
 @dataclass
 class AgentMetadata:
-    """Enhanced agent metadata structure for registry entries with specialization support"""
+    """Enhanced agent metadata structure for registry entries with specialization and model support"""
     name: str
     type: str
     path: str
@@ -44,6 +45,9 @@ class AgentMetadata:
     composite_agents: List[str] = None
     validation_score: float = 0.0
     complexity_level: str = 'basic'  # 'basic', 'intermediate', 'advanced', 'expert'
+    # Model configuration fields
+    preferred_model: Optional[str] = None
+    model_config: Optional[Dict[str, Any]] = None
     
     def __post_init__(self):
         if self.capabilities is None:
@@ -60,6 +64,8 @@ class AgentMetadata:
             self.hybrid_types = []
         if self.composite_agents is None:
             self.composite_agents = []
+        if self.model_config is None:
+            self.model_config = {}
 
 class AgentRegistry:
     """
@@ -74,9 +80,10 @@ class AgentRegistry:
     - Agent validation and error handling
     """
     
-    def __init__(self, cache_service: Optional[SharedPromptCache] = None):
-        """Initialize AgentRegistry with optional cache service"""
+    def __init__(self, cache_service: Optional[SharedPromptCache] = None, model_selector: Optional[ModelSelector] = None):
+        """Initialize AgentRegistry with optional cache service and model selector"""
         self.cache_service = cache_service or SharedPromptCache()
+        self.model_selector = model_selector or ModelSelector()
         self.registry: Dict[str, AgentMetadata] = {}
         self.discovery_paths: List[Path] = []
         self.core_agent_types = {
@@ -253,6 +260,9 @@ class AgentRegistry:
             is_hybrid, hybrid_types = self._detect_hybrid_agent(agent_type, specializations)
             complexity_level = self._assess_complexity_level(capabilities, specializations)
             
+            # Extract model configuration from agent file
+            preferred_model, model_config = await self._extract_model_configuration(agent_file, agent_type, complexity_level)
+            
             return AgentMetadata(
                 name=agent_name,
                 type=agent_type,
@@ -270,7 +280,9 @@ class AgentRegistry:
                 roles=roles,
                 is_hybrid=is_hybrid,
                 hybrid_types=hybrid_types,
-                complexity_level=complexity_level
+                complexity_level=complexity_level,
+                preferred_model=preferred_model,
+                model_config=model_config
             )
             
         except Exception as e:
@@ -490,6 +502,207 @@ class AgentRegistry:
                     break
         
         return capabilities
+    
+    async def _extract_model_configuration(
+        self, 
+        agent_file: Path, 
+        agent_type: str, 
+        complexity_level: str
+    ) -> Tuple[Optional[str], Dict[str, Any]]:
+        """
+        Extract model configuration from agent file and apply intelligent selection.
+        
+        Args:
+            agent_file: Path to agent file
+            agent_type: Agent type classification
+            complexity_level: Assessed complexity level
+            
+        Returns:
+            Tuple of (preferred_model, model_config)
+        """
+        try:
+            # Check for explicit model configuration in agent file
+            content = agent_file.read_text(encoding='utf-8')
+            preferred_model = None
+            model_config = {}
+            
+            # Parse explicit model preferences from agent file
+            explicit_model = self._parse_explicit_model_config(content)
+            if explicit_model:
+                preferred_model = explicit_model["model_id"]
+                model_config = explicit_model.get("config", {})
+                logger.debug(f"Found explicit model configuration in {agent_file.name}: {preferred_model}")
+            
+            # If no explicit configuration, use intelligent selection
+            if not preferred_model:
+                # Create selection criteria based on agent analysis
+                criteria = ModelSelectionCriteria(
+                    agent_type=agent_type,
+                    task_complexity=complexity_level,
+                    performance_requirements=self._analyze_performance_requirements(content),
+                    reasoning_depth_required=self._analyze_reasoning_requirements(content, agent_type),
+                    creativity_required=self._analyze_creativity_requirements(content),
+                    speed_priority=self._analyze_speed_requirements(content)
+                )
+                
+                # Select model using ModelSelector
+                model_type, model_configuration = self.model_selector.select_model_for_agent(
+                    agent_type, criteria
+                )
+                
+                preferred_model = model_type.value
+                model_config = {
+                    "max_tokens": model_configuration.max_tokens,
+                    "context_window": model_configuration.context_window,
+                    "selection_criteria": {
+                        "task_complexity": criteria.task_complexity,
+                        "reasoning_depth": criteria.reasoning_depth_required,
+                        "speed_priority": criteria.speed_priority,
+                        "creativity_required": criteria.creativity_required
+                    },
+                    "capabilities": model_configuration.capabilities,
+                    "performance_profile": model_configuration.performance_profile,
+                    "auto_selected": True
+                }
+                
+                logger.debug(f"Auto-selected model for {agent_type}: {preferred_model}")
+            
+            return preferred_model, model_config
+            
+        except Exception as e:
+            logger.warning(f"Error extracting model configuration from {agent_file}: {e}")
+            # Fallback to default model selection
+            try:
+                model_type, model_configuration = self.model_selector.select_model_for_agent(agent_type)
+                return model_type.value, {
+                    "max_tokens": model_configuration.max_tokens,
+                    "fallback_selection": True,
+                    "error": str(e)
+                }
+            except Exception as fallback_error:
+                logger.error(f"Fallback model selection failed: {fallback_error}")
+                return None, {"error": str(e), "fallback_error": str(fallback_error)}
+    
+    def _parse_explicit_model_config(self, content: str) -> Optional[Dict[str, Any]]:
+        """
+        Parse explicit model configuration from agent file content.
+        
+        Looks for patterns like:
+        - MODEL_PREFERENCE = "claude-3-opus-20240229"
+        - PREFERRED_MODEL = "claude-3-5-sonnet-20241022"
+        - model_config = {"model": "claude-3-opus-20240229", "max_tokens": 4096}
+        
+        Args:
+            content: Agent file content
+            
+        Returns:
+            Dictionary with model configuration or None
+        """
+        import re
+        
+        # Pattern for direct model assignment
+        model_patterns = [
+            r'MODEL_PREFERENCE\s*=\s*["\']([^"\']+)["\']',
+            r'PREFERRED_MODEL\s*=\s*["\']([^"\']+)["\']',
+            r'model\s*=\s*["\']([^"\']+)["\']',
+            r'MODEL\s*=\s*["\']([^"\']+)["\']'
+        ]
+        
+        for pattern in model_patterns:
+            match = re.search(pattern, content, re.IGNORECASE)
+            if match:
+                model_id = match.group(1)
+                return {"model_id": model_id, "config": {"explicit": True}}
+        
+        # Pattern for configuration dictionary
+        config_pattern = r'model_config\s*=\s*\{([^}]+)\}'
+        config_match = re.search(config_pattern, content, re.IGNORECASE)
+        if config_match:
+            try:
+                # Simple parsing of model config dictionary
+                config_str = config_match.group(1)
+                model_match = re.search(r'["\']model["\']:\s*["\']([^"\']+)["\']', config_str)
+                if model_match:
+                    return {
+                        "model_id": model_match.group(1),
+                        "config": {"explicit": True, "from_dict": True}
+                    }
+            except Exception as e:
+                logger.warning(f"Error parsing model config dictionary: {e}")
+        
+        return None
+    
+    def _analyze_performance_requirements(self, content: str) -> Dict[str, Any]:
+        """Analyze performance requirements from agent file content."""
+        requirements = {}
+        content_lower = content.lower()
+        
+        # Speed requirements
+        if any(keyword in content_lower for keyword in ['fast', 'quick', 'rapid', 'immediate']):
+            requirements["speed_priority"] = True
+        
+        # Quality requirements  
+        if any(keyword in content_lower for keyword in ['quality', 'accurate', 'precise', 'detailed']):
+            requirements["quality_priority"] = True
+            
+        # Resource constraints
+        if any(keyword in content_lower for keyword in ['efficient', 'lightweight', 'minimal']):
+            requirements["resource_efficiency"] = True
+            
+        return requirements
+    
+    def _analyze_reasoning_requirements(self, content: str, agent_type: str) -> str:
+        """Analyze reasoning depth requirements from content and agent type."""
+        content_lower = content.lower()
+        
+        # Expert reasoning indicators
+        if any(keyword in content_lower for keyword in [
+            'architecture', 'design pattern', 'complex system', 'optimization',
+            'strategic', 'planning', 'analysis', 'research'
+        ]):
+            return "expert"
+        
+        # Deep reasoning indicators
+        if any(keyword in content_lower for keyword in [
+            'investigate', 'analyze', 'evaluate', 'assess', 'compare'
+        ]):
+            return "deep"
+        
+        # Simple reasoning indicators
+        if any(keyword in content_lower for keyword in [
+            'format', 'display', 'show', 'list', 'basic'
+        ]):
+            return "simple"
+        
+        # Agent type-based defaults
+        if agent_type in ['engineer', 'architecture', 'orchestrator']:
+            return "expert"
+        elif agent_type in ['research', 'analysis', 'qa']:
+            return "deep"
+        else:
+            return "standard"
+    
+    def _analyze_creativity_requirements(self, content: str) -> bool:
+        """Analyze creativity requirements from agent file content."""
+        content_lower = content.lower()
+        
+        creativity_indicators = [
+            'creative', 'innovative', 'design', 'brainstorm', 'ideate',
+            'generate', 'invent', 'original', 'novel'
+        ]
+        
+        return any(indicator in content_lower for indicator in creativity_indicators)
+    
+    def _analyze_speed_requirements(self, content: str) -> bool:
+        """Analyze speed priority requirements from agent file content."""
+        content_lower = content.lower()
+        
+        speed_indicators = [
+            'urgent', 'quick', 'fast', 'immediate', 'rapid', 'asap',
+            'real-time', 'instant', 'responsive'
+        ]
+        
+        return any(indicator in content_lower for indicator in speed_indicators)
     
     def _extract_specialized_metadata(self, capabilities: List[str]) -> Tuple[List[str], List[str], List[str], List[str]]:
         """
@@ -1270,3 +1483,273 @@ class AgentRegistry:
         })
         
         return enhanced_stats
+    
+    # Model selection and configuration methods
+    
+    async def get_agent_model_configuration(self, agent_name: str) -> Optional[Dict[str, Any]]:
+        """
+        Get model configuration for a specific agent.
+        
+        Args:
+            agent_name: Name of the agent
+            
+        Returns:
+            Model configuration dictionary or None if agent not found
+        """
+        if not self.registry:
+            await self.discover_agents()
+        
+        agent_metadata = self.registry.get(agent_name)
+        if not agent_metadata:
+            return None
+        
+        return {
+            "agent_name": agent_name,
+            "agent_type": agent_metadata.type,
+            "preferred_model": agent_metadata.preferred_model,
+            "model_config": agent_metadata.model_config,
+            "complexity_level": agent_metadata.complexity_level,
+            "capabilities": agent_metadata.capabilities,
+            "specializations": agent_metadata.specializations
+        }
+    
+    async def get_agents_by_model(self, model_id: str) -> List[AgentMetadata]:
+        """
+        Get all agents that use a specific model.
+        
+        Args:
+            model_id: Model identifier
+            
+        Returns:
+            List of agents using the specified model
+        """
+        if not self.registry:
+            await self.discover_agents()
+        
+        return [
+            metadata for metadata in self.registry.values()
+            if metadata.preferred_model == model_id
+        ]
+    
+    async def get_model_recommendations_for_agents(
+        self, 
+        agent_names: Optional[List[str]] = None
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Get model recommendations for specified agents or all agents.
+        
+        Args:
+            agent_names: List of agent names, or None for all agents
+            
+        Returns:
+            Dictionary mapping agent names to model recommendations
+        """
+        if not self.registry:
+            await self.discover_agents()
+        
+        recommendations = {}
+        
+        # Determine which agents to analyze
+        if agent_names:
+            agents_to_analyze = {
+                name: metadata for name, metadata in self.registry.items()
+                if name in agent_names
+            }
+        else:
+            agents_to_analyze = self.registry
+        
+        # Generate recommendations for each agent
+        for agent_name, metadata in agents_to_analyze.items():
+            try:
+                recommendation = self.model_selector.get_model_recommendation(
+                    agent_type=metadata.type,
+                    task_description=metadata.description or "",
+                    performance_requirements=metadata.model_config.get("selection_criteria", {})
+                )
+                
+                recommendations[agent_name] = {
+                    "current_model": metadata.preferred_model,
+                    "recommended_model": recommendation["recommended_model"],
+                    "matches_recommendation": metadata.preferred_model == recommendation["recommended_model"],
+                    "recommendation_details": recommendation,
+                    "agent_metadata": {
+                        "type": metadata.type,
+                        "complexity_level": metadata.complexity_level,
+                        "specializations": metadata.specializations
+                    }
+                }
+                
+            except Exception as e:
+                logger.error(f"Error generating recommendation for agent {agent_name}: {e}")
+                recommendations[agent_name] = {
+                    "error": str(e),
+                    "current_model": metadata.preferred_model
+                }
+        
+        return recommendations
+    
+    async def validate_agent_model_configurations(self) -> Dict[str, Any]:
+        """
+        Validate model configurations for all agents.
+        
+        Returns:
+            Validation results with recommendations and warnings
+        """
+        if not self.registry:
+            await self.discover_agents()
+        
+        validation_results = {
+            "total_agents": len(self.registry),
+            "valid_configurations": 0,
+            "invalid_configurations": 0,
+            "missing_configurations": 0,
+            "warnings": [],
+            "recommendations": [],
+            "detailed_results": {}
+        }
+        
+        for agent_name, metadata in self.registry.items():
+            try:
+                if not metadata.preferred_model:
+                    validation_results["missing_configurations"] += 1
+                    validation_results["warnings"].append(
+                        f"Agent '{agent_name}' has no model configuration"
+                    )
+                    continue
+                
+                # Validate using ModelSelector
+                validation = self.model_selector.validate_model_selection(
+                    agent_type=metadata.type,
+                    selected_model=metadata.preferred_model
+                )
+                
+                if validation["valid"]:
+                    validation_results["valid_configurations"] += 1
+                else:
+                    validation_results["invalid_configurations"] += 1
+                
+                validation_results["detailed_results"][agent_name] = validation
+                
+                # Collect warnings and recommendations
+                for warning in validation.get("warnings", []):
+                    validation_results["warnings"].append(f"{agent_name}: {warning}")
+                
+                for suggestion in validation.get("suggestions", []):
+                    validation_results["recommendations"].append(f"{agent_name}: {suggestion}")
+                
+            except Exception as e:
+                logger.error(f"Error validating model configuration for {agent_name}: {e}")
+                validation_results["invalid_configurations"] += 1
+                validation_results["detailed_results"][agent_name] = {
+                    "valid": False,
+                    "error": str(e)
+                }
+        
+        return validation_results
+    
+    async def update_agent_model_configuration(
+        self,
+        agent_name: str,
+        model_id: str,
+        model_config: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """
+        Update model configuration for a specific agent.
+        
+        Args:
+            agent_name: Name of the agent
+            model_id: New model identifier
+            model_config: Optional model configuration
+            
+        Returns:
+            True if update successful
+        """
+        if not self.registry:
+            await self.discover_agents()
+        
+        if agent_name not in self.registry:
+            logger.error(f"Agent '{agent_name}' not found in registry")
+            return False
+        
+        try:
+            # Validate model selection
+            validation = self.model_selector.validate_model_selection(
+                agent_type=self.registry[agent_name].type,
+                selected_model=model_id
+            )
+            
+            if not validation["valid"]:
+                logger.error(f"Invalid model selection for agent '{agent_name}': {validation.get('error')}")
+                return False
+            
+            # Update metadata
+            self.registry[agent_name].preferred_model = model_id
+            if model_config:
+                self.registry[agent_name].model_config.update(model_config)
+            else:
+                # Set basic configuration
+                self.registry[agent_name].model_config = {
+                    "manually_updated": True,
+                    "update_timestamp": time.time()
+                }
+            
+            logger.info(f"Updated model configuration for agent '{agent_name}': {model_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error updating model configuration for agent '{agent_name}': {e}")
+            return False
+    
+    async def get_model_usage_statistics(self) -> Dict[str, Any]:
+        """
+        Get statistics on model usage across all agents.
+        
+        Returns:
+            Dictionary with model usage statistics
+        """
+        if not self.registry:
+            await self.discover_agents()
+        
+        stats = {
+            "model_distribution": {},
+            "agent_type_model_mapping": {},
+            "complexity_level_distribution": {},
+            "auto_selected_count": 0,
+            "manually_configured_count": 0,
+            "total_agents": len(self.registry)
+        }
+        
+        for metadata in self.registry.values():
+            # Count model distribution
+            if metadata.preferred_model:
+                stats["model_distribution"][metadata.preferred_model] = \
+                    stats["model_distribution"].get(metadata.preferred_model, 0) + 1
+            
+            # Agent type to model mapping
+            agent_type = metadata.type
+            if agent_type not in stats["agent_type_model_mapping"]:
+                stats["agent_type_model_mapping"][agent_type] = {}
+            
+            model = metadata.preferred_model or "none"
+            stats["agent_type_model_mapping"][agent_type][model] = \
+                stats["agent_type_model_mapping"][agent_type].get(model, 0) + 1
+            
+            # Complexity level distribution
+            complexity = metadata.complexity_level
+            if complexity not in stats["complexity_level_distribution"]:
+                stats["complexity_level_distribution"][complexity] = {}
+            
+            stats["complexity_level_distribution"][complexity][model] = \
+                stats["complexity_level_distribution"][complexity].get(model, 0) + 1
+            
+            # Auto vs manual selection
+            if metadata.model_config.get("auto_selected"):
+                stats["auto_selected_count"] += 1
+            elif metadata.model_config.get("explicit") or metadata.model_config.get("manually_updated"):
+                stats["manually_configured_count"] += 1
+        
+        return stats
+    
+    def get_model_selector(self) -> ModelSelector:
+        """Get the ModelSelector instance for direct access."""
+        return self.model_selector

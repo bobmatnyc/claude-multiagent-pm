@@ -103,12 +103,26 @@ class PMOrchestrator:
     the agent prompt builder for automated Task Tool subprocess delegation.
     """
     
-    def __init__(self, working_directory: Optional[Path] = None):
+    def __init__(self, working_directory: Optional[Path] = None, model_override: Optional[str] = None, model_config: Optional[Dict[str, Any]] = None):
         """Initialize PM orchestrator with agent prompt builder integration."""
         self.working_directory = Path(working_directory or os.getcwd())
         self.agent_builder = AgentPromptBuilder(self.working_directory)
         self._delegation_history: List[Dict[str, Any]] = []
         self._active_delegations: Dict[str, AgentDelegationContext] = {}
+        
+        # Model configuration from CLI override
+        self.model_override = model_override
+        self.model_config = model_config or {}
+        if model_override:
+            self.model_config.update({
+                "source": "cli_override",
+                "selection_method": "user_specified",
+                "override_active": True
+            })
+        
+        # Initialize model selector with override support
+        self._model_selector = None
+        self._initialize_model_selector()
         
         # Initialize shared cache for delegation optimization
         self._shared_cache = None
@@ -127,6 +141,41 @@ class PMOrchestrator:
         
         logger.info(f"PMOrchestrator initialized with working directory: {self.working_directory}")
         logger.info(f"  Shared cache: {'enabled' if self._shared_cache else 'disabled'}")
+        logger.info(f"  Model override: {self.model_override or 'none'}")
+        if self.model_override:
+            logger.info(f"  Override source: {self.model_config.get('source', 'unknown')}")
+    
+    def _initialize_model_selector(self):
+        """Initialize model selector with CLI override support."""
+        try:
+            # Import ModelSelector with override support
+            import os
+            from claude_pm.services.model_selector import ModelSelector
+            
+            # Set environment override if CLI model is specified
+            if self.model_override:
+                old_override = os.environ.get('CLAUDE_PM_MODEL_OVERRIDE')
+                os.environ['CLAUDE_PM_MODEL_OVERRIDE'] = self.model_override
+                
+                try:
+                    self._model_selector = ModelSelector()
+                    logger.debug(f"ModelSelector initialized with CLI override: {self.model_override}")
+                finally:
+                    # Restore original environment
+                    if old_override is not None:
+                        os.environ['CLAUDE_PM_MODEL_OVERRIDE'] = old_override
+                    else:
+                        os.environ.pop('CLAUDE_PM_MODEL_OVERRIDE', None)
+            else:
+                self._model_selector = ModelSelector()
+                logger.debug("ModelSelector initialized with default configuration")
+                
+        except ImportError as e:
+            logger.warning(f"ModelSelector not available: {e}")
+            self._model_selector = None
+        except Exception as e:
+            logger.error(f"Failed to initialize ModelSelector: {e}")
+            self._model_selector = None
     
     def generate_agent_prompt(
         self,
@@ -138,7 +187,9 @@ class PMOrchestrator:
         priority: str = "medium",
         memory_categories: Optional[List[str]] = None,
         integration_notes: str = "",
-        escalation_triggers: Optional[List[str]] = None
+        escalation_triggers: Optional[List[str]] = None,
+        selected_model: Optional[str] = None,
+        model_config: Optional[Dict[str, Any]] = None
     ) -> str:
         """
         Generate a complete Task Tool prompt for agent delegation.
@@ -153,6 +204,8 @@ class PMOrchestrator:
             memory_categories: Memory categories for collection
             integration_notes: Additional integration context
             escalation_triggers: Conditions for escalation back to PM
+            selected_model: Optionally selected model for the agent
+            model_config: Model configuration metadata
             
         Returns:
             Complete Task Tool prompt ready for subprocess creation
@@ -198,9 +251,32 @@ class PMOrchestrator:
             # Generate base prompt using agent prompt builder
             base_prompt = self.agent_builder.build_task_tool_prompt(agent_type, task_context)
             
-            # Enhance prompt with PM orchestrator integration
+            # Use orchestrator model override if no specific model provided
+            effective_model = selected_model or self.model_override
+            effective_config = model_config or {}
+            
+            # Merge with orchestrator model config
+            if self.model_config:
+                effective_config = {**self.model_config, **effective_config}
+            
+            # Get model selection from model selector if available
+            if not effective_model and self._model_selector:
+                try:
+                    model_type, model_configuration = self._model_selector.select_model_for_agent(agent_type)
+                    effective_model = model_type.value
+                    effective_config.update({
+                        "max_tokens": model_configuration.max_tokens,
+                        "performance_profile": model_configuration.performance_profile,
+                        "selection_method": "agent_specific",
+                        "source": "model_selector"
+                    })
+                    logger.debug(f"Model selector chose {effective_model} for {agent_type}")
+                except Exception as e:
+                    logger.warning(f"Model selector failed for {agent_type}: {e}")
+            
+            # Enhance prompt with PM orchestrator integration and model configuration
             enhanced_prompt = self._enhance_prompt_with_pm_integration(
-                base_prompt, delegation_context
+                base_prompt, delegation_context, effective_model, effective_config
             )
             
             # Track delegation
@@ -250,18 +326,42 @@ TEMPORAL CONTEXT: Today is {datetime.now().strftime('%B %d, %Y')}. Apply date aw
     def _enhance_prompt_with_pm_integration(
         self, 
         base_prompt: str, 
-        delegation_context: AgentDelegationContext
+        delegation_context: AgentDelegationContext,
+        selected_model: Optional[str] = None,
+        model_config: Optional[Dict[str, Any]] = None
     ) -> str:
         """Enhance base prompt with PM orchestrator integration features."""
         
-        # Add PM integration section
+        # Add PM integration section with model configuration
+        model_info_section = ""
+        if selected_model and model_config:
+            selection_method = model_config.get("selection_method", "unknown")
+            source = model_config.get("source", "unknown")
+            max_tokens = model_config.get("max_tokens", "unknown")
+            
+            model_info_section = f"""
+**Model Configuration**:
+- **Selected Model**: {selected_model}
+- **Selection Method**: {selection_method}
+- **Configuration Source**: {source}
+- **Max Tokens**: {max_tokens}
+- **Performance Profile**: {model_config.get("performance_profile", {}).get("reasoning_quality", "standard")} reasoning quality
+"""
+            
+            # Add criteria if available
+            if "criteria" in model_config:
+                criteria = model_config["criteria"]
+                model_info_section += f"""- **Task Analysis**: {criteria.get("task_complexity", "medium")} complexity, {criteria.get("reasoning_depth", "standard")} reasoning depth
+- **Optimization**: {'Speed priority' if criteria.get("speed_priority") else 'Quality priority'}, {'Creativity enabled' if criteria.get("creativity_required") else 'Standard processing'}
+"""
+        
         pm_integration_section = f"""
 **PM Orchestrator Integration**:
 - **Delegation ID**: {delegation_context.agent_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}
 - **PM Coordination**: Report progress and escalate issues back to PM orchestrator
 - **Cross-Agent Workflow**: This task may integrate with other agent outputs
 - **Integration Notes**: {delegation_context.integration_notes or "Standard PM workflow integration"}
-
+{model_info_section}
 **Escalation Triggers**:
 {chr(10).join(f"- {trigger}" for trigger in delegation_context.escalation_triggers) if delegation_context.escalation_triggers else "- Task completion issues or blockers"}
 {chr(10).join(f"- {trigger}" for trigger in ["Required dependencies unavailable", "Quality standards not achievable", "Timeline conflicts"])}
@@ -440,7 +540,9 @@ def quick_delegate(
     task_description: str,
     requirements: Optional[List[str]] = None,
     deliverables: Optional[List[str]] = None,
-    working_directory: Optional[Path] = None
+    working_directory: Optional[Path] = None,
+    model_override: Optional[str] = None,
+    model_config: Optional[Dict[str, Any]] = None
 ) -> str:
     """
     Quick delegation helper for PM orchestrator.
@@ -451,11 +553,13 @@ def quick_delegate(
         requirements: List of requirements
         deliverables: List of expected deliverables
         working_directory: Working directory path
+        model_override: Model override from CLI
+        model_config: Model configuration metadata
         
     Returns:
         Complete Task Tool prompt ready for subprocess creation
     """
-    orchestrator = PMOrchestrator(working_directory)
+    orchestrator = PMOrchestrator(working_directory, model_override, model_config)
     return orchestrator.generate_agent_prompt(
         agent_type=agent_type,
         task_description=task_description,
@@ -464,9 +568,9 @@ def quick_delegate(
     )
 
 
-def create_shortcut_prompts() -> Dict[str, str]:
+def create_shortcut_prompts(model_override: Optional[str] = None, model_config: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
     """Create shortcut prompts for common PM orchestrator operations."""
-    orchestrator = PMOrchestrator()
+    orchestrator = PMOrchestrator(model_override=model_override, model_config=model_config)
     
     shortcuts = {
         "push": orchestrator.generate_agent_prompt(
