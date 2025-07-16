@@ -3,12 +3,11 @@
 CMPM (Claude Multi-Agent PM) CLI Wrapper
 ========================================
 
-Provides `/cmpm:command` slash command functionality for the Claude PM Framework.
-This wrapper intercepts slash commands and routes them to the appropriate handlers.
+Basic CLI wrapper for the Claude PM Framework.
 
 Usage:
-    cmpm /cmpm:health      # System health dashboard
-    cmpm /cmpm:agents      # Agent types and status
+    cmpm init              # Initialize framework
+    cmpm status            # Check framework health
     cmpm help              # Show help information
 """
 
@@ -20,12 +19,7 @@ from pathlib import Path
 framework_path = Path(__file__).parent.parent
 sys.path.insert(0, str(framework_path))
 
-from claude_pm.cli import main as cli_main
-from claude_pm.cmpm_commands import (
-    cmpm_health, cmpm_agents, cmpm_index, cmpm_dashboard, 
-    cmpm_qa_status, cmpm_qa_test, cmpm_qa_results, 
-    cmpm_integration, cmpm_ai_ops
-)
+from claude_pm.cmpm_commands import main as cmpm_main
 from rich.console import Console
 
 console = Console()
@@ -38,28 +32,18 @@ def show_help():
 =====================================
 
 [bold green]Available Commands:[/bold green]
-  [cyan]/cmpm:health[/cyan]       - Comprehensive system health dashboard
-  [cyan]/cmpm:agents[/cyan]       - List all active agent types and status
-  [cyan]/cmpm:index[/cyan]        - Generate comprehensive project discovery index
-  [cyan]/cmpm:dashboard[/cyan]    - Portfolio manager dashboard
-  [cyan]/cmpm:qa-status[/cyan]    - QA extension status and health
-  [cyan]/cmpm:qa-test[/cyan]      - Execute browser-based tests
-  [cyan]/cmpm:qa-results[/cyan]   - View test results and patterns
-  [cyan]/cmpm:integration[/cyan]  - Integration management
-  [cyan]/cmpm:ai-ops[/cyan]       - AI operations management
-  [cyan]help[/cyan]              - Show this help message
+  [cyan]init[/cyan]               - Initialize Claude PM Framework
+  [cyan]status[/cyan]             - Check framework health status
+  [cyan]help[/cyan]               - Show this help message
 
 [bold yellow]Examples:[/bold yellow]
-  cmpm /cmpm:health --detailed
-  cmpm /cmpm:agents --filter=standard
-  cmpm /cmpm:index --verbose
-  cmpm /cmpm:qa-test --browser
-  cmpm /cmpm:integration --action status
+  cmpm init
+  cmpm status
+  cmpm help
 
 [bold blue]Framework Info:[/bold blue]
-  Version: 4.1.0
-  Integration: ai-trackdown-tools v3.0.0
-  MCP Support: Active
+  Version: 0.9.0
+  Core Commands: init, status, help
     """
     console.print(help_text)
 
@@ -77,34 +61,13 @@ def main():
             show_help()
             return
         
-        # Handle slash commands
-        if command.startswith("/cmpm:"):
-            command_name = command[6:]  # Remove "/cmpm:" prefix
-            
-            # Map of command names to their functions
-            command_map = {
-                "health": cmpm_health,
-                "agents": cmpm_agents,
-                "index": cmpm_index,
-                "dashboard": cmpm_dashboard,
-                "qa-status": cmpm_qa_status,
-                "qa-test": cmpm_qa_test,
-                "qa-results": cmpm_qa_results,
-                "integration": cmpm_integration,
-                "ai-ops": cmpm_ai_ops
-            }
-            
-            if command_name in command_map:
-                # Remove the slash command from sys.argv and call the appropriate command
-                sys.argv = [f"cmpm:{command_name}"] + sys.argv[2:]
-                command_map[command_name]()
-            else:
-                console.print(f"[red]Unknown CMPM command: {command}[/red]")
-                console.print("Run 'cmpm help' for available commands")
-                sys.exit(1)
+        # Handle basic commands by delegating to the Click-based cmpm_commands
+        if command in ["init", "status"]:
+            # Delegate to the actual Click-based command implementation
+            sys.argv[0] = "cmpm"  # Set proper program name
+            cmpm_main()
         else:
-            console.print(f"[red]Invalid command format: {command}[/red]")
-            console.print("CMPM commands must start with '/cmpm:'")
+            console.print(f"[red]Unknown CMPM command: {command}[/red]")
             console.print("Run 'cmpm help' for available commands")
             sys.exit(1)
     
