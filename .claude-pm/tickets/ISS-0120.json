@@ -73,5 +73,13 @@
   "related_tickets": [
     "ISS-0118 (Agent Registry Implementation)",
     "ISS-0119 (CLAUDE.md Generation System)"
+  ],
+  "updates": [
+    {
+      "date": "2025-07-17T02:00:00.000000",
+      "type": "clarification",
+      "author": "Documentation Agent",
+      "content": "User provided critical clarifications for implementation approach:\n\n## Design Clarifications Received\n\n### 1. Claude API Integration\n**Answer**: Will work the same as current implementation (using existing Claude Code session auth)\n- No changes needed to authentication mechanism\n- Continue using current Claude client integration\n- Single Claude instance approach confirmed\n\n### 2. Context Filters\n**Answer**: Orchestrator provides information; agents request additional context as needed\n- Orchestrator responsible for initial context provision\n- Agents can request more context dynamically\n- Two-way communication pattern established\n\n### 3. State Persistence\n**Answer**: TBD - will implement after filtered delegation is proven\n- Deprioritized for MVP\n- Focus on core filtered delegation first\n- Will revisit based on MVP success\n\n### 4. Error Handling\n**Answer**: TBD - dependent on filtered delegation success\n- Deprioritized for MVP\n- Basic error propagation sufficient initially\n- Enhanced handling after core functionality proven\n\n### 5. Testing Strategy\n**Answer**: Use separate repository at ~/Projects/managed/claude-pm-new-orchestration\n- Dual-repository development approach confirmed\n- Core development in feature branch: feature/ISS-0120-local-orchestration\n- Testing and validation in separate managed repository\n- Isolation ensures framework stability during development\n\n## Implementation Progress\n\n### Completed\n- OrchestrationDetector class implemented with 92.65% test coverage\n- Detection logic for Task Tool delegation patterns\n- Feature branch created and active: feature/ISS-0120-local-orchestration\n\n### Next Steps\n1. Continue core LocalOrchestrator implementation\n2. Focus on filtered context delegation (MVP priority)\n3. Defer state persistence and advanced error handling\n4. Test orchestration in separate repository\n\n## Development Approach\n- Primary development in: /Users/masa/Projects/claude-multiagent-pm\n- Testing repository: ~/Projects/managed/claude-pm-new-orchestration\n- Feature branch: feature/ISS-0120-local-orchestration\n- Focus on MVP with filtered delegation as priority"
+    }
   ]
 }
