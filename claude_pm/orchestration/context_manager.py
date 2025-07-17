@@ -14,9 +14,10 @@ from typing import Dict, List, Any, Optional, Tuple, Set
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-import logging
 
-logger = logging.getLogger(__name__)
+# Use project standard logging configuration
+from claude_pm.core.logging_config import get_logger
+logger = get_logger(__name__)
 
 
 @dataclass

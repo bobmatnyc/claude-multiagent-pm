@@ -2538,3 +2538,207 @@
 2025-07-17 12:04:19,947 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250717_120419.md
 2025-07-17 12:04:19,948 - EnhancedDocSync - INFO - Saved statistics for monitoring
 2025-07-17 12:04:19,948 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-17 12:27:02,517 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-17 12:27:02,518 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-17 12:27:02,518 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-17 12:27:02,518 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-17 12:27:02,518 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-17 12:27:02,518 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-17 12:27:02,526 - EnhancedDocSync - INFO - Found 24 path reference issues
+2025-07-17 12:27:02,526 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-17 12:27:02,526 - EnhancedDocSync - INFO - Files validated: 11
+2025-07-17 12:27:02,526 - EnhancedDocSync - INFO - Links checked: 0
+2025-07-17 12:27:02,526 - EnhancedDocSync - INFO - Validation issues: 24
+2025-07-17 12:27:02,526 - EnhancedDocSync - INFO - Broken links: 0
+2025-07-17 12:27:02,526 - EnhancedDocSync - INFO - Path errors: 16
+2025-07-17 12:27:02,526 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-17 12:27:02,527 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250717_122702.md
+2025-07-17 12:27:02,527 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-17 12:27:02,527 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-17 12:30:26,398 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-17 12:30:26,398 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-17 12:30:26,398 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-17 12:30:26,398 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-17 12:30:26,398 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-17 12:30:26,398 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-17 12:30:26,406 - EnhancedDocSync - INFO - Found 24 path reference issues
+2025-07-17 12:30:26,407 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-17 12:30:26,407 - EnhancedDocSync - INFO - Files validated: 11
+2025-07-17 12:30:26,407 - EnhancedDocSync - INFO - Links checked: 0
+2025-07-17 12:30:26,407 - EnhancedDocSync - INFO - Validation issues: 24
+2025-07-17 12:30:26,407 - EnhancedDocSync - INFO - Broken links: 0
+2025-07-17 12:30:26,407 - EnhancedDocSync - INFO - Path errors: 16
+2025-07-17 12:30:26,407 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-17 12:30:26,407 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250717_123026.md
+2025-07-17 12:30:26,408 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-17 12:30:26,408 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-17 12:47:23,608 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-17 12:47:23,608 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-17 12:47:23,608 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-17 12:47:23,608 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-17 12:47:23,608 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-17 12:47:23,608 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-17 12:47:23,617 - EnhancedDocSync - INFO - Found 24 path reference issues
+2025-07-17 12:47:23,617 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-17 12:47:23,617 - EnhancedDocSync - INFO - Files validated: 11
+2025-07-17 12:47:23,618 - EnhancedDocSync - INFO - Links checked: 0
+2025-07-17 12:47:23,618 - EnhancedDocSync - INFO - Validation issues: 24
+2025-07-17 12:47:23,618 - EnhancedDocSync - INFO - Broken links: 0
+2025-07-17 12:47:23,618 - EnhancedDocSync - INFO - Path errors: 16
+2025-07-17 12:47:23,618 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-17 12:47:23,618 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250717_124723.md
+2025-07-17 12:47:23,619 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-17 12:47:23,619 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-17 12:58:35,166 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-17 12:58:35,166 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-17 12:58:35,166 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-17 12:58:35,166 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-17 12:58:35,166 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-17 12:58:35,166 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-17 12:58:35,175 - EnhancedDocSync - INFO - Found 24 path reference issues
+2025-07-17 12:58:35,176 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-17 12:58:35,176 - EnhancedDocSync - INFO - Files validated: 11
+2025-07-17 12:58:35,176 - EnhancedDocSync - INFO - Links checked: 0
+2025-07-17 12:58:35,176 - EnhancedDocSync - INFO - Validation issues: 24
+2025-07-17 12:58:35,176 - EnhancedDocSync - INFO - Broken links: 0
+2025-07-17 12:58:35,176 - EnhancedDocSync - INFO - Path errors: 16
+2025-07-17 12:58:35,176 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-17 12:58:35,176 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250717_125835.md
+2025-07-17 12:58:35,177 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-17 12:58:35,177 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-17 13:16:39,526 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-17 13:16:39,526 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-17 13:16:39,526 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-17 13:16:39,526 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-17 13:16:39,526 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-17 13:16:39,526 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-17 13:16:39,534 - EnhancedDocSync - INFO - Found 24 path reference issues
+2025-07-17 13:16:39,534 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-17 13:16:39,534 - EnhancedDocSync - INFO - Files validated: 11
+2025-07-17 13:16:39,534 - EnhancedDocSync - INFO - Links checked: 0
+2025-07-17 13:16:39,534 - EnhancedDocSync - INFO - Validation issues: 24
+2025-07-17 13:16:39,534 - EnhancedDocSync - INFO - Broken links: 0
+2025-07-17 13:16:39,534 - EnhancedDocSync - INFO - Path errors: 16
+2025-07-17 13:16:39,534 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-17 13:16:39,535 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250717_131639.md
+2025-07-17 13:16:39,536 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-17 13:16:39,536 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-17 15:00:17,719 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-17 15:00:17,720 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-17 15:00:17,720 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-17 15:00:17,720 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-17 15:00:17,720 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-17 15:00:17,720 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-17 15:00:17,728 - EnhancedDocSync - INFO - Found 24 path reference issues
+2025-07-17 15:00:17,728 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-17 15:00:17,728 - EnhancedDocSync - INFO - Files validated: 11
+2025-07-17 15:00:17,728 - EnhancedDocSync - INFO - Links checked: 0
+2025-07-17 15:00:17,728 - EnhancedDocSync - INFO - Validation issues: 24
+2025-07-17 15:00:17,728 - EnhancedDocSync - INFO - Broken links: 0
+2025-07-17 15:00:17,728 - EnhancedDocSync - INFO - Path errors: 16
+2025-07-17 15:00:17,728 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-17 15:00:17,729 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250717_150017.md
+2025-07-17 15:00:17,729 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-17 15:00:17,729 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-17 15:20:41,314 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-17 15:20:41,314 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-17 15:20:41,314 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-17 15:20:41,314 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-17 15:20:41,314 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-17 15:20:41,314 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-17 15:20:41,326 - EnhancedDocSync - INFO - Found 24 path reference issues
+2025-07-17 15:20:41,326 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-17 15:20:41,326 - EnhancedDocSync - INFO - Files validated: 11
+2025-07-17 15:20:41,326 - EnhancedDocSync - INFO - Links checked: 0
+2025-07-17 15:20:41,326 - EnhancedDocSync - INFO - Validation issues: 24
+2025-07-17 15:20:41,326 - EnhancedDocSync - INFO - Broken links: 0
+2025-07-17 15:20:41,326 - EnhancedDocSync - INFO - Path errors: 16
+2025-07-17 15:20:41,326 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-17 15:20:41,326 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250717_152041.md
+2025-07-17 15:20:41,327 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-17 15:20:41,327 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-17 15:34:51,643 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-17 15:34:51,643 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-17 15:34:51,643 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-17 15:34:51,643 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-17 15:34:51,643 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-17 15:34:51,643 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-17 15:34:51,652 - EnhancedDocSync - INFO - Found 24 path reference issues
+2025-07-17 15:34:51,652 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-17 15:34:51,652 - EnhancedDocSync - INFO - Files validated: 11
+2025-07-17 15:34:51,652 - EnhancedDocSync - INFO - Links checked: 0
+2025-07-17 15:34:51,652 - EnhancedDocSync - INFO - Validation issues: 24
+2025-07-17 15:34:51,652 - EnhancedDocSync - INFO - Broken links: 0
+2025-07-17 15:34:51,652 - EnhancedDocSync - INFO - Path errors: 16
+2025-07-17 15:34:51,652 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-17 15:34:51,653 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250717_153451.md
+2025-07-17 15:34:51,654 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-17 15:34:51,654 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-17 15:55:53,175 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-17 15:55:53,175 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-17 15:55:53,175 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-17 15:55:53,175 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-17 15:55:53,175 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-17 15:55:53,175 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-17 15:55:53,185 - EnhancedDocSync - INFO - Found 24 path reference issues
+2025-07-17 15:55:53,185 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-17 15:55:53,185 - EnhancedDocSync - INFO - Files validated: 11
+2025-07-17 15:55:53,185 - EnhancedDocSync - INFO - Links checked: 0
+2025-07-17 15:55:53,185 - EnhancedDocSync - INFO - Validation issues: 24
+2025-07-17 15:55:53,185 - EnhancedDocSync - INFO - Broken links: 0
+2025-07-17 15:55:53,185 - EnhancedDocSync - INFO - Path errors: 16
+2025-07-17 15:55:53,185 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-17 15:55:53,186 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250717_155553.md
+2025-07-17 15:55:53,187 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-17 15:55:53,187 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-17 16:36:44,876 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-17 16:36:44,877 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-17 16:36:44,877 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-17 16:36:44,877 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-17 16:36:44,877 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-17 16:36:44,877 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-17 16:36:44,886 - EnhancedDocSync - INFO - Found 24 path reference issues
+2025-07-17 16:36:44,886 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-17 16:36:44,886 - EnhancedDocSync - INFO - Files validated: 11
+2025-07-17 16:36:44,886 - EnhancedDocSync - INFO - Links checked: 0
+2025-07-17 16:36:44,886 - EnhancedDocSync - INFO - Validation issues: 24
+2025-07-17 16:36:44,886 - EnhancedDocSync - INFO - Broken links: 0
+2025-07-17 16:36:44,886 - EnhancedDocSync - INFO - Path errors: 16
+2025-07-17 16:36:44,886 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-17 16:36:44,887 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250717_163644.md
+2025-07-17 16:36:44,888 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-17 16:36:44,888 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-17 18:41:06,206 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-17 18:41:06,206 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-17 18:41:06,206 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-17 18:41:06,207 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-17 18:41:06,207 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-17 18:41:06,207 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-17 18:41:06,216 - EnhancedDocSync - INFO - Found 24 path reference issues
+2025-07-17 18:41:06,216 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-17 18:41:06,216 - EnhancedDocSync - INFO - Files validated: 11
+2025-07-17 18:41:06,216 - EnhancedDocSync - INFO - Links checked: 0
+2025-07-17 18:41:06,216 - EnhancedDocSync - INFO - Validation issues: 24
+2025-07-17 18:41:06,216 - EnhancedDocSync - INFO - Broken links: 0
+2025-07-17 18:41:06,216 - EnhancedDocSync - INFO - Path errors: 16
+2025-07-17 18:41:06,216 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-17 18:41:06,217 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250717_184106.md
+2025-07-17 18:41:06,217 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-17 18:41:06,217 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully
+2025-07-17 19:00:58,365 - EnhancedDocSync - INFO - Starting enhanced documentation synchronization...
+2025-07-17 19:00:58,365 - EnhancedDocSync - INFO - Parsing tickets from progressive documentation structure...
+2025-07-17 19:00:58,365 - EnhancedDocSync - WARNING - Priority tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/PRIORITY-TICKETS.md
+2025-07-17 19:00:58,365 - EnhancedDocSync - WARNING - Completed tickets file not found: /Users/masa/Projects/claude-multiagent-pm/trackdown/COMPLETED-TICKETS.md
+2025-07-17 19:00:58,365 - EnhancedDocSync - INFO - Parsed 0 tickets from progressive structure
+2025-07-17 19:00:58,365 - EnhancedDocSync - INFO - Validating path references across documentation...
+2025-07-17 19:00:58,375 - EnhancedDocSync - INFO - Found 24 path reference issues
+2025-07-17 19:00:58,375 - EnhancedDocSync - INFO - === VALIDATION RESULTS ===
+2025-07-17 19:00:58,375 - EnhancedDocSync - INFO - Files validated: 11
+2025-07-17 19:00:58,375 - EnhancedDocSync - INFO - Links checked: 0
+2025-07-17 19:00:58,375 - EnhancedDocSync - INFO - Validation issues: 24
+2025-07-17 19:00:58,375 - EnhancedDocSync - INFO - Broken links: 0
+2025-07-17 19:00:58,375 - EnhancedDocSync - INFO - Path errors: 16
+2025-07-17 19:00:58,375 - EnhancedDocSync - INFO - Inconsistencies: 0
+2025-07-17 19:00:58,375 - EnhancedDocSync - INFO - Generated comprehensive report: /Users/masa/Projects/claude-multiagent-pm/logs/enhanced_doc_sync_report_20250717_190058.md
+2025-07-17 19:00:58,376 - EnhancedDocSync - INFO - Saved statistics for monitoring
+2025-07-17 19:00:58,376 - EnhancedDocSync - INFO - Enhanced documentation synchronization completed successfully

@@ -16,7 +16,7 @@ from pathlib import Path
 # Script version - tracks claude-pm script updates independently
 def get_script_version():
     """Get script version - injected during deployment."""
-    return "011"
+    return "012"
 
 SCRIPT_VERSION = get_script_version()
 
@@ -699,8 +699,9 @@ def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_
                 return backup_path, False
                 
             finally:
-                # Cleanup manager resources
-                await manager._cleanup()
+                # Cleanup manager resources only if it was initialized
+                if 'manager' in locals():
+                    await manager._cleanup()
         
         # Run the async backup and update operation
         return asyncio.run(run_backup_and_update())

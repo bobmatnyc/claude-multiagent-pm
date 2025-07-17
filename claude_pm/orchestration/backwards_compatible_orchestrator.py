@@ -27,7 +27,6 @@ Usage:
 
 import os
 import sys
-import logging
 import asyncio
 import time
 import uuid
@@ -48,9 +47,9 @@ from claude_pm.utils.task_tool_helper import TaskToolHelper, TaskToolConfigurati
 from claude_pm.services.agent_registry import AgentRegistry
 from claude_pm.services.shared_prompt_cache import SharedPromptCache
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Use project standard logging configuration
+from claude_pm.core.logging_config import get_logger
+logger = get_logger(__name__)
 
 
 class OrchestrationMode(Enum):
@@ -184,7 +183,6 @@ class BackwardsCompatibleOrchestrator:
             "task_id": task_id,
             "task_description": task_description[:100],  # First 100 chars
             "priority": priority,
-            "timestamp": time.time(),
             "requirements_count": len(requirements) if requirements else 0,
             "deliverables_count": len(deliverables) if deliverables else 0
         })
@@ -297,8 +295,7 @@ class BackwardsCompatibleOrchestrator:
                 "mode": mode.value,
                 "context_tokens_original": context_size_original,
                 "context_tokens_filtered": context_size_filtered,
-                "token_reduction_percent": token_reduction_percent,
-                "timestamp": time.time()
+                "token_reduction_percent": token_reduction_percent
             })
             
             # Add orchestration metadata to result

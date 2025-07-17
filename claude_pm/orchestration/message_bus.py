@@ -6,15 +6,15 @@ async communication between agents without external dependencies.
 """
 
 import asyncio
-import logging
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, Optional, Awaitable
 from enum import Enum
 
-
-logger = logging.getLogger(__name__)
+# Use project standard logging configuration
+from claude_pm.core.logging_config import get_logger
+logger = get_logger(__name__)
 
 
 class MessageStatus(Enum):

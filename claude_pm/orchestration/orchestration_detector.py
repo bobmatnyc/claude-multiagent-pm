@@ -18,11 +18,12 @@ Example usage:
 """
 
 import os
-import logging
 from pathlib import Path
 from typing import Optional, Tuple
 
-logger = logging.getLogger(__name__)
+# Use project standard logging configuration
+from claude_pm.core.logging_config import get_logger
+logger = get_logger(__name__)
 
 
 class OrchestrationDetector:
