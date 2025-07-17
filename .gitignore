@@ -208,3 +208,4 @@ _archive/
 # Reports should be in docs/reports/
 # Tests should be in tests/ subdirectories
 # Use: python scripts/organize_project_files.py to fix organization
+logs/
