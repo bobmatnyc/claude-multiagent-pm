@@ -630,10 +630,8 @@ def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_
                 try:
                     from claude_pm.services.parent_directory_manager import ParentDirectoryManager
                 except ImportError as e:
-                    # If still failing, return error
-                    console.print(f"[red]❌ Cannot import Parent Directory Manager: {e}[/red]")
-                    console.print("[yellow]💡 Framework may not be properly installed[/yellow]")
-                    return None, False
+                    # If still failing, return special marker for import failure
+                    return "IMPORT_FAILED", str(e)
             
             # Initialize the Parent Directory Manager with proper configuration
             manager = ParentDirectoryManager(quiet_mode=quiet_mode)
@@ -704,7 +702,16 @@ def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_
                     await manager._cleanup()
         
         # Run the async backup and update operation
-        return asyncio.run(run_backup_and_update())
+        result = asyncio.run(run_backup_and_update())
+        
+        # If imports failed (indicated by IMPORT_FAILED marker), trigger fallback
+        if result and isinstance(result, tuple) and result[0] == "IMPORT_FAILED":
+            # Print the import error messages here
+            console.print(f"[red]❌ Cannot import Parent Directory Manager: {result[1]}[/red]")
+            console.print("[yellow]💡 Framework may not be properly installed[/yellow]")
+            raise ImportError(result[1])
+        
+        return result
         
     except ImportError as import_error:
         console.print(f"[red]❌ Failed to import required modules: {import_error}[/red]")
