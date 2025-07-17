@@ -248,25 +248,10 @@ def register_setup_commands(cli_group):
         """🚀 Setup CLAUDE.md template in parent directory with deployment-aware configuration."""
 
         async def run():
-            from ..commands.template_commands import deploy_claude_md
-
-            # Create a mock Click context for the template command
-            import click
-
-            template_ctx = click.Context(deploy_claude_md)
-            template_ctx.params = {"target_dir": target_dir, "backup": backup, "force": force}
-
+            manager = None  # Initialize to None to avoid undefined variable issues
             try:
-                # Import the deploy_claude_md function directly
-                from ..commands.template_commands import deploy_claude_md
-
-                # Run the deployment directly
-                # Initialize template deployment integration
-                integration = TemplateDeploymentIntegration()
-                await integration._initialize()
-
-                # Get deployment config
-                deployment_config = await integration.get_deployment_aware_template_config()
+                # Import ParentDirectoryManager for CLAUDE.md deployment
+                from ..services.parent_directory_manager import ParentDirectoryManager
 
                 # Determine target directory
                 if target_dir:
@@ -277,59 +262,12 @@ def register_setup_commands(cli_group):
                 # Ensure target directory exists
                 target_directory.mkdir(parents=True, exist_ok=True)
 
-                # Check for framework CLAUDE.md template
-                # Use explicit framework path to avoid deployment detection issues
-                framework_path = Path(__file__).parent.parent.parent  # Go up to project root
-                framework_template_path = framework_path / "framework" / "CLAUDE.md"
-
-                if not framework_template_path.exists():
-                    console.print(
-                        f"❌ Framework CLAUDE.md template not found at: {framework_template_path}"
-                    )
-                    return
-
-                # Read template content
-                template_content = framework_template_path.read_text()
-
-                # Set up template variables for handlebars processing
-                # Get framework template serial for FRAMEWORK_VERSION using dynamic loading
-                try:
-                    from ..utils.version_loader import get_framework_version
-                    framework_version = get_framework_version()  # This is the serial (010)
-                except ImportError:
-                    # Fallback to reading file directly
-                    framework_version_file = framework_path / "FRAMEWORK_VERSION"
-                    if framework_version_file.exists():
-                        framework_version = framework_version_file.read_text().strip()  # This is the serial (010)
-                    else:
-                        # Fallback to default serial
-                        framework_version = "001"
-                
-                template_variables = {
-                    "FRAMEWORK_VERSION": framework_version,  # Serial from FRAMEWORK_VERSION (014)
-                    "CLAUDE_MD_VERSION": f"{framework_version}-004",  # Serial format framework_version-serial
-                    "DEPLOYMENT_DATE": datetime.now().isoformat(),
-                    "PLATFORM": platform.system().lower(),
-                    "PYTHON_CMD": "python3",
-                    "DEPLOYMENT_ID": str(int(datetime.now().timestamp() * 1000)),
-                    "DEPLOYMENT_DIR": str(framework_path),
-                    "WORKING_DIR": str(Path.cwd()),
-                    "TARGET_DIR": str(target_directory),
-                    "AI_TRACKDOWN_PATH": "/Users/masa/.nvm/versions/node/v20.19.0/lib/node_modules/@bobmatnyc/ai-trackdown-tools/dist/index.js",
-                    "PLATFORM_NOTES": "**macOS-specific:**\n- Use `.sh` files for scripts\n- CLI wrappers: `bin/aitrackdown` and `bin/atd`\n- Health check: `scripts/health-check.sh`\n- May require Xcode Command Line Tools",
-                    "LAST_UPDATED": datetime.now().isoformat(),
-                }
-
                 console.print(f"🔧 [bold]Setting up CLAUDE.md Template[/bold]")
-                console.print(f"   • Framework Path: {framework_path}")
-                console.print(f"   • Template Path: {framework_template_path}")
                 console.print(f"   • Target Directory: {target_directory}")
 
-                # Process handlebars variables
-                processed_content = template_content
-                for key, value in template_variables.items():
-                    placeholder = f"{{{{{key}}}}}"
-                    processed_content = processed_content.replace(placeholder, str(value))
+                # Initialize Parent Directory Manager
+                manager = ParentDirectoryManager()
+                await manager._initialize()
 
                 # Handle target file
                 target_file = target_directory / "CLAUDE.md"
@@ -347,19 +285,37 @@ def register_setup_commands(cli_group):
                         console.print("❌ Setup cancelled")
                         return
 
-                # Write processed content
-                target_file.write_text(processed_content)
+                # Deploy CLAUDE.md using Parent Directory Manager
+                operation = await manager.install_template_to_parent_directory(
+                    target_directory=target_directory,
+                    template_id="claude_md",
+                    template_variables=None,  # Use default deployment variables
+                    force=force  # Use the force flag from command line
+                )
 
-                console.print(f"✅ [bold green]CLAUDE.md setup completed![/bold green]")
-                console.print(f"   • Target: {target_file}")
-                console.print(f"   • Size: {len(processed_content)} characters")
-                console.print(f"   • Variables processed: {len(template_variables)}")
+                if operation.success:
+                    console.print(f"✅ [bold green]CLAUDE.md setup completed![/bold green]")
+                    console.print(f"   • Target: {operation.target_path}")
+                    if operation.backup_path:
+                        console.print(f"   • Backup: {operation.backup_path}")
+                else:
+                    console.print(f"❌ Setup failed: {operation.error_message}")
+                    logger.error(f"Setup command failed: {operation.error_message}")
 
-                await integration._cleanup()
-
+            except ImportError as e:
+                console.print(f"❌ Import error: {e}")
+                console.print("💡 Try using 'claude-pm init' instead for basic setup")
+                logger.error(f"Setup command import error: {e}")
             except Exception as e:
                 console.print(f"❌ Setup failed: {e}")
                 logger.error(f"Setup command failed: {e}")
+            finally:
+                # Cleanup manager resources only if it was initialized
+                if manager is not None:
+                    try:
+                        await manager._cleanup()
+                    except Exception as cleanup_error:
+                        logger.debug(f"Cleanup error (non-critical): {cleanup_error}")
 
         asyncio.run(run())
 
@@ -545,7 +501,8 @@ def register_setup_commands(cli_group):
                             console.print(f"❌ CLAUDE.md deployment failed: {operation.error_message}")
                             logger.error(f"CLAUDE.md deployment failed: {operation.error_message}")
                         
-                        await manager._cleanup()
+                        if 'manager' in locals():
+                            await manager._cleanup()
                         
                     except Exception as deploy_error:
                         console.print(f"❌ CLAUDE.md deployment error: {deploy_error}")

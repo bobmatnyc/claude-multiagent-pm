@@ -211,6 +211,37 @@ class TaskToolHelper:
         Returns:
             Dictionary containing subprocess information and generated prompt
         """
+        # Check if orchestration is enabled for integrated context filtering
+        try:
+            from claude_pm.orchestration.detection import OrchestrationDetector
+            from claude_pm.orchestration.backwards_compatible_orchestrator import BackwardsCompatibleOrchestrator
+            
+            detector = OrchestrationDetector()
+            if detector.is_enabled():
+                # Use orchestration with context filtering
+                orchestrator = BackwardsCompatibleOrchestrator()
+                return await orchestrator.delegate_to_agent(
+                    agent_type=agent_type,
+                    task_description=task_description,
+                    requirements=requirements,
+                    deliverables=deliverables,
+                    dependencies=dependencies,
+                    priority=priority,
+                    memory_categories=memory_categories,
+                    timeout_seconds=timeout_seconds,
+                    escalation_triggers=escalation_triggers,
+                    integration_notes=integration_notes,
+                    model_override=model_override,
+                    performance_requirements=performance_requirements,
+                    working_directory=self.working_directory
+                )
+        except ImportError:
+            # Orchestration modules not available, continue with standard
+            pass
+        except Exception as e:
+            logger.warning(f"Orchestration check failed, continuing with standard: {e}")
+        
+        # Standard implementation without orchestration
         try:
             # Generate subprocess ID
             subprocess_id = f"{agent_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -1156,6 +1187,28 @@ async def quick_create_subprocess(
     Returns:
         Subprocess creation result with generated prompt
     """
+    # Check if orchestration is enabled
+    try:
+        from claude_pm.orchestration.detection import OrchestrationDetector
+        from claude_pm.orchestration.backwards_compatible_orchestrator import quick_delegate
+        
+        detector = OrchestrationDetector()
+        if detector.is_enabled():
+            # Use orchestration with context filtering
+            return await quick_delegate(
+                agent_type=agent_type,
+                task_description=task_description,
+                requirements=requirements,
+                deliverables=deliverables,
+                working_directory=working_directory
+            )
+    except ImportError:
+        # Orchestration modules not available, fall back to standard
+        pass
+    except Exception as e:
+        logger.warning(f"Orchestration check failed, falling back to standard: {e}")
+    
+    # Standard implementation without orchestration
     helper = TaskToolHelper(working_directory)
     return await helper.create_agent_subprocess(
         agent_type=agent_type,

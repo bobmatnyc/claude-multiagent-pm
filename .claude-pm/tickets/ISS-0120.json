@@ -1,0 +1,85 @@
+{
+  "id": "ISS-0120",
+  "title": "Implement Claude PM Local Orchestration System for 80-90% Token Cost Reduction",
+  "priority": "CRITICAL",
+  "type": "Enhancement/Architecture",
+  "component": "Core Orchestration",
+  "version": {
+    "current": "0.9.2",
+    "target": "0.10.0"
+  },
+  "status": "Open",
+  "created": "2025-07-17T00:00:00.000000",
+  "description": "Implement a local Python-based orchestration system to replace costly subprocess delegation, targeting 80-90% reduction in token consumption while maintaining 100% backwards compatibility.\n\n## Problem Statement\nCurrent subprocess delegation model consumes 500K-1M tokens per session due to:\n- Full prompt repetition for each subprocess (50K tokens each)\n- Full context passing to every agent\n- No context filtering or optimization\n- Subprocess overhead and redundancy\n\n## Proposed Solution\nLocal Python orchestration that:\n- Runs agents in-process without subprocess overhead\n- Filters context appropriately per agent type\n- Maintains single conversation thread\n- Reduces token usage by 80-90%\n- Provides 100% backwards compatibility\n\n## Design Review Summary\nBased on docs/design/claude_pm_orchestration_design.md:\n\n### Key Architecture Decisions\n1. **In-Process Execution**: Agents run as Python functions, not subprocesses\n2. **Context Filtering**: Each agent receives only relevant context\n3. **Simple Message Bus**: Lightweight communication between agents\n4. **Backwards Compatibility**: Existing Task Tool syntax unchanged\n5. **Serial Execution**: MVP with sequential agent execution\n\n### Token Savings Breakdown\n- Eliminate subprocess overhead: -40% tokens\n- Context filtering: -30% tokens\n- Single conversation thread: -15% tokens\n- Reduced prompt repetition: -10% tokens\n- **Total Expected Savings: 80-90%**\n\n## Implementation Approach\n\n### Phase 1: Core Infrastructure (Week 1)\n1. Create LocalOrchestrator class in claude_pm/orchestration/\n2. Implement agent runner framework\n3. Add context filtering system\n4. Create simple message bus\n\n### Phase 2: Agent Integration (Week 2)\n1. Adapt existing agents for local execution\n2. Implement backwards-compatible Task Tool wrapper\n3. Add state persistence layer\n4. Create orchestration configuration\n\n### Phase 3: Testing & Optimization (Week 3)\n1. Comprehensive test suite\n2. Performance benchmarking\n3. Token usage measurement\n4. Edge case handling\n\n### Phase 4: Rollout (Week 4)\n1. Feature flag implementation\n2. Gradual rollout strategy\n3. Monitoring and metrics\n4. Documentation updates\n\n## Critical Questions Requiring Clarification\n\n### 1. Claude API Integration\n- How do we maintain conversation context across agent calls?\n- Should we use single Claude instance or multiple?\n- How to handle rate limiting with local orchestration?\n- What's the optimal context window management strategy?\n\n### 2. Error Handling & Recovery\n- How to handle agent failures without subprocess isolation?\n- What's the rollback strategy for failed operations?\n- How to maintain transaction-like semantics?\n- Should we implement circuit breakers?\n\n### 3. State Management\n- Where to persist orchestration state?\n- How to handle concurrent orchestrations?\n- What's the recovery strategy after crashes?\n- How to maintain state across sessions?\n\n### 4. Backwards Compatibility\n- How to detect old vs new Task Tool syntax?\n- Should we auto-migrate existing workflows?\n- How to handle mixed-mode operations?\n- What's the deprecation timeline?\n\n### 5. Performance Considerations\n- What's acceptable latency for local execution?\n- How to handle long-running agent operations?\n- Should we implement timeouts?\n- Memory usage constraints?\n\n## Technical Design Details\n\n### LocalOrchestrator Class\n```python\nclass LocalOrchestrator:\n    def __init__(self, claude_client):\n        self.claude = claude_client\n        self.agents = AgentRegistry()\n        self.context_filter = ContextFilter()\n        self.message_bus = SimpleMessageBus()\n        self.state = OrchestrationState()\n    \n    async def execute_task(self, task_description, agent_type):\n        # Implementation details in design doc\n```\n\n### Context Filtering Strategy\n- Documentation Agent: Project structure, file lists, doc patterns\n- QA Agent: Test files, coverage reports, quality metrics\n- Engineer Agent: Code files, dependencies, technical context\n- Ops Agent: Configuration, deployment scripts, infrastructure\n\n### Message Bus Architecture\n- Simple pub/sub for agent communication\n- JSON message format for compatibility\n- Async support for future parallelization\n- Event logging for debugging\n\n## Risk Mitigation\n\n### Technical Risks\n1. **Memory Usage**: Implement agent lifecycle management\n2. **Error Propagation**: Comprehensive exception handling\n3. **State Corruption**: Transactional state updates\n4. **Performance Regression**: Extensive benchmarking\n\n### Operational Risks\n1. **Breaking Changes**: Feature flags and gradual rollout\n2. **User Confusion**: Clear migration documentation\n3. **Support Burden**: Comprehensive logging and diagnostics\n\n## Success Metrics\n- Token usage reduction: >80%\n- Latency improvement: <2s per agent call\n- Zero breaking changes\n- 95% test coverage\n- <5% memory overhead\n\n## Implementation Timeline\n- Week 1: Core infrastructure\n- Week 2: Agent integration\n- Week 3: Testing and optimization\n- Week 4: Rollout preparation\n- Week 5: Production deployment\n- Week 6: Monitoring and refinement",
+  "acceptance_criteria": [
+    "LocalOrchestrator class implemented with full test coverage",
+    "Context filtering reduces token usage by >30%",
+    "All 9 core agents support local execution",
+    "100% backwards compatibility with existing Task Tool syntax",
+    "Token usage reduced by 80-90% in benchmarks",
+    "Performance metrics show <2s latency per agent",
+    "Zero breaking changes in existing workflows",
+    "Comprehensive documentation and migration guide",
+    "Feature flags enable gradual rollout",
+    "State persistence handles crashes gracefully"
+  ],
+  "labels": [
+    "architecture",
+    "performance",
+    "cost-optimization",
+    "orchestration",
+    "backwards-compatibility"
+  ],
+  "milestone": "v0.10.0",
+  "assignee": "orchestration-team",
+  "questions": {
+    "claude_api": [
+      "How do we maintain conversation context across agent calls?",
+      "Should we use single Claude instance or multiple?",
+      "How to handle rate limiting with local orchestration?",
+      "What's the optimal context window management strategy?"
+    ],
+    "error_handling": [
+      "How to handle agent failures without subprocess isolation?",
+      "What's the rollback strategy for failed operations?",
+      "How to maintain transaction-like semantics?",
+      "Should we implement circuit breakers?"
+    ],
+    "state_management": [
+      "Where to persist orchestration state?",
+      "How to handle concurrent orchestrations?",
+      "What's the recovery strategy after crashes?",
+      "How to maintain state across sessions?"
+    ],
+    "backwards_compatibility": [
+      "How to detect old vs new Task Tool syntax?",
+      "Should we auto-migrate existing workflows?",
+      "How to handle mixed-mode operations?",
+      "What's the deprecation timeline?"
+    ],
+    "performance": [
+      "What's acceptable latency for local execution?",
+      "How to handle long-running agent operations?",
+      "Should we implement timeouts?",
+      "Memory usage constraints?"
+    ]
+  },
+  "dependencies": [
+    "AgentRegistry enhancements for local execution",
+    "SharedPromptCache integration",
+    "Claude API client improvements",
+    "State persistence infrastructure"
+  ],
+  "related_tickets": [
+    "ISS-0118 (Agent Registry Implementation)",
+    "ISS-0119 (CLAUDE.md Generation System)"
+  ],
+  "updates": [
+    {
+      "date": "2025-07-17T02:00:00.000000",
+      "type": "clarification",
+      "author": "Documentation Agent",
+      "content": "User provided critical clarifications for implementation approach:\n\n## Design Clarifications Received\n\n### 1. Claude API Integration\n**Answer**: Will work the same as current implementation (using existing Claude Code session auth)\n- No changes needed to authentication mechanism\n- Continue using current Claude client integration\n- Single Claude instance approach confirmed\n\n### 2. Context Filters\n**Answer**: Orchestrator provides information; agents request additional context as needed\n- Orchestrator responsible for initial context provision\n- Agents can request more context dynamically\n- Two-way communication pattern established\n\n### 3. State Persistence\n**Answer**: TBD - will implement after filtered delegation is proven\n- Deprioritized for MVP\n- Focus on core filtered delegation first\n- Will revisit based on MVP success\n\n### 4. Error Handling\n**Answer**: TBD - dependent on filtered delegation success\n- Deprioritized for MVP\n- Basic error propagation sufficient initially\n- Enhanced handling after core functionality proven\n\n### 5. Testing Strategy\n**Answer**: Use separate repository at ~/Projects/managed/claude-pm-new-orchestration\n- Dual-repository development approach confirmed\n- Core development in feature branch: feature/ISS-0120-local-orchestration\n- Testing and validation in separate managed repository\n- Isolation ensures framework stability during development\n\n## Implementation Progress\n\n### Completed\n- OrchestrationDetector class implemented with 92.65% test coverage\n- Detection logic for Task Tool delegation patterns\n- Feature branch created and active: feature/ISS-0120-local-orchestration\n\n### Next Steps\n1. Continue core LocalOrchestrator implementation\n2. Focus on filtered context delegation (MVP priority)\n3. Defer state persistence and advanced error handling\n4. Test orchestration in separate repository\n\n## Development Approach\n- Primary development in: /Users/masa/Projects/claude-multiagent-pm\n- Testing repository: ~/Projects/managed/claude-pm-new-orchestration\n- Feature branch: feature/ISS-0120-local-orchestration\n- Focus on MVP with filtered delegation as priority"
+    }
+  ]
+}

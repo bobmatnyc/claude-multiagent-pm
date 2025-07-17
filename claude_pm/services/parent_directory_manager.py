@@ -490,6 +490,12 @@ class ParentDirectoryManager(BaseService):
             ParentDirectoryOperation result
         """
         try:
+            # Run deduplication before deployment to prevent conflicts
+            self.logger.info("🔍 Running CLAUDE.md deduplication before deployment...")
+            dedup_actions = await self._deduplicate_claude_md_files()
+            if dedup_actions:
+                self.logger.info(f"📋 Deduplication processed {len(dedup_actions)} files")
+            
             # Use the generator's deploy_to_parent method
             generator = FrameworkClaudeMdGenerator()
             target_path = target_directory / "CLAUDE.md"
@@ -582,6 +588,12 @@ class ParentDirectoryManager(BaseService):
             ParentDirectoryOperation result
         """
         try:
+            # Run deduplication before installation to prevent conflicts
+            self.logger.info("🔍 Running CLAUDE.md deduplication before installation...")
+            dedup_actions = await self._deduplicate_claude_md_files()
+            if dedup_actions:
+                self.logger.info(f"📋 Deduplication processed {len(dedup_actions)} files")
+            
             # Use streaming logging during deployment if we're in startup phase
             if hasattr(self, '_startup_phase') and self._startup_phase:
                 # Switch to streaming logger temporarily for deployment
@@ -2354,3 +2366,148 @@ class ParentDirectoryManager(BaseService):
         except Exception as e:
             self.logger.error(f"Failed to get framework backup status: {e}")
             return {"error": str(e)}
+    
+    async def _deduplicate_claude_md_files(self) -> List[Tuple[Path, str]]:
+        """
+        Deduplicate CLAUDE.md files in parent directory hierarchy.
+        
+        Walks up the directory tree from current directory to root, finds all CLAUDE.md files,
+        keeps only the one closest to root (highest in hierarchy), and renames others to backup.
+        Only processes files that are framework deployment templates.
+        
+        Returns:
+            List of tuples (original_path, action_taken) for logging
+        """
+        deduplication_actions = []
+        
+        try:
+            self.logger.info("🔍 Starting CLAUDE.md deduplication scan...")
+            
+            # Walk up the directory tree from current directory to root
+            current_path = Path.cwd()
+            claude_md_files = []
+            
+            # Collect all CLAUDE.md files in parent directories
+            while current_path != current_path.parent:  # Stop at root
+                claude_md_path = current_path / "CLAUDE.md"
+                if claude_md_path.exists() and claude_md_path.is_file():
+                    claude_md_files.append(claude_md_path)
+                    self.logger.debug(f"Found CLAUDE.md at: {claude_md_path}")
+                current_path = current_path.parent
+            
+            # Check root directory as well
+            root_claude_md = current_path / "CLAUDE.md"
+            if root_claude_md.exists() and root_claude_md.is_file():
+                claude_md_files.append(root_claude_md)
+                self.logger.debug(f"Found CLAUDE.md at root: {root_claude_md}")
+            
+            if len(claude_md_files) <= 1:
+                self.logger.info("✅ No duplicate CLAUDE.md files found in parent hierarchy")
+                return deduplication_actions
+            
+            # Sort by path depth (root first, then deeper directories)
+            claude_md_files.sort(key=lambda p: len(p.parts))
+            
+            self.logger.info(f"📊 Found {len(claude_md_files)} CLAUDE.md files in parent hierarchy")
+            
+            # Process files - keep the first (closest to root), backup others
+            for idx, file_path in enumerate(claude_md_files):
+                try:
+                    # Read file content to check if it's a framework deployment template
+                    content = file_path.read_text()
+                    is_framework_template = self._is_framework_deployment_template(content)
+                    
+                    if idx == 0:
+                        # This is the file closest to root - keep it if it's a framework template
+                        if is_framework_template:
+                            self.logger.info(f"✅ Keeping primary framework template at: {file_path}")
+                            deduplication_actions.append((file_path, "kept as primary"))
+                        else:
+                            self.logger.info(f"⚠️ File at {file_path} is not a framework template - skipping")
+                            deduplication_actions.append((file_path, "skipped - not framework template"))
+                    else:
+                        # This is a duplicate - check if it's a framework template before backing up
+                        if is_framework_template:
+                            # Generate backup filename with timestamp
+                            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                            backup_name = f"CLAUDE.md.backup_{timestamp}"
+                            backup_path = file_path.parent / backup_name
+                            
+                            # Handle duplicate timestamps
+                            counter = 1
+                            while backup_path.exists():
+                                backup_name = f"CLAUDE.md.backup_{timestamp}_{counter:02d}"
+                                backup_path = file_path.parent / backup_name
+                                counter += 1
+                            
+                            # Rename the duplicate to backup
+                            file_path.rename(backup_path)
+                            self.logger.info(f"📦 Backed up duplicate framework template: {file_path} → {backup_path}")
+                            deduplication_actions.append((file_path, f"backed up to {backup_path.name}"))
+                        else:
+                            self.logger.info(f"🛡️ Preserving non-framework file at: {file_path}")
+                            deduplication_actions.append((file_path, "preserved - not framework template"))
+                            
+                except Exception as file_error:
+                    self.logger.error(f"Failed to process file {file_path}: {file_error}")
+                    deduplication_actions.append((file_path, f"error: {str(file_error)}"))
+            
+            # Log summary
+            backed_up_count = sum(1 for _, action in deduplication_actions if "backed up" in action)
+            if backed_up_count > 0:
+                self.logger.info(f"✅ Deduplication complete: {backed_up_count} duplicate framework templates backed up")
+            else:
+                self.logger.info("✅ Deduplication complete: No framework template duplicates needed backing up")
+                
+        except Exception as e:
+            self.logger.error(f"Failed during CLAUDE.md deduplication: {e}")
+            
+        return deduplication_actions
+    
+    async def deduplicate_parent_claude_md(self) -> Dict[str, Any]:
+        """
+        Public method to manually trigger CLAUDE.md deduplication in parent hierarchy.
+        
+        Returns:
+            Dictionary with deduplication results
+        """
+        try:
+            self.logger.info("🔧 Manual CLAUDE.md deduplication requested")
+            
+            # Run deduplication
+            actions = await self._deduplicate_claude_md_files()
+            
+            # Build result summary
+            result = {
+                "success": True,
+                "timestamp": datetime.now().isoformat(),
+                "actions_taken": len(actions),
+                "details": []
+            }
+            
+            for file_path, action in actions:
+                result["details"].append({
+                    "file": str(file_path),
+                    "action": action
+                })
+            
+            # Count different action types
+            action_summary = {
+                "kept_primary": sum(1 for _, a in actions if "kept as primary" in a),
+                "backed_up": sum(1 for _, a in actions if "backed up" in a),
+                "preserved": sum(1 for _, a in actions if "preserved" in a),
+                "skipped": sum(1 for _, a in actions if "skipped" in a),
+                "errors": sum(1 for _, a in actions if "error:" in a)
+            }
+            
+            result["summary"] = action_summary
+            
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Failed to run manual deduplication: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
