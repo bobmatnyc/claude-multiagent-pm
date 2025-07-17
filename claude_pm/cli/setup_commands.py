@@ -545,7 +545,8 @@ def register_setup_commands(cli_group):
                             console.print(f"❌ CLAUDE.md deployment failed: {operation.error_message}")
                             logger.error(f"CLAUDE.md deployment failed: {operation.error_message}")
                         
-                        await manager._cleanup()
+                        if 'manager' in locals():
+                            await manager._cleanup()
                         
                     except Exception as deploy_error:
                         console.print(f"❌ CLAUDE.md deployment error: {deploy_error}")
