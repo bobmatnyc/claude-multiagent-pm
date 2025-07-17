@@ -5,5 +5,19 @@ This package contains components for detecting and managing local project orches
 """
 
 from .orchestration_detector import OrchestrationDetector
+from .message_bus import (
+    SimpleMessageBus,
+    Message,
+    Request,
+    Response,
+    MessageStatus
+)
 
-__all__ = ['OrchestrationDetector']
+__all__ = [
+    'OrchestrationDetector',
+    'SimpleMessageBus',
+    'Message',
+    'Request',
+    'Response',
+    'MessageStatus'
+]
