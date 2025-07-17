@@ -522,6 +522,25 @@ class MinimalPostInstall {
                 this.log(`⚠️ Templates source not found: ${templatesSource}`, 'warn');
             }
             
+            // Ensure framework CLAUDE.md is copied to templates directory
+            const frameworkClaudeMdSource = path.join(this.packageRoot, 'framework', 'CLAUDE.md');
+            const templateClaudeMdDest = path.join(templatesDest, 'CLAUDE.md');
+            
+            if (fs.existsSync(frameworkClaudeMdSource) && !fs.existsSync(templateClaudeMdDest)) {
+                try {
+                    // Ensure templates directory exists
+                    if (!fs.existsSync(templatesDest)) {
+                        fs.mkdirSync(templatesDest, { recursive: true });
+                    }
+                    
+                    // Copy framework CLAUDE.md to templates
+                    fs.copyFileSync(frameworkClaudeMdSource, templateClaudeMdDest);
+                    this.log(`✅ Framework CLAUDE.md copied to templates: ${templateClaudeMdDest}`);
+                } catch (error) {
+                    this.log(`⚠️ Failed to copy framework CLAUDE.md: ${error.message}`, 'warn');
+                }
+            }
+            
             // Verify CLAUDE.md is accessible
             const claudeMdPath = path.join(frameworkDest, 'CLAUDE.md');
             if (fs.existsSync(claudeMdPath)) {

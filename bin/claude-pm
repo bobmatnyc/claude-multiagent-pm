@@ -16,7 +16,7 @@ from pathlib import Path
 # Script version - tracks claude-pm script updates independently
 def get_script_version():
     """Get script version - injected during deployment."""
-    return "010"
+    return "011"
 
 SCRIPT_VERSION = get_script_version()
 
@@ -270,11 +270,21 @@ def check_parent_claude_md_status():
         parent_dir = current_dir.parent
         parent_claude_md = parent_dir / "CLAUDE.md"
         
-        # Get framework template path
-        framework_template = framework_path / "framework" / "CLAUDE.md"
+        # Get framework template path - try multiple locations
+        framework_template = None
+        template_locations = [
+            framework_path / "framework" / "CLAUDE.md",
+            Path.home() / ".claude-pm" / "templates" / "CLAUDE.md",
+            Path(__file__).parent.parent / "framework" / "CLAUDE.md",
+        ]
+        
+        for location in template_locations:
+            if location.exists():
+                framework_template = location
+                break
         
         # Check if framework template exists
-        if not framework_template.exists():
+        if not framework_template:
             return {
                 "needs_update": False,
                 "parent_exists": parent_claude_md.exists(),
@@ -434,6 +444,154 @@ def check_parent_claude_md_status():
         }
 
 
+def create_minimal_claude_md():
+    """
+    Create a minimal CLAUDE.md template from embedded string.
+    This is a last resort when no template file can be found.
+    """
+    framework_version = get_framework_version()
+    deployment_date = datetime.now().isoformat()
+    deployment_id = int(datetime.now().timestamp())
+    
+    template = f'''# Claude PM Framework Configuration - Deployment
+
+<!-- 
+CLAUDE_MD_VERSION: {framework_version}-001
+FRAMEWORK_VERSION: {framework_version}
+DEPLOYMENT_DATE: {deployment_date}
+LAST_UPDATED: {deployment_date}
+CONTENT_HASH: minimal
+-->
+
+## 🤖 AI ASSISTANT ROLE DESIGNATION
+
+**You are operating within a Claude PM Framework deployment**
+
+Your primary role is operating as a multi-agent orchestrator. Your job is to orchestrate projects by:
+- **Delegating tasks** to other agents via Task Tool (subprocesses)
+- **Providing comprehensive context** to each agent for their specific domain
+- **Receiving and integrating results** to inform project progress and next steps
+- **Coordinating cross-agent workflows** to achieve project objectives
+- **Maintaining project visibility** and strategic oversight throughout execution
+
+### Framework Context
+- **Version**: {framework_version}
+- **Deployment Date**: {deployment_date}
+- **Platform**: {sys.platform}
+- **Python Command**: python3
+- **Agent Hierarchy**: Three-tier (Project → User → System)
+- **Core System**: 🔧 Framework orchestration and agent coordination
+
+---
+
+## A) AGENTS
+
+### Core Agent Types (Mandatory Collaboration)
+1. **Documentation Agent** - Project documentation and operational understanding
+2. **Ticketing Agent** - Universal ticketing interface and lifecycle management
+3. **Version Control Agent** - Git operations and version control
+4. **QA Agent** - Quality assurance, testing, and validation
+5. **Research Agent** - Investigation, analysis, and information gathering
+6. **Ops Agent** - Deployment, operations, and infrastructure management
+7. **Security Agent** - Security analysis and vulnerability assessment
+8. **Engineer Agent** - Code implementation and development
+9. **Data Engineer Agent** - Data store management and AI API integrations
+
+### Task Tool Subprocess Creation Protocol
+
+**Standard Task Tool Orchestration Format:**
+```
+**[Agent Type] Agent**: [Clear task description with specific deliverables]
+
+TEMPORAL CONTEXT: Today is [current date]. Apply date awareness.
+
+**Task**: [Detailed task breakdown with specific requirements]
+
+**Context**: [Comprehensive filtered context relevant to this agent type]
+
+**Authority**: [Agent writing permissions and scope]
+**Expected Results**: [Specific deliverables PM needs back]
+```
+
+---
+
+## B) TODO AND TASK TOOLS
+
+### TodoWrite Integration with Task Tool
+
+**Workflow Pattern:**
+1. **Create TodoWrite entries** for complex multi-agent tasks
+2. **Mark todo as in_progress** when delegating via Task Tool
+3. **Update todo status** based on subprocess completion
+4. **Mark todo as completed** when agent delivers results
+
+---
+
+## C) CLAUDE-PM INIT
+
+### Core Initialization Commands
+```bash
+# Basic initialization check
+claude-pm init
+
+# Complete setup with directory creation
+claude-pm init --setup
+
+# Comprehensive verification of agent hierarchy
+claude-pm init --verify
+```
+
+---
+
+**Framework Version**: {framework_version}
+**Deployment ID**: {deployment_id}
+**Last Updated**: {deployment_date}
+'''
+    
+    return template
+
+
+def ensure_template_in_user_directory():
+    """
+    Ensure CLAUDE.md template exists in user directory for deployment.
+    This is a one-time copy during framework usage.
+    """
+    user_template_dir = Path.home() / ".claude-pm" / "templates"
+    user_template_path = user_template_dir / "CLAUDE.md"
+    
+    # If template already exists in user directory, we're good
+    if user_template_path.exists():
+        return True
+    
+    # Create templates directory if it doesn't exist
+    user_template_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Find source template
+    template_locations = [
+        framework_path / "framework" / "CLAUDE.md",
+        framework_path / "templates" / "CLAUDE.md",
+        Path(__file__).parent.parent / "framework" / "CLAUDE.md",
+    ]
+    
+    source_template = None
+    for location in template_locations:
+        if location.exists():
+            source_template = location
+            break
+    
+    if source_template:
+        try:
+            shutil.copy2(source_template, user_template_path)
+            console.print(f"[dim]✅ Template copied to user directory: {user_template_path}[/dim]")
+            return True
+        except Exception as e:
+            console.print(f"[yellow]⚠️ Could not copy template to user directory: {e}[/yellow]")
+            return False
+    else:
+        console.print(f"[yellow]⚠️ Framework template not found in expected locations[/yellow]")
+        return False
+
+
 def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_version, quiet_mode=False):
     """
     Perform automatic backup and update of CLAUDE.md using Parent Directory Manager.
@@ -454,12 +612,28 @@ def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_
         - backup_path: Path to backup file or None if failed
         - success: True if update succeeded, False otherwise
     """
+    # First ensure template exists in user directory
+    ensure_template_in_user_directory()
+    
     try:
         import asyncio
         
         async def run_backup_and_update():
-            # Import the Parent Directory Manager service
-            from claude_pm.services.parent_directory_manager import ParentDirectoryManager
+            try:
+                # Try to import the Parent Directory Manager service
+                from claude_pm.services.parent_directory_manager import ParentDirectoryManager
+            except ImportError:
+                # If import fails, we're likely in an external project
+                # Try to add framework path to sys.path and retry
+                if str(framework_path) not in sys.path:
+                    sys.path.insert(0, str(framework_path))
+                    try:
+                        from claude_pm.services.parent_directory_manager import ParentDirectoryManager
+                    except ImportError as e:
+                        # If still failing, return error
+                        console.print(f"[red]❌ Cannot import Parent Directory Manager: {e}[/red]")
+                        console.print("[yellow]💡 Framework may not be properly installed[/yellow]")
+                        return None, False
             
             # Initialize the Parent Directory Manager with proper configuration
             manager = ParentDirectoryManager(quiet_mode=quiet_mode)
@@ -532,12 +706,75 @@ def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_
         return asyncio.run(run_backup_and_update())
         
     except ImportError as import_error:
-        console.print(f"[red]❌ Failed to import Parent Directory Manager: {import_error}[/red]")
-        console.print("[yellow]💡 Framework may not be properly installed[/yellow]")
+        console.print(f"[red]❌ Failed to import required modules: {import_error}[/red]")
+        console.print("[yellow]💡 Attempting direct CLAUDE.md deployment...[/yellow]")
         
-        # Log import error for troubleshooting
-        console.print("[dim]💭 This usually indicates the framework is not properly installed or accessible[/dim]")
-        return None, False
+        # Fallback: Try direct file copy if imports fail
+        try:
+            # First ensure template exists in user directory
+            ensure_template_in_user_directory()
+            
+            # Try multiple locations for the framework template
+            framework_template = None
+            template_locations = [
+                framework_path / "framework" / "CLAUDE.md",
+                Path.home() / ".claude-pm" / "templates" / "CLAUDE.md",
+                Path(__file__).parent.parent / "framework" / "CLAUDE.md",
+            ]
+            
+            for location in template_locations:
+                if location.exists():
+                    framework_template = location
+                    break
+            
+            if framework_template:
+                # Create backup of existing file if it exists
+                backup_path = None
+                if parent_claude_md.exists():
+                    backup_name = f"CLAUDE.md.backup.{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                    backup_path = parent_claude_md.parent / backup_name
+                    shutil.copy2(parent_claude_md, backup_path)
+                    console.print(f"[green]✅ Backup created: {backup_path.name}[/green]")
+                
+                # Read template and apply basic substitutions
+                template_content = framework_template.read_text()
+                
+                # Get framework version
+                framework_version = get_framework_version()
+                
+                # Apply basic template substitutions
+                deployment_date = datetime.now().isoformat()
+                replacements = {
+                    '{{CLAUDE_MD_VERSION}}': f'{framework_version}-001',
+                    '{{FRAMEWORK_VERSION}}': framework_version,
+                    '{{DEPLOYMENT_DATE}}': deployment_date,
+                    '{{LAST_UPDATED}}': deployment_date,
+                    '{{DEPLOYMENT_ID}}': str(int(datetime.now().timestamp())),
+                    '{{PLATFORM_NOTES}}': f'Platform: {sys.platform}'
+                }
+                
+                for placeholder, value in replacements.items():
+                    template_content = template_content.replace(placeholder, value)
+                
+                # Write processed template to parent directory
+                parent_claude_md.write_text(template_content)
+                console.print(f"[green]✅ CLAUDE.md deployed directly with template substitutions[/green]")
+                return backup_path, True
+            else:
+                # Last resort: create minimal CLAUDE.md from embedded template
+                console.print(f"[yellow]⚠️ No template file found - creating minimal CLAUDE.md[/yellow]")
+                try:
+                    minimal_template = create_minimal_claude_md()
+                    parent_claude_md.write_text(minimal_template)
+                    console.print(f"[green]✅ Minimal CLAUDE.md created successfully[/green]")
+                    return None, True
+                except Exception as minimal_error:
+                    console.print(f"[red]❌ Failed to create minimal template: {minimal_error}[/red]")
+                    return None, False
+                
+        except Exception as copy_error:
+            console.print(f"[red]❌ Direct deployment failed: {copy_error}[/red]")
+            return None, False
         
     except Exception as e:
         console.print(f"[red]❌ Backup and update operation failed: {e}[/red]")
@@ -1010,10 +1247,14 @@ def ensure_project_initialized():
                 with open(project_config, 'w') as f:
                     json.dump(config_data, f, indent=2)
             
-            # Log the auto-initialization at DEBUG level
-            import logging
-            logger = logging.getLogger("claude_pm")
-            logger.debug(f"Auto-initialized .claude-pm directory in {current_dir}")
+            # Try to log if logging is available
+            try:
+                import logging
+                logger = logging.getLogger("claude_pm")
+                logger.debug(f"Auto-initialized .claude-pm directory in {current_dir}")
+            except:
+                # Logging not available, continue silently
+                pass
             
             return True
         
@@ -1021,9 +1262,13 @@ def ensure_project_initialized():
         
     except Exception as e:
         # Silently fail - don't interrupt the user's workflow
-        import logging
-        logger = logging.getLogger("claude_pm")
-        logger.debug(f"Failed to auto-initialize .claude-pm directory: {e}")
+        try:
+            import logging
+            logger = logging.getLogger("claude_pm")
+            logger.debug(f"Failed to auto-initialize .claude-pm directory: {e}")
+        except:
+            # Even logging failed, just continue
+            pass
         return False
 
 
