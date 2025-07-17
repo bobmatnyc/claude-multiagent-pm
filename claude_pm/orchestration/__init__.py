@@ -12,6 +12,12 @@ from .message_bus import (
     Response,
     MessageStatus
 )
+from .context_manager import (
+    ContextManager,
+    ContextFilter,
+    AgentInteraction,
+    create_context_manager
+)
 
 __all__ = [
     'OrchestrationDetector',
@@ -19,5 +25,9 @@ __all__ = [
     'Message',
     'Request',
     'Response',
-    'MessageStatus'
+    'MessageStatus',
+    'ContextManager',
+    'ContextFilter',
+    'AgentInteraction',
+    'create_context_manager'
 ]
