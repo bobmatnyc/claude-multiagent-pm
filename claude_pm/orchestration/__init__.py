@@ -4,6 +4,10 @@ Claude PM Orchestration Package
 This package contains components for detecting and managing local project orchestration.
 """
 
+# Initialize orchestration logging
+from .logging_setup import setup_orchestration_logging
+setup_orchestration_logging()
+
 from .orchestration_detector import OrchestrationDetector
 from .message_bus import (
     SimpleMessageBus,

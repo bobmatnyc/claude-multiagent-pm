@@ -16,7 +16,7 @@ from pathlib import Path
 # Script version - tracks claude-pm script updates independently
 def get_script_version():
     """Get script version - injected during deployment."""
-    return "009"
+    return "010"
 
 SCRIPT_VERSION = get_script_version()
 
@@ -969,6 +969,64 @@ def check_memory_status():
     #     }
 
 
+def ensure_project_initialized():
+    """
+    Ensure the project has a .claude-pm directory with basic structure.
+    This runs automatically before any command execution to prevent errors.
+    
+    Returns:
+        bool: True if directory was created, False if already existed
+    """
+    try:
+        # Check if .claude-pm directory exists in current project
+        current_dir = Path.cwd()
+        claude_pm_dir = current_dir / ".claude-pm"
+        
+        if not claude_pm_dir.exists():
+            # Create the basic structure silently
+            dirs_to_create = [
+                claude_pm_dir / "logs",
+                claude_pm_dir / "agents",
+                claude_pm_dir / "agents" / "project-specific",
+                claude_pm_dir / "config",
+                claude_pm_dir / "templates",
+                claude_pm_dir / "memory",
+                claude_pm_dir / "framework_backups",
+            ]
+            
+            for dir_path in dirs_to_create:
+                dir_path.mkdir(parents=True, exist_ok=True)
+            
+            # Create a basic project config
+            project_config = claude_pm_dir / "config" / "project.json"
+            if not project_config.exists():
+                import json
+                config_data = {
+                    "project_name": current_dir.name,
+                    "created": datetime.now().isoformat(),
+                    "framework_version": get_framework_version(),
+                    "auto_initialized": True
+                }
+                with open(project_config, 'w') as f:
+                    json.dump(config_data, f, indent=2)
+            
+            # Log the auto-initialization at DEBUG level
+            import logging
+            logger = logging.getLogger("claude_pm")
+            logger.debug(f"Auto-initialized .claude-pm directory in {current_dir}")
+            
+            return True
+        
+        return False
+        
+    except Exception as e:
+        # Silently fail - don't interrupt the user's workflow
+        import logging
+        logger = logging.getLogger("claude_pm")
+        logger.debug(f"Failed to auto-initialize .claude-pm directory: {e}")
+        return False
+
+
 def launch_claude_cli_yolo():
     """Launch Claude CLI in proper YOLO mode with essential flags and AbortSignal configuration."""
     validation = validate_claude_cli()
@@ -1467,6 +1525,15 @@ def main():
     enhanced_flags = ["--safe", "--upgrade", "--rollback", "--dry-run", "--cleanup"]
     version_flags = ["--version"]  # Removed -v to avoid conflict with verbose
     help_flags = ["--help", "-h"]
+    
+    # Auto-initialize project .claude-pm directory if missing (except for cleanup/uninstall)
+    # This prevents errors from missing log directories and other project structures
+    cleanup_commands = ["--cleanup", "--uninstall", "uninstall", "cleanup"]
+    is_cleanup_command = any(cmd in args for cmd in cleanup_commands)
+    
+    if not is_cleanup_command:
+        # Silently ensure project is initialized before any operations
+        ensure_project_initialized()
     
     # Check for init command
     if args and args[0] == "init":
