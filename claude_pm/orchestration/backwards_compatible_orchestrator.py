@@ -29,6 +29,8 @@ import os
 import sys
 import logging
 import asyncio
+import time
+import uuid
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
@@ -58,6 +60,16 @@ class OrchestrationMode(Enum):
     HYBRID = "hybrid"
 
 
+class ReturnCode:
+    """Return codes for orchestration operations."""
+    SUCCESS = 0
+    GENERAL_FAILURE = 1
+    TIMEOUT = 2
+    CONTEXT_FILTERING_ERROR = 3
+    AGENT_NOT_FOUND = 4
+    MESSAGE_BUS_ERROR = 5
+
+
 @dataclass
 class OrchestrationMetrics:
     """Metrics for orchestration performance tracking."""
@@ -67,6 +79,12 @@ class OrchestrationMetrics:
     fallback_reason: Optional[str] = None
     context_filtering_time_ms: float = 0.0
     message_routing_time_ms: float = 0.0
+    context_size_original: int = 0
+    context_size_filtered: int = 0
+    token_reduction_percent: float = 0.0
+    return_code: int = ReturnCode.SUCCESS
+    task_id: Optional[str] = None
+    agent_type: Optional[str] = None
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert metrics to dictionary for logging/reporting."""
@@ -77,7 +95,13 @@ class OrchestrationMetrics:
             "fallback_reason": self.fallback_reason,
             "context_filtering_time_ms": self.context_filtering_time_ms,
             "message_routing_time_ms": self.message_routing_time_ms,
-            "total_time_ms": self.decision_time_ms + self.execution_time_ms
+            "total_time_ms": self.decision_time_ms + self.execution_time_ms,
+            "context_size_original": self.context_size_original,
+            "context_size_filtered": self.context_size_filtered,
+            "token_reduction_percent": self.token_reduction_percent,
+            "return_code": self.return_code,
+            "task_id": self.task_id,
+            "agent_type": self.agent_type
         }
 
 
@@ -137,7 +161,7 @@ class BackwardsCompatibleOrchestrator:
         integration_notes: str = "",
         model_override: Optional[str] = None,
         performance_requirements: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    ) -> Tuple[Dict[str, Any], int]:
         """
         Delegate task to agent with automatic orchestration mode selection.
         
@@ -150,22 +174,39 @@ class BackwardsCompatibleOrchestrator:
         Returns:
             Same structure as TaskToolHelper.create_agent_subprocess
         """
-        start_time = datetime.now()
+        start_time = time.perf_counter()
+        task_id = str(uuid.uuid4())[:8]  # Short task ID for tracking
+        return_code = ReturnCode.SUCCESS
+        
+        # Log delegation start
+        logger.info("agent_delegation_start", extra={
+            "agent_type": agent_type,
+            "task_id": task_id,
+            "task_description": task_description[:100],  # First 100 chars
+            "priority": priority,
+            "timestamp": time.time(),
+            "requirements_count": len(requirements) if requirements else 0,
+            "deliverables_count": len(deliverables) if deliverables else 0
+        })
         
         try:
             # Determine orchestration mode
+            mode_start = time.perf_counter()
             mode, fallback_reason = await self._determine_orchestration_mode()
-            decision_time = (datetime.now() - start_time).total_seconds() * 1000
+            decision_time = (time.perf_counter() - mode_start) * 1000
             
-            logger.info(f"Selected orchestration mode: {mode.value}")
-            if fallback_reason:
-                logger.info(f"Fallback reason: {fallback_reason}")
+            logger.info("orchestration_mode_selected", extra={
+                "mode": mode.value,
+                "fallback_reason": fallback_reason,
+                "decision_time_ms": decision_time,
+                "task_id": task_id
+            })
             
             # Execute based on mode
-            execution_start = datetime.now()
+            execution_start = time.perf_counter()
             
             if mode == OrchestrationMode.LOCAL:
-                result = await self._execute_local_orchestration(
+                result, exec_return_code = await self._execute_local_orchestration(
                     agent_type=agent_type,
                     task_description=task_description,
                     requirements=requirements,
@@ -177,11 +218,13 @@ class BackwardsCompatibleOrchestrator:
                     escalation_triggers=escalation_triggers,
                     integration_notes=integration_notes,
                     model_override=model_override,
-                    performance_requirements=performance_requirements
+                    performance_requirements=performance_requirements,
+                    task_id=task_id
                 )
+                return_code = exec_return_code
             else:
                 # Fallback to subprocess delegation
-                result = await self._execute_subprocess_delegation(
+                result, exec_return_code = await self._execute_subprocess_delegation(
                     agent_type=agent_type,
                     task_description=task_description,
                     requirements=requirements,
@@ -193,37 +236,116 @@ class BackwardsCompatibleOrchestrator:
                     escalation_triggers=escalation_triggers,
                     integration_notes=integration_notes,
                     model_override=model_override,
-                    performance_requirements=performance_requirements
+                    performance_requirements=performance_requirements,
+                    task_id=task_id
                 )
+                return_code = exec_return_code
             
-            execution_time = (datetime.now() - execution_start).total_seconds() * 1000
+            execution_time = (time.perf_counter() - execution_start) * 1000
+            total_time = (time.perf_counter() - start_time) * 1000
+            
+            # Determine return code from result
+            if isinstance(result, dict):
+                if not result.get("success", True):
+                    return_code = ReturnCode.GENERAL_FAILURE
+                if "return_code" in result:
+                    return_code = result["return_code"]
+            
+            # Extract metrics from result if available
+            context_size_original = 0
+            context_size_filtered = 0
+            token_reduction_percent = 0.0
+            
+            if isinstance(result, dict) and "local_orchestration" in result:
+                local_orch = result["local_orchestration"]
+                if "context_size_original" in local_orch:
+                    context_size_original = local_orch["context_size_original"]
+                if "context_size_filtered" in local_orch:
+                    context_size_filtered = local_orch["context_size_filtered"]
+                if context_size_original > 0:
+                    token_reduction_percent = ((context_size_original - context_size_filtered) / context_size_original) * 100
             
             # Record metrics
             metrics = OrchestrationMetrics(
                 mode=mode,
                 decision_time_ms=decision_time,
                 execution_time_ms=execution_time,
-                fallback_reason=fallback_reason
+                fallback_reason=fallback_reason,
+                return_code=return_code,
+                task_id=task_id,
+                agent_type=agent_type,
+                context_size_original=context_size_original,
+                context_size_filtered=context_size_filtered,
+                token_reduction_percent=token_reduction_percent
             )
+            
+            # Extract timing from local orchestration if available
+            if isinstance(result, dict) and "local_orchestration" in result:
+                local_orch = result["local_orchestration"]
+                metrics.context_filtering_time_ms = local_orch.get("context_filtering_ms", 0.0)
+                metrics.message_routing_time_ms = local_orch.get("message_routing_ms", 0.0)
+            
             self._orchestration_metrics.append(metrics)
+            
+            # Log delegation end
+            logger.info("agent_delegation_end", extra={
+                "agent_type": agent_type,
+                "task_id": task_id,
+                "duration_ms": total_time,
+                "execution_time_ms": execution_time,
+                "return_code": return_code,
+                "mode": mode.value,
+                "context_tokens_original": context_size_original,
+                "context_tokens_filtered": context_size_filtered,
+                "token_reduction_percent": token_reduction_percent,
+                "timestamp": time.time()
+            })
             
             # Add orchestration metadata to result
             if isinstance(result, dict) and "success" in result:
                 result["orchestration_metadata"] = {
                     "mode": mode.value,
-                    "metrics": metrics.to_dict()
+                    "metrics": metrics.to_dict(),
+                    "task_id": task_id
                 }
+                result["return_code"] = return_code
             
-            return result
+            return result, return_code
             
-        except Exception as e:
-            logger.error(f"Error in backwards compatible orchestration: {e}")
+        except asyncio.TimeoutError as e:
+            return_code = ReturnCode.TIMEOUT
+            logger.error("agent_delegation_timeout", extra={
+                "agent_type": agent_type,
+                "task_id": task_id,
+                "timeout_seconds": timeout_seconds,
+                "error": str(e)
+            })
             # Always fallback to subprocess on error
-            return await self._emergency_subprocess_fallback(
+            result = await self._emergency_subprocess_fallback(
                 agent_type=agent_type,
                 task_description=task_description,
-                error=str(e)
+                error=f"Timeout after {timeout_seconds}s",
+                task_id=task_id,
+                return_code=return_code
             )
+            return result, return_code
+        except Exception as e:
+            return_code = ReturnCode.GENERAL_FAILURE
+            logger.error("agent_delegation_error", extra={
+                "agent_type": agent_type,
+                "task_id": task_id,
+                "error": str(e),
+                "error_type": type(e).__name__
+            })
+            # Always fallback to subprocess on error
+            result = await self._emergency_subprocess_fallback(
+                agent_type=agent_type,
+                task_description=task_description,
+                error=str(e),
+                task_id=task_id,
+                return_code=return_code
+            )
+            return result, return_code
     
     async def _determine_orchestration_mode(self) -> Tuple[OrchestrationMode, Optional[str]]:
         """
@@ -232,13 +354,22 @@ class BackwardsCompatibleOrchestrator:
         Returns:
             Tuple of (mode, fallback_reason)
         """
+        start_time = time.perf_counter()
+        
         # Check if mode is forced (for testing)
         if self.force_mode:
+            logger.debug("orchestration_mode_forced", extra={
+                "mode": self.force_mode.value,
+                "reason": "testing"
+            })
             return self.force_mode, "Forced mode for testing"
         
         # Check if orchestration is enabled
         is_enabled = self.detector.is_orchestration_enabled()
         if not is_enabled:
+            logger.debug("orchestration_disabled", extra={
+                "reason": "environment_variable_not_set"
+            })
             return OrchestrationMode.SUBPROCESS, "CLAUDE_PM_ORCHESTRATION not enabled"
         
         # Verify all components are available
@@ -246,21 +377,37 @@ class BackwardsCompatibleOrchestrator:
             # Check message bus
             if not self._message_bus:
                 self._message_bus = SimpleMessageBus()
+                logger.debug("message_bus_initialized")
             
             # Check context manager
             if not self._context_manager:
                 self._context_manager = create_context_manager()
+                logger.debug("context_manager_initialized")
             
             # Check agent registry
             if not self._agent_registry:
                 cache = SharedPromptCache.get_instance()
                 self._agent_registry = AgentRegistry(cache_service=cache)
+                logger.debug("agent_registry_initialized", extra={
+                    "cache_available": cache is not None
+                })
+            
+            initialization_time = (time.perf_counter() - start_time) * 1000
+            
+            logger.debug("orchestration_components_ready", extra={
+                "initialization_time_ms": initialization_time,
+                "mode": OrchestrationMode.LOCAL.value
+            })
             
             # All components available, use local orchestration
             return OrchestrationMode.LOCAL, None
             
         except Exception as e:
-            logger.warning(f"Component initialization failed: {e}")
+            logger.warning("component_initialization_failed", extra={
+                "error": str(e),
+                "error_type": type(e).__name__,
+                "fallback_mode": OrchestrationMode.SUBPROCESS.value
+            })
             return OrchestrationMode.SUBPROCESS, f"Component initialization failed: {str(e)}"
     
     async def _execute_local_orchestration(
@@ -268,31 +415,79 @@ class BackwardsCompatibleOrchestrator:
         agent_type: str,
         task_description: str,
         **kwargs
-    ) -> Dict[str, Any]:
+    ) -> Tuple[Dict[str, Any], int]:
         """
         Execute task using local orchestration.
         
         This method uses the new orchestration components while maintaining
         the same return structure as subprocess delegation.
         """
+        task_id = kwargs.get("task_id", str(uuid.uuid4())[:8])
+        return_code = ReturnCode.SUCCESS
+        
         try:
-            logger.debug(f"Executing local orchestration for {agent_type}")
+            logger.debug("local_orchestration_start", extra={
+                "agent_type": agent_type,
+                "task_id": task_id
+            })
             
             # Generate subprocess ID for compatibility
             subprocess_id = f"{agent_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
             
             # Get agent prompt from registry
+            agent_prompt_start = time.perf_counter()
             agent_prompt = await self._get_agent_prompt(agent_type)
+            agent_prompt_time = (time.perf_counter() - agent_prompt_start) * 1000
+            
             if not agent_prompt:
+                return_code = ReturnCode.AGENT_NOT_FOUND
+                logger.error("agent_not_found", extra={
+                    "agent_type": agent_type,
+                    "task_id": task_id,
+                    "prompt_lookup_time_ms": agent_prompt_time
+                })
                 raise ValueError(f"No agent prompt found for {agent_type}")
             
+            logger.debug("agent_prompt_loaded", extra={
+                "agent_type": agent_type,
+                "task_id": task_id,
+                "prompt_size": len(agent_prompt),
+                "load_time_ms": agent_prompt_time
+            })
+            
             # Collect current full context
+            context_collection_start = time.perf_counter()
             full_context = await self._collect_full_context()
+            context_collection_time = (time.perf_counter() - context_collection_start) * 1000
+            
+            # Calculate original context size
+            original_context_size = self._context_manager.get_context_size_estimate(full_context)
+            
+            logger.debug("context_collected", extra={
+                "task_id": task_id,
+                "collection_time_ms": context_collection_time,
+                "context_size_tokens": original_context_size,
+                "files_count": len(full_context.get("files", {}))
+            })
             
             # Filter context for agent
-            context_start = datetime.now()
+            context_filter_start = time.perf_counter()
             filtered_context = self._context_manager.filter_context_for_agent(agent_type, full_context)
-            context_time = (datetime.now() - context_start).total_seconds() * 1000
+            context_filter_time = (time.perf_counter() - context_filter_start) * 1000
+            
+            # Calculate filtered context size
+            filtered_context_size = self._context_manager.get_context_size_estimate(filtered_context)
+            token_reduction_percent = ((original_context_size - filtered_context_size) / original_context_size * 100) if original_context_size > 0 else 0
+            
+            logger.info("context_filtered", extra={
+                "agent_type": agent_type,
+                "task_id": task_id,
+                "filter_time_ms": context_filter_time,
+                "original_tokens": original_context_size,
+                "filtered_tokens": filtered_context_size,
+                "reduction_percent": token_reduction_percent,
+                "files_after_filter": len(filtered_context.get("files", {}))
+            })
             
             # Create request message
             request = Request(
@@ -303,14 +498,32 @@ class BackwardsCompatibleOrchestrator:
                     "context": filtered_context,
                     "requirements": kwargs.get("requirements", []),
                     "deliverables": kwargs.get("deliverables", []),
-                    "priority": kwargs.get("priority", "medium")
+                    "priority": kwargs.get("priority", "medium"),
+                    "task_id": task_id
                 }
             )
             
             # Route through message bus
-            routing_start = datetime.now()
+            routing_start = time.perf_counter()
             response = await self._message_bus.route_message(request)
-            routing_time = (datetime.now() - routing_start).total_seconds() * 1000
+            routing_time = (time.perf_counter() - routing_start) * 1000
+            
+            # Determine return code based on response
+            if response.status != MessageStatus.COMPLETED:
+                if response.status == MessageStatus.TIMEOUT:
+                    return_code = ReturnCode.TIMEOUT
+                elif response.error and "context" in response.error.lower():
+                    return_code = ReturnCode.CONTEXT_FILTERING_ERROR
+                else:
+                    return_code = ReturnCode.MESSAGE_BUS_ERROR
+            
+            logger.info("message_bus_routing_complete", extra={
+                "agent_type": agent_type,
+                "task_id": task_id,
+                "routing_time_ms": routing_time,
+                "response_status": response.status.value,
+                "return_code": return_code
+            })
             
             # Format response for compatibility
             result = {
@@ -328,7 +541,8 @@ class BackwardsCompatibleOrchestrator:
                     "requirements": kwargs.get("requirements", []),
                     "deliverables": kwargs.get("deliverables", []),
                     "priority": kwargs.get("priority", "medium"),
-                    "orchestration_mode": "local"
+                    "orchestration_mode": "local",
+                    "task_id": task_id
                 },
                 "prompt": self._format_agent_prompt(
                     agent_type, task_description, agent_prompt, **kwargs
@@ -337,11 +551,15 @@ class BackwardsCompatibleOrchestrator:
                     subprocess_id, agent_type, response
                 ),
                 "local_orchestration": {
-                    "context_filtering_ms": context_time,
+                    "context_filtering_ms": context_filter_time,
                     "message_routing_ms": routing_time,
                     "response_status": response.status.value,
-                    "filtered_context_size": len(filtered_context)
-                }
+                    "filtered_context_size": filtered_context_size,
+                    "context_size_original": original_context_size,
+                    "context_size_filtered": filtered_context_size,
+                    "token_reduction_percent": token_reduction_percent
+                },
+                "return_code": return_code
             }
             
             # Include error if present
@@ -352,30 +570,55 @@ class BackwardsCompatibleOrchestrator:
             if response.data and "result" in response.data:
                 result["results"] = response.data["result"]
             
-            logger.info(f"Local orchestration completed for {subprocess_id}")
-            return result
+            logger.info("local_orchestration_complete", extra={
+                "agent_type": agent_type,
+                "task_id": task_id,
+                "subprocess_id": subprocess_id,
+                "return_code": return_code,
+                "total_time_ms": context_filter_time + routing_time
+            })
+            
+            return result, return_code
             
         except Exception as e:
-            logger.error(f"Local orchestration failed: {e}")
+            if return_code == ReturnCode.SUCCESS:
+                return_code = ReturnCode.GENERAL_FAILURE
+                
+            logger.error("local_orchestration_failed", extra={
+                "agent_type": agent_type,
+                "task_id": task_id,
+                "error": str(e),
+                "error_type": type(e).__name__,
+                "return_code": return_code
+            })
+            
             # Fallback to subprocess
-            return await self._execute_subprocess_delegation(
+            result, _ = await self._execute_subprocess_delegation(
                 agent_type=agent_type,
                 task_description=task_description,
                 **kwargs
             )
+            result["return_code"] = return_code
+            return result, return_code
     
     async def _execute_subprocess_delegation(
         self,
         agent_type: str,
         task_description: str,
         **kwargs
-    ) -> Dict[str, Any]:
+    ) -> Tuple[Dict[str, Any], int]:
         """
         Execute task using traditional subprocess delegation.
         
         This maintains full compatibility with existing code.
         """
-        logger.debug(f"Executing subprocess delegation for {agent_type}")
+        task_id = kwargs.get("task_id", str(uuid.uuid4())[:8])
+        
+        logger.info("subprocess_delegation_start", extra={
+            "agent_type": agent_type,
+            "task_id": task_id,
+            "reason": "fallback_to_subprocess"
+        })
         
         # Initialize task tool helper if needed
         if not self._task_tool_helper:
@@ -384,47 +627,111 @@ class BackwardsCompatibleOrchestrator:
                 config=self.config
             )
         
+        start_time = time.perf_counter()
+        
+        # Remove task_id from kwargs before passing to TaskToolHelper
+        clean_kwargs = {k: v for k, v in kwargs.items() if k != "task_id"}
+        
         # Delegate to task tool helper
-        return await self._task_tool_helper.create_agent_subprocess(
+        result = await self._task_tool_helper.create_agent_subprocess(
             agent_type=agent_type,
             task_description=task_description,
-            **kwargs
+            **clean_kwargs
         )
+        
+        execution_time = (time.perf_counter() - start_time) * 1000
+        
+        logger.info("subprocess_delegation_complete", extra={
+            "agent_type": agent_type,
+            "task_id": task_id,
+            "execution_time_ms": execution_time,
+            "success": result.get("success", False) if isinstance(result, dict) else False
+        })
+        
+        # Add task_id to result for tracking
+        if isinstance(result, dict):
+            result["task_id"] = task_id
+        
+        # Determine return code based on result
+        return_code = ReturnCode.SUCCESS
+        if isinstance(result, dict) and not result.get("success", True):
+            return_code = ReturnCode.GENERAL_FAILURE
+            
+        return result, return_code
     
     async def _emergency_subprocess_fallback(
         self,
         agent_type: str,
         task_description: str,
-        error: str
-    ) -> Dict[str, Any]:
+        error: str,
+        task_id: Optional[str] = None,
+        return_code: int = ReturnCode.GENERAL_FAILURE
+    ) -> Tuple[Dict[str, Any], int]:
         """
         Emergency fallback to subprocess delegation with error information.
         """
-        logger.warning(f"Emergency subprocess fallback due to: {error}")
+        task_id = task_id or str(uuid.uuid4())[:8]
+        
+        logger.warning("emergency_fallback_triggered", extra={
+            "agent_type": agent_type,
+            "task_id": task_id,
+            "error": error,
+            "return_code": return_code
+        })
         
         try:
             # Try subprocess delegation
-            result = await self._execute_subprocess_delegation(
+            result, subprocess_return_code = await self._execute_subprocess_delegation(
                 agent_type=agent_type,
-                task_description=task_description
+                task_description=task_description,
+                task_id=task_id
             )
             
             # Add error context
             if isinstance(result, dict):
                 result["orchestration_error"] = error
                 result["fallback_mode"] = "emergency_subprocess"
+                result["return_code"] = return_code
+                result["task_id"] = task_id
             
-            return result
+            logger.info("emergency_fallback_succeeded", extra={
+                "agent_type": agent_type,
+                "task_id": task_id,
+                "subprocess_success": result.get("success", False) if isinstance(result, dict) else False
+            })
+            
+            # Return original return code if subprocess succeeded, otherwise use subprocess return code
+            final_return_code = return_code if subprocess_return_code == ReturnCode.SUCCESS else subprocess_return_code
+            return result, final_return_code
             
         except Exception as e:
             # Ultimate fallback - return error response
             subprocess_id = f"error_{agent_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            return TaskToolResponse(
-                request_id=subprocess_id,
-                success=False,
-                error=f"Orchestration failed: {error}. Subprocess fallback also failed: {str(e)}",
-                enhanced_prompt=f"**{agent_type.title()}**: {task_description}"
-            )
+            
+            logger.error("emergency_fallback_failed", extra={
+                "agent_type": agent_type,
+                "task_id": task_id,
+                "original_error": error,
+                "fallback_error": str(e),
+                "return_code": return_code
+            })
+            
+            error_result = {
+                "success": False,
+                "subprocess_id": subprocess_id,
+                "task_id": task_id,
+                "return_code": return_code,
+                "error": f"Orchestration failed: {error}. Subprocess fallback also failed: {str(e)}",
+                "subprocess_info": {
+                    "subprocess_id": subprocess_id,
+                    "agent_type": agent_type,
+                    "task_description": task_description,
+                    "status": "failed",
+                    "fallback_mode": "emergency_subprocess"
+                },
+                "prompt": f"**{agent_type.title()}**: {task_description}"
+            }
+            return error_result, return_code
     
     async def _get_agent_prompt(self, agent_type: str) -> Optional[str]:
         """Get agent prompt from registry."""
@@ -615,7 +922,9 @@ Integration Notes:
         if not self._orchestration_metrics:
             return {
                 "total_orchestrations": 0,
-                "metrics": []
+                "metrics": [],
+                "success_rate": 0.0,
+                "average_token_reduction": 0.0
             }
         
         # Calculate statistics
@@ -623,21 +932,70 @@ Integration Notes:
         local_count = sum(1 for m in self._orchestration_metrics if m.mode == OrchestrationMode.LOCAL)
         subprocess_count = sum(1 for m in self._orchestration_metrics if m.mode == OrchestrationMode.SUBPROCESS)
         
+        # Success/failure statistics
+        success_count = sum(1 for m in self._orchestration_metrics if m.return_code == ReturnCode.SUCCESS)
+        failure_by_code = {}
+        for m in self._orchestration_metrics:
+            if m.return_code != ReturnCode.SUCCESS:
+                code_name = self._get_return_code_name(m.return_code)
+                failure_by_code[code_name] = failure_by_code.get(code_name, 0) + 1
+        
+        # Timing statistics
         avg_decision_time = sum(m.decision_time_ms for m in self._orchestration_metrics) / total
         avg_execution_time = sum(m.execution_time_ms for m in self._orchestration_metrics) / total
+        
+        # Token reduction statistics (only for local orchestrations with data)
+        token_reductions = [
+            m.token_reduction_percent 
+            for m in self._orchestration_metrics 
+            if m.mode == OrchestrationMode.LOCAL and m.context_size_original > 0
+        ]
+        avg_token_reduction = sum(token_reductions) / len(token_reductions) if token_reductions else 0.0
+        
+        # Context filtering timing (only for local orchestrations)
+        context_filter_times = [
+            m.context_filtering_time_ms 
+            for m in self._orchestration_metrics 
+            if m.mode == OrchestrationMode.LOCAL and m.context_filtering_time_ms > 0
+        ]
+        avg_context_filter_time = sum(context_filter_times) / len(context_filter_times) if context_filter_times else 0.0
+        
+        # Agent type distribution
+        agent_type_counts = {}
+        for m in self._orchestration_metrics:
+            if m.agent_type:
+                agent_type_counts[m.agent_type] = agent_type_counts.get(m.agent_type, 0) + 1
         
         return {
             "total_orchestrations": total,
             "local_orchestrations": local_count,
             "subprocess_orchestrations": subprocess_count,
+            "success_count": success_count,
+            "success_rate": (success_count / total * 100) if total > 0 else 0.0,
+            "failure_by_code": failure_by_code,
             "average_decision_time_ms": avg_decision_time,
             "average_execution_time_ms": avg_execution_time,
+            "average_context_filter_time_ms": avg_context_filter_time,
+            "average_token_reduction_percent": avg_token_reduction,
+            "agent_type_distribution": agent_type_counts,
             "recent_metrics": [m.to_dict() for m in self._orchestration_metrics[-10:]],
             "fallback_reasons": list(set(
                 m.fallback_reason for m in self._orchestration_metrics 
                 if m.fallback_reason
             ))
         }
+    
+    def _get_return_code_name(self, code: int) -> str:
+        """Get human-readable name for return code."""
+        code_names = {
+            ReturnCode.SUCCESS: "SUCCESS",
+            ReturnCode.GENERAL_FAILURE: "GENERAL_FAILURE",
+            ReturnCode.TIMEOUT: "TIMEOUT",
+            ReturnCode.CONTEXT_FILTERING_ERROR: "CONTEXT_FILTERING_ERROR",
+            ReturnCode.AGENT_NOT_FOUND: "AGENT_NOT_FOUND",
+            ReturnCode.MESSAGE_BUS_ERROR: "MESSAGE_BUS_ERROR"
+        }
+        return code_names.get(code, f"UNKNOWN_{code}")
     
     async def validate_compatibility(self) -> Dict[str, Any]:
         """Validate backwards compatibility with existing systems."""
@@ -648,10 +1006,11 @@ Integration Notes:
         
         try:
             # Check API compatibility
-            test_result = await self.delegate_to_agent(
+            test_result, test_return_code = await self.delegate_to_agent(
                 agent_type="test",
                 task_description="Compatibility validation test"
             )
+            validation_results["checks"]["return_code_support"] = test_return_code is not None
             
             # Check required fields in response
             required_fields = ["success", "subprocess_id", "subprocess_info", "prompt"]
@@ -712,11 +1071,12 @@ async def delegate_with_compatibility(
     agent_type: str,
     task_description: str,
     **kwargs
-) -> Dict[str, Any]:
+) -> Tuple[Dict[str, Any], int]:
     """
     Quick delegation helper with automatic orchestration mode selection.
     
     This is a drop-in replacement for quick_create_subprocess.
+    Returns tuple of (result_dict, return_code).
     """
     orchestrator = BackwardsCompatibleOrchestrator()
     return await orchestrator.delegate_to_agent(
