@@ -9,6 +9,7 @@ import re
 import os
 import json
 import tiktoken
+import hashlib
 from typing import Dict, List, Any, Optional, Tuple, Set
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -62,6 +63,7 @@ class ContextManager:
         self.interaction_history: Dict[str, List[AgentInteraction]] = {}
         self.shared_context: Dict[str, Any] = {}
         self.token_encoder = tiktoken.get_encoding("cl100k_base")  # GPT-4 encoding
+        self._claude_md_cache: Dict[str, Dict[str, Any]] = {}  # Cache for CLAUDE.md deduplication
         
         logger.info("ContextManager initialized with filters for %d agent types", 
                    len(self.filters))
@@ -150,6 +152,15 @@ class ContextManager:
                 directory_patterns=["migrations/", "models/", "data/", "schemas/"],
                 priority_keywords=["database", "api", "schema", "migration", "data"],
                 context_sections=["database_schema", "api_endpoints", "data_models"]
+            ),
+            
+            "orchestrator": ContextFilter(
+                agent_type="orchestrator",
+                include_patterns=[r"CLAUDE\.md", r"README", r"TODO"],
+                file_extensions=[".md", ".txt", ".json", ".yaml"],
+                directory_patterns=[".claude-pm/", "docs/"],
+                priority_keywords=["orchestrate", "coordinate", "delegate", "manage", "framework"],
+                context_sections=["project_overview", "active_tasks", "agent_status"]
             )
         }
         
@@ -159,6 +170,146 @@ class ContextManager:
         """Register a custom context filter for a new agent type."""
         self.filters[agent_type] = filter_config
         logger.info("Registered custom filter for agent type: %s", agent_type)
+    
+    def _deduplicate_claude_md_content(self, claude_md_files: Dict[str, str]) -> Dict[str, str]:
+        """
+        Deduplicate CLAUDE.md content from multiple files.
+        
+        Strategy:
+        1. Parse content into sections (using headers)
+        2. Compute hashes for each section
+        3. Keep only unique sections, prioritizing closer files
+        4. Merge unique sections intelligently
+        
+        Args:
+            claude_md_files: Dict mapping file paths to their content
+            
+        Returns:
+            Dict with deduplicated content, preserving unique sections
+        """
+        if not claude_md_files:
+            return {}
+        
+        # Sort files by proximity (project > parent > framework)
+        sorted_files = sorted(claude_md_files.items(), key=lambda x: (
+            'framework' not in x[0],  # Framework last
+            x[0].count('/'),  # Fewer slashes = parent directory
+            x[0]  # Alphabetical as tiebreaker
+        ), reverse=True)
+        
+        # Parse sections from each file
+        parsed_files = {}
+        section_hashes: Dict[str, str] = {}  # hash -> first file containing it
+        
+        for file_path, content in sorted_files:
+            sections = self._parse_markdown_sections(content)
+            parsed_files[file_path] = sections
+            
+            # Track unique sections by full section hash (header + content)
+            for section_header, section_content in sections:
+                # Hash both header and content to handle same content under different headers
+                full_section = f"{section_header}\n{section_content}"
+                section_hash = hashlib.md5(full_section.encode()).hexdigest()
+                if section_hash not in section_hashes:
+                    section_hashes[section_hash] = file_path
+        
+        # Build deduplicated content - keep at least one file with merged unique content
+        deduplicated = {}
+        total_original_size = sum(len(content) for content in claude_md_files.values())
+        
+        # Track which sections belong to which files
+        for file_path, sections in parsed_files.items():
+            unique_sections = []
+            
+            for section_header, section_content in sections:
+                # Hash both header and content for consistency
+                full_section = f"{section_header}\n{section_content}"
+                section_hash = hashlib.md5(full_section.encode()).hexdigest()
+                # Keep section only if this file was the first to contain it
+                if section_hashes[section_hash] == file_path:
+                    unique_sections.append((section_header, section_content))
+            
+            if unique_sections:
+                # Reconstruct content from unique sections
+                deduplicated_content = '\n\n'.join(
+                    f"{header}\n{content}" for header, content in unique_sections
+                )
+                deduplicated[file_path] = deduplicated_content
+        
+        # Log deduplication results
+        total_deduplicated_size = sum(len(content) for content in deduplicated.values())
+        reduction_percent = ((total_original_size - total_deduplicated_size) / total_original_size * 100) if total_original_size > 0 else 0
+        
+        logger.info(
+            "CLAUDE.md deduplication: %d files, %d -> %d chars (%.1f%% reduction)",
+            len(claude_md_files), total_original_size, total_deduplicated_size, reduction_percent
+        )
+        
+        return deduplicated
+    
+    def _parse_markdown_sections(self, content: str) -> List[Tuple[str, str]]:
+        """
+        Parse markdown content into sections based on headers.
+        
+        Args:
+            content: Markdown content to parse
+            
+        Returns:
+            List of (header, content) tuples
+        """
+        sections = []
+        current_header = "# Introduction"  # Default header for content before first header
+        current_content = []
+        
+        lines = content.split('\n')
+        
+        for line in lines:
+            # Check if line is a header (# or ##)
+            if re.match(r'^#{1,3}\s+', line):
+                # Save previous section if it has content
+                if current_content:
+                    sections.append((current_header, '\n'.join(current_content)))
+                    current_content = []
+                current_header = line
+            else:
+                current_content.append(line)
+        
+        # Don't forget the last section
+        if current_content:
+            sections.append((current_header, '\n'.join(current_content)))
+        
+        return sections
+    
+    def _extract_claude_md_files(self, full_context: Dict[str, Any]) -> Dict[str, str]:
+        """
+        Extract CLAUDE.md files from the full context.
+        
+        Args:
+            full_context: Full context dictionary
+            
+        Returns:
+            Dict mapping file paths to CLAUDE.md content
+        """
+        claude_md_files = {}
+        
+        # Check for CLAUDE.md files in various context locations
+        if "files" in full_context:
+            for file_path, content in full_context["files"].items():
+                if file_path.endswith("CLAUDE.md") and isinstance(content, str):
+                    claude_md_files[file_path] = content
+        
+        # Check for inline CLAUDE.md content (sometimes passed directly)
+        if "claude_md_content" in full_context:
+            if isinstance(full_context["claude_md_content"], dict):
+                claude_md_files.update(full_context["claude_md_content"])
+            elif isinstance(full_context["claude_md_content"], str):
+                claude_md_files["inline_claude_md"] = full_context["claude_md_content"]
+        
+        # Check for framework instructions
+        if "framework_instructions" in full_context:
+            claude_md_files["framework_instructions"] = full_context["framework_instructions"]
+        
+        return claude_md_files
     
     def filter_context_for_agent(self, agent_type: str, full_context: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -176,6 +327,13 @@ class ContextManager:
             return full_context
         
         filter_config = self.filters[agent_type]
+        # First, handle CLAUDE.md deduplication
+        claude_md_files = self._extract_claude_md_files(full_context)
+        deduplicated_claude_md = {}
+        
+        if claude_md_files:
+            deduplicated_claude_md = self._deduplicate_claude_md_content(claude_md_files)
+        
         filtered_context = {
             "agent_type": agent_type,
             "timestamp": datetime.now().isoformat(),
@@ -185,6 +343,11 @@ class ContextManager:
         # Filter file contents based on patterns
         if "files" in full_context:
             filtered_files = self._filter_files(full_context["files"], filter_config)
+            # Add back deduplicated CLAUDE.md files for all agents (they may need references)
+            if deduplicated_claude_md:
+                for file_path, content in deduplicated_claude_md.items():
+                    if file_path.endswith("CLAUDE.md"):
+                        filtered_files[file_path] = content
             if filtered_files:
                 filtered_context["files"] = filtered_files
         
@@ -192,6 +355,11 @@ class ContextManager:
         for section in filter_config.context_sections:
             if section in full_context:
                 filtered_context[section] = full_context[section]
+        
+        # Include deduplicated CLAUDE.md if relevant to agent
+        # These agent types need framework instructions for orchestration
+        if deduplicated_claude_md and agent_type in ['orchestrator', 'pm', 'project_manager', 'project_management']:
+            filtered_context["framework_instructions"] = deduplicated_claude_md
         
         # Add priority information based on keywords
         if "current_task" in full_context:
@@ -232,6 +400,9 @@ class ContextManager:
         filtered_files = {}
         
         for file_path, content in files.items():
+            # Skip CLAUDE.md files as they're handled separately with deduplication
+            if file_path.endswith("CLAUDE.md"):
+                continue
             # Check if file matches include patterns
             include_match = any(
                 re.search(pattern, file_path, re.IGNORECASE) 
