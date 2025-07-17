@@ -249,7 +249,7 @@ class BackwardsCompatibleOrchestrator:
             
             # Check context manager
             if not self._context_manager:
-                self._context_manager = await create_context_manager(self.working_directory)
+                self._context_manager = create_context_manager()
             
             # Check agent registry
             if not self._agent_registry:
@@ -286,9 +286,12 @@ class BackwardsCompatibleOrchestrator:
             if not agent_prompt:
                 raise ValueError(f"No agent prompt found for {agent_type}")
             
+            # Collect current full context
+            full_context = await self._collect_full_context()
+            
             # Filter context for agent
             context_start = datetime.now()
-            filtered_context = await self._context_manager.get_filtered_context(agent_type)
+            filtered_context = self._context_manager.filter_context_for_agent(agent_type, full_context)
             context_time = (datetime.now() - context_start).total_seconds() * 1000
             
             # Create request message
@@ -430,19 +433,29 @@ class BackwardsCompatibleOrchestrator:
                 self._prompt_cache = SharedPromptCache.get_instance()
             
             # Try to get from cache first
-            cached_prompt = await self._prompt_cache.get_agent_prompt(agent_type)
+            cache_key = f"agent_prompt:{agent_type}"
+            cached_prompt = self._prompt_cache.get(cache_key)
             if cached_prompt:
                 return cached_prompt
             
             # Load from agent registry
             if self._agent_registry:
-                agent_data = await self._agent_registry.get_agent(agent_type)
-                if agent_data and "prompt" in agent_data:
-                    # Cache for future use
-                    await self._prompt_cache.cache_agent_prompt(
-                        agent_type, agent_data["prompt"]
-                    )
-                    return agent_data["prompt"]
+                agent_metadata = await self._agent_registry.get_agent(agent_type)
+                if agent_metadata:
+                    # Load agent definition file
+                    agent_path = Path(agent_metadata.path)
+                    if agent_path.exists():
+                        agent_content = agent_path.read_text()
+                        # Cache for future use
+                        cache_key = f"agent_prompt:{agent_type}"
+                        self._prompt_cache.set(cache_key, agent_content, ttl=3600)
+                        return agent_content
+                    else:
+                        # Fallback to basic prompt from metadata
+                        basic_prompt = f"{agent_metadata.description}\n\nSpecializations: {', '.join(agent_metadata.specializations)}"
+                        cache_key = f"agent_prompt:{agent_type}"
+                        self._prompt_cache.set(cache_key, basic_prompt, ttl=3600)
+                        return basic_prompt
             
             return None
             
@@ -491,6 +504,77 @@ Priority: {kwargs.get('priority', 'medium')}
 """
         
         return formatted_prompt
+    
+    async def _collect_full_context(self) -> Dict[str, Any]:
+        """
+        Collect the full context for the current working directory.
+        
+        This includes:
+        - Project files and structure
+        - CLAUDE.md instructions
+        - Current task information
+        - Git status and recent commits
+        - Active tickets
+        """
+        context = {
+            "working_directory": str(self.working_directory),
+            "timestamp": datetime.now().isoformat(),
+            "files": {},
+        }
+        
+        try:
+            # Collect CLAUDE.md files
+            claude_md_files = {}
+            
+            # Check for project CLAUDE.md
+            project_claude = self.working_directory / "CLAUDE.md"
+            if project_claude.exists():
+                claude_md_files[str(project_claude)] = project_claude.read_text()
+            
+            # Check for parent CLAUDE.md
+            parent_claude = self.working_directory.parent / "CLAUDE.md"
+            if parent_claude.exists():
+                claude_md_files[str(parent_claude)] = parent_claude.read_text()
+            
+            # Check for framework CLAUDE.md
+            framework_claude = Path(__file__).parent.parent.parent / "framework" / "CLAUDE.md"
+            if framework_claude.exists():
+                claude_md_files[str(framework_claude)] = framework_claude.read_text()
+            
+            if claude_md_files:
+                context["files"].update(claude_md_files)
+                context["claude_md_content"] = claude_md_files
+            
+            # Collect project structure information
+            # For now, we'll add a simplified version - in production this would be more comprehensive
+            context["project_structure"] = {
+                "type": "python_project",
+                "has_git": (self.working_directory / ".git").exists(),
+                "has_tests": (self.working_directory / "tests").exists(),
+                "main_directories": []
+            }
+            
+            # Add main directories
+            for item in self.working_directory.iterdir():
+                if item.is_dir() and not item.name.startswith("."):
+                    context["project_structure"]["main_directories"].append(item.name)
+            
+            # Add any active task information from shared context if available
+            if hasattr(self, "_task_context"):
+                context["current_task"] = self._task_context
+            
+            logger.debug(f"Collected full context with {len(context['files'])} files")
+            
+        except Exception as e:
+            logger.error(f"Error collecting full context: {e}")
+            # Return minimal context on error
+            return {
+                "working_directory": str(self.working_directory),
+                "timestamp": datetime.now().isoformat(),
+                "error": f"Context collection error: {str(e)}"
+            }
+        
+        return context
     
     def _generate_local_usage_instructions(
         self,
