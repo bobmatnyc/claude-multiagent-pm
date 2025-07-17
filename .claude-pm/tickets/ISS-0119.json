@@ -1,0 +1,31 @@
+{
+  "id": "ISS-0119",
+  "title": "Implement Structured CLAUDE.md Generation System with Auto-versioning",
+  "priority": "HIGH",
+  "type": "Enhancement/Architecture",
+  "component": "Framework Deployment",
+  "version": {
+    "current": "0.9.2",
+    "target": "0.9.3"
+  },
+  "status": "Open",
+  "created": "2025-07-16T10:42:38.170492",
+  "description": "The framework needs a dedicated framework_claude_md_generator.py module that provides:\n\n## Problem Statement\nCurrently framework/CLAUDE.md is manually maintained with risk of structural drift during updates. Manual editing can accidentally reorder sections, miss required updates, or introduce formatting inconsistencies.\n\n## Proposed Solution\nImplement a code-driven CLAUDE.md generator that:\n- Defines canonical structure for framework/CLAUDE.md\n- Auto-increments serial numbers on updates (015-001 \u2192 015-002)\n- Handles all template variable substitution\n- Deploys to parent directories  \n- Validates section completeness\n- Replaces current deployment logic in parent_directory_manager.py\n\n## Benefits\n1. **Structural Stability**: Section order never changes accidentally\n2. **Automatic Version Management**: Serial numbers increment automatically\n3. **Testable Generation**: Each section can be unit tested\n4. **Clear Separation**: Structure vs content clearly separated\n5. **Easier Maintenance**: Updates happen in code, not manual editing\n\n## Technical Approach\n\n### Architecture\n- OrderedDict-based section management for guaranteed order\n- Section generators for each major component\n- Template variable registry for consistent substitution\n- Validation layer for completeness checking\n- Integration hooks for deployment pipeline\n\n### Key Components\n1. **FrameworkClaudeMdGenerator class**\n   - generate() method returns complete CLAUDE.md\n   - update_serial() for version bumping\n   - validate_structure() for integrity checks\n   \n2. **Section Generators**\n   - header_section(): Version metadata and timestamps\n   - role_section(): AI assistant role designation  \n   - agents_section(): Core agents and hierarchy\n   - tools_section(): TodoWrite and Task Tool integration\n   - init_section(): Claude-pm init procedures\n   - principles_section(): Orchestration principles\n   - validation_section(): Subprocess validation protocol\n   - troubleshooting_section(): Common issues\n\n3. **Template Variables**\n   - {{FRAMEWORK_VERSION}}: From VERSION file\n   - {{DEPLOYMENT_DATE}}: Current timestamp\n   - {{DEPLOYMENT_ID}}: Unique deployment identifier\n   - {{PLATFORM_NOTES}}: Platform-specific content\n   - {{CONTENT_HASH}}: Structure validation hash\n\n### Integration Points\n- parent_directory_manager.py calls generator instead of reading template\n- Deployment scripts updated to use generator\n- Version consistency validation integrated\n- Backup system works with generated output\n\n## Implementation Plan\n1. Create claude_pm/services/framework_claude_md_generator.py\n2. Implement section generators with current content\n3. Add auto-versioning logic for serial numbers\n4. Create comprehensive test suite\n5. Integrate with parent_directory_manager.py\n6. Update deployment scripts\n7. Document usage and maintenance procedures\n\n## Acceptance Criteria\n- [ ] Generator produces byte-identical output to current template (initially)\n- [ ] Serial numbers auto-increment on updates\n- [ ] All sections validated for completeness\n- [ ] Tests cover all section generators\n- [ ] Deployment pipeline fully integrated\n- [ ] Documentation updated for new system\n- [ ] Backward compatibility maintained",
+  "acceptance_criteria": [
+    "Generator produces byte-identical output to current template (initially)",
+    "Serial numbers auto-increment on updates",
+    "All sections validated for completeness",
+    "Tests cover all section generators",
+    "Deployment pipeline fully integrated",
+    "Documentation updated for new system",
+    "Backward compatibility maintained"
+  ],
+  "labels": [
+    "architecture",
+    "deployment",
+    "framework",
+    "stability"
+  ],
+  "milestone": "v0.9.3",
+  "assignee": "framework-team"
+}

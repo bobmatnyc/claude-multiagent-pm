@@ -576,3 +576,21 @@ Begin with smaller projects to understand the framework's coordination patterns 
 **Technical Requirements**: Node.js 16+, Python 3.8+
 
 **📚 Documentation**: [**User Guide**](./docs/user-guide.md) | [Quick Start Guide](./docs/QUICKSTART.md) | [Framework Guide](./framework/CLAUDE.md) | [Custom Agents](./docs/old/user-guide/README.md)
+
+## 🛠️ Developer Documentation
+
+**For contributors and developers working on the framework:**
+
+**📖 [Developer Documentation](./docs/developer/README.md)** - Comprehensive guide for framework development
+
+### Developer Guides:
+- [**Architecture Guide**](./docs/developer/architecture.md) - System design and component interaction
+- [**Development Setup**](./docs/developer/setup.md) - Environment configuration and toolchain
+- [**Contributing Guide**](./docs/developer/contributing.md) - How to contribute code and documentation
+- [**API Reference**](./docs/developer/api-reference.md) - Complete API documentation
+- [**Agent Development**](./docs/developer/agent-development.md) - Creating custom agents
+- [**Testing Guide**](./docs/developer/testing.md) - Test strategies and best practices
+- [**Performance Guide**](./docs/developer/performance.md) - Optimization techniques
+- [**Security Guide**](./docs/developer/security.md) - Security best practices
+- [**Deployment Guide**](./docs/developer/deployment.md) - Deployment strategies
+- [**Debugging Guide**](./docs/developer/debugging.md) - Troubleshooting techniques

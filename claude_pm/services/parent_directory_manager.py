@@ -33,6 +33,7 @@ from enum import Enum
 
 from ..core.base_service import BaseService
 from ..core.logging_config import setup_logging, setup_streaming_logger, finalize_streaming_logs
+from .framework_claude_md_generator import FrameworkClaudeMdGenerator
 # TemplateManager and DependencyManager removed - use Claude Code Task Tool instead
 import os
 
@@ -473,6 +474,94 @@ class ParentDirectoryManager(BaseService):
             self.logger.error(f"Failed to register parent directory {target_directory}: {e}")
             return False
 
+    async def deploy_framework_template(
+        self,
+        target_directory: Path,
+        force: bool = False,
+    ) -> ParentDirectoryOperation:
+        """
+        Deploy framework template using the new generator with integrated deployment.
+
+        Args:
+            target_directory: Directory to deploy template to
+            force: Force deployment even if version is current
+
+        Returns:
+            ParentDirectoryOperation result
+        """
+        try:
+            # Use the generator's deploy_to_parent method
+            generator = FrameworkClaudeMdGenerator()
+            target_path = target_directory / "CLAUDE.md"
+            
+            # Set template variables for deployment
+            import platform
+            generator.template_variables = {
+                'PYTHON_CMD': 'python3',
+                'PLATFORM': platform.system().lower(),
+                'PLATFORM_NOTES': self._get_platform_notes(),
+                'DEPLOYMENT_ID': '{{DEPLOYMENT_ID}}'  # Leave as template for runtime substitution
+            }
+            
+            # Create backup if file exists
+            backup_path = None
+            if target_path.exists():
+                # Check if existing file is protected
+                existing_content = target_path.read_text()
+                
+                # Check if existing file is a framework deployment template
+                is_framework_template = self._is_framework_deployment_template(existing_content)
+                
+                if not is_framework_template:
+                    # This is a project development file or other custom CLAUDE.md - PERMANENT PROTECTION
+                    error_msg = "Permanent protection active: Existing file is not a framework deployment template - protecting project development file"
+                    self.logger.error(f"🚫 PERMANENT PROTECTION: {error_msg}")
+                    self._log_protection_guidance(target_path, error_msg)
+                    
+                    return ParentDirectoryOperation(
+                        action=ParentDirectoryAction.INSTALL,
+                        target_path=target_path,
+                        success=False,
+                        template_id="framework_claude_md",
+                        error_message=error_msg,
+                    )
+                
+                # Create backup since it's a framework template
+                backup_path = await self._create_backup(target_path)
+                if backup_path:
+                    self._log_info_if_not_quiet(f"📁 Backup created: {backup_path}")
+            
+            # Deploy using generator (it expects a Path object)
+            success, message = generator.deploy_to_parent(target_directory, force=force)
+            
+            if success:
+                return ParentDirectoryOperation(
+                    action=ParentDirectoryAction.INSTALL,
+                    target_path=target_path,
+                    success=True,
+                    template_id="framework_claude_md",
+                    backup_path=backup_path,
+                    changes_made=[f"Deployed framework template to {target_path}"],
+                )
+            else:
+                return ParentDirectoryOperation(
+                    action=ParentDirectoryAction.INSTALL,
+                    target_path=target_path,
+                    success=False,
+                    template_id="framework_claude_md",
+                    error_message=f"Deployment failed: {message}",
+                )
+                
+        except Exception as e:
+            self.logger.error(f"Failed to deploy framework template to {target_directory}: {e}")
+            return ParentDirectoryOperation(
+                action=ParentDirectoryAction.INSTALL,
+                target_path=target_directory / "CLAUDE.md",
+                success=False,
+                template_id="framework_claude_md",
+                error_message=str(e),
+            )
+
     async def install_template_to_parent_directory(
         self,
         target_directory: Path,
@@ -501,7 +590,13 @@ class ParentDirectoryManager(BaseService):
                 deployment_streaming = True
             else:
                 deployment_streaming = False
-            # FIXED: Get template from deployment framework path
+            # Determine target file path
+            target_file = target_directory / "CLAUDE.md"
+            
+            # Store target file for generator to use for version auto-increment
+            self._current_target_file = target_file
+            
+            # FIXED: Get template from deployment framework path using generator
             content, template_version = await self._get_framework_template(template_id)
             if not content:
                 # Fallback to template manager if framework template not found
@@ -509,9 +604,6 @@ class ParentDirectoryManager(BaseService):
                 raise RuntimeError(
                     "Template manager removed - use Claude Code Task Tool for template management"
                 )
-
-            # Determine target file path
-            target_file = target_directory / "CLAUDE.md"
 
             # Initialize backup_path
             backup_path = None
@@ -531,49 +623,12 @@ class ParentDirectoryManager(BaseService):
                 else:
                     self.logger.warning(f"⚠️ Failed to create backup for {target_file}")
 
-            # Render template with variables including deployment context
-            merged_variables = self._get_deployment_template_variables()
-            if template_version and hasattr(template_version, "variables"):
-                merged_variables.update(template_version.variables)
-            merged_variables.update(template_variables or {})
-
-            # Add CLAUDE_MD_VERSION to template variables if not present
-            if "CLAUDE_MD_VERSION" not in merged_variables:
-                # Generate temporary content for comparison first
-                # Get framework version
-                try:
-                    version_file = self.framework_path / "VERSION"
-                    if version_file.exists():
-                        default_version = version_file.read_text().strip()
-                    else:
-                        import claude_pm
-                        default_version = claude_pm.__version__
-                except:
-                    import claude_pm
-                    default_version = claude_pm.__version__
-                
-                framework_version = merged_variables.get("FRAMEWORK_VERSION", default_version)
-                temp_variables = merged_variables.copy()
-                temp_variables["CLAUDE_MD_VERSION"] = "TEMP"  # Placeholder for template rendering
-
-                # Render template with placeholder to get content for comparison
-                temp_content = await self._render_template_content(content, temp_variables)
-
-                # Generate version based on content comparison
-                claude_md_version = self._generate_next_claude_md_version(
-                    target_file, framework_version, temp_content
-                )
-                merged_variables["CLAUDE_MD_VERSION"] = claude_md_version
-
-                self._log_info_if_not_quiet(f"🔢 Generated CLAUDE.md version: {claude_md_version}")
-                self._log_info_if_not_quiet(f"   • Framework version: {framework_version}")
-                self._log_info_if_not_quiet(f"   • Target file: {target_file}")
-
-            # Direct template rendering with handlebars substitution
-            rendered_content = await self._render_template_content(content, merged_variables)
-
+            # The generator already handles all template generation and variable substitution
+            # We just need to use the content directly
+            rendered_content = content
+            
             if not rendered_content:
-                raise RuntimeError("Failed to render template")
+                raise RuntimeError("Failed to generate template")
 
             # Check if deployment should be skipped based on version comparison and file type protection
             should_skip, skip_reason, is_permanent_protection = self._should_skip_deployment(
@@ -637,6 +692,10 @@ class ParentDirectoryManager(BaseService):
 
             self._log_info_if_not_quiet(f"Successfully installed template {template_id} to {target_file}")
             
+            # Clean up temporary attribute
+            if hasattr(self, '_current_target_file'):
+                del self._current_target_file
+            
             # Finalize streaming logs if we used streaming logger
             if deployment_streaming:
                 finalize_streaming_logs(self.logger)
@@ -648,6 +707,10 @@ class ParentDirectoryManager(BaseService):
             self.logger.error(
                 f"Failed to install template {template_id} to {target_directory}: {e}"
             )
+            
+            # Clean up temporary attribute
+            if hasattr(self, '_current_target_file'):
+                del self._current_target_file
             
             # Finalize streaming logs if we used streaming logger
             if 'deployment_streaming' in locals() and deployment_streaming:
@@ -1864,7 +1927,7 @@ class ParentDirectoryManager(BaseService):
         self, template_id: str
     ) -> Tuple[Optional[str], Optional[Any]]:
         """
-        Get template from deployment framework path.
+        Get template from deployment framework path using the new generator.
 
         Args:
             template_id: Template identifier
@@ -1875,46 +1938,62 @@ class ParentDirectoryManager(BaseService):
         try:
             # Check for framework CLAUDE.md template
             if template_id in ["parent_directory_claude_md", "claude_md", "deployment_claude"]:
+                # Use the new generator to create the template
+                generator = FrameworkClaudeMdGenerator()
+                
+                # Set template variables before generation
+                import platform
+                generator.template_variables = {
+                    'PYTHON_CMD': 'python3',
+                    'PLATFORM': platform.system().lower(),
+                    'PLATFORM_NOTES': self._get_platform_notes(),
+                    'DEPLOYMENT_ID': '{{DEPLOYMENT_ID}}'  # Leave as template for runtime substitution
+                }
+                
+                # Check if we have an existing file to pass for version auto-increment
+                current_content = None
+                if hasattr(self, '_current_target_file') and self._current_target_file.exists():
+                    current_content = self._current_target_file.read_text()
+                
+                # Generate the template content
+                content = generator.generate(current_content=current_content)
+                
+                # Extract the version that was generated
+                generated_version = self._extract_claude_md_version(content)
+                
+                # Maintain backup functionality with the generated content
                 framework_template_path = self.framework_path / "framework" / "CLAUDE.md"
-
                 if framework_template_path.exists():
-                    # PROTECTION: Ensure framework/CLAUDE.md is never deleted or removed
-                    self._protect_framework_template(framework_template_path)
-                    
-                    # BACKUP: Create backup before reading (in case of corruption during read)
+                    # BACKUP: Create backup before any operations
                     self._backup_framework_template(framework_template_path)
-                    
-                    content = framework_template_path.read_text()
 
-                    # Create a simple template version object
-                    # template_manager removed - use Claude Code Task Tool instead
-                    from datetime import datetime
-                    import hashlib
+                # Create a simple template version object for compatibility
+                from datetime import datetime
+                import hashlib
 
-                    # Use a simple dictionary instead of TemplateVersion
-                    # Create a simple template version object that has the expected attributes
-                    class SimpleTemplateVersion:
-                        def __init__(self, template_id, version, source, created_at, checksum, variables, metadata):
-                            self.template_id = template_id
-                            self.version = version
-                            self.source = source
-                            self.created_at = created_at
-                            self.checksum = checksum
-                            self.variables = variables
-                            self.metadata = metadata
-                    
-                    template_version = SimpleTemplateVersion(
-                        template_id=template_id,
-                        version="deployment-current",
-                        source="framework",
-                        created_at=datetime.now(),
-                        checksum=hashlib.sha256(content.encode()).hexdigest(),
-                        variables={},
-                        metadata={"source_path": str(framework_template_path)}
-                    )
+                # Create a simple template version object that has the expected attributes
+                class SimpleTemplateVersion:
+                    def __init__(self, template_id, version, source, created_at, checksum, variables, metadata):
+                        self.template_id = template_id
+                        self.version = version
+                        self.source = source
+                        self.created_at = created_at
+                        self.checksum = checksum
+                        self.variables = variables
+                        self.metadata = metadata
+                
+                template_version = SimpleTemplateVersion(
+                    template_id=template_id,
+                    version=generated_version or "deployment-current",
+                    source="framework-generator",
+                    created_at=datetime.now(),
+                    checksum=hashlib.sha256(content.encode()).hexdigest(),
+                    variables=generator.template_variables,
+                    metadata={"source": "FrameworkClaudeMdGenerator"}
+                )
 
-                    self._log_info_if_not_quiet(f"Using framework template from: {framework_template_path}")
-                    return content, template_version
+                self._log_info_if_not_quiet(f"Using framework template from generator (version: {generated_version})")
+                return content, template_version
 
             return None, None
 
@@ -1922,6 +2001,25 @@ class ParentDirectoryManager(BaseService):
             self.logger.error(f"Failed to get framework template {template_id}: {e}")
             return None, None
 
+    def _get_platform_notes(self) -> str:
+        """
+        Get platform-specific notes for the framework template.
+        
+        Returns:
+            Platform-specific notes string
+        """
+        import platform
+        system = platform.system().lower()
+        
+        if system == 'windows':
+            return "Windows users may need to use 'python' instead of 'python3' depending on installation."
+        elif system == 'darwin':
+            return "macOS users should ensure python3 is installed via Homebrew or official Python installer."
+        elif system == 'linux':
+            return "Linux users may need to install python3 via their package manager if not present."
+        else:
+            return f"Platform-specific configuration may be required for {system}."
+    
     def _get_deployment_template_variables(self) -> Dict[str, Any]:
         """
         Get deployment-specific template variables for handlebars substitution.

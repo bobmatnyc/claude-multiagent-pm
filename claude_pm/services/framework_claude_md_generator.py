@@ -1,13 +1,122 @@
-# Claude PM Framework Configuration - Deployment
+"""
+Framework CLAUDE.md Generator Service
+
+This service provides structured generation of the framework CLAUDE.md template
+with auto-versioning, section management, and deployment capabilities.
+"""
+
+import os
+import re
+from typing import Dict, Optional, Any, List, Tuple
+from datetime import datetime
+from collections import OrderedDict
+from pathlib import Path
+import json
+
+
+class FrameworkClaudeMdGenerator:
+    """
+    Generates and manages the framework CLAUDE.md template with structured sections,
+    auto-versioning, and deployment capabilities.
+    """
+    
+    def __init__(self):
+        """Initialize the generator with current framework version."""
+        self.framework_version = self._get_framework_version()
+        self.sections = OrderedDict()
+        self.template_variables = {}
+        self._initialize_sections()
+    
+    def _get_framework_version(self) -> str:
+        """
+        Get the current framework version from framework/VERSION file.
+        
+        Returns:
+            str: Framework version (e.g., "015")
+        """
+        version_path = Path(__file__).parent.parent.parent / "framework" / "VERSION"
+        if version_path.exists():
+            with open(version_path, 'r') as f:
+                version_content = f.read().strip()
+                # Framework VERSION file contains just the framework version number
+                try:
+                    return f"{int(version_content):03d}"
+                except ValueError:
+                    # If not a plain number, try to extract from version string
+                    match = re.match(r'(\d+)', version_content)
+                    if match:
+                        return f"{int(match.group(1)):03d}"
+        return "014"  # Default fallback
+    
+    def _parse_current_version(self, content: str) -> Tuple[str, int]:
+        """
+        Parse the current CLAUDE_MD_VERSION from existing content.
+        
+        Args:
+            content: Existing CLAUDE.md content
+            
+        Returns:
+            Tuple of (framework_version, serial_number)
+        """
+        match = re.search(r'CLAUDE_MD_VERSION:\s*(\d+)-(\d+)', content)
+        if match:
+            return match.group(1), int(match.group(2))
+        return self.framework_version, 1
+    
+    def _auto_increment_version(self, current_content: Optional[str] = None) -> str:
+        """
+        Auto-increment the CLAUDE_MD_VERSION serial number.
+        
+        Args:
+            current_content: Current CLAUDE.md content to parse version from
+            
+        Returns:
+            str: New version string (e.g., "015-003")
+        """
+        if current_content:
+            framework_ver, serial = self._parse_current_version(current_content)
+            if framework_ver == self.framework_version:
+                return f"{framework_ver}-{serial + 1:03d}"
+        
+        return f"{self.framework_version}-001"
+    
+    def _initialize_sections(self):
+        """Initialize all sections in the required order."""
+        # Each section is a tuple of (generator_method, section_data)
+        self.sections['header'] = (self._generate_header, {})
+        self.sections['role_designation'] = (self._generate_role_designation, {})
+        self.sections['agents'] = (self._generate_agents_section, {})
+        self.sections['todo_task_tools'] = (self._generate_todo_task_tools, {})
+        self.sections['claude_pm_init'] = (self._generate_claude_pm_init, {})
+        self.sections['orchestration_principles'] = (self._generate_orchestration_principles, {})
+        self.sections['subprocess_validation'] = (self._generate_subprocess_validation, {})
+        self.sections['delegation_constraints'] = (self._generate_delegation_constraints, {})
+        self.sections['environment_config'] = (self._generate_environment_config, {})
+        self.sections['troubleshooting'] = (self._generate_troubleshooting, {})
+        self.sections['core_responsibilities'] = (self._generate_core_responsibilities, {})
+        self.sections['footer'] = (self._generate_footer, {})
+    
+    def _generate_header(self, data: Dict[str, Any]) -> str:
+        """Generate the header section with version metadata."""
+        version = data.get('version', self._auto_increment_version())
+        timestamp = datetime.utcnow().isoformat()
+        content_hash = data.get('content_hash', self._generate_content_hash())
+        
+        return f"""# Claude PM Framework Configuration - Deployment
 
 <!-- 
-CLAUDE_MD_VERSION: 015-002
-FRAMEWORK_VERSION: {{FRAMEWORK_VERSION}}
-DEPLOYMENT_DATE: 2025-07-15T15:30:00.000000
-LAST_UPDATED: 2025-07-16T11:30:00.000000
-CONTENT_HASH: {{CONTENT_HASH}}
--->
-
+CLAUDE_MD_VERSION: {version}
+FRAMEWORK_VERSION: {self.framework_version}
+DEPLOYMENT_DATE: {timestamp}
+LAST_UPDATED: {timestamp}
+CONTENT_HASH: {content_hash}
+-->"""
+    
+    def _generate_role_designation(self, data: Dict[str, Any]) -> str:
+        """Generate the AI Assistant Role Designation section."""
+        deployment_date = data.get('deployment_date', datetime.utcnow().isoformat())
+        
+        return f"""
 ## 🤖 AI ASSISTANT ROLE DESIGNATION
 
 **You are operating within a Claude PM Framework deployment**
@@ -20,16 +129,19 @@ Your primary role is operating as a multi-agent orchestrator. Your job is to orc
 - **Maintaining project visibility** and strategic oversight throughout execution
 
 ### Framework Context
-- **Version**: {{FRAMEWORK_VERSION}}
-- **Deployment Date**: {{DEPLOYMENT_DATE}}
-- **Platform**: {{PLATFORM}}
-- **Python Command**: {{PYTHON_CMD}}
+- **Version**: {self.framework_version}
+- **Deployment Date**: {deployment_date}
+- **Platform**: {{{{PLATFORM}}}}
+- **Python Command**: {{{{PYTHON_CMD}}}}
 - **Agent Hierarchy**: Three-tier (Project → User → System) with automatic discovery
 - **Core System**: 🔧 Framework orchestration and agent coordination
 - **Performance**: ⚡ <15 second health monitoring (77% improvement)
 
----
-
+---"""
+    
+    def _generate_agents_section(self, data: Dict[str, Any]) -> str:
+        """Generate the comprehensive Agents section."""
+        return """
 ## A) AGENTS
 
 ### 🚨 MANDATORY: CORE AGENT TYPES
@@ -254,8 +366,6 @@ TEMPORAL CONTEXT: Today is [current date]. Apply date awareness to:
 - **"security"** → Security Agent (security analysis, agent precedence validation)
 - **"document"** → Documentation Agent (project pattern scanning, operational docs)
 - **"ticket"** → Ticketing Agent (all ticket operations, universal interface)
-
-**🚨 TICKET KEYWORD TRIGGER**: The word "ticket" in ANY context (create a ticket, update ticket, check tickets, etc.) MUST trigger immediate Ticketing Agent delegation. No exceptions.
 - **"branch"** → Version Control Agent (branch creation, switching, management)
 - **"merge"** → Version Control Agent (merge operations with QA validation)
 - **"research"** → Research Agent (general research, library documentation)
@@ -495,40 +605,6 @@ batch_agents = registry.loadAgents(
 )
 ```
 
-### 📈 Prompt Improvement Notifications
-
-**MANDATORY: Report all automated prompt improvements to maintain visibility**
-
-When the framework's **Prompt Improvement System** automatically enhances an agent prompt:
-
-1. **Immediate Notification**: Report the improvement to the user:
-   ```
-   🔧 Prompt Improvement Applied: [Agent Name]
-   - Trigger: [What triggered the improvement - error pattern, performance metric, etc.]
-   - Enhancement: [Brief description of what was improved]
-   - Expected Impact: [How this should improve agent performance]
-   ```
-
-2. **Track Improvements**: Include in status updates:
-   - Which agents received improvements
-   - Number of improvements applied
-   - Performance changes observed
-
-3. **Learning Integration**: Note when improvements are:
-   - Shared across similar agents
-   - Integrated into agent training data
-   - Affecting cross-agent performance
-
-**Example Notification**:
-```
-🔧 Prompt Improvement Applied: Research Agent
-- Trigger: Repeated timeout errors on large codebases
-- Enhancement: Added chunking strategy and parallel search patterns
-- Expected Impact: 65% faster searches, reduced timeouts
-```
-
-This ensures users are aware of the continuous optimization happening behind the scenes and can track the evolution of their agent ecosystem.
-
 #### Task Tool Integration Patterns for Agent Registry
 
 **Dynamic Agent Selection in Task Tool:**
@@ -631,8 +707,11 @@ def orchestrate_with_registry(task_description, requirements):
     )
 ```
 
----
-
+---"""
+    
+    def _generate_todo_task_tools(self, data: Dict[str, Any]) -> str:
+        """Generate the Todo and Task Tools section."""
+        return """
 ## B) TODO AND TASK TOOLS
 
 ### 🚨 MANDATORY: TodoWrite Integration with Task Tool
@@ -707,8 +786,11 @@ Task Tool → Version Control Agent: Apply semantic version bump and create rele
 Update TodoWrite status based on agent completions
 ```
 
----
-
+---"""
+    
+    def _generate_claude_pm_init(self, data: Dict[str, Any]) -> str:
+        """Generate the Claude-PM Init section."""
+        return """
 ## C) CLAUDE-PM INIT
 
 ### Core Initialization Commands
@@ -769,7 +851,7 @@ claude-pm init --verify
 
 **Multi-Project Orchestrator Pattern:**
 
-1. **Framework Directory** (`{{DEPLOYMENT_DIR}}/.claude-pm/`)
+1. **Framework Directory** (`/Users/masa/Projects/claude-multiagent-pm/.claude-pm/`)
    - Global user agents (shared across all projects)
    - Framework-level configuration
 
@@ -793,8 +875,11 @@ python -c "from claude_pm.services.health_monitor import HealthMonitor; HealthMo
 claude-pm init --verify
 
 
----
-
+---"""
+    
+    def _generate_orchestration_principles(self, data: Dict[str, Any]) -> str:
+        """Generate the Core Orchestration Principles section."""
+        return """
 ## 🚨 CORE ORCHESTRATION PRINCIPLES
 
 1. **Never Perform Direct Work**: PM NEVER reads or writes code, modifies files, performs Git operations, or executes technical tasks directly unless explicitly ordered to by the user
@@ -809,10 +894,12 @@ claude-pm init --verify
 10. **Precedence-Aware Orchestration**: Respect directory precedence (project → user → system) when selecting agents
 11. **Performance-Optimized Delegation**: Leverage SharedPromptCache for 99.7% faster agent loading and orchestration
 12. **Specialization-Based Routing**: Route tasks to agents with appropriate specializations beyond core 9 types using registry discovery
-13. **Prompt Improvement Transparency**: Report all automated prompt enhancements to maintain user awareness of system optimizations
 
----
-
+---"""
+    
+    def _generate_subprocess_validation(self, data: Dict[str, Any]) -> str:
+        """Generate the Subprocess Validation Protocol section."""
+        return """
 ## 🔥🚨 CRITICAL: SUBPROCESS VALIDATION PROTOCOL 🚨🔥
 
 **⚠️ WARNING: SUBPROCESS REPORTS CAN BE MISLEADING ⚠️**
@@ -909,8 +996,11 @@ echo "Python Module: $(python3 -c 'import claude_pm; print(claude_pm.__version__
 # If ANY of the above fail, IMMEDIATELY inform user and fix issues
 ```
 
----
-
+---"""
+    
+    def _generate_delegation_constraints(self, data: Dict[str, Any]) -> str:
+        """Generate the Critical Delegation Constraints section."""
+        return """
 ## 🚨 CRITICAL DELEGATION CONSTRAINTS
 
 **FORBIDDEN ACTIVITIES - MUST DELEGATE VIA TASK TOOL:**
@@ -919,9 +1009,11 @@ echo "Python Module: $(python3 -c 'import claude_pm; print(claude_pm.__version__
 - **Configuration**: NEVER modify config files - delegate to Ops Agent
 - **Testing**: NEVER write tests - delegate to QA Agent
 - **Documentation Operations**: ALL documentation tasks must be delegated to Documentation Agent
-- **Ticket Operations**: ALL ticket operations must be delegated to Ticketing Agent - if the word "ticket" appears in any context (create, update, read, close, etc.), IMMEDIATELY delegate to Ticketing Agent
-- **Ticket Creation/Management**: NEVER create ticket content, descriptions, or specifications directly - the word "ticket" = immediate Ticketing Agent delegation
-
+- **Ticket Operations**: ALL ticket operations must be delegated to Ticketing Agent"""
+    
+    def _generate_environment_config(self, data: Dict[str, Any]) -> str:
+        """Generate the Environment Configuration section."""
+        return """
 ## 🚨 ENVIRONMENT CONFIGURATION
 
 ### Python Environment
@@ -930,8 +1022,11 @@ echo "Python Module: $(python3 -c 'import claude_pm; print(claude_pm.__version__
 - **Framework Import**: `import claude_pm`
 
 ### Platform-Specific Notes
-{{PLATFORM_NOTES}}
-
+{{PLATFORM_NOTES}}"""
+    
+    def _generate_troubleshooting(self, data: Dict[str, Any]) -> str:
+        """Generate the Troubleshooting section."""
+        return """
 ## 🚨 TROUBLESHOOTING
 
 ### Common Issues
@@ -956,8 +1051,11 @@ echo "Python Module: $(python3 -c 'import claude_pm; print(claude_pm.__version__
 13. **Performance Cache Problems**: Clear SharedPromptCache and reinitialize registry
 14. **Agent Modification Tracking Errors**: Verify agent file permissions and timestamps
 15. **Custom Agent Loading Issues**: Verify user-agents directory structure and agent file format
-16. **Directory Precedence Problems**: Check user-agents directory hierarchy and parent directory traversal
-
+16. **Directory Precedence Problems**: Check user-agents directory hierarchy and parent directory traversal"""
+    
+    def _generate_core_responsibilities(self, data: Dict[str, Any]) -> str:
+        """Generate the Core Responsibilities section."""
+        return """
 ## Core Responsibilities
 1. **Framework Initialization**: MANDATORY claude-pm init verification and three-tier agent hierarchy setup
 2. **Date Awareness**: Always acknowledge current date at session start and maintain temporal context
@@ -970,9 +1068,200 @@ echo "Python Module: $(python3 -c 'import claude_pm; print(claude_pm.__version__
 9. **Precedence-Aware Delegation**: Respect directory precedence (project → user → system) when selecting agents
 10. **Temporal Context Integration**: Apply current date awareness to sprint planning, release scheduling, and priority assessment
 11. **Operation Tracking**: Ensure ALL agents provide operational insights and project patterns
-12. **Agent Modification Tracking**: Monitor agent changes and adapt orchestration patterns accordingly
-13. **Prompt Improvement Visibility**: Report automated prompt improvements to users for transparency
-
-**Framework Version**: {{FRAMEWORK_VERSION}}
-**Deployment ID**: {{DEPLOYMENT_ID}}
-**Last Updated**: {{LAST_UPDATED}}
+12. **Agent Modification Tracking**: Monitor agent changes and adapt orchestration patterns accordingly"""
+    
+    def _generate_footer(self, data: Dict[str, Any]) -> str:
+        """Generate the footer section."""
+        deployment_id = data.get('deployment_id', '{{DEPLOYMENT_ID}}')
+        timestamp = datetime.utcnow().isoformat()
+        
+        return f"""
+**Framework Version**: {self.framework_version}
+**Deployment ID**: {deployment_id}
+**Last Updated**: {timestamp}"""
+    
+    def _generate_content_hash(self) -> str:
+        """
+        Generate a content hash for integrity verification.
+        
+        Returns:
+            str: 16-character hash of content
+        """
+        import hashlib
+        # Simple hash generation - can be enhanced
+        timestamp = datetime.utcnow().isoformat()
+        hash_obj = hashlib.sha256(timestamp.encode())
+        return hash_obj.hexdigest()[:16]
+    
+    def generate(self, 
+                current_content: Optional[str] = None,
+                template_variables: Optional[Dict[str, str]] = None) -> str:
+        """
+        Generate the complete CLAUDE.md content.
+        
+        Args:
+            current_content: Current CLAUDE.md content for version parsing
+            template_variables: Variables to substitute in the template
+            
+        Returns:
+            str: Complete CLAUDE.md content
+        """
+        # Store template variables
+        if template_variables:
+            self.template_variables = template_variables
+        
+        # Auto-increment version if current content provided
+        version = self._auto_increment_version(current_content)
+        
+        # Generate all sections
+        content_parts = []
+        for section_name, (generator_func, section_data) in self.sections.items():
+            # Add version to header data
+            if section_name == 'header':
+                section_data['version'] = version
+            
+            section_content = generator_func(section_data)
+            content_parts.append(section_content)
+        
+        # Join all sections
+        full_content = '\n'.join(content_parts)
+        
+        # Apply template variable substitution
+        for var_name, var_value in self.template_variables.items():
+            placeholder = f"{{{{{var_name}}}}}"
+            full_content = full_content.replace(placeholder, var_value)
+        
+        return full_content
+    
+    def validate_content(self, content: str) -> Tuple[bool, List[str]]:
+        """
+        Validate that generated content has all required sections.
+        
+        Args:
+            content: Content to validate
+            
+        Returns:
+            Tuple of (is_valid, list_of_issues)
+        """
+        issues = []
+        
+        # Check for required sections
+        required_patterns = [
+            (r'CLAUDE_MD_VERSION:', 'Version metadata'),
+            (r'## 🤖 AI ASSISTANT ROLE DESIGNATION', 'Role designation section'),
+            (r'## A\) AGENTS', 'Agents section'),
+            (r'## B\) TODO AND TASK TOOLS', 'Todo/Task tools section'),
+            (r'## C\) CLAUDE-PM INIT', 'Claude-PM init section'),
+            (r'## 🚨 CORE ORCHESTRATION PRINCIPLES', 'Orchestration principles'),
+            (r'## 🔥🚨 CRITICAL: SUBPROCESS VALIDATION PROTOCOL', 'Subprocess validation'),
+            (r'## 🚨 CRITICAL DELEGATION CONSTRAINTS', 'Delegation constraints'),
+            (r'## 🚨 TROUBLESHOOTING', 'Troubleshooting section'),
+            (r'## Core Responsibilities', 'Core responsibilities'),
+        ]
+        
+        for pattern, section_name in required_patterns:
+            if not re.search(pattern, content):
+                issues.append(f"Missing required section: {section_name}")
+        
+        # Check for template variables that weren't substituted
+        # Some variables like DEPLOYMENT_ID are intentionally left for runtime substitution
+        allowed_runtime_vars = {'{{DEPLOYMENT_ID}}'}
+        unsubstituted = re.findall(r'\{\{[^}]+\}\}', content)
+        unexpected_vars = [var for var in unsubstituted if var not in allowed_runtime_vars]
+        if unexpected_vars:
+            issues.append(f"Unsubstituted template variables: {', '.join(set(unexpected_vars))}")
+        
+        return len(issues) == 0, issues
+    
+    def deploy_to_parent(self, parent_path: Path, force: bool = False) -> Tuple[bool, str]:
+        """
+        Deploy generated content to a parent directory.
+        
+        Args:
+            parent_path: Path to parent directory
+            force: Force deployment even if versions match
+            
+        Returns:
+            Tuple of (success, message)
+        """
+        target_file = parent_path / "CLAUDE.md"
+        
+        # Check if file exists and compare versions
+        if target_file.exists() and not force:
+            with open(target_file, 'r') as f:
+                existing_content = f.read()
+                existing_version = self._parse_current_version(existing_content)[0]
+                
+            if existing_version == self.framework_version:
+                return True, f"Version {existing_version} already deployed"
+        
+        # Generate new content
+        current_content = None
+        if target_file.exists():
+            with open(target_file, 'r') as f:
+                current_content = f.read()
+        
+        new_content = self.generate(current_content=current_content)
+        
+        # Validate before deployment
+        is_valid, issues = self.validate_content(new_content)
+        if not is_valid:
+            return False, f"Validation failed: {'; '.join(issues)}"
+        
+        # Deploy
+        try:
+            with open(target_file, 'w') as f:
+                f.write(new_content)
+            
+            return True, f"Successfully deployed version {self._parse_current_version(new_content)[0]}-{self._parse_current_version(new_content)[1]:03d}"
+        except Exception as e:
+            return False, f"Deployment failed: {str(e)}"
+    
+    def get_section_list(self) -> List[str]:
+        """
+        Get list of all section names in order.
+        
+        Returns:
+            List of section names
+        """
+        return list(self.sections.keys())
+    
+    def update_section(self, section_name: str, content: str) -> bool:
+        """
+        Update a specific section's generator to return custom content.
+        
+        Args:
+            section_name: Name of section to update
+            content: New content for the section
+            
+        Returns:
+            bool: Success status
+        """
+        if section_name not in self.sections:
+            return False
+        
+        # Create a lambda that returns the custom content
+        self.sections[section_name] = (lambda data: content, {})
+        return True
+    
+    def add_custom_section(self, section_name: str, content: str, after: Optional[str] = None):
+        """
+        Add a custom section to the generator.
+        
+        Args:
+            section_name: Name for the new section
+            content: Content for the section
+            after: Section name to insert after (None = append at end)
+        """
+        new_section = (lambda data: content, {})
+        
+        if after is None or after not in self.sections:
+            self.sections[section_name] = new_section
+        else:
+            # Insert after specified section
+            new_sections = OrderedDict()
+            for key, value in self.sections.items():
+                new_sections[key] = value
+                if key == after:
+                    new_sections[section_name] = new_section
+            self.sections = new_sections
