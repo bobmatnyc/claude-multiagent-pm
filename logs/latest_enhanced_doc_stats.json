@@ -180,6 +180,16 @@
       "target_path": "../CLAUDE.md`"
     },
     {
+      "severity": "high",
+      "issue_type": "broken_link",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/user-guide.md",
+      "line_number": 1116,
+      "description": "Broken link: [Project CLAUDE.md](../CLAUDE.md) -> /Users/masa/Projects/claude-multiagent-pm/CLAUDE.md",
+      "suggested_fix": "Suggested fix: Use '../framework/CLAUDE.md' instead of '../CLAUDE.md'",
+      "link_text": "Project CLAUDE.md",
+      "target_path": "/Users/masa/Projects/claude-multiagent-pm/CLAUDE.md"
+    },
+    {
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/user-guide.md",
@@ -248,9 +258,30 @@
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
       "target_path": "claude_pm/agents/`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/user-guide.md",
+      "line_number": 1094,
+      "description": "Potentially invalid path reference: ./CLAUDE.md",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./CLAUDE.md"
     }
   ],
-  "broken_links": [],
+  "broken_links": [
+    {
+      "severity": "high",
+      "issue_type": "broken_link",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/user-guide.md",
+      "line_number": 1116,
+      "description": "Broken link: [Project CLAUDE.md](../CLAUDE.md) -> /Users/masa/Projects/claude-multiagent-pm/CLAUDE.md",
+      "suggested_fix": "Suggested fix: Use '../framework/CLAUDE.md' instead of '../CLAUDE.md'",
+      "link_text": "Project CLAUDE.md",
+      "target_path": "/Users/masa/Projects/claude-multiagent-pm/CLAUDE.md"
+    }
+  ],
   "path_errors": [
     {
       "severity": "medium",
@@ -411,10 +442,20 @@
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
       "target_path": "claude_pm/agents/`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/user-guide.md",
+      "line_number": 1094,
+      "description": "Potentially invalid path reference: ./CLAUDE.md",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./CLAUDE.md"
     }
   ],
   "inconsistencies_found": [],
-  "last_update": "2025-07-17 19:07:33",
+  "last_update": "2025-07-17 19:14:53",
   "files_validated": 11,
-  "links_checked": 0
+  "links_checked": 1
 }
