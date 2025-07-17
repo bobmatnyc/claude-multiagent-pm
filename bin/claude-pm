@@ -16,7 +16,7 @@ from pathlib import Path
 # Script version - tracks claude-pm script updates independently
 def get_script_version():
     """Get script version - injected during deployment."""
-    return "012"
+    return "013"
 
 SCRIPT_VERSION = get_script_version()
 
@@ -622,18 +622,18 @@ def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_
             try:
                 # Try to import the Parent Directory Manager service
                 from claude_pm.services.parent_directory_manager import ParentDirectoryManager
-            except ImportError:
+            except ImportError as initial_error:
                 # If import fails, we're likely in an external project
                 # Try to add framework path to sys.path and retry
                 if str(framework_path) not in sys.path:
                     sys.path.insert(0, str(framework_path))
-                    try:
-                        from claude_pm.services.parent_directory_manager import ParentDirectoryManager
-                    except ImportError as e:
-                        # If still failing, return error
-                        console.print(f"[red]❌ Cannot import Parent Directory Manager: {e}[/red]")
-                        console.print("[yellow]💡 Framework may not be properly installed[/yellow]")
-                        return None, False
+                try:
+                    from claude_pm.services.parent_directory_manager import ParentDirectoryManager
+                except ImportError as e:
+                    # If still failing, return error
+                    console.print(f"[red]❌ Cannot import Parent Directory Manager: {e}[/red]")
+                    console.print("[yellow]💡 Framework may not be properly installed[/yellow]")
+                    return None, False
             
             # Initialize the Parent Directory Manager with proper configuration
             manager = ParentDirectoryManager(quiet_mode=quiet_mode)
