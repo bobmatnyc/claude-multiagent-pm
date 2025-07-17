@@ -276,6 +276,28 @@ def validate_framework_deployment():
     return False
 
 
+def find_claude_md_in_hierarchy():
+    """
+    Find the highest CLAUDE.md file in the directory hierarchy.
+    Returns the path to the highest CLAUDE.md file or None if not found.
+    """
+    current = Path.cwd()
+    
+    # Walk up the directory tree
+    while current != current.parent:  # Stop at root
+        claude_md = current / "CLAUDE.md"
+        if claude_md.exists() and claude_md.is_file():
+            return claude_md
+        current = current.parent
+    
+    # Check root directory
+    root_claude_md = current / "CLAUDE.md"
+    if root_claude_md.exists() and root_claude_md.is_file():
+        return root_claude_md
+    
+    return None
+
+
 def check_parent_claude_md_status():
     """
     Check parent directory CLAUDE.md file status against framework template.
@@ -293,6 +315,9 @@ def check_parent_claude_md_status():
         - backup_path: str - Path to backup file (if created)
     """
     try:
+        # First check if CLAUDE.md exists anywhere in the hierarchy
+        existing_claude_md = find_claude_md_in_hierarchy()
+        
         # Get current working directory and look for parent CLAUDE.md
         current_dir = Path.cwd()
         parent_dir = current_dir.parent
@@ -338,9 +363,25 @@ def check_parent_claude_md_status():
         
         # Check if parent CLAUDE.md exists
         if not parent_claude_md.exists():
+            # Check if CLAUDE.md exists higher up in the hierarchy
+            if existing_claude_md:
+                console.print(f"[dim]📄 CLAUDE.md already exists at: {existing_claude_md}[/dim]")
+                console.print(f"[dim]   Skipping auto-deployment to avoid duplication[/dim]")
+                return {
+                    "needs_update": False,
+                    "parent_exists": False,
+                    "parent_path": parent_claude_md,
+                    "template_version": template_version,
+                    "parent_version": "none",
+                    "status_message": f"CLAUDE.md exists higher in hierarchy at {existing_claude_md.parent.name}",
+                    "auto_updated": False,
+                    "backup_path": None,
+                    "hierarchy_claude_md": existing_claude_md
+                }
+            
             # ENHANCED: Auto-deploy CLAUDE.md when missing
             try:
-                console.print(f"[yellow]📄 No CLAUDE.md found in {current_dir.name} - auto-deploying framework template[/yellow]")
+                console.print(f"[yellow]📄 No CLAUDE.md found in hierarchy - auto-deploying framework template[/yellow]")
                 
                 # Perform automatic deployment using Parent Directory Manager
                 backup_result, update_result = perform_automatic_backup_and_update(
@@ -843,11 +884,16 @@ def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_
 def display_parent_claude_md_notification(check_result):
     """
     Display notification about parent CLAUDE.md status with actionable guidance.
-    Enhanced to handle automatic updates.
+    Enhanced to handle automatic updates and hierarchy detection.
     
     Args:
         check_result: Dict from check_parent_claude_md_status()
     """
+    # Check if CLAUDE.md exists in hierarchy
+    if "hierarchy_claude_md" in check_result and check_result["hierarchy_claude_md"]:
+        console.print(f"[green]📄 Using CLAUDE.md from: {check_result['hierarchy_claude_md']}[/green]")
+        return
+    
     if not check_result["parent_exists"]:
         # No parent CLAUDE.md - this is normal for many directories
         console.print(f"[dim]📄 Parent CLAUDE.md: {check_result['status_message']}[/dim]")
