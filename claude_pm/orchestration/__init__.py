@@ -18,6 +18,13 @@ from .context_manager import (
     AgentInteraction,
     create_context_manager
 )
+from .backwards_compatible_orchestrator import (
+    BackwardsCompatibleOrchestrator,
+    OrchestrationMode,
+    OrchestrationMetrics,
+    create_backwards_compatible_orchestrator,
+    delegate_with_compatibility
+)
 
 __all__ = [
     'OrchestrationDetector',
@@ -29,5 +36,10 @@ __all__ = [
     'ContextManager',
     'ContextFilter',
     'AgentInteraction',
-    'create_context_manager'
+    'create_context_manager',
+    'BackwardsCompatibleOrchestrator',
+    'OrchestrationMode',
+    'OrchestrationMetrics',
+    'create_backwards_compatible_orchestrator',
+    'delegate_with_compatibility'
 ]
