@@ -265,33 +265,44 @@ class AgentProfileLoader(BaseService):
         if deployment_dir := os.getenv('CLAUDE_PM_DEPLOYMENT_DIR'):
             return Path(deployment_dir)
             
+        # Try to find framework directory with agent-roles
+        current_dir = Path(__file__).parent.parent.parent  # Go up to project root
+        framework_dir = current_dir / 'framework'
+        if framework_dir.exists() and (framework_dir / 'agent-roles').exists():
+            return framework_dir
+            
         # Try relative to current module
         current_dir = Path(__file__).parent.parent
-        if (current_dir / 'agents').exists():
+        if (current_dir / 'agent-roles').exists():
+            return current_dir
+        elif (current_dir / 'agents').exists():
             return current_dir
             
         # Fallback to working directory
         return self.working_directory
     
     def _initialize_tier_paths(self) -> None:
-        """Initialize paths for each tier with directory precedence walking logic."""
-        # Project tier - current directory
+        """Initialize paths for each tier with proper precedence."""
+        # Project tier - current directory (highest precedence)
         project_path = self.working_directory / '.claude-pm' / 'agents' / 'project-specific'
         self.tier_paths[ProfileTier.PROJECT] = project_path
         
-        # User tier - user home directory
+        # User tier - user home directory (for trained/customized agents)
         user_path = self.user_home / '.claude-pm' / 'agents' / 'user-defined'
         self.tier_paths[ProfileTier.USER] = user_path
         
-        # System tier - framework directory
-        system_path = self.framework_path / 'agents' / 'system'
+        # System tier - framework agent-roles directory (core system agents)
+        system_path = self.framework_path / 'agent-roles'
         if not system_path.exists():
-            system_path = self.working_directory / '.claude-pm' / 'agents' / 'system'
+            raise FileNotFoundError(
+                f"System agents directory not found at {system_path}. "
+                f"Framework path: {self.framework_path}"
+            )
         self.tier_paths[ProfileTier.SYSTEM] = system_path
         
-        # Create directories if they don't exist
-        for tier_path in self.tier_paths.values():
-            tier_path.mkdir(parents=True, exist_ok=True)
+        # Create project and user directories if they don't exist
+        project_path.mkdir(parents=True, exist_ok=True)
+        user_path.mkdir(parents=True, exist_ok=True)
         
         logger.info(f"Initialized tier paths: {len(self.tier_paths)} tiers")
         for tier, path in self.tier_paths.items():
@@ -334,12 +345,24 @@ class AgentProfileLoader(BaseService):
                     logger.debug(f"Loaded {agent_name} profile from {tier.value} tier")
                     return profile
             
-            logger.warning(f"No profile found for agent: {agent_name}")
-            return None
+            # No profile found - this is an error condition
+            checked_paths = []
+            for tier in [ProfileTier.PROJECT, ProfileTier.USER, ProfileTier.SYSTEM]:
+                tier_path = self.tier_paths[tier]
+                checked_paths.append(f"{tier.value}: {tier_path}")
             
+            error_msg = (
+                f"Agent profile '{agent_name}' not found in any tier.\n"
+                f"Searched paths:\n" + "\n".join(f"  - {path}" for path in checked_paths)
+            )
+            logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
+            
+        except FileNotFoundError:
+            raise  # Re-raise FileNotFoundError
         except Exception as e:
             logger.error(f"Error loading profile for {agent_name}: {e}")
-            return None
+            raise RuntimeError(f"Failed to load agent profile '{agent_name}': {e}")
     
     async def _load_profile_from_tier(self, agent_name: str, tier: ProfileTier) -> Optional[AgentProfile]:
         """Load profile from specific tier."""

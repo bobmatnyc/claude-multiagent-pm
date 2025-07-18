@@ -41,9 +41,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 
-# Add the scripts directory to the path so we can import agent_prompt_builder
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
-
 # Import SharedPromptCache for performance optimization
 try:
     from .shared_prompt_cache import SharedPromptCache
@@ -52,23 +49,13 @@ except ImportError as e:
     logging.warning(f"SharedPromptCache not available: {e}")
     SHARED_CACHE_AVAILABLE = False
 
+# Import core agent loading functionality
 try:
-    from agent_prompt_builder import AgentPromptBuilder, TaskContext, AgentProfile, AgentTier
+    from .core_agent_loader import CoreAgentLoader
+    AGENT_LOADER_AVAILABLE = True
 except ImportError as e:
-    logging.error(f"Failed to import agent_prompt_builder: {e}")
-    # Fallback minimal implementation
-    class AgentPromptBuilder:
-        def __init__(self, working_directory=None):
-            self.working_directory = Path(working_directory or os.getcwd())
-        
-        def build_task_tool_prompt(self, agent_name: str, task_context: Any) -> str:
-            return f"**{agent_name.title()}**: {task_context.description} + MEMORY COLLECTION REQUIRED"
-    
-    class TaskContext:
-        def __init__(self, description: str, **kwargs):
-            self.description = description
-            for k, v in kwargs.items():
-                setattr(self, k, v)
+    logging.warning(f"Failed to import CoreAgentLoader, will create simple loader: {e}")
+    AGENT_LOADER_AVAILABLE = False
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -104,11 +91,21 @@ class PMOrchestrator:
     """
     
     def __init__(self, working_directory: Optional[Path] = None, model_override: Optional[str] = None, model_config: Optional[Dict[str, Any]] = None):
-        """Initialize PM orchestrator with agent prompt builder integration."""
+        """Initialize PM orchestrator with core agent loader integration."""
         self.working_directory = Path(working_directory or os.getcwd())
-        self.agent_builder = AgentPromptBuilder(self.working_directory)
         self._delegation_history: List[Dict[str, Any]] = []
         self._active_delegations: Dict[str, AgentDelegationContext] = {}
+        
+        # Initialize synchronous core agent loader
+        if AGENT_LOADER_AVAILABLE:
+            try:
+                self._agent_loader = CoreAgentLoader(self.working_directory)
+                logger.info("CoreAgentLoader initialized successfully")
+            except Exception as e:
+                logger.error(f"Failed to initialize CoreAgentLoader: {e}")
+                self._agent_loader = None
+        else:
+            self._agent_loader = None
         
         # Model configuration from CLI override
         self.model_override = model_override
@@ -144,6 +141,7 @@ class PMOrchestrator:
         logger.info(f"  Model override: {self.model_override or 'none'}")
         if self.model_override:
             logger.info(f"  Override source: {self.model_config.get('source', 'unknown')}")
+    
     
     def _initialize_model_selector(self):
         """Initialize model selector with CLI override support."""
@@ -237,19 +235,25 @@ class PMOrchestrator:
                 escalation_triggers=escalation_triggers or []
             )
             
-            # Create task context for agent prompt builder
-            task_context = TaskContext(
-                description=task_description,
-                temporal_context=delegation_context.temporal_context,
-                specific_requirements=delegation_context.requirements,
-                expected_deliverables=delegation_context.deliverables,
-                dependencies=delegation_context.dependencies,
-                priority=delegation_context.priority,
-                memory_categories=delegation_context.memory_categories
-            )
+            # Create task context for core agent loader
+            task_context = {
+                'task_description': task_description,
+                'temporal_context': delegation_context.temporal_context,
+                'requirements': delegation_context.requirements,
+                'deliverables': delegation_context.deliverables,
+                'dependencies': delegation_context.dependencies,
+                'priority': delegation_context.priority,
+                'memory_categories': delegation_context.memory_categories,
+                'integration_notes': integration_notes,
+                'escalation_triggers': escalation_triggers or []
+            }
             
-            # Generate base prompt using agent prompt builder
-            base_prompt = self.agent_builder.build_task_tool_prompt(agent_type, task_context)
+            # Generate base prompt using core agent loader (synchronous)
+            if self._agent_loader:
+                base_prompt = self._agent_loader.build_task_prompt(agent_type, task_context)
+            else:
+                # Fallback if loader not available
+                base_prompt = f"**{agent_type.title()}**: {task_description}\nTEMPORAL CONTEXT: {delegation_context.temporal_context}"
             
             # Use orchestrator model override if no specific model provided
             effective_model = selected_model or self.model_override
@@ -301,27 +305,13 @@ class PMOrchestrator:
             
             return enhanced_prompt
             
+        except FileNotFoundError:
+            # Re-raise file not found errors
+            raise
         except Exception as e:
             logger.error(f"Error generating agent prompt: {e}")
-            # Return a basic fallback prompt
-            return f"""**{agent_type.title()}**: {task_description} + MEMORY COLLECTION REQUIRED
-
-TEMPORAL CONTEXT: Today is {datetime.now().strftime('%B %d, %Y')}. Apply date awareness to task execution.
-
-**Task**: {task_description}
-
-**Requirements**:
-{chr(10).join(f"- {req}" for req in (requirements or []))}
-
-**Expected Deliverables**:
-{chr(10).join(f"- {deliverable}" for deliverable in (deliverables or []))}
-
-**Authority**: {agent_type.title()} operations + memory collection
-**Memory Categories**: {', '.join(memory_categories or ['bug', 'feedback', 'architecture:design'])}
-**Priority**: {priority}
-
-**Error Note**: Basic fallback prompt used due to builder error: {str(e)}
-"""
+            # Re-raise the error instead of providing fallback
+            raise RuntimeError(f"Failed to generate agent prompt: {e}") from e
     
     def _enhance_prompt_with_pm_integration(
         self, 
@@ -418,12 +408,12 @@ TEMPORAL CONTEXT: Today is {datetime.now().strftime('%B %d, %Y')}. Apply date aw
         return False
     
     def list_available_agents(self) -> Dict[str, List[str]]:
-        """List all available agents from the agent prompt builder."""
+        """List all available agents from the core agent loader."""
         try:
-            return {
-                tier.value: agents 
-                for tier, agents in self.agent_builder.list_available_agents().items()
-            }
+            if self._agent_loader:
+                return self._agent_loader.list_available_agents()
+            else:
+                raise RuntimeError("Agent loader not available")
         except Exception as e:
             logger.error(f"Error listing available agents: {e}")
             return {
@@ -435,12 +425,19 @@ TEMPORAL CONTEXT: Today is {datetime.now().strftime('%B %d, %Y')}. Apply date aw
     def validate_agent_hierarchy(self) -> Dict[str, Any]:
         """Validate agent hierarchy for PM orchestrator integration."""
         try:
-            validation_results = self.agent_builder.validate_hierarchy()
+            validation_results = {}
+            
+            if self._agent_loader:
+                # Basic validation - check if we can list agents
+                agents = self._agent_loader.list_available_agents()
+                validation_results["valid"] = len(agents) > 0
+                validation_results["agent_count"] = sum(len(tier_agents) for tier_agents in agents.values())
+                validation_results["tiers_found"] = list(agents.keys())
             
             # Add PM orchestrator specific validations
             validation_results["pm_integration"] = {
                 "active_delegations": len(self._active_delegations),
-                "builder_available": hasattr(self.agent_builder, 'build_task_tool_prompt'),
+                "loader_available": self._agent_loader is not None,
                 "working_directory": str(self.working_directory),
                 "hierarchy_accessible": True
             }
@@ -454,7 +451,7 @@ TEMPORAL CONTEXT: Today is {datetime.now().strftime('%B %d, %Y')}. Apply date aw
                 "issues": [f"Hierarchy validation failed: {str(e)}"],
                 "pm_integration": {
                     "active_delegations": len(self._active_delegations),
-                    "builder_available": False,
+                    "loader_available": False,
                     "working_directory": str(self.working_directory),
                     "hierarchy_accessible": False
                 }
@@ -480,11 +477,7 @@ TEMPORAL CONTEXT: Today is {datetime.now().strftime('%B %d, %Y')}. Apply date aw
         if self._shared_cache:
             metrics["pm_orchestrator_cache_metrics"] = self._shared_cache.get_metrics()
         
-        # Get agent builder cache metrics
-        try:
-            metrics["agent_builder_cache_metrics"] = self.agent_builder.get_cache_metrics()
-        except Exception as e:
-            logger.warning(f"Failed to get agent builder cache metrics: {e}")
+        # Agent loader is synchronous and doesn't track metrics
         
         return metrics
     
@@ -507,27 +500,22 @@ TEMPORAL CONTEXT: Today is {datetime.now().strftime('%B %d, %Y')}. Apply date aw
                 invalidated = self._shared_cache.invalidate("delegation_prompt:*")
                 logger.info(f"Invalidated {invalidated} delegation cache entries")
         
-        # Also invalidate agent builder cache
-        try:
-            self.agent_builder.invalidate_cache(agent_type)
-        except Exception as e:
-            logger.warning(f"Failed to invalidate agent builder cache: {e}")
+        # Agent loader uses core shared cache, no need for separate invalidation
     
     def get_agent_profile_info(self, agent_type: str) -> Optional[Dict[str, Any]]:
         """Get detailed information about an agent profile."""
         try:
-            profile = self.agent_builder.load_agent_profile(agent_type)
-            if profile:
-                return {
-                    "name": profile.name,
-                    "tier": profile.tier.value,
-                    "role": profile.role,
-                    "nickname": profile.nickname,
-                    "capabilities": profile.capabilities,
-                    "authority_scope": profile.authority_scope,
-                    "profile_path": str(profile.path),
-                    "profile_id": profile.profile_id
-                }
+            if self._agent_loader:
+                profile = self._agent_loader.load_agent_profile(agent_type)
+                if profile:
+                    return {
+                        "name": profile.name,
+                        "tier": profile.tier.value,
+                        "role": profile.role,
+                        "nickname": profile.nickname,
+                        "profile_path": str(profile.path),
+                        "profile_id": profile.profile_id
+                    }
             return None
         except Exception as e:
             logger.error(f"Error getting agent profile info: {e}")

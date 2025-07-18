@@ -1769,3 +1769,161 @@ class AgentRegistry:
     def get_model_selector(self) -> ModelSelector:
         """Get the ModelSelector instance for direct access."""
         return self.model_selector
+    
+    def health_check(self) -> Dict[str, Any]:
+        """
+        Perform a comprehensive health check on the AgentRegistry.
+        
+        Returns:
+            Dictionary with health status information
+        """
+        health_status = {
+            'status': 'healthy',
+            'timestamp': time.time(),
+            'checks': {},
+            'warnings': [],
+            'errors': []
+        }
+        
+        try:
+            # Check 1: Discovery paths accessibility
+            discovery_paths_status = []
+            accessible_paths = 0
+            for path in self.discovery_paths:
+                path_status = {
+                    'path': str(path),
+                    'exists': path.exists(),
+                    'readable': path.exists() and os.access(path, os.R_OK)
+                }
+                discovery_paths_status.append(path_status)
+                if path_status['readable']:
+                    accessible_paths += 1
+            
+            health_status['checks']['discovery_paths'] = {
+                'total': len(self.discovery_paths),
+                'accessible': accessible_paths,
+                'details': discovery_paths_status
+            }
+            
+            if accessible_paths == 0:
+                health_status['errors'].append('No accessible discovery paths found')
+                health_status['status'] = 'critical'
+            elif accessible_paths < len(self.discovery_paths):
+                health_status['warnings'].append(f'Only {accessible_paths}/{len(self.discovery_paths)} discovery paths are accessible')
+                if health_status['status'] == 'healthy':
+                    health_status['status'] = 'degraded'
+            
+            # Check 2: Cache service availability
+            try:
+                cache_test_key = 'agent_registry_health_check_test'
+                self.cache_service.set(cache_test_key, {'test': True}, ttl=1)
+                cache_result = self.cache_service.get(cache_test_key)
+                cache_healthy = cache_result is not None and cache_result.get('test') == True
+                
+                health_status['checks']['cache_service'] = {
+                    'available': True,
+                    'functional': cache_healthy,
+                    'type': type(self.cache_service).__name__
+                }
+                
+                if not cache_healthy:
+                    health_status['warnings'].append('Cache service is not functioning properly')
+                    if health_status['status'] == 'healthy':
+                        health_status['status'] = 'degraded'
+                        
+            except Exception as e:
+                health_status['checks']['cache_service'] = {
+                    'available': False,
+                    'error': str(e)
+                }
+                health_status['warnings'].append(f'Cache service error: {e}')
+                if health_status['status'] == 'healthy':
+                    health_status['status'] = 'degraded'
+            
+            # Check 3: Model selector availability
+            try:
+                model_selector_status = self.model_selector is not None
+                health_status['checks']['model_selector'] = {
+                    'available': model_selector_status,
+                    'type': type(self.model_selector).__name__ if model_selector_status else None
+                }
+                
+                if not model_selector_status:
+                    health_status['warnings'].append('Model selector not available')
+                    
+            except Exception as e:
+                health_status['checks']['model_selector'] = {
+                    'available': False,
+                    'error': str(e)
+                }
+                health_status['warnings'].append(f'Model selector error: {e}')
+            
+            # Check 4: Registry state
+            health_status['checks']['registry'] = {
+                'loaded': bool(self.registry),
+                'agent_count': len(self.registry),
+                'last_discovery': self.last_discovery_time,
+                'cache_valid': self._is_discovery_cache_valid() if self.last_discovery_time else False
+            }
+            
+            # Check 5: Agent type coverage
+            if self.registry:
+                discovered_types = set(metadata.type for metadata in self.registry.values())
+                core_coverage = len(self.core_agent_types.intersection(discovered_types))
+                
+                health_status['checks']['agent_coverage'] = {
+                    'core_types_discovered': core_coverage,
+                    'core_types_total': len(self.core_agent_types),
+                    'specialized_types_discovered': len(discovered_types.intersection(self.specialized_agent_types)),
+                    'total_types_discovered': len(discovered_types)
+                }
+                
+                if core_coverage < len(self.core_agent_types):
+                    missing_core = self.core_agent_types - discovered_types
+                    health_status['warnings'].append(f'Missing core agent types: {", ".join(sorted(missing_core))}')
+            else:
+                health_status['checks']['agent_coverage'] = {
+                    'message': 'No agents discovered yet'
+                }
+            
+            # Check 6: System resources
+            try:
+                import psutil
+                process = psutil.Process()
+                memory_info = process.memory_info()
+                
+                health_status['checks']['system_resources'] = {
+                    'memory_usage_mb': memory_info.rss / 1024 / 1024,
+                    'available': True
+                }
+            except ImportError:
+                health_status['checks']['system_resources'] = {
+                    'available': False,
+                    'note': 'psutil not installed'
+                }
+            except Exception as e:
+                health_status['checks']['system_resources'] = {
+                    'available': False,
+                    'error': str(e)
+                }
+            
+            # Overall health assessment
+            if health_status['errors']:
+                health_status['status'] = 'critical'
+            elif len(health_status['warnings']) > 3:
+                health_status['status'] = 'degraded'
+            
+            health_status['summary'] = {
+                'status': health_status['status'],
+                'error_count': len(health_status['errors']),
+                'warning_count': len(health_status['warnings']),
+                'checks_passed': sum(1 for check in health_status['checks'].values() 
+                                   if isinstance(check, dict) and check.get('available', True))
+            }
+            
+        except Exception as e:
+            health_status['status'] = 'error'
+            health_status['errors'].append(f'Health check failed: {str(e)}')
+            health_status['exception'] = str(e)
+        
+        return health_status

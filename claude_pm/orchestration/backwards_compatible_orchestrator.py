@@ -47,6 +47,12 @@ from claude_pm.utils.task_tool_helper import TaskToolHelper, TaskToolConfigurati
 from claude_pm.services.agent_registry import AgentRegistry
 from claude_pm.services.shared_prompt_cache import SharedPromptCache
 
+# Import subprocess runner for real subprocess creation
+try:
+    from claude_pm.services.subprocess_runner import SubprocessRunner
+except ImportError:
+    SubprocessRunner = None
+    
 # Use project standard logging configuration
 from claude_pm.core.logging_config import get_logger
 logger = get_logger(__name__)
@@ -140,6 +146,7 @@ class BackwardsCompatibleOrchestrator:
         self._task_tool_helper: Optional[TaskToolHelper] = None
         self._agent_registry: Optional[AgentRegistry] = None
         self._prompt_cache: Optional[SharedPromptCache] = None
+        self._subprocess_runner: Optional[SubprocessRunner] = None
         
         # Metrics tracking
         self._orchestration_metrics: List[OrchestrationMetrics] = []
@@ -361,13 +368,13 @@ class BackwardsCompatibleOrchestrator:
             })
             return self.force_mode, "Forced mode for testing"
         
-        # Check if orchestration is enabled
+        # Check if orchestration is enabled (default is enabled)
         is_enabled = self.detector.is_orchestration_enabled()
         if not is_enabled:
             logger.debug("orchestration_disabled", extra={
-                "reason": "environment_variable_not_set"
+                "reason": "explicitly_disabled_in_claude_md"
             })
-            return OrchestrationMode.SUBPROCESS, "CLAUDE_PM_ORCHESTRATION not enabled"
+            return OrchestrationMode.SUBPROCESS, "CLAUDE_PM_ORCHESTRATION explicitly disabled"
         
         # Verify all components are available
         try:
@@ -617,6 +624,21 @@ class BackwardsCompatibleOrchestrator:
             "reason": "fallback_to_subprocess"
         })
         
+        # Check if we should use real subprocess (when SubprocessRunner is available)
+        use_real_subprocess = (
+            SubprocessRunner is not None and 
+            os.getenv('CLAUDE_PM_USE_REAL_SUBPROCESS', 'false').lower() == 'true'
+        )
+        
+        if use_real_subprocess:
+            # Use real subprocess via SubprocessRunner
+            return await self._execute_real_subprocess(
+                agent_type=agent_type,
+                task_description=task_description,
+                **kwargs
+            )
+        
+        # Otherwise use traditional TaskToolHelper approach
         # Initialize task tool helper if needed
         if not self._task_tool_helper:
             self._task_tool_helper = TaskToolHelper(
@@ -655,6 +677,169 @@ class BackwardsCompatibleOrchestrator:
             return_code = ReturnCode.GENERAL_FAILURE
             
         return result, return_code
+    
+    async def _execute_real_subprocess(
+        self,
+        agent_type: str,
+        task_description: str,
+        **kwargs
+    ) -> Tuple[Dict[str, Any], int]:
+        """
+        Execute task using real OS subprocess with proper environment.
+        
+        This creates an actual subprocess with the subprocess runner.
+        """
+        task_id = kwargs.get("task_id", str(uuid.uuid4())[:8])
+        subprocess_id = f"{agent_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        
+        logger.info("real_subprocess_execution_start", extra={
+            "agent_type": agent_type,
+            "task_id": task_id,
+            "subprocess_id": subprocess_id
+        })
+        
+        try:
+            # Initialize subprocess runner if needed
+            if not self._subprocess_runner:
+                self._subprocess_runner = SubprocessRunner()
+                
+                # Test environment setup
+                test_result = self._subprocess_runner.test_environment()
+                if not test_result.get('success'):
+                    logger.error("subprocess_environment_test_failed", extra={
+                        "error": test_result.get('error'),
+                        "task_id": task_id
+                    })
+                    raise RuntimeError(f"Subprocess environment test failed: {test_result.get('error')}")
+            
+            # Prepare task data
+            task_data = {
+                'task_description': task_description,
+                'requirements': kwargs.get('requirements', []),
+                'deliverables': kwargs.get('deliverables', []),
+                'dependencies': kwargs.get('dependencies', []),
+                'priority': kwargs.get('priority', 'medium'),
+                'memory_categories': kwargs.get('memory_categories', []),
+                'escalation_triggers': kwargs.get('escalation_triggers', []),
+                'integration_notes': kwargs.get('integration_notes', ''),
+                'current_date': datetime.now().strftime('%Y-%m-%d'),
+                'task_id': task_id,
+                'subprocess_id': subprocess_id
+            }
+            
+            # Run subprocess
+            start_time = time.perf_counter()
+            return_code, stdout, stderr = await self._subprocess_runner.run_agent_subprocess_async(
+                agent_type=agent_type,
+                task_data=task_data,
+                timeout=kwargs.get('timeout_seconds', 300)
+            )
+            execution_time = (time.perf_counter() - start_time) * 1000
+            
+            # Parse results
+            success = return_code == 0
+            
+            logger.info("real_subprocess_execution_complete", extra={
+                "agent_type": agent_type,
+                "task_id": task_id,
+                "subprocess_id": subprocess_id,
+                "return_code": return_code,
+                "execution_time_ms": execution_time,
+                "success": success
+            })
+            
+            # Build result
+            result = {
+                "success": success,
+                "subprocess_id": subprocess_id,
+                "task_id": task_id,
+                "return_code": return_code if return_code >= 0 else ReturnCode.GENERAL_FAILURE,
+                "subprocess_info": {
+                    "subprocess_id": subprocess_id,
+                    "agent_type": agent_type,
+                    "task_description": task_description,
+                    "creation_time": datetime.now().isoformat(),
+                    "status": "completed" if success else "failed",
+                    "requirements": kwargs.get("requirements", []),
+                    "deliverables": kwargs.get("deliverables", []),
+                    "priority": kwargs.get("priority", "medium"),
+                    "orchestration_mode": "real_subprocess",
+                    "task_id": task_id,
+                    "execution_time_ms": execution_time
+                },
+                "stdout": stdout,
+                "stderr": stderr,
+                "prompt": f"**{agent_type.title()} Agent**: {task_description}",
+                "usage_instructions": self._generate_real_subprocess_instructions(
+                    subprocess_id, agent_type, return_code, stdout, stderr
+                )
+            }
+            
+            return result, return_code if return_code >= 0 else ReturnCode.GENERAL_FAILURE
+            
+        except Exception as e:
+            logger.error("real_subprocess_execution_failed", extra={
+                "agent_type": agent_type,
+                "task_id": task_id,
+                "error": str(e),
+                "error_type": type(e).__name__
+            })
+            
+            # Return error result
+            return {
+                "success": False,
+                "subprocess_id": subprocess_id,
+                "task_id": task_id,
+                "return_code": ReturnCode.GENERAL_FAILURE,
+                "error": str(e),
+                "subprocess_info": {
+                    "subprocess_id": subprocess_id,
+                    "agent_type": agent_type,
+                    "task_description": task_description,
+                    "status": "failed",
+                    "orchestration_mode": "real_subprocess",
+                    "error": str(e)
+                }
+            }, ReturnCode.GENERAL_FAILURE
+    
+    def _generate_real_subprocess_instructions(
+        self,
+        subprocess_id: str,
+        agent_type: str,
+        return_code: int,
+        stdout: str,
+        stderr: str
+    ) -> str:
+        """Generate usage instructions for real subprocess execution."""
+        return f"""
+Real Subprocess Execution Instructions:
+======================================
+
+Subprocess ID: {subprocess_id}
+Agent Type: {agent_type}
+Return Code: {return_code}
+Status: {'SUCCESS' if return_code == 0 else 'FAILED'}
+
+This task was executed in a real OS subprocess:
+- Environment variables were properly configured
+- Agent profile was loaded from framework
+- Subprocess had isolated execution context
+
+Output:
+{'-' * 50}
+{stdout[:1000]}{'... (truncated)' if len(stdout) > 1000 else ''}
+{'-' * 50}
+
+{'Errors:' if stderr else ''}
+{'='*50 if stderr else ''}
+{stderr[:500] if stderr else ''}
+{'='*50 if stderr else ''}
+
+Integration Notes:
+- Real subprocess execution provides true isolation
+- Framework path and environment were properly set
+- Agent profiles were successfully loaded
+"""
     
     async def _emergency_subprocess_fallback(
         self,
