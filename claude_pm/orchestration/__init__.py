@@ -29,6 +29,20 @@ from .backwards_compatible_orchestrator import (
     create_backwards_compatible_orchestrator,
     delegate_with_compatibility
 )
+from .terminal_handoff import (
+    TerminalHandoffManager,
+    TerminalProxy,
+    HandoffRequest,
+    HandoffResponse,
+    HandoffSession,
+    HandoffState,
+    HandoffPermission
+)
+from .interactive_agent_base import (
+    InteractiveAgentBase,
+    InteractiveContext,
+    SimpleInteractiveAgent
+)
 
 __all__ = [
     'OrchestrationDetector',
@@ -45,5 +59,15 @@ __all__ = [
     'OrchestrationMode',
     'OrchestrationMetrics',
     'create_backwards_compatible_orchestrator',
-    'delegate_with_compatibility'
+    'delegate_with_compatibility',
+    'TerminalHandoffManager',
+    'TerminalProxy',
+    'HandoffRequest',
+    'HandoffResponse',
+    'HandoffSession',
+    'HandoffState',
+    'HandoffPermission',
+    'InteractiveAgentBase',
+    'InteractiveContext',
+    'SimpleInteractiveAgent'
 ]
