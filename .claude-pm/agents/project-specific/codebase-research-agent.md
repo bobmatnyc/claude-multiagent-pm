@@ -5,8 +5,8 @@
 - **Type**: research
 - **Specializations**: ['codebase', 'architecture', 'business_logic', 'framework', 'claude_pm_framework']
 - **Authority**: Framework architecture knowledge, business logic guidance, codebase analysis
-- **Version**: 0.9.0 (Framework v014-005)
-- **Last Updated**: 2025-07-15
+- **Version**: 0.9.1 (Framework v014-005)
+- **Last Updated**: 2025-07-18
 
 ## When to Use This Agent
 
@@ -46,8 +46,6 @@
 - Version control and release management
 
 **FIRST PLACE TO GO**: Before any development work, consult this agent to understand existing patterns and avoid reinventing solutions.
-
-## Framework Knowledge Base (Embedded)
 
 ### 🏗️ CORE ARCHITECTURE
 
@@ -147,7 +145,7 @@
 
 ### 📊 VERSION MANAGEMENT
 
-**CURRENT VERSION**: 0.9.0 (Framework v014-005)
+**CURRENT VERSION**: 0.9.1 (Framework v014-005)
 - **Semantic Versioning**: Minor bump from 0.8.6 for new agent registry features
 - **Backward Compatibility**: Full compatibility with existing installations
 - **Framework Version**: Independent versioning for template updates
@@ -320,6 +318,7 @@ TEMPORAL CONTEXT: Today is 2025-07-15. Apply framework v0.9.0 knowledge with cur
 - Provides architectural guidance for Task Tool delegation decisions
 - Informs agent selection based on codebase patterns and requirements
 - Supplies context for multi-agent workflow coordination
+- **NEW**: Cleanup recommendations and project hygiene analysis
 
 **WITH ENGINEER AGENT**:
 - Provides implementation guidance and existing pattern analysis
@@ -379,3 +378,116 @@ TEMPORAL CONTEXT: Today is 2025-07-15. Apply framework v0.9.0 knowledge with cur
 ---
 
 **Remember**: This agent contains the complete embedded knowledge of the Claude Multi-Agent PM Framework. Always consult this agent FIRST when planning any development work on the framework codebase to understand existing patterns and architectural decisions before implementation.
+
+---
+
+## Cleanup Recommendations (2025-07-18)
+
+### 🗑️ IMMEDIATE CLEANUP ACTIONS
+
+**1. LOGS DIRECTORY (263MB)**
+- **Location**: `/logs/`
+- **Issue**: Contains 263MB of JSON validation reports, memory reports, and sync logs
+- **Action**: Archive and compress older logs, move to `.gitignore`
+- **Keep**: Last 7 days of active logs
+- **Archive**: Create `logs/archive/YYYY-MM/` structure
+
+**2. PYTHON CACHE FILES (33 directories)**
+- **Location**: Multiple `__pycache__` directories throughout project
+- **Action**: Add cleanup script to remove all Python cache files
+- **Command**: `find . -type d -name "__pycache__" -exec rm -rf {} +`
+
+**3. .DS_STORE FILES**
+- **Location**: Multiple macOS system files throughout project
+- **Action**: Remove all and ensure proper .gitignore coverage
+- **Command**: `find . -name ".DS_Store" -delete`
+
+**4. NODE_MODULES LOGS**
+- **Location**: `node_modules/@bobmatnyc/claude-multiagent-pm/scripts/*.log`
+- **Issue**: Package contains log files that shouldn't be published
+- **Action**: Clean before next publish
+
+### 🚨 SECURITY & PRIVACY CONCERNS
+
+**1. DELETED .claude-pm/CLAUDE.md**
+- **Status**: File deleted but not staged
+- **Issue**: Contains deployment configuration and paths
+- **Action**: Verify if deletion is intentional or needs restoration
+
+**2. API KEY PATTERNS**
+- **Status**: No active API keys found in codebase
+- **Good**: Proper .env usage and .gitignore patterns
+
+### 📁 INCOMPLETE FEATURES & DEAD CODE
+
+**1. UNTRACKED DOCUMENTATION**
+- **File**: `docs/agent_registry_sync_methods.md`
+- **Status**: New documentation not tracked in git
+- **Action**: Review and commit if needed
+
+**2. MODIFIED BUT UNSTAGED FILES**
+- `claude_pm/core/agent_registry.py`
+- `claude_pm/services/agent_registry.py` 
+- `claude_pm/services/parent_directory_manager.py`
+- **Action**: Review changes and stage/commit or revert
+
+**3. LOG FILE PATTERNS TO IGNORE**
+```gitignore
+# Enhanced log patterns
+logs/comprehensive-validation-*.json
+logs/memory-monitor-report-*.json
+logs/subprocess-comprehensive-report-*.json
+logs/enhanced_doc_sync_report_*.md
+logs/*_memory_collection.json
+```
+
+### 🔧 RECOMMENDED .gitignore ADDITIONS
+
+```gitignore
+# Temporary validation files
+comprehensive-validation-*.json
+memory-*-report-*.json
+subprocess-*-report-*.json
+
+# Archive patterns
+logs/archive/
+logs/compressed/
+
+# Additional Python patterns
+*.pyc
+.pytest_cache/
+.ruff_cache/
+```
+
+### 📊 PROJECT HYGIENE METRICS
+
+- **Total Ignored Files**: 500+ (mostly logs and reports)
+- **Unstaged Changes**: 7 files
+- **Untracked Files**: 1 documentation file
+- **Cache Directories**: 33 __pycache__ folders
+- **Log Storage**: 263MB (needs rotation)
+- **Branch Status**: 3 commits ahead of origin/main
+
+### 🎯 CLEANUP PRIORITY ORDER
+
+1. **Archive logs** (immediate 263MB space recovery)
+2. **Clean Python caches** (quick win, improves performance)
+3. **Update .gitignore** (prevent future accumulation)
+4. **Review unstaged changes** (ensure nothing important is lost)
+5. **Remove .DS_Store files** (clean repository)
+6. **Document cleanup in CHANGELOG** (maintain project history)
+
+---
+
+## Recent Updates
+
+### 2025-07-18 Update
+- Added comprehensive cleanup recommendations section
+- Identified 263MB of logs requiring archival/compression
+- Found 33 __pycache__ directories for cleanup
+- Documented incomplete features and security audit results
+- Updated version to 0.9.1 reflecting current project state
+- Added recommended .gitignore patterns for log files
+- Analyzed git status and identified files needing attention
+- Verified no active API keys or security vulnerabilities
+- Analyzed directory structure for optimization opportunities

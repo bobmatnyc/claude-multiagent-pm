@@ -106,7 +106,7 @@ git log --oneline --decorate --graph --all
 git log --pretty=format:"* %s (%h)" --since="last tag"
 
 # Analyze semantic version impact
-git diff HEAD^ HEAD --name-only | grep -E "\.(py|js|ts|go)$"
+git diff HEAD^ HEAD --name-only | grep -E "\\.(py|js|ts|go)$"
 ```
 
 ### Documentation Analysis

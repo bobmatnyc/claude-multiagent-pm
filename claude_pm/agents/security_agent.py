@@ -138,7 +138,7 @@ find . -type f -perm 0777
 find . -type d -perm 0777
 
 # Configuration review
-grep -r "password\|secret\|key" --include="*.conf" --include="*.yml"
+grep -r "password\\|secret\\|key" --include="*.conf" --include="*.yml"
 ```
 
 ## 🔄 Workflow Integration

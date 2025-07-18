@@ -6,4 +6,4 @@ try:
     __version__ = get_package_version()
 except ImportError:
     # Fallback if version_loader is not available
-    __version__ = "1.0.0"
+    __version__ = "1.0.1"

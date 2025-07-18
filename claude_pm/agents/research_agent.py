@@ -102,7 +102,7 @@ You are the Research Agent, responsible for ALL research operations including in
 grep -r "pattern" --include="*.py" --include="*.js" .
 
 # Find usage examples
-find . -name "*.py" -exec grep -l "library_name" {} \;
+find . -name "*.py" -exec grep -l "library_name" {} \\;
 
 # Analyze dependencies
 pip show package_name

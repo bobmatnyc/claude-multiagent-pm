@@ -2,6 +2,20 @@
 
 All notable changes to the Claude Multi-Agent Project Management Framework will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.1] - 2025-07-18
+
+### Fixed
+- Fixed agent discovery to be properly synchronous for CLI and script usage
+- Fixed AttributeError when using `listAgents()` function
+- Fixed escape sequence warnings in agent files (documentation_agent.py, research_agent.py, security_agent.py)
+- Fixed import to use synchronous agent registry implementation
+- Corrected return types for agent discovery methods (now returns Dict instead of coroutine/list)
+- Fixed syntax error with escaped != operator
+
+### Changed
+- Agent registry now uses synchronous implementation by default for better CLI compatibility
+- Simplified agent discovery - no async/await needed for directory scanning
+
 ## [1.0.0] - 2025-07-18
 
 ### 🚀 Major Release: Production-Ready Multi-Agent PM Framework

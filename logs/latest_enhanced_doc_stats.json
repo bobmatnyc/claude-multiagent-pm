@@ -13,7 +13,7 @@
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/README.md",
-      "line_number": 271,
+      "line_number": 295,
       "description": "Potentially invalid path reference: ./.claude-pm/agents/`,",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
@@ -23,7 +23,7 @@
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/README.md",
-      "line_number": 271,
+      "line_number": 295,
       "description": "Potentially invalid path reference: ./../.claude-pm/agents/`,",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
@@ -33,7 +33,7 @@
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/README.md",
-      "line_number": 271,
+      "line_number": 295,
       "description": "Potentially invalid path reference: ../.claude-pm/agents/`,",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
@@ -43,7 +43,7 @@
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/README.md",
-      "line_number": 271,
+      "line_number": 295,
       "description": "Potentially invalid path reference: ../../.claude-pm/agents/`,",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
@@ -53,7 +53,7 @@
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/README.md",
-      "line_number": 274,
+      "line_number": 298,
       "description": "Potentially invalid path reference: claude_pm/agents/`",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
@@ -142,6 +142,246 @@
     {
       "severity": "medium",
       "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 71,
+      "description": "Potentially invalid path reference: claude_pm/core/connection_manager.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/core/connection_manager.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 73,
+      "description": "Potentially invalid path reference: claude_pm/services/health_dashboard.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/health_dashboard.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 74,
+      "description": "Potentially invalid path reference: claude_pm/services/memory_service.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/memory_service.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 75,
+      "description": "Potentially invalid path reference: claude_pm/services/multi_agent_orchestrator.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/multi_agent_orchestrator.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 76,
+      "description": "Potentially invalid path reference: claude_pm/collectors/framework_services.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/collectors/framework_services.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 88,
+      "description": "Potentially invalid path reference: ./managed/ai-trackdown-tools/bobmatnyc-ai-trackdown-tools-1.0.1.tgz`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./managed/ai-trackdown-tools/bobmatnyc-ai-trackdown-tools-1.0.1.tgz`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 88,
+      "description": "Potentially invalid path reference: ../managed/ai-trackdown-tools/bobmatnyc-ai-trackdown-tools-1.0.1.tgz`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "../managed/ai-trackdown-tools/bobmatnyc-ai-trackdown-tools-1.0.1.tgz`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 296,
+      "description": "Potentially invalid path reference: docs/design/claude-multiagent-pm-design.md`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/design/claude-multiagent-pm-design.md`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 333,
+      "description": "Potentially invalid path reference: docs/FRAMEWORK_OVERVIEW.md**",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/FRAMEWORK_OVERVIEW.md**"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 334,
+      "description": "Potentially invalid path reference: docs/user-guide/01-getting-started.md**",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/user-guide/01-getting-started.md**"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 335,
+      "description": "Potentially invalid path reference: docs/user-guide/04-directory-organization.md**",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/user-guide/04-directory-organization.md**"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 336,
+      "description": "Potentially invalid path reference: docs/user-guide/05-custom-agents.md**",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/user-guide/05-custom-agents.md**"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 337,
+      "description": "Potentially invalid path reference: docs/user-guide/07-troubleshooting-faq.md**",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/user-guide/07-troubleshooting-faq.md**"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 338,
+      "description": "Potentially invalid path reference: docs/INDEX.md**",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/INDEX.md**"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 353,
+      "description": "Potentially invalid path reference: ./bin/cmpm`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./bin/cmpm`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 427,
+      "description": "Potentially invalid path reference: claude_pm/cmpm_commands.py`**",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cmpm_commands.py`**"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 29,
+      "description": "Potentially invalid path reference: ./compressed/logs-2025-01.tar.gz",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./compressed/logs-2025-01.tar.gz"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 29,
+      "description": "Potentially invalid path reference: ../compressed/logs-2025-01.tar.gz",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "../compressed/logs-2025-01.tar.gz"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 68,
+      "description": "Potentially invalid path reference: claude_pm/core/agent_registry.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/core/agent_registry.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 69,
+      "description": "Potentially invalid path reference: claude_pm/services/agent_registry.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/agent_registry.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 70,
+      "description": "Potentially invalid path reference: claude_pm/services/parent_directory_manager.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/parent_directory_manager.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 73,
+      "description": "Potentially invalid path reference: docs/agent_registry_sync_methods.md`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/agent_registry_sync_methods.md`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 128,
+      "description": "Potentially invalid path reference: scripts/`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 150,
+      "description": "Potentially invalid path reference: scripts/cleanup_project.py`:",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/cleanup_project.py`:"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/QUICKSTART.md",
       "line_number": 427,
       "description": "Potentially invalid path reference: ./CLAUDE.md`",
@@ -178,16 +418,6 @@
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
       "target_path": "../CLAUDE.md`"
-    },
-    {
-      "severity": "high",
-      "issue_type": "broken_link",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/user-guide.md",
-      "line_number": 1116,
-      "description": "Broken link: [Project CLAUDE.md](../CLAUDE.md) -> /Users/masa/Projects/claude-multiagent-pm/CLAUDE.md",
-      "suggested_fix": "Suggested fix: Use '../framework/CLAUDE.md' instead of '../CLAUDE.md'",
-      "link_text": "Project CLAUDE.md",
-      "target_path": "/Users/masa/Projects/claude-multiagent-pm/CLAUDE.md"
     },
     {
       "severity": "medium",
@@ -262,12 +492,32 @@
     {
       "severity": "medium",
       "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/user-guide.md",
-      "line_number": 1094,
-      "description": "Potentially invalid path reference: ./CLAUDE.md",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/validation_report_iss_0119.md",
+      "line_number": 92,
+      "description": "Potentially invalid path reference: framework/CLAUDE.md`:",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
-      "target_path": "./CLAUDE.md"
+      "target_path": "framework/CLAUDE.md`:"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/RELEASE_NOTES.md",
+      "line_number": 46,
+      "description": "Potentially invalid path reference: claude_pm/agents/`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/agents/`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/RELEASE_NOTES.md",
+      "line_number": 46,
+      "description": "Potentially invalid path reference: framework/claude_pm/agents/`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "framework/claude_pm/agents/`"
     },
     {
       "severity": "medium",
@@ -320,24 +570,13 @@
       "target_path": "./tests/e2e/test_full_install.sh"
     }
   ],
-  "broken_links": [
-    {
-      "severity": "high",
-      "issue_type": "broken_link",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/user-guide.md",
-      "line_number": 1116,
-      "description": "Broken link: [Project CLAUDE.md](../CLAUDE.md) -> /Users/masa/Projects/claude-multiagent-pm/CLAUDE.md",
-      "suggested_fix": "Suggested fix: Use '../framework/CLAUDE.md' instead of '../CLAUDE.md'",
-      "link_text": "Project CLAUDE.md",
-      "target_path": "/Users/masa/Projects/claude-multiagent-pm/CLAUDE.md"
-    }
-  ],
+  "broken_links": [],
   "path_errors": [
     {
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/README.md",
-      "line_number": 271,
+      "line_number": 295,
       "description": "Potentially invalid path reference: ./.claude-pm/agents/`,",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
@@ -347,7 +586,7 @@
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/README.md",
-      "line_number": 271,
+      "line_number": 295,
       "description": "Potentially invalid path reference: ./../.claude-pm/agents/`,",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
@@ -357,7 +596,7 @@
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/README.md",
-      "line_number": 271,
+      "line_number": 295,
       "description": "Potentially invalid path reference: ../.claude-pm/agents/`,",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
@@ -367,7 +606,7 @@
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/README.md",
-      "line_number": 271,
+      "line_number": 295,
       "description": "Potentially invalid path reference: ../../.claude-pm/agents/`,",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
@@ -377,11 +616,251 @@
       "severity": "medium",
       "issue_type": "path_error",
       "file_path": "/Users/masa/Projects/claude-multiagent-pm/README.md",
-      "line_number": 274,
+      "line_number": 298,
       "description": "Potentially invalid path reference: claude_pm/agents/`",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
       "target_path": "claude_pm/agents/`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 71,
+      "description": "Potentially invalid path reference: claude_pm/core/connection_manager.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/core/connection_manager.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 73,
+      "description": "Potentially invalid path reference: claude_pm/services/health_dashboard.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/health_dashboard.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 74,
+      "description": "Potentially invalid path reference: claude_pm/services/memory_service.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/memory_service.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 75,
+      "description": "Potentially invalid path reference: claude_pm/services/multi_agent_orchestrator.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/multi_agent_orchestrator.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 76,
+      "description": "Potentially invalid path reference: claude_pm/collectors/framework_services.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/collectors/framework_services.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 88,
+      "description": "Potentially invalid path reference: ./managed/ai-trackdown-tools/bobmatnyc-ai-trackdown-tools-1.0.1.tgz`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./managed/ai-trackdown-tools/bobmatnyc-ai-trackdown-tools-1.0.1.tgz`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 88,
+      "description": "Potentially invalid path reference: ../managed/ai-trackdown-tools/bobmatnyc-ai-trackdown-tools-1.0.1.tgz`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "../managed/ai-trackdown-tools/bobmatnyc-ai-trackdown-tools-1.0.1.tgz`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 296,
+      "description": "Potentially invalid path reference: docs/design/claude-multiagent-pm-design.md`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/design/claude-multiagent-pm-design.md`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 333,
+      "description": "Potentially invalid path reference: docs/FRAMEWORK_OVERVIEW.md**",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/FRAMEWORK_OVERVIEW.md**"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 334,
+      "description": "Potentially invalid path reference: docs/user-guide/01-getting-started.md**",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/user-guide/01-getting-started.md**"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 335,
+      "description": "Potentially invalid path reference: docs/user-guide/04-directory-organization.md**",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/user-guide/04-directory-organization.md**"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 336,
+      "description": "Potentially invalid path reference: docs/user-guide/05-custom-agents.md**",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/user-guide/05-custom-agents.md**"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 337,
+      "description": "Potentially invalid path reference: docs/user-guide/07-troubleshooting-faq.md**",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/user-guide/07-troubleshooting-faq.md**"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 338,
+      "description": "Potentially invalid path reference: docs/INDEX.md**",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/INDEX.md**"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 353,
+      "description": "Potentially invalid path reference: ./bin/cmpm`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./bin/cmpm`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/CHANGELOG.md",
+      "line_number": 427,
+      "description": "Potentially invalid path reference: claude_pm/cmpm_commands.py`**",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/cmpm_commands.py`**"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 29,
+      "description": "Potentially invalid path reference: ./compressed/logs-2025-01.tar.gz",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./compressed/logs-2025-01.tar.gz"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 29,
+      "description": "Potentially invalid path reference: ../compressed/logs-2025-01.tar.gz",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "../compressed/logs-2025-01.tar.gz"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 68,
+      "description": "Potentially invalid path reference: claude_pm/core/agent_registry.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/core/agent_registry.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 69,
+      "description": "Potentially invalid path reference: claude_pm/services/agent_registry.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/agent_registry.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 70,
+      "description": "Potentially invalid path reference: claude_pm/services/parent_directory_manager.py`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/services/parent_directory_manager.py`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 73,
+      "description": "Potentially invalid path reference: docs/agent_registry_sync_methods.md`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "docs/agent_registry_sync_methods.md`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 128,
+      "description": "Potentially invalid path reference: scripts/`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/cleanup_recommendations_2025-07-18.md",
+      "line_number": 150,
+      "description": "Potentially invalid path reference: scripts/cleanup_project.py`:",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "scripts/cleanup_project.py`:"
     },
     {
       "severity": "medium",
@@ -496,12 +975,32 @@
     {
       "severity": "medium",
       "issue_type": "path_error",
-      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/user-guide.md",
-      "line_number": 1094,
-      "description": "Potentially invalid path reference: ./CLAUDE.md",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/validation_report_iss_0119.md",
+      "line_number": 92,
+      "description": "Potentially invalid path reference: framework/CLAUDE.md`:",
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
-      "target_path": "./CLAUDE.md"
+      "target_path": "framework/CLAUDE.md`:"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/RELEASE_NOTES.md",
+      "line_number": 46,
+      "description": "Potentially invalid path reference: claude_pm/agents/`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "claude_pm/agents/`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/RELEASE_NOTES.md",
+      "line_number": 46,
+      "description": "Potentially invalid path reference: framework/claude_pm/agents/`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "framework/claude_pm/agents/`"
     },
     {
       "severity": "medium",
@@ -555,7 +1054,7 @@
     }
   ],
   "inconsistencies_found": [],
-  "last_update": "2025-07-18 00:14:13",
-  "files_validated": 12,
-  "links_checked": 1
+  "last_update": "2025-07-18 02:05:38",
+  "files_validated": 16,
+  "links_checked": 0
 }

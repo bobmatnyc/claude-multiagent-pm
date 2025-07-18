@@ -5,18 +5,19 @@ This module exposes the AgentRegistry from services to the core framework layer,
 providing the expected interface for core framework operations.
 
 Created: 2025-07-16 (Emergency restoration)
-Purpose: Restore missing claude_pm.core.agent_registry import
+Updated: 2025-07-18 (Switch to synchronous implementation)
+Purpose: Restore missing claude_pm.core.agent_registry import with synchronous operations
 """
 
-# Import AgentRegistry from services and expose it at core level
-from claude_pm.services.agent_registry import AgentRegistry, AgentMetadata
+# Import AgentRegistry from synchronous services and expose it at core level
+from claude_pm.services.agent_registry_sync import AgentRegistry, AgentMetadata
 
 # Expose key classes and functions for core framework access
 __all__ = [
     'AgentRegistry', 
     'AgentMetadata',
     'create_agent_registry',
-    'discover_agents_async',
+    'discover_agents',
     'get_core_agent_types',
     'get_specialized_agent_types',
     'listAgents',
@@ -39,9 +40,9 @@ def create_agent_registry(cache_service=None):
     """
     return AgentRegistry(cache_service=cache_service)
 
-async def discover_agents_async(force_refresh=False):
+def discover_agents(force_refresh=False):
     """
-    Convenience function for async agent discovery
+    Convenience function for synchronous agent discovery
     
     Args:
         force_refresh: Force cache refresh
@@ -50,7 +51,7 @@ async def discover_agents_async(force_refresh=False):
         Dictionary of discovered agents
     """
     registry = AgentRegistry()
-    return await registry.discover_agents(force_refresh=force_refresh)
+    return registry.discover_agents_sync(force_refresh=force_refresh)
 
 def get_core_agent_types():
     """
@@ -75,23 +76,17 @@ def get_specialized_agent_types():
 # Add convenience method for synchronous access with camelCase naming
 def listAgents():
     """
-    Synchronous wrapper for listing all agents (camelCase compatibility)
+    Synchronous function for listing all agents (camelCase compatibility)
     
-    This provides a non-async interface for simple agent listing operations
+    This provides a synchronous interface for simple agent listing operations
     that matches the camelCase naming convention in CLAUDE.md documentation.
     
     Returns:
         Dictionary of agent name -> agent metadata
     """
     registry = AgentRegistry()
-    agents = registry.discover_agents_sync()
-    return {name: {
-        'type': metadata.type,
-        'path': metadata.path,
-        'tier': metadata.tier,
-        'last_modified': metadata.last_modified,
-        'specializations': metadata.specializations
-    } for name, metadata in agents.items()}
+    # The sync version already has a listAgents method that returns a dict
+    return registry.listAgents()
 
 # Add synchronous convenience functions
 def list_agents(agent_type=None, tier=None):
@@ -106,16 +101,7 @@ def list_agents(agent_type=None, tier=None):
         List of agent metadata dictionaries
     """
     registry = AgentRegistry()
-    agents = registry.list_agents_sync(agent_type=agent_type, tier=tier)
-    return [{
-        'name': agent.name,
-        'type': agent.type,
-        'path': agent.path,
-        'tier': agent.tier,
-        'last_modified': agent.last_modified,
-        'specializations': agent.specializations,
-        'description': agent.description
-    } for agent in agents]
+    return registry.list_agents(agent_type=agent_type, tier=tier)
 
 def discover_agents_sync(force_refresh=False):
     """
@@ -128,7 +114,7 @@ def discover_agents_sync(force_refresh=False):
         Dictionary of discovered agents
     """
     registry = AgentRegistry()
-    return registry.discover_agents_sync(force_refresh=force_refresh)
+    return registry.discover_agents(force_refresh=force_refresh)
 
 def get_agent(agent_name):
     """
@@ -141,7 +127,7 @@ def get_agent(agent_name):
         Agent metadata or None
     """
     registry = AgentRegistry()
-    agent = registry.get_agent_sync(agent_name)
+    agent = registry.get_agent(agent_name)
     if agent:
         return {
             'name': agent.name,
@@ -162,4 +148,10 @@ def get_registry_stats():
         Dictionary of registry statistics
     """
     registry = AgentRegistry()
-    return registry.get_registry_stats_sync()
+    # This method doesn't exist in sync version, return basic stats
+    agents = registry.list_agents()
+    return {
+        'total_agents': len(agents),
+        'agent_types': len(set(a.type for a in agents)),
+        'tiers': list(set(a.tier for a in agents))
+    }
