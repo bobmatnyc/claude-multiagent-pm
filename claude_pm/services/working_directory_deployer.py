@@ -90,7 +90,6 @@ class WorkingDirectoryDeployer(BaseService):
     def _define_template_files(self) -> Dict[str, str]:
         """Define template files to deploy."""
         return {
-            'CLAUDE.md': 'templates/CLAUDE.md',
             'config.json': 'templates/config/working-directory-config.json',
             'agents/project-agents.json': 'templates/project-agents.json',
             'templates/project-template.md': 'templates/project-template.md',

@@ -13,6 +13,10 @@ Key Features:
 - Uses SharedPromptCache for performance
 - Special handling for ticketing agent's dynamic CLI help
 
+For advanced agent management features (CRUD, versioning, section updates), use:
+    from claude_pm.agents.agent_loader_integration import get_enhanced_loader
+    from claude_pm.services.agent_management_service import AgentManager
+
 Usage:
     from claude_pm.agents.agent_loader import get_documentation_agent_prompt
     

@@ -7,7 +7,7 @@
       "architect": {
         "name": "PM Orchestrator Agent",
         "type": "core",
-        "file": "architect-agent.md",
+        "file": "pm-orchestrator-agent.md",
         "description": "Multi-agent orchestrator and project management specialist - Primary coordination hub",
         "tools": ["task_tool", "todo_write", "memory_collection", "health_monitoring", "orchestration"],
         "coordination_role": "primary_orchestrator",
