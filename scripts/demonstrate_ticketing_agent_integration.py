@@ -12,7 +12,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from claude_pm.agents import get_ticketing_agent_prompt, TICKETING_CONFIG, SYSTEM_AGENTS
+from claude_pm.agents import get_ticketing_agent_prompt, TICKETING_CONFIG
 
 def demonstrate_agent_integration():
     """Demonstrate the updated Ticketing Agent with AI Trackdown Tools integration."""

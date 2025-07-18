@@ -3,12 +3,11 @@
 Unified Agent Loader System
 ==========================
 
-Provides unified loading of agent prompts from framework markdown files with fallback
-to Python constants. Integrates with SharedPromptCache for performance optimization.
+Provides unified loading of agent prompts from framework markdown files.
+Integrates with SharedPromptCache for performance optimization.
 
 Key Features:
 - Loads agent prompts from framework/agent-roles/*.md files
-- Falls back to existing Python constants if MD file not found
 - Handles base_agent.md prepending
 - Provides backward-compatible get_*_agent_prompt() functions
 - Uses SharedPromptCache for performance
@@ -17,14 +16,13 @@ Key Features:
 Usage:
     from claude_pm.agents.agent_loader import get_documentation_agent_prompt
     
-    # Get agent prompt (from MD file or fallback to Python constant)
+    # Get agent prompt from MD file
     prompt = get_documentation_agent_prompt()
 """
 
 import logging
 from pathlib import Path
-from typing import Optional, Dict, Any, Callable
-import importlib
+from typing import Optional, Dict, Any
 
 from ..services.shared_prompt_cache import SharedPromptCache
 from .base_agent_loader import prepend_base_instructions
@@ -38,7 +36,7 @@ FRAMEWORK_AGENT_ROLES_DIR = Path(__file__).parent.parent.parent / "framework" / 
 # Cache prefix for agent prompts
 AGENT_CACHE_PREFIX = "agent_prompt:"
 
-# Agent name mappings (Python module name -> MD file name)
+# Agent name mappings (agent name -> MD file name)
 AGENT_MAPPINGS = {
     "documentation": "documentation-agent.md",
     "ticketing": "ticketing-agent.md",
@@ -49,19 +47,6 @@ AGENT_MAPPINGS = {
     "security": "security-agent.md",
     "engineer": "engineer-agent.md",
     "data_engineer": "data-agent.md",  # Note: data-agent.md maps to data_engineer
-}
-
-# Python module fallbacks
-PYTHON_MODULES = {
-    "documentation": "documentation_agent",
-    "ticketing": "ticketing_agent",
-    "version_control": "version_control_agent",
-    "qa": "qa_agent",
-    "research": "research_agent",
-    "ops": "ops_agent",
-    "security": "security_agent",
-    "engineer": "engineer_agent",
-    "data_engineer": "data_engineer_agent",
 }
 
 
@@ -115,45 +100,11 @@ def load_agent_prompt_from_md(agent_name: str, force_reload: bool = False) -> Op
         return None
 
 
-def load_agent_prompt_from_python(agent_name: str) -> Optional[str]:
-    """
-    Load agent prompt from Python module (fallback).
-    
-    Args:
-        agent_name: Agent name (e.g., 'documentation', 'ticketing')
-        
-    Returns:
-        str: Agent prompt content from Python module, or None if not found
-    """
-    try:
-        module_name = PYTHON_MODULES.get(agent_name)
-        if not module_name:
-            logger.error(f"No Python module mapping found for agent: {agent_name}")
-            return None
-            
-        # Import the module
-        module = importlib.import_module(f".{module_name}", package="claude_pm.agents")
-        
-        # Get the prompt constant (without base instructions)
-        prompt_constant_name = f"{agent_name.upper()}_AGENT_PROMPT"
-        if hasattr(module, prompt_constant_name):
-            return getattr(module, prompt_constant_name)
-        
-        # Some modules might use PROMPT_TEMPLATE
-        if hasattr(module, f"{agent_name.upper()}_AGENT_PROMPT_TEMPLATE"):
-            return getattr(module, f"{agent_name.upper()}_AGENT_PROMPT_TEMPLATE")
-            
-        logger.error(f"No prompt constant found in module: {module_name}")
-        return None
-        
-    except Exception as e:
-        logger.error(f"Error loading agent prompt from Python for '{agent_name}': {e}")
-        return None
 
 
 def get_agent_prompt(agent_name: str, force_reload: bool = False, **kwargs) -> str:
     """
-    Get agent prompt with MD file priority and Python fallback.
+    Get agent prompt from MD file.
     
     Args:
         agent_name: Agent name (e.g., 'documentation', 'ticketing')
@@ -163,45 +114,23 @@ def get_agent_prompt(agent_name: str, force_reload: bool = False, **kwargs) -> s
     Returns:
         str: Complete agent prompt with base instructions prepended
     """
-    # Try loading from MD file first
+    # Load from MD file
     prompt = load_agent_prompt_from_md(agent_name, force_reload)
     
-    # Fall back to Python module if MD not found
     if prompt is None:
-        logger.info(f"Falling back to Python module for agent: {agent_name}")
-        
-        # Special handling for ticketing agent with dynamic help
-        if agent_name == "ticketing" and "force_refresh_help" in kwargs:
-            try:
-                module = importlib.import_module(".ticketing_agent", package="claude_pm.agents")
-                if hasattr(module, "get_ticketing_agent_prompt"):
-                    # Call the function directly to handle dynamic help
-                    return module.get_ticketing_agent_prompt(
-                        force_refresh_help=kwargs.get("force_refresh_help", False)
-                    )
-            except Exception as e:
-                logger.error(f"Error calling ticketing agent function: {e}")
-        
-        # Standard fallback to Python constant
-        prompt = load_agent_prompt_from_python(agent_name)
-        
-        if prompt is None:
-            raise ValueError(f"No agent prompt found for: {agent_name}")
+        raise ValueError(f"No agent prompt MD file found for: {agent_name}")
     
     # Handle ticketing agent template formatting if needed
     if agent_name == "ticketing" and "{dynamic_help}" in prompt:
         try:
-            # Import ticketing module to get dynamic help
-            module = importlib.import_module(".ticketing_agent", package="claude_pm.agents")
-            if hasattr(module, "_dynamic_help_section"):
-                prompt = prompt.format(dynamic_help=getattr(module, "_dynamic_help_section"))
-            else:
-                # Initialize help if not already done
-                if hasattr(module, "_cli_helper"):
-                    cli_helper = getattr(module, "_cli_helper")
-                    help_content, _ = cli_helper.get_cli_help()
-                    dynamic_help = cli_helper.format_help_for_prompt(help_content)
-                    prompt = prompt.format(dynamic_help=dynamic_help)
+            # Import CLI helper module to get dynamic help
+            from ..orchestration.ai_trackdown_tools import CLIHelpFormatter
+            
+            # Create a CLI helper instance
+            cli_helper = CLIHelpFormatter()
+            help_content, _ = cli_helper.get_cli_help()
+            dynamic_help = cli_helper.format_help_for_prompt(help_content)
+            prompt = prompt.format(dynamic_help=dynamic_help)
         except Exception as e:
             logger.warning(f"Could not format dynamic help for ticketing agent: {e}")
             # Remove the placeholder if we can't fill it
@@ -263,20 +192,17 @@ def list_available_agents() -> Dict[str, Dict[str, Any]]:
     List all available agents with their sources.
     
     Returns:
-        dict: Agent information including source (md/python) and path
+        dict: Agent information including MD file path
     """
     agents = {}
     
     for agent_name, md_filename in AGENT_MAPPINGS.items():
         md_path = FRAMEWORK_AGENT_ROLES_DIR / md_filename
-        python_module = PYTHON_MODULES.get(agent_name)
         
         agents[agent_name] = {
             "md_file": md_filename if md_path.exists() else None,
             "md_path": str(md_path) if md_path.exists() else None,
-            "python_module": python_module,
-            "has_md": md_path.exists(),
-            "has_python": python_module is not None
+            "has_md": md_path.exists()
         }
     
     return agents
@@ -320,8 +246,7 @@ def validate_agent_files() -> Dict[str, bool]:
         md_path = FRAMEWORK_AGENT_ROLES_DIR / md_filename
         results[agent_name] = {
             "md_exists": md_path.exists(),
-            "md_path": str(md_path),
-            "python_fallback": PYTHON_MODULES.get(agent_name) is not None
+            "md_path": str(md_path)
         }
     
     return results

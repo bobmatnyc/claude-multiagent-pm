@@ -56,7 +56,7 @@ class DocSyncConfigManager:
     
     def __init__(self, claude_pm_root: Optional[str] = None):
         self.claude_pm_root = Path(claude_pm_root or "/Users/masa/Projects/claude-multiagent-pm")
-        self.config_file = self.claude_pm_root / "config" / "doc_sync_config.json"
+        self.config_file = self.claude_pm_root / "scripts" / "config" / "doc_sync_config.json"
         self.logger = self._setup_logging()
         
     def _setup_logging(self) -> logging.Logger:

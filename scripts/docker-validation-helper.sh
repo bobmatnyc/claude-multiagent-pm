@@ -24,7 +24,7 @@ DOCKER="🐳"
 # Project configuration
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VALIDATION_SCRIPT="$PROJECT_ROOT/scripts/pre-publish-docker-validation.js"
-CONFIG_FILE="$PROJECT_ROOT/config/docker-validation-config.json"
+CONFIG_FILE="$PROJECT_ROOT/scripts/config/docker-validation-config.json"
 LOGS_DIR="$PROJECT_ROOT/logs"
 
 # Validation configuration
