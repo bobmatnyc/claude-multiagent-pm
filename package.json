@@ -1,6 +1,6 @@
 {
   "name": "@bobmatnyc/claude-multiagent-pm",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Claude Multi-Agent PM Framework - Pure Python implementation with Click-based CLI and enhanced flags system",
   "main": "bin/claude-pm",
   "bin": {
@@ -65,6 +65,7 @@
     "install:validate": "node install/validate.js --comprehensive && node install/test-installation.js",
     "install:health-check": "node -e \"const fs = require('fs'); const path = require('path'); const home = require('os').homedir(); const healthPath = path.join(home, '.claude-pm', 'health-check.json'); if (fs.existsSync(healthPath)) { console.log(JSON.stringify(JSON.parse(fs.readFileSync(healthPath, 'utf8')), null, 2)); } else { console.log('Health check not available - run claude-pm init'); }\"",
     "install:dependencies": "node install/postinstall-minimal.js",
+    "install:missing-deps": "python3 scripts/install_missing_dependencies.py",
     "install:diagnostics": "node -e \"const fs = require('fs'); const path = require('path'); const home = require('os').homedir(); const diagPath = path.join(home, '.claude-pm', 'installation-diagnostics.json'); if (fs.existsSync(diagPath)) { console.log(JSON.stringify(JSON.parse(fs.readFileSync(diagPath, 'utf8')), null, 2)); } else { console.log('Diagnostics not available - run npm run install:unified'); }\"",
     "install:report": "node -e \"const fs = require('fs'); const path = require('path'); const home = require('os').homedir(); const reportPath = path.join(home, '.claude-pm', 'installation-report.md'); if (fs.existsSync(reportPath)) { console.log(fs.readFileSync(reportPath, 'utf8')); } else { console.log('Installation report not available - run npm run install:unified'); }\"",
     "test:unified-installation": "node install/test-unified-installation.js",

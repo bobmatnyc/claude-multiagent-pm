@@ -26,3 +26,7 @@ requests>=2.31.0
 
 # Utilities
 pathspec>=0.11.0
+
+# Markdown parsing
+python-frontmatter>=1.0.0
+mistune>=3.0.0

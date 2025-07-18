@@ -5,6 +5,14 @@ All notable changes to the Claude Multi-Agent PM Framework will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2025-07-18
+
+### Fixed
+- Critical npm postinstall issue: Missing Python dependencies (python-frontmatter, mistune)
+- Added automatic dependency installation to npm postinstall process
+- Added recovery script (scripts/install_missing_dependencies.py) for existing installations
+- Added comprehensive troubleshooting documentation for common issues
+
 ## [1.2.0] - 2025-07-18
 
 ### Added
