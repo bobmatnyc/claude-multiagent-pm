@@ -32,8 +32,8 @@ logger = logging.getLogger(__name__)
 # Cache key for base agent instructions
 BASE_AGENT_CACHE_KEY = "base_agent:instructions"
 
-# Base agent file path (relative to this module)
-BASE_AGENT_FILE = Path(__file__).parent / "base_agent.md"
+# Base agent file path (in framework/agent-roles directory)
+BASE_AGENT_FILE = Path(__file__).parent.parent.parent / "framework" / "agent-roles" / "base_agent.md"
 
 
 def load_base_agent_instructions(force_reload: bool = False) -> Optional[str]:

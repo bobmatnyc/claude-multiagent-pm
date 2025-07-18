@@ -5,6 +5,27 @@ All notable changes to the Claude Multi-Agent PM Framework will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] - 2025-07-18
+
+### Added
+- Ticket update requirements to base_agent.md for consistent ticket tracking
+- BaseAgentManager unit tests for comprehensive test coverage
+- Version history section in README for better version tracking
+
+### Changed
+- Updated README with concise framework comparison and version history
+- Enhanced base agent instructions with explicit ticket update requirements
+- Improved base_agent_loader.py to use framework/agent-roles path
+
+### Fixed
+- Base agent file path resolution in base_agent_loader.py
+- Test directory organization and reports structure
+
+### Maintenance
+- Cleaned up test directory structure with proper categorization
+- Moved test reports to dedicated reports/ subdirectory
+- Added .gitignore for reports/validation/ directory
+
 ## [1.2.1] - 2025-07-18
 
 ### Fixed

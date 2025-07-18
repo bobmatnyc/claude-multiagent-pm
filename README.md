@@ -1,6 +1,6 @@
 # Claude PM Framework
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://www.npmjs.com/package/@bobmatnyc/claude-multiagent-pm)
+[![Version](https://img.shields.io/badge/version-1.2.3-blue.svg)](https://www.npmjs.com/package/@bobmatnyc/claude-multiagent-pm)
 [![Framework](https://img.shields.io/badge/framework-014--005-green.svg)](./framework/CLAUDE.md)
 [![Node.js](https://img.shields.io/badge/node->=16.0.0-green.svg)](https://nodejs.org/)
 [![Python](https://img.shields.io/badge/python->=3.8.0-green.svg)](https://python.org/)
@@ -11,36 +11,19 @@ A lightweight, flexible multi-agent framework for orchestrating AI-driven develo
 
 ### Claude PM Framework vs claude-flow:
 
-| Feature | Claude PM Framework | claude-flow |
-|---------|-------------------|-------------|
-| **Target Users** | Individuals, small teams, agile developers | Large enterprises, complex organizations |
-| **Setup Complexity** | Lightweight, quick setup | Comprehensive enterprise configuration |
-| **Agent System** | **Unlimited custom agents** (10 concurrent) + 9 core agents | Fixed enterprise agent set |
-| **Project Scale** | Single projects to small team coordination | Multi-repository, enterprise scale |
-| **Customization** | **User-generated agents**, dynamic discovery | Enterprise templates, rigid structure |
-| **Integration** | Flexible, plugin-based, user-defined | Heavy enterprise tooling required |
-| **Learning Curve** | Minimal - start creating agents immediately | Steep - requires enterprise architecture knowledge |
-| **Agent Training** | **Self-improving agents**, continuous learning, pattern capture | Static agents, manual updates only |
-| **Best For** | **Rapid development**, creative workflows, custom automation | Enterprise governance, compliance, large teams |
+| Aspect | Claude PM Framework | claude-flow |
+|--------|-------------------|-------------|
+| **Focus** | Individual developers & small teams | Large enterprises |
+| **Agent System** | **Unlimited custom agents** + 9 core agents | Fixed enterprise agent set |
+| **Setup** | Lightweight, immediate start | Heavy enterprise configuration |
+| **Customization** | **User-generated agents**, self-improving | Static templates, manual updates |
+| **Best For** | Rapid development, creative workflows | Enterprise governance, compliance |
 
 ### Choose Claude PM Framework when:
 - You want to **create your own custom agents** for specific tasks
-- Working solo or in small, agile teams
-- Need **flexibility** to define new agent types on the fly
-- Want **lightweight setup** without enterprise overhead
-- Building creative, adaptive workflows
-- Running up to **10 specialized agents concurrently**
-- Prefer **user-driven customization** over rigid templates
+- Need **lightweight setup** without enterprise overhead
 - Want agents that **learn and improve** from usage patterns
-- Need **self-optimizing workflows** that get better over time
-
-### Choose claude-flow when:
-- Large enterprise with 50+ developers
-- Need strict governance and compliance
-- Require heavy integration with enterprise tools
-- Have dedicated DevOps teams for setup
-- Need standardized workflows across many teams
-- Compliance and audit trails are critical
+- Building creative, adaptive workflows with **user-driven customization**
 
 ## Install & Run
 
@@ -58,7 +41,7 @@ claude-pm
 
 The user guide covers everything from basic concepts to advanced workflows, including practical examples and best practices for orchestrating AI-driven development workflows.
 
-## Key Features (v1.0.0)
+## Key Features (v1.2.3)
 
 - **🎯 Custom Agent Creation**: Create project-specific agents tailored to your domain - architecture, performance, UI/UX, compliance, and more
 - **🤖 Agent Registry & Hierarchical Discovery**: Dynamic agent discovery with project → user → system precedence
@@ -186,6 +169,86 @@ push  # Multi-agent quality pipeline before merge
 **Traditional Development**: Manual testing → Manual documentation → Manual review → Deploy
 
 **Orchestrated Development**: Your custom agents handle testing, documentation, and review processes while you focus on creative problem-solving and core logic. Enables rapid prototyping and agile development with minimal setup overhead.
+
+## Notable Features by Version
+
+### Version History (Most Recent First)
+
+#### v1.2.3 (Current) - July 2025
+- **Maintenance Release**: Documentation updates and test reorganization
+- **Base Agent Updates**: Added ticket update requirements for consistency
+- **Test Coverage**: Added BaseAgentManager unit tests
+- **File Path Fix**: Corrected base_agent_loader.py to use framework path
+
+#### v1.2.2 - July 2025
+- **Python Package Publishing**: Full PyPI distribution support
+- **Dependency Management**: Enhanced Python dependency handling and installation
+- **Agent Discovery Optimization**: Improved agent loading performance
+- **Documentation Reorganization**: Cleaner docs structure with better navigation
+
+#### v1.2.1 - July 2025
+- **Critical Fix**: Resolved npm postinstall Python dependency issues
+- **Auto-Recovery**: Added automatic dependency installation scripts
+- **Troubleshooting**: Comprehensive issue resolution documentation
+
+#### v1.2.0 - July 2025
+- **Base Agent Instructions**: Shared capabilities system for all agents
+- **BaseAgentManager API**: Structured updates to agent behaviors
+- **PM Orchestrator Agent**: Enhanced multi-agent coordination role
+- **Agent Versioning**: Track and manage agent changes over time
+- **Test Suite Reorganization**: Better test categorization
+
+#### v1.0.1 - July 2025
+- **Production Fixes**: Resolved agent discovery issues
+- **Deployment Improvements**: Better external project support
+
+#### v1.0.0 - July 2025
+- **LOCAL Orchestration**: Default mode for instant agent responses
+- **Subprocess Environment**: Robust agent delegation handling
+- **Performance Optimizations**: Major architectural improvements
+- **Framework Stability**: Production-ready release
+
+#### v0.9.3 - July 2025
+- **Agent Type Expansion**: Support for 35+ specialized agent types
+- **Natural Language Selection**: AI-powered agent matching from descriptions
+- **Performance Metrics**: 0.34ms agent selection speed
+
+#### v0.9.2 - July 2025
+- **Enhanced Agent Discovery**: Improved registry performance
+- **Documentation Updates**: Comprehensive user guides
+
+#### v0.9.1 - July 2025
+- **Import Resolution**: Fixed agent system functionality
+- **Interface Extraction**: Better model selection features
+- **User Guide**: Complete documentation overhaul
+
+#### v0.9.0 - July 2025
+- **Agent Registry System**: Revolutionary discovery with two-tier hierarchy
+- **99.7% Performance**: SharedPromptCache integration breakthrough
+- **Real-time Tracking**: Agent modification monitoring
+- **Streamlined Architecture**: Simplified hierarchy for maintainability
+
+#### v0.8.5 - July 2025
+- **Enhanced Testing**: Improved test coverage and reliability
+
+#### v0.8.4 - July 2025
+- **NPM Publishing**: Resolved package publication issues
+
+#### v0.8.3 - July 2025
+- **Subprocess Validation**: Protocol implementation for reliability
+- **Installer Fixes**: Fresh installation support improvements
+
+#### v0.8.2 - July 2025
+- **Cleanup System**: Comprehensive file management
+- **NPM Reliability**: Installation process improvements
+
+#### v0.8.1 - July 2025
+- **Dependency Fixes**: Resolved npm package issues
+
+#### v0.8.0 - July 2025
+- **Agent Restructuring**: Complete system architecture overhaul
+- **Memory Expansion**: Enhanced memory system capabilities
+- **Framework Foundation**: Core multi-agent capabilities established
 
 ## Common Use Cases
 
