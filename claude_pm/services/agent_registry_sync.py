@@ -124,9 +124,17 @@ class AgentRegistry:
         if user_agents_dir.exists():
             paths.append(user_agents_dir)
         
-        # System agents (framework directory)
+        # System agents - look for framework/agent-roles directory
         try:
             import claude_pm
+            # First try the framework/agent-roles directory (markdown agents)
+            framework_base = Path(claude_pm.__file__).parent.parent
+            agent_roles_path = framework_base / 'framework' / 'agent-roles'
+            if agent_roles_path.exists():
+                paths.append(agent_roles_path)
+                logger.debug(f"Found framework agent-roles directory: {agent_roles_path}")
+            
+            # Also check for Python agents in the module
             framework_path = Path(claude_pm.__file__).parent / 'agents'
             if framework_path.exists():
                 paths.append(framework_path)
@@ -210,10 +218,15 @@ class AgentRegistry:
         
         logger.debug(f"Scanning directory: {directory} (tier: {tier})")
         
-        # Scan for Python agent files
-        for agent_file in directory.rglob("*.py"):
-            if agent_file.name.startswith('__'):
-                continue  # Skip __init__.py and __pycache__
+        # Scan for markdown agent files (changed from Python files)
+        for agent_file in directory.rglob("*.md"):
+            # Skip template files and backup files
+            if agent_file.name in ['AGENT_TEMPLATE.md', 'base_agent.md'] or '.backup' in agent_file.name:
+                continue
+            
+            # Skip non-agent markdown files
+            if not agent_file.name.endswith('-agent.md'):
+                continue
             
             try:
                 agent_metadata = self._extract_agent_metadata(agent_file, tier)
@@ -241,11 +254,12 @@ class AgentRegistry:
             file_size = stat.st_size
             last_modified = stat.st_mtime
             
-            # Determine agent name and type
+            # Determine agent name and type from filename
+            # e.g., "documentation-agent.md" -> name: "documentation-agent", type: "documentation"
             agent_name = agent_file.stem
             agent_type = self._classify_agent_type(agent_name, agent_file)
             
-            # Read file for additional metadata
+            # Read file for additional metadata - now handles markdown
             description, version, capabilities = self._parse_agent_file(agent_file)
             
             # Enhanced metadata extraction for ISS-0118
@@ -284,11 +298,11 @@ class AgentRegistry:
     
     def _parse_agent_file(self, agent_file: Path) -> Tuple[Optional[str], Optional[str], List[str]]:
         """
-        Enhanced agent file parsing with specialized capability detection for ISS-0118.
-        Extracts comprehensive metadata including specialization indicators.
+        Parse markdown agent file to extract metadata.
+        Extracts description, capabilities, and other metadata from markdown structure.
         
         Args:
-            agent_file: Path to agent file
+            agent_file: Path to agent markdown file
             
         Returns:
             Tuple of (description, version, capabilities)
@@ -299,82 +313,115 @@ class AgentRegistry:
         
         try:
             content = agent_file.read_text(encoding='utf-8')
-            
-            # Extract docstring description with specialization detection
-            if '"""' in content:
-                docstring_start = content.find('"""')
-                if docstring_start != -1:
-                    docstring_end = content.find('"""', docstring_start + 3)
-                    if docstring_end != -1:
-                        docstring = content[docstring_start + 3:docstring_end].strip()
-                        # Use first line as description
-                        description = docstring.split('\n')[0].strip()
-                        
-                        # Extract specialization hints from docstring
-                        docstring_lower = docstring.lower()
-                        specialization_indicators = [
-                            'specializes in', 'specialized for', 'expert in', 'focused on',
-                            'handles', 'manages', 'responsible for', 'domain:', 'specialty:'
-                        ]
-                        for indicator in specialization_indicators:
-                            if indicator in docstring_lower:
-                                # Extract text after indicator as specialization capability
-                                spec_start = docstring_lower.find(indicator) + len(indicator)
-                                spec_text = docstring[spec_start:spec_start+100].strip()
-                                if spec_text:
-                                    capabilities.append(f"specialization:{spec_text.split('.')[0].strip()}")
-            
-            # Extract version information
-            if 'VERSION' in content or '__version__' in content:
-                lines = content.split('\n')
-                for line in lines:
-                    if 'VERSION' in line or '__version__' in line:
-                        if '=' in line:
-                            version_part = line.split('=')[1].strip().strip('"\'')
-                            version = version_part
-                            break
-            
-            # Enhanced capability extraction from methods/functions
             lines = content.split('\n')
+            
+            # Extract description from Primary Role section
+            in_primary_role = False
+            for i, line in enumerate(lines):
+                if line.strip() == "## 🎯 Primary Role":
+                    in_primary_role = True
+                    # Get next non-empty line as description
+                    for j in range(i+1, min(i+5, len(lines))):
+                        desc_line = lines[j].strip()
+                        if desc_line and not desc_line.startswith('#'):
+                            description = desc_line
+                            break
+                    break
+            
+            # Extract capabilities from Core Capabilities section
+            in_capabilities = False
             for line in lines:
-                line = line.strip()
-                if line.startswith('def ') and not line.startswith('def _'):
-                    # Extract public method names as capabilities
-                    method_name = line.split('(')[0].replace('def ', '').strip()
-                    if method_name not in ['__init__', '__str__', '__repr__']:
-                        capabilities.append(method_name)
-                elif line.startswith('async def ') and not line.startswith('async def _'):
-                    # Extract async method names as capabilities
-                    method_name = line.split('(')[0].replace('async def ', '').strip()
-                    if method_name not in ['__init__', '__str__', '__repr__']:
-                        capabilities.append(f"async_{method_name}")
+                if line.strip() == "## 🔧 Core Capabilities":
+                    in_capabilities = True
+                    continue
+                elif in_capabilities and line.startswith('## '):
+                    # End of capabilities section
+                    break
+                elif in_capabilities and line.strip().startswith('- **'):
+                    # Extract capability name from bold text
+                    cap_match = line.strip()[4:].split('**')[0]
+                    if cap_match:
+                        capabilities.append(f"capability:{cap_match}")
             
-            # Extract capabilities from class definitions and inheritance
-            import ast
-            try:
-                tree = ast.parse(content)
-                for node in ast.walk(tree):
-                    if isinstance(node, ast.ClassDef):
-                        # Add class name as capability
-                        capabilities.append(f"class:{node.name}")
-                        
-                        # Extract base classes as capability indicators
-                        for base in node.bases:
-                            if isinstance(base, ast.Name):
-                                capabilities.append(f"inherits:{base.id}")
-                            elif isinstance(base, ast.Attribute):
-                                capabilities.append(f"inherits:{base.attr}")
-            except SyntaxError:
-                pass  # Skip AST parsing if syntax errors
+            # Extract specializations from content
+            content_lower = content.lower()
             
-            # Extract framework and library capabilities from imports
-            framework_capabilities = self._extract_framework_capabilities(content)
-            capabilities.extend(framework_capabilities)
+            # Look for specialization keywords
+            if 'changelog' in content_lower:
+                capabilities.append('specialization:changelog_generation')
+            if 'release notes' in content_lower:
+                capabilities.append('specialization:release_documentation')
+            if 'documentation pattern' in content_lower:
+                capabilities.append('specialization:documentation_analysis')
+            if 'api documentation' in content_lower:
+                capabilities.append('specialization:api_documentation')
+            if 'security' in content_lower and 'security-agent' in agent_file.name:
+                capabilities.append('specialization:security_analysis')
+            if 'testing' in content_lower or 'qa-agent' in agent_file.name:
+                capabilities.append('specialization:quality_assurance')
+            if 'research' in content_lower and 'research-agent' in agent_file.name:
+                capabilities.append('specialization:technical_research')
+            if 'version control' in content_lower or 'version-control' in agent_file.name:
+                capabilities.append('specialization:git_operations')
+            if 'ticketing' in content_lower or 'ticketing-agent' in agent_file.name:
+                capabilities.append('specialization:issue_tracking')
+            if 'data' in content_lower and 'data-agent' in agent_file.name:
+                capabilities.append('specialization:data_management')
+            if 'engineer' in content_lower and 'engineer-agent' in agent_file.name:
+                capabilities.append('specialization:code_implementation')
+            if 'ops' in content_lower and 'ops-agent' in agent_file.name:
+                capabilities.append('specialization:deployment_operations')
             
-            # Extract role and domain capabilities from comments
-            role_capabilities = self._extract_role_capabilities(content)
-            capabilities.extend(role_capabilities)
-        
+            # Extract frameworks mentioned
+            framework_patterns = {
+                'git': 'framework:git',
+                'github': 'framework:github',
+                'jira': 'framework:jira',
+                'gitlab': 'framework:gitlab',
+                'jenkins': 'framework:jenkins',
+                'docker': 'framework:docker',
+                'kubernetes': 'framework:kubernetes',
+                'terraform': 'framework:terraform',
+                'ansible': 'framework:ansible',
+                'aws': 'framework:aws',
+                'azure': 'framework:azure',
+                'gcp': 'framework:gcp'
+            }
+            
+            for pattern, framework in framework_patterns.items():
+                if pattern in content_lower:
+                    capabilities.append(framework)
+            
+            # Extract domain capabilities
+            if 'devops' in content_lower or 'ci/cd' in content_lower:
+                capabilities.append('domain:devops')
+            if 'security' in content_lower:
+                capabilities.append('domain:security')
+            if 'documentation' in content_lower:
+                capabilities.append('domain:documentation')
+            if 'testing' in content_lower or 'quality' in content_lower:
+                capabilities.append('domain:quality_assurance')
+            
+            # Extract role capabilities based on agent type
+            agent_roles = {
+                'documentation-agent': 'role:technical_writer',
+                'ticketing-agent': 'role:issue_manager',
+                'version-control-agent': 'role:version_manager',
+                'qa-agent': 'role:quality_assurance',
+                'research-agent': 'role:researcher',
+                'ops-agent': 'role:devops_engineer',
+                'security-agent': 'role:security_specialist',
+                'engineer-agent': 'role:software_engineer',
+                'data-agent': 'role:data_engineer',
+                'data-engineer-agent': 'role:data_engineer'  # Support both naming conventions
+            }
+            
+            if agent_file.stem in agent_roles:
+                capabilities.append(agent_roles[agent_file.stem])
+            
+            # Default version for markdown agents
+            version = "1.0.0"
+            
         except Exception as e:
             logger.warning(f"Error parsing agent file {agent_file}: {e}")
         
@@ -814,6 +861,10 @@ class AgentRegistry:
         name_lower = agent_name.lower()
         
         # First check for core agent types (highest priority)
+        # Special handling for data-agent -> data_engineer mapping
+        if 'data-agent' in name_lower or 'data_agent' in name_lower:
+            return 'data_engineer'
+        
         for core_type in self.core_agent_types:
             if core_type in name_lower or name_lower in core_type:
                 return core_type
@@ -968,15 +1019,29 @@ class AgentRegistry:
                 
                 validation_score += 10  # File exists
                 
-                # Syntax validation (basic Python syntax check)
+                # Content validation for markdown files
                 try:
                     with open(metadata.path, 'r', encoding='utf-8') as f:
                         content = f.read()
-                    compile(content, metadata.path, 'exec')
-                    validation_score += 20  # Valid syntax
+                    
+                    # Basic markdown validation
+                    if metadata.path.endswith('.md'):
+                        # Check for required sections
+                        required_sections = ['Primary Role', 'Core Capabilities']
+                        for section in required_sections:
+                            if f"## 🎯 {section}" in content or f"## 🔧 {section}" in content:
+                                validation_score += 10
+                            else:
+                                validation_errors.append(f"Missing required section: {section}")
+                    else:
+                        # Python syntax validation (if any Python agents remain)
+                        compile(content, metadata.path, 'exec')
+                        validation_score += 20  # Valid syntax
                 except SyntaxError as e:
                     validation_errors.append(f"Syntax error: {e}")
                     validation_score -= 10
+                except Exception as e:
+                    validation_errors.append(f"Content error: {e}")
                 
                 # Enhanced validation for specialized agents
                 validation_score += self._validate_specialized_agent(metadata, content)
