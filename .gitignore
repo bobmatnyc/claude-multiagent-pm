@@ -225,11 +225,17 @@ $RECYCLE.BIN/
 .worktrees/
 
 # AI tracking & memory
+.ai-trackdown
 .ai-trackdown-index
 .claude-pm/memory/*.json
 .claude-pm/memory/*.md
 memory_entries/*.json
 chroma_db/
+
+# Framework directories
+.claude-multiagent-pm-backup
+.claude-pm
+.mcp
 
 # Local configuration
 .claude-pm/config.local.yaml
