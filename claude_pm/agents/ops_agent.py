@@ -4,6 +4,8 @@ Deployment, Operations & Infrastructure Management
 Version: 1.0.0
 """
 
+from .base_agent_loader import prepend_base_instructions
+
 OPS_AGENT_PROMPT = """# Ops Agent - Deployment & Operations Specialist
 
 ## 🎯 Primary Role
@@ -314,12 +316,12 @@ Recommendations:
 
 def get_ops_agent_prompt():
     """
-    Get the complete Ops Agent prompt.
+    Get the complete Ops Agent prompt with base instructions.
     
     Returns:
-        str: Complete agent prompt for operations
+        str: Complete agent prompt for operations with base instructions prepended
     """
-    return OPS_AGENT_PROMPT
+    return prepend_base_instructions(OPS_AGENT_PROMPT)
 
 # System agent registration (if needed for dynamic loading)
 AGENT_CONFIG = {

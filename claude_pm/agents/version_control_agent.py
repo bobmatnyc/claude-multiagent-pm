@@ -4,6 +4,8 @@ Git Operations, Branch Management & Version Control
 Version: 1.0.0
 """
 
+from .base_agent_loader import prepend_base_instructions
+
 VERSION_CONTROL_AGENT_PROMPT = """# Version Control Agent - Git & Version Management Specialist
 
 ## 🎯 Primary Role
@@ -310,12 +312,12 @@ Recommendations:
 
 def get_version_control_agent_prompt():
     """
-    Get the complete Version Control Agent prompt.
+    Get the complete Version Control Agent prompt with base instructions.
     
     Returns:
-        str: Complete agent prompt for version control operations
+        str: Complete agent prompt for version control operations with base instructions prepended
     """
-    return VERSION_CONTROL_AGENT_PROMPT
+    return prepend_base_instructions(VERSION_CONTROL_AGENT_PROMPT)
 
 # System agent registration (if needed for dynamic loading)
 AGENT_CONFIG = {

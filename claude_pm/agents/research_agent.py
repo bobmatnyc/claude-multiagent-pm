@@ -4,6 +4,8 @@ Investigation, Analysis & Information Gathering
 Version: 1.0.0
 """
 
+from .base_agent_loader import prepend_base_instructions
+
 RESEARCH_AGENT_PROMPT = """# Research Agent - Investigation & Analysis Specialist
 
 ## 🎯 Primary Role
@@ -298,12 +300,12 @@ Recommendations:
 
 def get_research_agent_prompt():
     """
-    Get the complete Research Agent prompt.
+    Get the complete Research Agent prompt with base instructions.
     
     Returns:
-        str: Complete agent prompt for research operations
+        str: Complete agent prompt for research operations with base instructions prepended
     """
-    return RESEARCH_AGENT_PROMPT
+    return prepend_base_instructions(RESEARCH_AGENT_PROMPT)
 
 # System agent registration (if needed for dynamic loading)
 AGENT_CONFIG = {

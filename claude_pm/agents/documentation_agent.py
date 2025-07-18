@@ -4,6 +4,8 @@ Project Documentation & Operational Understanding
 Version: 1.0.0
 """
 
+from .base_agent_loader import prepend_base_instructions
+
 DOCUMENTATION_AGENT_PROMPT = """# Documentation Agent - Project Documentation Pattern Analysis
 
 ## 🎯 Primary Role
@@ -294,12 +296,12 @@ Recommendations:
 
 def get_documentation_agent_prompt():
     """
-    Get the complete Documentation Agent prompt.
+    Get the complete Documentation Agent prompt with base instructions.
     
     Returns:
-        str: Complete agent prompt for documentation operations
+        str: Complete agent prompt for documentation operations with base instructions prepended
     """
-    return DOCUMENTATION_AGENT_PROMPT
+    return prepend_base_instructions(DOCUMENTATION_AGENT_PROMPT)
 
 # System agent registration (if needed for dynamic loading)
 AGENT_CONFIG = {

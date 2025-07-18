@@ -1,13 +1,30 @@
 # Claude PM Framework - User Guide
 
-[![Version](https://img.shields.io/badge/version-0.9.0-blue.svg)](https://www.npmjs.com/package/@bobmatnyc/claude-multiagent-pm)
-[![Framework](https://img.shields.io/badge/framework-014--005-green.svg)](./framework/CLAUDE.md)
+[![Version](https://img.shields.io/badge/version-1.0.2-blue.svg)](https://www.npmjs.com/package/@bobmatnyc/claude-multiagent-pm)
+[![Framework](https://img.shields.io/badge/framework-015--002-green.svg)](./framework/CLAUDE.md)
 [![Node.js](https://img.shields.io/badge/node->=16.0.0-green.svg)](https://nodejs.org/)
 [![Python](https://img.shields.io/badge/python->=3.8.0-green.svg)](https://python.org/)
 
 > **Get productive with Claude PM Framework in 30 minutes**
 > 
 > A comprehensive multi-agent framework that orchestrates AI-driven development workflows across teams and complex projects. This guide provides clear learning paths for beginners, practitioners, and advanced users.
+
+## 🎯 New in v1.0.2: Natural Language Agent Selection
+
+Simply describe what you need in plain English - the framework automatically routes to the right agent with 94.1% accuracy:
+
+```bash
+# Natural language examples
+"Research React Server Components" → Research Agent
+"Update the API docs" → Documentation Agent
+"Fix the login bug" → Engineer Agent
+
+# Or use explicit @agent syntax
+"@security scan for vulnerabilities"
+"@qa run all tests"
+```
+
+[Learn more in the Agent Selection Guide →](./agent-selection-guide.md)
 
 ---
 

@@ -3,18 +3,40 @@ Claude PM Framework Agents Package
 
 System-level agent implementations with Task Tool integration.
 These agents provide specialized prompts and capabilities for PM orchestration.
+
+Uses unified agent loader to load prompts from framework/agent-roles/*.md files
+with fallback to Python constants for backward compatibility.
 """
 
-# Import all agent modules and their configs
-from .documentation_agent import get_documentation_agent_prompt, AGENT_CONFIG as DOCUMENTATION_CONFIG
-from .ticketing_agent import get_ticketing_agent_prompt, AGENT_CONFIG as TICKETING_CONFIG
-from .version_control_agent import get_version_control_agent_prompt, AGENT_CONFIG as VERSION_CONTROL_CONFIG
-from .qa_agent import get_qa_agent_prompt, AGENT_CONFIG as QA_CONFIG
-from .research_agent import get_research_agent_prompt, AGENT_CONFIG as RESEARCH_CONFIG
-from .ops_agent import get_ops_agent_prompt, AGENT_CONFIG as OPS_CONFIG
-from .security_agent import get_security_agent_prompt, AGENT_CONFIG as SECURITY_CONFIG
-from .engineer_agent import get_engineer_agent_prompt, AGENT_CONFIG as ENGINEER_CONFIG
-from .data_engineer_agent import get_data_engineer_agent_prompt, AGENT_CONFIG as DATA_ENGINEER_CONFIG
+# Import from unified agent loader
+from .agent_loader import (
+    get_documentation_agent_prompt,
+    get_ticketing_agent_prompt,
+    get_version_control_agent_prompt,
+    get_qa_agent_prompt,
+    get_research_agent_prompt,
+    get_ops_agent_prompt,
+    get_security_agent_prompt,
+    get_engineer_agent_prompt,
+    get_data_engineer_agent_prompt,
+    list_available_agents,
+    clear_agent_cache,
+    validate_agent_files
+)
+
+# Import agent metadata (previously AGENT_CONFIG)
+from .agents_metadata import (
+    DOCUMENTATION_CONFIG,
+    TICKETING_CONFIG,
+    VERSION_CONTROL_CONFIG,
+    QA_CONFIG,
+    RESEARCH_CONFIG,
+    OPS_CONFIG,
+    SECURITY_CONFIG,
+    ENGINEER_CONFIG,
+    DATA_ENGINEER_CONFIG,
+    ALL_AGENT_CONFIGS
+)
 
 # Available system agents
 __all__ = [
@@ -28,6 +50,10 @@ __all__ = [
     'get_security_agent_prompt',
     'get_engineer_agent_prompt',
     'get_data_engineer_agent_prompt',
+    # Agent utility functions
+    'list_available_agents',
+    'clear_agent_cache',
+    'validate_agent_files',
     # Agent configs
     'DOCUMENTATION_CONFIG',
     'TICKETING_CONFIG',
@@ -38,6 +64,7 @@ __all__ = [
     'SECURITY_CONFIG',
     'ENGINEER_CONFIG',
     'DATA_ENGINEER_CONFIG',
+    'ALL_AGENT_CONFIGS',
     # System registry
     'SYSTEM_AGENTS'
 ]

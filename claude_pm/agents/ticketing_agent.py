@@ -4,7 +4,178 @@ AI Trackdown Tools Integration
 Version: 1.0.0
 """
 
-TICKETING_AGENT_PROMPT = """# Ticketing Agent - AI Trackdown Tools Integration
+import subprocess
+import json
+import os
+from datetime import datetime
+from pathlib import Path
+
+from .base_agent_loader import prepend_base_instructions
+
+class TicketingAgentCLIHelper:
+    """Dynamic CLI help discovery for AI Trackdown Tools"""
+    
+    def __init__(self):
+        self.cache_dir = Path.home() / '.claude-pm' / 'cache' / 'cli_help'
+        self.cache_file = self.cache_dir / 'aitrackdown_help.json'
+        self.cache_duration = 3600  # 1 hour cache
+        
+    def _ensure_cache_dir(self):
+        """Ensure cache directory exists"""
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        
+    def _is_cache_valid(self):
+        """Check if cache is still valid"""
+        if not self.cache_file.exists():
+            return False
+            
+        try:
+            cache_stat = self.cache_file.stat()
+            cache_age = datetime.now().timestamp() - cache_stat.st_mtime
+            return cache_age < self.cache_duration
+        except:
+            return False
+            
+    def _run_cli_command(self, command_args):
+        """Run CLI command and capture output"""
+        try:
+            result = subprocess.run(
+                command_args,
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            if result.returncode == 0:
+                return result.stdout
+            else:
+                return f"Error: {result.stderr}"
+        except subprocess.TimeoutExpired:
+            return "Error: Command timed out"
+        except FileNotFoundError:
+            return "Error: aitrackdown CLI not found. Please install ai-trackdown-tools."
+        except Exception as e:
+            return f"Error: {str(e)}"
+            
+    def _discover_commands(self):
+        """Discover all available commands and their help"""
+        commands_help = {}
+        
+        # Get main help
+        main_help = self._run_cli_command(['aitrackdown', '--help'])
+        commands_help['main'] = main_help
+        
+        # Common command groups to discover
+        command_groups = [
+            'epic', 'issue', 'task', 'pr', 'resolve', 'state', 
+            'sync', 'ai', 'status', 'backlog', 'health', 'export',
+            'migrate', 'portfolio', 'config', 'index'
+        ]
+        
+        # Discover subcommands for each group
+        for cmd_group in command_groups:
+            group_help = self._run_cli_command(['aitrackdown', cmd_group, '--help'])
+            if not group_help.startswith('Error:'):
+                commands_help[cmd_group] = group_help
+                
+                # Try to discover sub-subcommands
+                if 'Commands:' in group_help:
+                    # Parse subcommands from help output
+                    lines = group_help.split('\n')
+                    in_commands = False
+                    for line in lines:
+                        if 'Commands:' in line:
+                            in_commands = True
+                            continue
+                        if in_commands and line.strip() and not line.startswith(' '):
+                            in_commands = False
+                            break
+                        if in_commands and line.strip():
+                            # Extract command name
+                            parts = line.strip().split()
+                            if parts:
+                                subcmd = parts[0]
+                                subcmd_help = self._run_cli_command(['aitrackdown', cmd_group, subcmd, '--help'])
+                                if not subcmd_help.startswith('Error:'):
+                                    commands_help[f"{cmd_group}_{subcmd}"] = subcmd_help
+                                    
+        return commands_help
+        
+    def get_cli_help(self, force_refresh=False):
+        """Get CLI help, using cache if available"""
+        self._ensure_cache_dir()
+        
+        # Check cache validity
+        if not force_refresh and self._is_cache_valid():
+            try:
+                with open(self.cache_file, 'r') as f:
+                    cache_data = json.load(f)
+                    return cache_data['help_content'], cache_data['timestamp']
+            except:
+                pass
+                
+        # Discover commands
+        help_content = self._discover_commands()
+        timestamp = datetime.now().isoformat()
+        
+        # Save to cache
+        try:
+            cache_data = {
+                'help_content': help_content,
+                'timestamp': timestamp,
+                'version': self._get_cli_version()
+            }
+            with open(self.cache_file, 'w') as f:
+                json.dump(cache_data, f, indent=2)
+        except:
+            pass
+            
+        return help_content, timestamp
+        
+    def _get_cli_version(self):
+        """Get AI Trackdown Tools version"""
+        version_output = self._run_cli_command(['aitrackdown', '--version'])
+        if not version_output.startswith('Error:'):
+            return version_output.strip()
+        return "Unknown"
+        
+    def format_help_for_prompt(self, help_content):
+        """Format help content for inclusion in agent prompt"""
+        formatted = ["### 🛠️ AI TRACKDOWN TOOLS - DYNAMIC CLI REFERENCE\n"]
+        formatted.append(f"**Last Updated**: {datetime.now().isoformat()}\n")
+        formatted.append(f"**CLI Version**: {self._get_cli_version()}\n\n")
+        
+        # Add main help
+        if 'main' in help_content:
+            formatted.append("#### Main Commands\n```\n")
+            formatted.append(help_content['main'])
+            formatted.append("\n```\n\n")
+            
+        # Add command group helps
+        for cmd, help_text in sorted(help_content.items()):
+            if cmd != 'main' and not help_text.startswith('Error:'):
+                formatted.append(f"#### {cmd.replace('_', ' ').title()} Command\n```\n")
+                formatted.append(help_text)
+                formatted.append("\n```\n\n")
+                
+        # Add error recovery instructions
+        formatted.append("### 🔄 CLI Error Recovery\n")
+        formatted.append("If you encounter CLI errors, try these steps:\n")
+        formatted.append("1. Verify CLI installation: `which aitrackdown`\n")
+        formatted.append("2. Check CLI version: `aitrackdown --version`\n")
+        formatted.append("3. Refresh help cache: Request PM to run with force_refresh=True\n")
+        formatted.append("4. Fallback to basic commands if advanced features fail\n")
+        formatted.append("5. Alert PM immediately if CLI is completely unavailable\n\n")
+        
+        return ''.join(formatted)
+
+# Initialize CLI helper
+_cli_helper = TicketingAgentCLIHelper()
+
+# Get dynamic help content
+_help_content, _help_timestamp = _cli_helper.get_cli_help()
+_dynamic_help_section = _cli_helper.format_help_for_prompt(_help_content)
+
+TICKETING_AGENT_PROMPT_TEMPLATE = """# Ticketing Agent - AI Trackdown Tools Integration
 
 ## 🎯 Primary Role
 **Universal Ticketing Interface & Lifecycle Management Specialist with AI Trackdown Tools**
@@ -15,7 +186,9 @@ You are the Ticketing Agent, responsible for ALL ticket operations across multip
 
 ## 🛠️ AI TRACKDOWN TOOLS - COMPLETE API DOCUMENTATION
 
-### 🚀 Core AI Trackdown Tools Commands
+{dynamic_help}
+
+### 📚 STATIC REFERENCE (Fallback if CLI unavailable)
 
 #### **Hierarchical Structure**
 ```
@@ -763,6 +936,17 @@ aitrackdown [command] --verbose
 4. **Recovery Priority**: Focus on restoring CLI functionality immediately
 5. **State Synchronization**: Ensure any fallback operations sync back to CLI
 
+### Dynamic CLI Help Update Protocol
+When encountering CLI errors or unknown commands:
+1. **Error Pattern Detection**: If CLI returns "unknown command" or similar errors
+2. **Help Refresh Request**: Request PM to refresh CLI help cache:
+   ```
+   PM: Please refresh the ticketing agent's CLI help cache to discover new commands
+   ```
+3. **Auto-Discovery**: The agent will automatically discover new commands and options
+4. **Capability Update**: Updated help will be included in future responses
+5. **Version Awareness**: Track CLI version changes and adapt to new features
+
 ## 🏗️ Framework Integration Requirements
 
 ### Claude PM Framework Context
@@ -789,14 +973,58 @@ aitrackdown [command] --verbose
 **Allocation**: ONE per project with portfolio coordination capabilities
 """
 
-def get_ticketing_agent_prompt():
+def get_ticketing_agent_prompt(force_refresh_help=False):
     """
-    Get the complete Ticketing Agent prompt with AI Trackdown Tools integration.
+    Get the complete Ticketing Agent prompt with AI Trackdown Tools integration and base instructions.
+    
+    Args:
+        force_refresh_help: Force refresh of CLI help cache
     
     Returns:
-        str: Complete agent prompt with embedded API documentation
+        str: Complete agent prompt with embedded API documentation and base instructions prepended
     """
-    return TICKETING_AGENT_PROMPT
+    # Get latest CLI help if needed
+    if force_refresh_help or not _cli_helper._is_cache_valid():
+        global _help_content, _help_timestamp, _dynamic_help_section
+        _help_content, _help_timestamp = _cli_helper.get_cli_help(force_refresh=force_refresh_help)
+        _dynamic_help_section = _cli_helper.format_help_for_prompt(_help_content)
+    
+    # Format the prompt with dynamic help
+    agent_prompt = TICKETING_AGENT_PROMPT_TEMPLATE.format(dynamic_help=_dynamic_help_section)
+    
+    # Prepend base instructions
+    return prepend_base_instructions(agent_prompt)
+
+def refresh_cli_help_cache():
+    """
+    Refresh the CLI help cache and return status.
+    
+    Returns:
+        dict: Status information about the refresh operation
+    """
+    global _help_content, _help_timestamp, _dynamic_help_section
+    
+    try:
+        # Force refresh
+        _help_content, _help_timestamp = _cli_helper.get_cli_help(force_refresh=True)
+        _dynamic_help_section = _cli_helper.format_help_for_prompt(_help_content)
+        
+        # Get version info
+        cli_version = _cli_helper._get_cli_version()
+        
+        return {
+            'status': 'success',
+            'timestamp': _help_timestamp,
+            'cli_version': cli_version,
+            'commands_discovered': len(_help_content),
+            'cache_file': str(_cli_helper.cache_file)
+        }
+    except Exception as e:
+        return {
+            'status': 'error',
+            'error': str(e),
+            'cache_file': str(_cli_helper.cache_file)
+        }
 
 # System agent registration (if needed for dynamic loading)
 AGENT_CONFIG = {

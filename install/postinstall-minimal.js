@@ -189,6 +189,55 @@ class MinimalPostInstall {
     }
 
     /**
+     * Ensure aitrackdown alias is available after ai-trackdown-tools installation
+     */
+    ensureAitrackdownAlias(pythonCmd) {
+        this.log('Checking aitrackdown alias availability...');
+        
+        try {
+            // First check if aitrackdown command is already available
+            try {
+                execSync('which aitrackdown', { stdio: 'pipe' });
+                this.log('✅ aitrackdown alias already available');
+                return { available: true, created: false };
+            } catch (e) {
+                // Command not found, proceed to create alias
+            }
+            
+            // Run the ensure_aitrackdown_alias.py script
+            const scriptPath = path.join(this.packageRoot, 'scripts', 'ensure_aitrackdown_alias.py');
+            
+            if (!fs.existsSync(scriptPath)) {
+                this.log('⚠️ ensure_aitrackdown_alias.py script not found', 'warn');
+                return { available: false, created: false };
+            }
+            
+            try {
+                const output = execSync(`${pythonCmd} ${scriptPath}`, { 
+                    cwd: this.packageRoot,
+                    stdio: 'pipe',
+                    encoding: 'utf8',
+                    timeout: 30000
+                });
+                
+                if (output.includes('already exists') || output.includes('created successfully')) {
+                    this.log('✅ aitrackdown alias ensured');
+                    return { available: true, created: true };
+                } else {
+                    this.log('⚠️ aitrackdown alias creation returned unexpected output', 'warn');
+                    return { available: false, created: false };
+                }
+            } catch (scriptError) {
+                this.log(`⚠️ Failed to ensure aitrackdown alias: ${scriptError.message}`, 'warn');
+                return { available: false, created: false };
+            }
+        } catch (e) {
+            this.log(`⚠️ Error checking aitrackdown alias: ${e.message}`, 'warn');
+            return { available: false, created: false };
+        }
+    }
+
+    /**
      * Validate installation components
      */
     validateInstallation(pythonCmd) {
@@ -389,6 +438,14 @@ class MinimalPostInstall {
                 console.log(`   Core Modules: ${validation.coreModulesAvailable ? '✅' : '❌'}`);
                 console.log(`   CLI Package: ${validation.cliAvailable ? '✅' : '❌'}`);
                 console.log(`   Memory System: ${validation.memorySystemAvailable ? '✅' : '❌'}`);
+                
+                // Check aitrackdown alias status
+                let aitrackdownAvailable = false;
+                try {
+                    execSync('which aitrackdown', { stdio: 'pipe' });
+                    aitrackdownAvailable = true;
+                } catch (e) {}
+                console.log(`   Aitrackdown Alias: ${aitrackdownAvailable ? '✅' : '⚠️ (manual setup may be needed)'}`);
             }
         }
         
@@ -404,6 +461,7 @@ class MinimalPostInstall {
         console.log('   • If Python dependencies fail: Check Python 3.8+ is installed');
         console.log('   • If permission errors occur: Try with --break-system-packages flag');
         console.log('   • If memory system fails: AI features will be limited but core CLI works');
+        console.log('   • If aitrackdown alias missing: Run "python scripts/ensure_aitrackdown_alias.py"');
         console.log('   • For detailed logs: Check ~/.claude-pm/logs/ after initialization');
         
         console.log('\n📚 Documentation:');
@@ -614,6 +672,26 @@ class MinimalPostInstall {
             
             if (pythonInstallSuccess) {
                 this.log('✅ Python package installation completed successfully');
+                
+                // Ensure aitrackdown alias after Python package installation
+                const pythonCommands = ['python3', 'python'];
+                let pythonCmd = null;
+                for (const cmd of pythonCommands) {
+                    try {
+                        const version = execSync(`${cmd} --version`, { stdio: 'pipe', encoding: 'utf8' });
+                        if (version.includes('Python 3.')) {
+                            pythonCmd = cmd;
+                            break;
+                        }
+                    } catch (e) {}
+                }
+                
+                if (pythonCmd) {
+                    const aliasResult = this.ensureAitrackdownAlias(pythonCmd);
+                    if (!aliasResult.available) {
+                        this.log('ℹ️ aitrackdown alias may need manual setup for ticketing functionality');
+                    }
+                }
             } else {
                 this.log('⚠️ Python package installation partial/failed - manual steps may be required', 'warn');
                 this.log('💡 Run "npm run install:validate" to check installation status');

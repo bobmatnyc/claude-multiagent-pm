@@ -44,8 +44,9 @@ from .context_manager import ContextManager, create_context_manager
 # Import existing components for compatibility
 from claude_pm.core.response_types import TaskToolResponse
 from claude_pm.utils.task_tool_helper import TaskToolHelper, TaskToolConfiguration
-from claude_pm.services.agent_registry import AgentRegistry
+from claude_pm.services.agent_registry_sync import AgentRegistry
 from claude_pm.services.shared_prompt_cache import SharedPromptCache
+from claude_pm.core.agent_keyword_parser import AgentKeywordParser
 
 # Import subprocess runner for real subprocess creation
 try:
@@ -140,6 +141,9 @@ class BackwardsCompatibleOrchestrator:
         # Initialize orchestration detector
         self.detector = OrchestrationDetector()
         
+        # Initialize keyword parser for agent type detection
+        self.keyword_parser = AgentKeywordParser()
+        
         # Initialize components (lazy loading)
         self._message_bus: Optional[SimpleMessageBus] = None
         self._context_manager: Optional[ContextManager] = None
@@ -184,9 +188,25 @@ class BackwardsCompatibleOrchestrator:
         task_id = str(uuid.uuid4())[:8]  # Short task ID for tracking
         return_code = ReturnCode.SUCCESS
         
+        # Parse agent type from task description if not explicitly provided or generic
+        original_agent_type = agent_type
+        if not agent_type or agent_type.lower() in ['agent', 'generic', 'default']:
+            parsed_type = self.keyword_parser.parse_task_description(task_description)
+            if parsed_type:
+                agent_type = parsed_type
+                logger.info(f"Keyword parser detected agent type '{agent_type}' from task description")
+        
+        # Also check if task description contains @agent_name syntax
+        elif task_description.strip().startswith('@'):
+            parsed_type = self.keyword_parser.parse_task_description(task_description)
+            if parsed_type:
+                agent_type = parsed_type
+                logger.info(f"Explicit @agent syntax detected: '{agent_type}'")
+        
         # Log delegation start
         logger.info("agent_delegation_start", extra={
             "agent_type": agent_type,
+            "original_agent_type": original_agent_type,
             "task_id": task_id,
             "task_description": task_description[:100],  # First 100 chars
             "priority": priority,
@@ -447,43 +467,32 @@ class BackwardsCompatibleOrchestrator:
             # Generate subprocess ID for compatibility
             subprocess_id = f"{agent_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
             
-            # Get agent prompt from registry (or use default for instant LOCAL mode)
+            # Get agent prompt from registry using proper hierarchy
             agent_prompt_start = time.perf_counter()
-            agent_prompt = await self._get_agent_prompt(agent_type)
+            agent_prompt, agent_tier = self._get_agent_prompt_with_hierarchy(agent_type)
             agent_prompt_time = (time.perf_counter() - agent_prompt_start) * 1000
             
-            if not agent_prompt:
-                # Use agent-specific default prompts for instant LOCAL mode
-                agent_prompts = {
-                    'security': """You are the Security Agent, responsible for security analysis, vulnerability assessment, and protection.
-You provide comprehensive security capabilities protecting projects from vulnerabilities and threats.""",
-                    'engineer': """You are the Engineer Agent, responsible for code implementation, development, and technical problem solving.
-You provide software engineering expertise and best practices.""",
-                    'documentation': """You are the Documentation Agent, responsible for creating and maintaining project documentation.
-You ensure clear, comprehensive documentation across all project aspects.""",
-                    'qa': """You are the QA Agent, responsible for quality assurance, testing, and validation.
-You ensure project quality through comprehensive testing strategies.""",
-                    'research': """You are the Research Agent, responsible for investigation, analysis, and information gathering.
-You provide in-depth research and technical analysis.""",
-                    'ops': """You are the Ops Agent, responsible for deployment, operations, and infrastructure.
-You handle all operational aspects of project deployment and maintenance.""",
-                    'version_control': """You are the Version Control Agent, responsible for Git operations and version management.
-You manage branches, merges, and repository workflows.""",
-                    'ticketing': """You are the Ticketing Agent, responsible for ticket lifecycle and issue tracking.
-You provide universal ticketing interface across platforms.""",
-                    'data_engineer': """You are the Data Engineer Agent, responsible for data management and AI API integrations.
-You handle databases, data pipelines, and data architecture."""
-                }
-                
-                agent_prompt = agent_prompts.get(agent_type, f"""You are the {agent_type.title()} Agent.
-Your role is to assist with {agent_type} tasks and provide expert guidance.
-This is a LOCAL orchestration mode execution for instant responses.""")
-                
-                logger.debug("using_default_agent_prompt", extra={
+            # Log which agent level was selected
+            if agent_prompt and agent_tier:
+                logger.info("agent_selected", extra={
                     "agent_type": agent_type,
+                    "agent_tier": agent_tier,
+                    "prompt_loading_ms": agent_prompt_time,
                     "task_id": task_id,
-                    "reason": "instant_local_mode"
+                    "mode": "LOCAL"
                 })
+            
+            if not agent_prompt:
+                # Fallback if no agent found in registry (should rarely happen)
+                logger.warning("agent_not_found_in_registry", extra={
+                    "agent_type": agent_type,
+                    "fallback": "generic_prompt",
+                    "task_id": task_id
+                })
+                agent_prompt = f"""You are the {agent_type.title()} Agent.
+Your role is to assist with {agent_type} tasks and provide expert guidance.
+This is a LOCAL orchestration mode execution for instant responses."""
+                agent_tier = "fallback"
             
             logger.debug("agent_prompt_ready", extra={
                 "agent_type": agent_type,
@@ -491,6 +500,11 @@ This is a LOCAL orchestration mode execution for instant responses.""")
                 "prompt_size": len(agent_prompt),
                 "load_time_ms": agent_prompt_time
             })
+            
+            # Ensure context manager is initialized
+            if not self._context_manager:
+                self._context_manager = create_context_manager()
+                logger.debug("context_manager_initialized_in_local_orchestration")
             
             # Collect current full context
             context_collection_start = time.perf_counter()
@@ -596,7 +610,9 @@ This is a LOCAL orchestration mode execution for instant responses.""")
                     "filtered_context_size": filtered_context_size,
                     "context_size_original": original_context_size,
                     "context_size_filtered": filtered_context_size,
-                    "token_reduction_percent": token_reduction_percent
+                    "token_reduction_percent": token_reduction_percent,
+                    "agent_tier": agent_tier,
+                    "agent_prompt_loading_ms": agent_prompt_time
                 },
                 "return_code": return_code
             }
@@ -965,7 +981,14 @@ Integration Notes:
             
             # Load from agent registry
             if self._agent_registry:
-                agent_metadata = await self._agent_registry.get_agent(agent_type)
+                # First discover agents to ensure registry is populated
+                self._agent_registry.discover_agents()
+                # Get agent metadata by type
+                agent_metadata = None
+                for agent_name, metadata in self._agent_registry.registry.items():
+                    if metadata.type == agent_type:
+                        agent_metadata = metadata
+                        break
                 if agent_metadata:
                     # Load agent definition file
                     agent_path = Path(agent_metadata.path)
@@ -987,6 +1010,77 @@ Integration Notes:
         except Exception as e:
             logger.error(f"Error getting agent prompt: {e}")
             return None
+    
+    def _get_agent_prompt_with_hierarchy(self, agent_type: str) -> Tuple[Optional[str], Optional[str]]:
+        """
+        Get agent prompt from registry with hierarchy information.
+        
+        Returns:
+            Tuple of (agent_prompt, tier) where tier is 'project', 'user', or 'system'
+        """
+        try:
+            if not self._prompt_cache:
+                self._prompt_cache = SharedPromptCache.get_instance()
+            
+            if not self._agent_registry:
+                # Initialize agent registry if needed
+                cache = SharedPromptCache.get_instance()
+                self._agent_registry = AgentRegistry(cache_service=cache)
+                
+            # Discover all agents to ensure we have the latest
+            all_agents = self._agent_registry.discover_agents()
+            
+            # Find the agent with proper hierarchy precedence
+            agent_metadata = None
+            agent_tier = None
+            
+            for agent_name, metadata in all_agents.items():
+                if metadata.type == agent_type:
+                    # Apply hierarchy precedence: project > user > system
+                    if metadata.tier == 'project':
+                        agent_metadata = metadata
+                        agent_tier = 'project'
+                        break  # Project level has highest precedence
+                    elif metadata.tier == 'user' and agent_tier != 'project':
+                        agent_metadata = metadata
+                        agent_tier = 'user'
+                    elif metadata.tier == 'system' and agent_tier is None:
+                        agent_metadata = metadata
+                        agent_tier = 'system'
+            
+            if agent_metadata:
+                # Try cache first
+                cache_key = f"agent_prompt:{agent_type}:{agent_tier}"
+                cached_prompt = self._prompt_cache.get(cache_key)
+                if cached_prompt:
+                    return cached_prompt, agent_tier
+                
+                # Load agent definition file
+                agent_path = Path(agent_metadata.path)
+                if agent_path.exists():
+                    agent_content = agent_path.read_text()
+                    # Cache for future use
+                    self._prompt_cache.set(cache_key, agent_content, ttl=3600)
+                    
+                    logger.info("agent_prompt_loaded", extra={
+                        "agent_type": agent_type,
+                        "agent_tier": agent_tier,
+                        "agent_path": str(agent_path),
+                        "specializations": agent_metadata.specializations
+                    })
+                    
+                    return agent_content, agent_tier
+                else:
+                    # Fallback to basic prompt from metadata
+                    basic_prompt = f"{agent_metadata.description}\n\nSpecializations: {', '.join(agent_metadata.specializations or [])}"
+                    self._prompt_cache.set(cache_key, basic_prompt, ttl=3600)
+                    return basic_prompt, agent_tier
+            
+            return None, None
+            
+        except Exception as e:
+            logger.error(f"Error getting agent prompt with hierarchy: {e}")
+            return None, None
     
     def _format_agent_prompt(
         self,

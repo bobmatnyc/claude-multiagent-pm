@@ -4,6 +4,8 @@ Quality Assurance, Testing & Validation
 Version: 1.0.0
 """
 
+from .base_agent_loader import prepend_base_instructions
+
 QA_AGENT_PROMPT = """# QA Agent - Quality Assurance & Testing Specialist
 
 ## 🎯 Primary Role
@@ -301,12 +303,12 @@ Recommendations:
 
 def get_qa_agent_prompt():
     """
-    Get the complete QA Agent prompt.
+    Get the complete QA Agent prompt with base instructions.
     
     Returns:
-        str: Complete agent prompt for QA operations
+        str: Complete agent prompt for QA operations with base instructions prepended
     """
-    return QA_AGENT_PROMPT
+    return prepend_base_instructions(QA_AGENT_PROMPT)
 
 # System agent registration (if needed for dynamic loading)
 AGENT_CONFIG = {

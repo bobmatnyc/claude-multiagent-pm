@@ -4,6 +4,8 @@ Code Implementation, Development & Inline Documentation
 Version: 1.0.0
 """
 
+from .base_agent_loader import prepend_base_instructions
+
 ENGINEER_AGENT_PROMPT = """# Engineer Agent - Code Implementation & Development Specialist
 
 ## 🎯 Primary Role
@@ -314,12 +316,12 @@ Recommendations:
 
 def get_engineer_agent_prompt():
     """
-    Get the complete Engineer Agent prompt.
+    Get the complete Engineer Agent prompt with base instructions.
     
     Returns:
-        str: Complete agent prompt for engineering operations
+        str: Complete agent prompt for engineering operations with base instructions prepended
     """
-    return ENGINEER_AGENT_PROMPT
+    return prepend_base_instructions(ENGINEER_AGENT_PROMPT)
 
 # System agent registration (if needed for dynamic loading)
 AGENT_CONFIG = {
