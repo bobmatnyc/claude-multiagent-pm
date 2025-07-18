@@ -1,6 +1,6 @@
 {
   "name": "@bobmatnyc/claude-multiagent-pm",
-  "version": "0.9.3",
+  "version": "1.0.0",
   "description": "Claude Multi-Agent PM Framework - Pure Python implementation with Click-based CLI and enhanced flags system",
   "main": "bin/claude-pm",
   "bin": {
@@ -128,11 +128,11 @@
     "scripts/",
     "pyproject.toml",
     "README.md",
-    "CHANGELOG.md",
+    "docs/CHANGELOG.md",
     "LICENSE"
   ],
   "dependencies": {
-    "@bobmatnyc/ai-trackdown-tools": "^1.1.2"
+    "@bobmatnyc/ai-trackdown-tools": "^1.2.0"
   },
   "devDependencies": {
     "standard-version": "^9.5.0"

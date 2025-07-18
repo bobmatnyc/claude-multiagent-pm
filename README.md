@@ -1,6 +1,6 @@
 # Claude PM Framework
 
-[![Version](https://img.shields.io/badge/version-0.9.0-blue.svg)](https://www.npmjs.com/package/@bobmatnyc/claude-multiagent-pm)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://www.npmjs.com/package/@bobmatnyc/claude-multiagent-pm)
 [![Framework](https://img.shields.io/badge/framework-014--005-green.svg)](./framework/CLAUDE.md)
 [![Node.js](https://img.shields.io/badge/node->=16.0.0-green.svg)](https://nodejs.org/)
 [![Python](https://img.shields.io/badge/python->=3.8.0-green.svg)](https://python.org/)
@@ -58,7 +58,7 @@ claude-pm
 
 The user guide covers everything from basic concepts to advanced workflows, including practical examples and best practices for orchestrating AI-driven development workflows.
 
-## Key Features (v0.9.0)
+## Key Features (v1.0.0)
 
 - **🎯 Custom Agent Creation**: Create project-specific agents tailored to your domain - architecture, performance, UI/UX, compliance, and more
 - **🤖 Agent Registry & Hierarchical Discovery**: Dynamic agent discovery with project → user → system precedence
@@ -70,6 +70,30 @@ The user guide covers everything from basic concepts to advanced workflows, incl
 - **📝 Comprehensive Documentation**: Auto-generated changelogs, semantic versioning, and project documentation
 - **🔍 Quality Assurance**: Automated testing, linting, and security scanning across agent workflows
 - **🚀 Deployment Coordination**: Multi-agent deployment validation and management
+
+## 🔧 Orchestration Model - Our Own Built-in Process Manager
+
+**IMPORTANT**: The Claude PM Framework uses its own custom-built process management system for agent orchestration. This is NOT Claude's Task Tool subprocess system - this is our framework's innovation.
+
+### How It Works
+
+The PM (Project Manager) agent orchestrates all work by delegating to specialized agents through **our own built-in process manager**:
+
+1. **Process Creation**: PM analyzes tasks and creates agent processes using our process manager
+2. **Isolated Execution**: Each agent runs in its own controlled process environment
+3. **Context Filtering**: Agents receive only the context relevant to their specialization
+4. **Result Integration**: PM collects and integrates results from multiple agents
+5. **Workflow Coordination**: Complex multi-agent workflows are managed by our orchestration engine
+
+### Benefits of Our Process Manager
+
+- **Concurrent Execution**: Run up to 10 specialized agents simultaneously
+- **Process Isolation**: Secure execution environment for each agent
+- **Error Recovery**: Robust handling of agent failures and timeouts
+- **Performance Tracking**: Built-in metrics and optimization
+- **Easy Extension**: Simple to add custom agents that integrate seamlessly
+
+This custom process management system is a core differentiator of the Claude PM Framework, purpose-built for AI agent coordination.
 
 ## 🧠 Agent Training & Continuous Learning
 
@@ -241,7 +265,7 @@ push  # Comprehensive validation across all packages
 
 ---
 
-## Custom Agent Creation (v0.9.0)
+## Custom Agent Creation (v1.0.0)
 
 ### Extend the Framework with Your Own Agents
 
@@ -275,7 +299,7 @@ The framework includes a sophisticated **Agent Training System** that enables:
    - Core framework functionality (9 core agent types)
    - Always available as fallback
 
-#### User-Agents Directory Structure (v0.9.0)
+#### User-Agents Directory Structure (v1.0.0)
 
 ```
 $PWD/.claude-pm/agents/
@@ -377,7 +401,7 @@ TEMPORAL CONTEXT: Today is [date]. Apply date awareness to [agent-specific consi
 [Agent-specific performance requirements or optimizations]
 ```
 
-### Agent Registry Integration (v0.9.0)
+### Agent Registry Integration (v1.0.0)
 
 **Dynamic Agent Discovery with 99.7% Performance Improvement:**
 ```python
@@ -412,7 +436,7 @@ multi_spec = registry.listAgents(specializations=['integration', 'performance'])
 - Provide comprehensive context filtering
 - Specify expected results and integration patterns
 
-#### Performance Considerations (v0.9.0)
+#### Performance Considerations (v1.0.0)
 - **SharedPromptCache Integration**: 99.7% faster agent loading through intelligent caching
 - **Real-Time Modification Tracking**: Monitor agent changes and adapt workflows automatically
 - **Optimized Discovery**: <100ms agent discovery for typical projects

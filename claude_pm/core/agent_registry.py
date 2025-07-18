@@ -12,7 +12,19 @@ Purpose: Restore missing claude_pm.core.agent_registry import
 from claude_pm.services.agent_registry import AgentRegistry, AgentMetadata
 
 # Expose key classes and functions for core framework access
-__all__ = ['AgentRegistry', 'AgentMetadata']
+__all__ = [
+    'AgentRegistry', 
+    'AgentMetadata',
+    'create_agent_registry',
+    'discover_agents_async',
+    'get_core_agent_types',
+    'get_specialized_agent_types',
+    'listAgents',
+    'list_agents',
+    'discover_agents_sync',
+    'get_agent',
+    'get_registry_stats'
+]
 
 # Create convenience aliases for common operations
 def create_agent_registry(cache_service=None):
@@ -71,18 +83,83 @@ def listAgents():
     Returns:
         Dictionary of agent name -> agent metadata
     """
-    import asyncio
     registry = AgentRegistry()
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        agents = loop.run_until_complete(registry.discover_agents())
-        return {name: {
-            'type': metadata.type,
-            'path': metadata.path,
-            'tier': metadata.tier,
-            'last_modified': metadata.last_modified,
-            'specializations': metadata.specializations
-        } for name, metadata in agents.items()}
-    finally:
-        loop.close()
+    agents = registry.discover_agents_sync()
+    return {name: {
+        'type': metadata.type,
+        'path': metadata.path,
+        'tier': metadata.tier,
+        'last_modified': metadata.last_modified,
+        'specializations': metadata.specializations
+    } for name, metadata in agents.items()}
+
+# Add synchronous convenience functions
+def list_agents(agent_type=None, tier=None):
+    """
+    Synchronous function to list agents with optional filtering
+    
+    Args:
+        agent_type: Filter by agent type
+        tier: Filter by hierarchy tier
+        
+    Returns:
+        List of agent metadata dictionaries
+    """
+    registry = AgentRegistry()
+    agents = registry.list_agents_sync(agent_type=agent_type, tier=tier)
+    return [{
+        'name': agent.name,
+        'type': agent.type,
+        'path': agent.path,
+        'tier': agent.tier,
+        'last_modified': agent.last_modified,
+        'specializations': agent.specializations,
+        'description': agent.description
+    } for agent in agents]
+
+def discover_agents_sync(force_refresh=False):
+    """
+    Synchronous function for agent discovery
+    
+    Args:
+        force_refresh: Force cache refresh
+        
+    Returns:
+        Dictionary of discovered agents
+    """
+    registry = AgentRegistry()
+    return registry.discover_agents_sync(force_refresh=force_refresh)
+
+def get_agent(agent_name):
+    """
+    Synchronous function to get a specific agent
+    
+    Args:
+        agent_name: Name of agent to retrieve
+        
+    Returns:
+        Agent metadata or None
+    """
+    registry = AgentRegistry()
+    agent = registry.get_agent_sync(agent_name)
+    if agent:
+        return {
+            'name': agent.name,
+            'type': agent.type,
+            'path': agent.path,
+            'tier': agent.tier,
+            'last_modified': agent.last_modified,
+            'specializations': agent.specializations,
+            'description': agent.description
+        }
+    return None
+
+def get_registry_stats():
+    """
+    Synchronous function to get registry statistics
+    
+    Returns:
+        Dictionary of registry statistics
+    """
+    registry = AgentRegistry()
+    return registry.get_registry_stats_sync()

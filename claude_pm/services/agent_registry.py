@@ -1770,6 +1770,128 @@ class AgentRegistry:
         """Get the ModelSelector instance for direct access."""
         return self.model_selector
     
+    def list_agents_sync(self, agent_type: Optional[str] = None, tier: Optional[str] = None) -> List[AgentMetadata]:
+        """
+        Synchronous wrapper for async list_agents method.
+        
+        Args:
+            agent_type: Filter by agent type
+            tier: Filter by hierarchy tier
+            
+        Returns:
+            List of matching AgentMetadata
+        """
+        import asyncio
+        loop = None
+        try:
+            # Try to get the current event loop
+            loop = asyncio.get_running_loop()
+            # If we're in an async context, we can't use run_until_complete
+            # Create a new thread to run the async method
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(asyncio.run, self.list_agents(agent_type=agent_type, tier=tier))
+                return future.result()
+        except RuntimeError:
+            # No event loop running, we can create one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(self.list_agents(agent_type=agent_type, tier=tier))
+            finally:
+                loop.close()
+                asyncio.set_event_loop(None)
+    
+    def discover_agents_sync(self, force_refresh: bool = False) -> Dict[str, AgentMetadata]:
+        """
+        Synchronous wrapper for discover_agents method.
+        
+        Args:
+            force_refresh: Force cache refresh even if within TTL
+            
+        Returns:
+            Dictionary of agent name -> AgentMetadata
+        """
+        import asyncio
+        loop = None
+        try:
+            # Try to get the current event loop
+            loop = asyncio.get_running_loop()
+            # If we're in an async context, we can't use run_until_complete
+            # Create a new thread to run the async method
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(asyncio.run, self.discover_agents(force_refresh=force_refresh))
+                return future.result()
+        except RuntimeError:
+            # No event loop running, we can create one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(self.discover_agents(force_refresh=force_refresh))
+            finally:
+                loop.close()
+                asyncio.set_event_loop(None)
+    
+    def get_agent_sync(self, agent_name: str) -> Optional[AgentMetadata]:
+        """
+        Synchronous wrapper for get_agent method.
+        
+        Args:
+            agent_name: Name of agent to retrieve
+            
+        Returns:
+            AgentMetadata or None if not found
+        """
+        import asyncio
+        loop = None
+        try:
+            # Try to get the current event loop
+            loop = asyncio.get_running_loop()
+            # If we're in an async context, we can't use run_until_complete
+            # Create a new thread to run the async method
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(asyncio.run, self.get_agent(agent_name))
+                return future.result()
+        except RuntimeError:
+            # No event loop running, we can create one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(self.get_agent(agent_name))
+            finally:
+                loop.close()
+                asyncio.set_event_loop(None)
+    
+    def get_registry_stats_sync(self) -> Dict[str, Any]:
+        """
+        Synchronous wrapper for get_registry_stats method.
+        
+        Returns:
+            Dictionary of registry statistics
+        """
+        import asyncio
+        loop = None
+        try:
+            # Try to get the current event loop
+            loop = asyncio.get_running_loop()
+            # If we're in an async context, we can't use run_until_complete
+            # Create a new thread to run the async method
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(asyncio.run, self.get_registry_stats())
+                return future.result()
+        except RuntimeError:
+            # No event loop running, we can create one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(self.get_registry_stats())
+            finally:
+                loop.close()
+                asyncio.set_event_loop(None)
+
     def health_check(self) -> Dict[str, Any]:
         """
         Perform a comprehensive health check on the AgentRegistry.

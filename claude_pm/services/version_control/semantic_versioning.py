@@ -607,7 +607,7 @@ class SemanticVersionManager:
         return "\n".join(lines)
 
     def update_changelog(
-        self, version: SemanticVersion, changes: List[str], changelog_file: str = "CHANGELOG.md"
+        self, version: SemanticVersion, changes: List[str], changelog_file: str = "docs/CHANGELOG.md"
     ) -> bool:
         """
         Update CHANGELOG.md with new version entry.
@@ -671,7 +671,7 @@ class SemanticVersionManager:
         versions = []
 
         # Try to get versions from changelog
-        changelog_path = self.project_root / "CHANGELOG.md"
+        changelog_path = self.project_root / "docs" / "CHANGELOG.md"
         if changelog_path.exists():
             versions.extend(self._parse_changelog_versions(changelog_path))
 

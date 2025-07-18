@@ -230,6 +230,25 @@ class ParentDirectoryManager(BaseService):
 
             # Load subsystem versions
             await self._load_subsystem_versions()
+            
+            # CRITICAL STARTUP TASK: Run deduplication to prevent duplicate context loading
+            # Claude Code loads ALL CLAUDE.md files it finds, causing duplicate context if multiple
+            # framework templates exist. We must ensure only ONE framework template exists at the
+            # rootmost location, while preserving all project-specific CLAUDE.md files.
+            self._log_info_if_not_quiet("Running CLAUDE.md deduplication on startup...")
+            try:
+                dedup_actions = await self._deduplicate_claude_md_files()
+                if dedup_actions:
+                    backed_up_count = sum(1 for _, action in dedup_actions if "backed up" in action)
+                    if backed_up_count > 0:
+                        # Always log deduplication results, even in quiet mode
+                        self.logger.warning(f"🧹 Deduplication cleaned up {backed_up_count} redundant framework CLAUDE.md templates")
+                        for path, action in dedup_actions:
+                            if "backed up" in action:
+                                self.logger.warning(f"  - {path} → {action}")
+            except Exception as e:
+                # Always log deduplication errors
+                self.logger.error(f"Failed to run CLAUDE.md deduplication on startup: {e}")
 
             self._log_info_if_not_quiet("Parent Directory Manager initialized successfully")
             
@@ -1463,9 +1482,19 @@ class ParentDirectoryManager(BaseService):
         """
         Check if content is a framework deployment template by examining metadata header.
         
-        Framework deployment templates have:
-        1. Title starting with "# Claude PM Framework Configuration - Deployment"
-        2. HTML comment block with metadata (CLAUDE_MD_VERSION, FRAMEWORK_VERSION, etc.)
+        BUSINESS LOGIC:
+        Framework deployment templates are CLAUDE.md files created by parent_directory_manager
+        to provide AI context about the Claude PM Framework. These files:
+        1. Have title "# Claude PM Framework Configuration - Deployment"
+        2. Contain HTML comment block with metadata (CLAUDE_MD_VERSION, FRAMEWORK_VERSION, etc.)
+        3. Define the AI's role as a multi-agent orchestrator
+        4. Should exist ONLY at the rootmost parent directory
+        
+        Project CLAUDE.md files are different - they:
+        1. Have project-specific titles (e.g., "# Claude PM Orchestration Test Project")
+        2. May contain project-specific markers (e.g., <!-- CLAUDE_PM_ORCHESTRATION: ENABLED -->)
+        3. Define project-specific context and requirements
+        4. MUST BE PRESERVED and never removed
         
         Args:
             content: File content to check
@@ -2371,9 +2400,23 @@ class ParentDirectoryManager(BaseService):
         """
         Deduplicate CLAUDE.md files in parent directory hierarchy.
         
-        Walks up the directory tree from current directory to root, finds all CLAUDE.md files,
-        keeps only the one closest to root (highest in hierarchy), and renames others to backup.
-        Only processes files that are framework deployment templates.
+        BUSINESS LOGIC:
+        1. Walk up the directory tree from current working directory to root
+        2. Find ALL CLAUDE.md files in this parent hierarchy
+        3. Identify which files are framework deployment templates vs project files
+           - Framework templates have title "# Claude PM Framework Configuration - Deployment"
+           - Project files (like orchestration test projects) are preserved
+        4. Among framework templates, find the one with the newest version
+        5. Keep ONLY the rootmost (highest in hierarchy) framework template
+        6. Update the rootmost template to the newest version if needed
+        7. Backup and remove all other framework templates
+        8. Never touch project CLAUDE.md files
+        
+        RATIONALE:
+        - Claude Code loads ALL CLAUDE.md files it finds in the directory tree
+        - Multiple framework templates cause duplicated context
+        - Only one framework template should exist at the rootmost location
+        - Project-specific CLAUDE.md files serve different purposes and must be preserved
         
         Returns:
             List of tuples (original_path, action_taken) for logging
@@ -2383,11 +2426,13 @@ class ParentDirectoryManager(BaseService):
         try:
             self.logger.info("🔍 Starting CLAUDE.md deduplication scan...")
             
-            # Walk up the directory tree from current directory to root
+            # STEP 1: Walk up the directory tree from current directory to root
+            # Example: If running from /Users/masa/Projects/managed/claude-pm-new-orchestration/
+            # We check: claude-pm-new-orchestration/ -> managed/ -> Projects/ -> masa/ -> Users/ -> /
             current_path = Path.cwd()
             claude_md_files = []
             
-            # Collect all CLAUDE.md files in parent directories
+            # Collect ALL CLAUDE.md files found while walking up parent directories
             while current_path != current_path.parent:  # Stop at root
                 claude_md_path = current_path / "CLAUDE.md"
                 if claude_md_path.exists() and claude_md_path.is_file():
@@ -2395,56 +2440,118 @@ class ParentDirectoryManager(BaseService):
                     self.logger.debug(f"Found CLAUDE.md at: {claude_md_path}")
                 current_path = current_path.parent
             
-            # Check root directory as well
+            # Check root directory as well (in case there's a CLAUDE.md at /)
             root_claude_md = current_path / "CLAUDE.md"
             if root_claude_md.exists() and root_claude_md.is_file():
                 claude_md_files.append(root_claude_md)
                 self.logger.debug(f"Found CLAUDE.md at root: {root_claude_md}")
             
+            # If we found 0 or 1 files, there's nothing to deduplicate
             if len(claude_md_files) <= 1:
                 self.logger.info("✅ No duplicate CLAUDE.md files found in parent hierarchy")
                 return deduplication_actions
             
-            # Sort by path depth (root first, then deeper directories)
+            # STEP 2: Sort by path depth (rootmost first)
+            # Example: [/Users/masa/Projects/CLAUDE.md, /Users/masa/Projects/managed/CLAUDE.md, ...]
             claude_md_files.sort(key=lambda p: len(p.parts))
             
             self.logger.info(f"📊 Found {len(claude_md_files)} CLAUDE.md files in parent hierarchy")
             
-            # Process files - keep the first (closest to root), backup others
+            # STEP 3: First pass - analyze all files to categorize and find newest version
+            # We need to:
+            # - Identify which files are framework deployment templates
+            # - Identify which files are project-specific CLAUDE.md files
+            # - Find the newest version among all framework templates
+            framework_templates = []
+            newest_version = None
+            newest_content = None
+            
+            for file_path in claude_md_files:
+                try:
+                    content = file_path.read_text()
+                    # Check if this is a framework deployment template
+                    # (has title "# Claude PM Framework Configuration - Deployment" and metadata)
+                    is_framework_template = self._is_framework_deployment_template(content)
+                    
+                    if is_framework_template:
+                        # Extract version from CLAUDE_MD_VERSION metadata
+                        version = self._extract_claude_md_version(content)
+                        framework_templates.append((file_path, content, version))
+                        
+                        # Track the newest version we've seen
+                        # Version format: 014-004 (framework_version-serial_number)
+                        if version and (newest_version is None or self._compare_versions(version, newest_version) > 0):
+                            newest_version = version
+                            newest_content = content
+                            self.logger.info(f"📋 Found newer version {version} at: {file_path}")
+                except Exception as e:
+                    self.logger.error(f"Failed to analyze {file_path}: {e}")
+            
+            # STEP 4: Second pass - process files based on our analysis
+            # Business rules:
+            # - Keep the rootmost (idx=0) framework template, update it if needed
+            # - Backup and remove all other framework templates
+            # - Never touch project CLAUDE.md files
             for idx, file_path in enumerate(claude_md_files):
                 try:
-                    # Read file content to check if it's a framework deployment template
                     content = file_path.read_text()
                     is_framework_template = self._is_framework_deployment_template(content)
                     
                     if idx == 0:
-                        # This is the file closest to root - keep it if it's a framework template
+                        # This is the ROOTMOST file (e.g., /Users/masa/Projects/CLAUDE.md)
+                        # This is where we want to keep our single framework template
                         if is_framework_template:
-                            self.logger.info(f"✅ Keeping primary framework template at: {file_path}")
-                            deduplication_actions.append((file_path, "kept as primary"))
+                            current_version = self._extract_claude_md_version(content)
+                            
+                            # Check if we found a newer version elsewhere that we should update to
+                            if newest_version and current_version and self._compare_versions(newest_version, current_version) > 0:
+                                # We found a newer version in a subdirectory - update the rootmost file
+                                # Example: rootmost has 014-001, but managed/ has 014-004
+                                
+                                # First backup the current rootmost file
+                                backup_path = await self._create_backup(file_path)
+                                if backup_path:
+                                    self.logger.info(f"📁 Backed up current rootmost file before update: {backup_path}")
+                                
+                                # Update with the newest content we found
+                                file_path.write_text(newest_content)
+                                self.logger.info(f"⬆️ Updated rootmost template from {current_version} to {newest_version}")
+                                deduplication_actions.append((file_path, f"updated from {current_version} to {newest_version}"))
+                            else:
+                                # Rootmost file already has the newest version (or versions are equal)
+                                self.logger.info(f"✅ Keeping primary framework template at: {file_path} (version {current_version})")
+                                deduplication_actions.append((file_path, "kept as primary"))
                         else:
+                            # Rootmost file is NOT a framework template - this is unusual but we preserve it
                             self.logger.info(f"⚠️ File at {file_path} is not a framework template - skipping")
                             deduplication_actions.append((file_path, "skipped - not framework template"))
                     else:
-                        # This is a duplicate - check if it's a framework template before backing up
+                        # This is NOT the rootmost file (e.g., managed/CLAUDE.md, managed/project/CLAUDE.md)
+                        # Business rule: Only framework templates should be removed, project files preserved
                         if is_framework_template:
+                            # This is a REDUNDANT framework template that must be removed
+                            # Example: /Users/masa/Projects/managed/CLAUDE.md when rootmost exists
+                            
                             # Generate backup filename with timestamp
                             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                             backup_name = f"CLAUDE.md.backup_{timestamp}"
                             backup_path = file_path.parent / backup_name
                             
-                            # Handle duplicate timestamps
+                            # Handle duplicate timestamps (rare but possible)
                             counter = 1
                             while backup_path.exists():
                                 backup_name = f"CLAUDE.md.backup_{timestamp}_{counter:02d}"
                                 backup_path = file_path.parent / backup_name
                                 counter += 1
                             
-                            # Rename the duplicate to backup
+                            # Rename the duplicate to backup (effectively removing it from Claude Code's view)
                             file_path.rename(backup_path)
-                            self.logger.info(f"📦 Backed up duplicate framework template: {file_path} → {backup_path}")
+                            # Always log removal of duplicate framework templates
+                            self.logger.warning(f"📦 Backed up duplicate framework template: {file_path} → {backup_path}")
                             deduplication_actions.append((file_path, f"backed up to {backup_path.name}"))
                         else:
+                            # This is a PROJECT-SPECIFIC CLAUDE.md file - NEVER REMOVE THESE
+                            # Example: managed/claude-pm-new-orchestration/CLAUDE.md (orchestration test project)
                             self.logger.info(f"🛡️ Preserving non-framework file at: {file_path}")
                             deduplication_actions.append((file_path, "preserved - not framework template"))
                             
