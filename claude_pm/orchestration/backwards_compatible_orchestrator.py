@@ -453,12 +453,32 @@ class BackwardsCompatibleOrchestrator:
             agent_prompt_time = (time.perf_counter() - agent_prompt_start) * 1000
             
             if not agent_prompt:
-                # Use a default prompt for instant LOCAL mode
-                agent_prompt = f"""You are the {agent_type.title()} Agent.
-
+                # Use agent-specific default prompts for instant LOCAL mode
+                agent_prompts = {
+                    'security': """You are the Security Agent, responsible for security analysis, vulnerability assessment, and protection.
+You provide comprehensive security capabilities protecting projects from vulnerabilities and threats.""",
+                    'engineer': """You are the Engineer Agent, responsible for code implementation, development, and technical problem solving.
+You provide software engineering expertise and best practices.""",
+                    'documentation': """You are the Documentation Agent, responsible for creating and maintaining project documentation.
+You ensure clear, comprehensive documentation across all project aspects.""",
+                    'qa': """You are the QA Agent, responsible for quality assurance, testing, and validation.
+You ensure project quality through comprehensive testing strategies.""",
+                    'research': """You are the Research Agent, responsible for investigation, analysis, and information gathering.
+You provide in-depth research and technical analysis.""",
+                    'ops': """You are the Ops Agent, responsible for deployment, operations, and infrastructure.
+You handle all operational aspects of project deployment and maintenance.""",
+                    'version_control': """You are the Version Control Agent, responsible for Git operations and version management.
+You manage branches, merges, and repository workflows.""",
+                    'ticketing': """You are the Ticketing Agent, responsible for ticket lifecycle and issue tracking.
+You provide universal ticketing interface across platforms.""",
+                    'data_engineer': """You are the Data Engineer Agent, responsible for data management and AI API integrations.
+You handle databases, data pipelines, and data architecture."""
+                }
+                
+                agent_prompt = agent_prompts.get(agent_type, f"""You are the {agent_type.title()} Agent.
 Your role is to assist with {agent_type} tasks and provide expert guidance.
-This is a LOCAL orchestration mode execution for instant responses.
-"""
+This is a LOCAL orchestration mode execution for instant responses.""")
+                
                 logger.debug("using_default_agent_prompt", extra={
                     "agent_type": agent_type,
                     "task_id": task_id,
@@ -1250,23 +1270,125 @@ Integration Notes:
     def _register_default_agent_handlers(self) -> None:
         """
         Register default handlers for all agent types to enable instant LOCAL mode.
-        These handlers simulate agent responses without actual subprocess creation.
+        These handlers provide agent-specific responses based on their role.
         """
-        async def default_agent_handler(request: Request) -> Response:
-            """Default handler that simulates instant agent responses."""
-            agent_type = request.agent_id
-            task_data = request.data
-            
-            # Create simulated response based on agent type
-            result_text = f"""**{agent_type.title()} Agent Response**
+        # Define agent-specific greetings
+        agent_greetings = {
+            'security': """Hello! I'm the Security Agent.
 
-Task: {task_data.get('task', 'No task specified')}
+I specialize in:
+- Security analysis and vulnerability assessment
+- Threat modeling and risk evaluation  
+- Security policy implementation
+- Incident response coordination
+- Compliance verification
 
-This is a LOCAL orchestration response executed instantly without subprocess creation.
+I'm here to help protect your project from security vulnerabilities and ensure best practices are followed.""",
+            'engineer': """Hello! I'm the Engineer Agent.
 
-Agent Type: {agent_type}
-Orchestration Mode: LOCAL (instant response)
-Execution Time: <1ms
+I specialize in:
+- Code implementation and development
+- Software architecture design
+- Technical problem solving
+- Performance optimization
+- Code quality and best practices
+
+I'm here to help with all your engineering and development needs.""",
+            'documentation': """Hello! I'm the Documentation Agent.
+
+I specialize in:
+- Technical documentation creation
+- API documentation
+- User guides and tutorials
+- Code documentation standards
+- Documentation health analysis
+
+I'm here to ensure your project has clear, comprehensive documentation.""",
+            'qa': """Hello! I'm the QA Agent.
+
+I specialize in:
+- Test planning and execution
+- Quality assurance processes
+- Test automation
+- Bug tracking and verification
+- Quality metrics and reporting
+
+I'm here to ensure your project meets quality standards.""",
+            'research': """Hello! I'm the Research Agent.
+
+I specialize in:
+- Technical research and investigation
+- Library and framework analysis
+- Best practices research
+- Technology evaluation
+- Solution exploration
+
+I'm here to help investigate and analyze technical topics.""",
+            'ops': """Hello! I'm the Ops Agent.
+
+I specialize in:
+- Deployment and operations
+- Infrastructure management
+- CI/CD pipeline setup
+- Monitoring and alerting
+- Performance optimization
+
+I'm here to handle all operational aspects of your project.""",
+            'version_control': """Hello! I'm the Version Control Agent.
+
+I specialize in:
+- Git operations and workflows
+- Branch management
+- Merge conflict resolution
+- Version tagging and releases
+- Repository maintenance
+
+I'm here to manage all version control operations.""",
+            'ticketing': """Hello! I'm the Ticketing Agent.
+
+I specialize in:
+- Ticket lifecycle management
+- Issue tracking integration
+- Sprint planning support
+- Status reporting
+- Cross-platform ticket sync
+
+I'm here to manage your project's ticketing workflow.""",
+            'data_engineer': """Hello! I'm the Data Engineer Agent.
+
+I specialize in:
+- Database design and optimization
+- Data pipeline development
+- ETL processes
+- Data storage solutions
+- AI/ML API integrations
+
+I'm here to handle all data engineering tasks."""
+        }
+        
+        def create_agent_handler(agent_type: str):
+            """Create a handler for a specific agent type."""
+            async def agent_handler(request: Request) -> Response:
+                """Handler that provides agent-specific responses."""
+                task_data = request.data
+                task = task_data.get('task', '')
+                
+                # Check if this is a simple greeting/role query
+                greeting_keywords = ['who are you', 'hello', 'hi', 'greet', 'introduce', 'role', 'what do you do']
+                is_greeting = any(keyword in task.lower() for keyword in greeting_keywords)
+                
+                if is_greeting:
+                    # Provide agent-specific greeting
+                    result_text = agent_greetings.get(agent_type, f"""Hello! I'm the {agent_type.title()} Agent.
+
+I'm ready to assist with {agent_type} tasks. Please let me know what you need help with!""")
+                else:
+                    # For actual tasks, provide a task acknowledgment
+                    result_text = f"""**{agent_type.title()} Agent Response**
+
+Task received: {task}
+
+I understand you need help with this {agent_type} task. As the {agent_type.title()} Agent, I'll analyze the requirements and provide appropriate assistance.
 
 Requirements:
 {chr(10).join('- ' + req for req in task_data.get('requirements', ['None specified']))}
@@ -1274,17 +1396,19 @@ Requirements:
 Deliverables:
 {chr(10).join('- ' + dlv for dlv in task_data.get('deliverables', ['None specified']))}
 
-Status: Task acknowledged and ready for processing.
-Note: This is a simulated response for demonstration of LOCAL mode performance.
-"""
+Priority: {task_data.get('priority', 'medium')}
+
+I'm processing this request using LOCAL orchestration for instant response."""
+                
+                return Response(
+                    request_id=request.id,
+                    correlation_id=request.correlation_id,
+                    agent_id=agent_type,
+                    status=MessageStatus.COMPLETED,
+                    data={"result": result_text}
+                )
             
-            return Response(
-                request_id=request.id,
-                correlation_id=request.correlation_id,
-                agent_id=agent_type,
-                status=MessageStatus.COMPLETED,
-                data={"result": result_text}
-            )
+            return agent_handler
         
         # Register handlers for all common agent types
         agent_types = [
@@ -1295,11 +1419,14 @@ Note: This is a simulated response for demonstration of LOCAL mode performance.
         
         for agent_type in agent_types:
             try:
-                self._message_bus.register_handler(agent_type, default_agent_handler)
-                logger.debug(f"Registered default handler for {agent_type} agent")
+                handler = create_agent_handler(agent_type)
+                self._message_bus.register_handler(agent_type, handler)
+                logger.debug(f"Registered specific handler for {agent_type} agent")
             except ValueError:
                 # Handler already registered, skip
                 pass
+            except Exception as e:
+                logger.warning(f"Failed to register handler for {agent_type}: {e}")
 
 
 # Convenience functions for drop-in replacement

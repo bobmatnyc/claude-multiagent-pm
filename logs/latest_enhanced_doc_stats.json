@@ -268,6 +268,56 @@
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
       "target_path": "./CLAUDE.md"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_MODEL_LOCAL_DEVELOPMENT.md",
+      "line_number": 9,
+      "description": "Potentially invalid path reference: /Users/masa/Projects/claude-multiagent-pm`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "/Users/masa/Projects/claude-multiagent-pm`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_MODEL_LOCAL_DEVELOPMENT.md",
+      "line_number": 142,
+      "description": "Potentially invalid path reference: ./bobmatnyc-claude-multiagent-pm-0.9.3.tgz",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./bobmatnyc-claude-multiagent-pm-0.9.3.tgz"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_MODEL_LOCAL_DEVELOPMENT.md",
+      "line_number": 263,
+      "description": "Potentially invalid path reference: ./tests/integration/test_cli.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./tests/integration/test_cli.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_MODEL_LOCAL_DEVELOPMENT.md",
+      "line_number": 269,
+      "description": "Potentially invalid path reference: ./tests/deployment/test_deploy.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./tests/deployment/test_deploy.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_MODEL_LOCAL_DEVELOPMENT.md",
+      "line_number": 275,
+      "description": "Potentially invalid path reference: ./tests/e2e/test_full_install.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./tests/e2e/test_full_install.sh"
     }
   ],
   "broken_links": [
@@ -452,10 +502,60 @@
       "suggested_fix": "Verify this path is correct and accessible",
       "link_text": null,
       "target_path": "./CLAUDE.md"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_MODEL_LOCAL_DEVELOPMENT.md",
+      "line_number": 9,
+      "description": "Potentially invalid path reference: /Users/masa/Projects/claude-multiagent-pm`",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "/Users/masa/Projects/claude-multiagent-pm`"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_MODEL_LOCAL_DEVELOPMENT.md",
+      "line_number": 142,
+      "description": "Potentially invalid path reference: ./bobmatnyc-claude-multiagent-pm-0.9.3.tgz",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./bobmatnyc-claude-multiagent-pm-0.9.3.tgz"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_MODEL_LOCAL_DEVELOPMENT.md",
+      "line_number": 263,
+      "description": "Potentially invalid path reference: ./tests/integration/test_cli.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./tests/integration/test_cli.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_MODEL_LOCAL_DEVELOPMENT.md",
+      "line_number": 269,
+      "description": "Potentially invalid path reference: ./tests/deployment/test_deploy.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./tests/deployment/test_deploy.sh"
+    },
+    {
+      "severity": "medium",
+      "issue_type": "path_error",
+      "file_path": "/Users/masa/Projects/claude-multiagent-pm/docs/DEPLOYMENT_MODEL_LOCAL_DEVELOPMENT.md",
+      "line_number": 275,
+      "description": "Potentially invalid path reference: ./tests/e2e/test_full_install.sh",
+      "suggested_fix": "Verify this path is correct and accessible",
+      "link_text": null,
+      "target_path": "./tests/e2e/test_full_install.sh"
     }
   ],
   "inconsistencies_found": [],
-  "last_update": "2025-07-17 19:17:29",
-  "files_validated": 11,
+  "last_update": "2025-07-17 23:58:46",
+  "files_validated": 12,
   "links_checked": 1
 }
