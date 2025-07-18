@@ -15,6 +15,7 @@ from .cache_service_integration import (
 from .agent_registry import AgentRegistry, AgentMetadata
 from .agent_management_service import AgentManager
 from .agent_versioning import AgentVersionManager
+from .base_agent_manager import BaseAgentManager, BaseAgentSection
 # DependencyManager removed - use Claude Code Task Tool instead
 
 __all__ = [
@@ -36,4 +37,6 @@ __all__ = [
     "AgentMetadata",
     "AgentManager",
     "AgentVersionManager",
+    "BaseAgentManager",
+    "BaseAgentSection",
 ]
