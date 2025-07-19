@@ -7,6 +7,8 @@
 
 A lightweight, flexible multi-agent framework for orchestrating AI-driven development workflows with unlimited custom agent creation.
 
+Claude PM brings the power of AI orchestration to your development workflow through a simple CLAUDE.md configuration file. By defining your project's goals and constraints in natural language, you enable specialized AI agent teams to collaborate on your codebase - with a PM orchestrator intelligently delegating tasks to Documentation, QA, Engineering, Security, and other specialized agents (including your own custom agents). This framework makes it remarkably easy to leverage AI assistance while maintaining full control over your development process.
+
 ## Framework Positioning
 
 ### Claude PM Framework vs claude-flow:
