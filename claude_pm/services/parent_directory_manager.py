@@ -34,8 +34,12 @@ from enum import Enum
 from ..core.base_service import BaseService
 from ..core.logging_config import setup_logging, setup_streaming_logger, finalize_streaming_logs
 from .framework_claude_md_generator import FrameworkClaudeMdGenerator
-# TemplateManager and DependencyManager removed - use Claude Code Task Tool instead
-import os
+
+# Import extracted modules for delegation
+from .backup_manager import BackupManager
+from .template_deployer import TemplateDeployer, DeploymentContext
+from .framework_protector import FrameworkProtector
+from .version_control_helper import VersionControlHelper
 
 
 class ParentDirectoryContext(Enum):
@@ -163,6 +167,28 @@ class ParentDirectoryManager(BaseService):
 
         # Initialize paths
         self._initialize_paths()
+        
+        # Initialize extracted service modules for delegation
+        self._backup_manager = BackupManager(
+            base_dir=self.working_dir,
+            retention_days=self.backup_retention_days,
+            logger=self.logger
+        )
+        
+        self._template_deployer = TemplateDeployer(
+            framework_path=self.framework_path,
+            logger=self.logger
+        )
+        
+        self._framework_protector = FrameworkProtector(
+            framework_path=self.framework_path,
+            logger=self.logger
+        )
+        
+        self._version_helper = VersionControlHelper(
+            working_dir=self.working_dir,
+            logger=self.logger
+        )
 
     def _log_info_if_not_quiet(self, message: str) -> None:
         """Log INFO message only if not in quiet mode."""
@@ -1224,15 +1250,13 @@ class ParentDirectoryManager(BaseService):
         Returns:
             Dictionary with subsystem version information
         """
-        try:
-            return {
-                "framework_path": str(self.framework_path),
-                "subsystems": self.subsystem_versions.copy(),
-                "detection_timestamp": datetime.now().isoformat()
-            }
-        except Exception as e:
-            self.logger.error(f"Failed to get subsystem versions: {e}")
-            return {"error": str(e)}
+        # Delegate to VersionControlHelper
+        report = self._version_helper.get_version_report()
+        return {
+            "framework_path": str(self.framework_path),
+            "subsystems": report.get("subsystems", {}),
+            "detection_timestamp": datetime.now().isoformat()
+        }
 
     def get_subsystem_version(self, subsystem: str) -> Optional[str]:
         """
@@ -1244,12 +1268,8 @@ class ParentDirectoryManager(BaseService):
         Returns:
             Version string or None if not found
         """
-        try:
-            subsystem_info = self.subsystem_versions.get(subsystem)
-            return subsystem_info.get("version") if subsystem_info else None
-        except Exception as e:
-            self.logger.error(f"Failed to get version for subsystem {subsystem}: {e}")
-            return None
+        # Delegate to VersionControlHelper
+        return self._version_helper.get_subsystem_version(subsystem)
 
     async def validate_subsystem_compatibility(self, required_versions: Dict[str, str]) -> Dict[str, Any]:
         """
@@ -1502,49 +1522,8 @@ class ParentDirectoryManager(BaseService):
         Returns:
             True if content is a framework deployment template, False otherwise
         """
-        try:
-            lines = content.split('\n')
-            
-            # Check for the specific title pattern
-            title_found = False
-            for line in lines[:5]:  # Check first 5 lines for title
-                if line.strip().startswith("# Claude PM Framework Configuration - Deployment"):
-                    title_found = True
-                    break
-            
-            if not title_found:
-                self.logger.debug("No framework deployment title found")
-                return False
-            
-            # Check for HTML comment metadata block
-            # Support both template format ({{VAR}}) and deployed format (actual values)
-            metadata_patterns = [
-                r"CLAUDE_MD_VERSION:\s*(?:\{\{CLAUDE_MD_VERSION\}\}|\d+-\d+)",
-                r"FRAMEWORK_VERSION:\s*(?:\{\{FRAMEWORK_VERSION\}\}|\d+)",
-                r"DEPLOYMENT_DATE:\s*(?:\{\{DEPLOYMENT_DATE\}\}|\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})",
-                r"LAST_UPDATED:\s*(?:\{\{LAST_UPDATED\}\}|.*)",
-                r"CONTENT_HASH:\s*(?:\{\{CONTENT_HASH\}\}|.*)"
-            ]
-            
-            # Look for metadata patterns in the first 20 lines (where metadata should be)
-            content_start = '\n'.join(lines[:20])
-            
-            # Check if we have at least 3 of the 5 expected metadata patterns
-            pattern_matches = 0
-            for pattern in metadata_patterns:
-                if re.search(pattern, content_start, re.IGNORECASE):
-                    pattern_matches += 1
-            
-            if pattern_matches >= 3:
-                self.logger.debug("Framework deployment template detected: found deployment title and metadata patterns")
-                return True
-            else:
-                self.logger.debug(f"Not a framework deployment template: found {pattern_matches}/5 metadata patterns")
-                return False
-                
-        except Exception as e:
-            self.logger.error(f"Failed to check framework deployment template: {e}")
-            return False
+        # Delegate to TemplateDeployer
+        return self._template_deployer.is_framework_deployment_template(content)
 
     def _extract_claude_md_version(self, content: str) -> Optional[str]:
         """
@@ -1557,25 +1536,8 @@ class ParentDirectoryManager(BaseService):
         Returns:
             Version string or None if not found
         """
-        try:
-            # Look for CLAUDE_MD_VERSION in HTML comment or frontmatter
-            # Updated patterns to support both formats: 4.5.1 and 4.5.1-001
-            patterns = [
-                r"CLAUDE_MD_VERSION:\s*([\d\.-]+)",
-                r"<!-- CLAUDE_MD_VERSION:\s*([\d\.-]+)\s*-->",
-                r'CLAUDE_MD_VERSION"?:\s*"?([\d\.-]+)"?',
-            ]
-
-            for pattern in patterns:
-                match = re.search(pattern, content, re.IGNORECASE)
-                if match:
-                    return match.group(1)
-
-            return None
-
-        except Exception as e:
-            self.logger.error(f"Failed to extract CLAUDE_MD_VERSION: {e}")
-            return None
+        # Delegate to TemplateDeployer
+        return self._template_deployer.extract_claude_md_version(content)
 
     def _compare_versions(self, version1: str, version2: str) -> int:
         """
@@ -1592,6 +1554,11 @@ class ParentDirectoryManager(BaseService):
              0 if version1 == version2
              1 if version1 > version2
         """
+        # Delegate to TemplateDeployer
+        return self._template_deployer.compare_versions(version1, version2)
+
+    def _compare_versions_old(self, version1: str, version2: str) -> int:
+        """Old implementation kept for reference"""
         try:
 
             def parse_claude_md_version(version_str):
@@ -2282,77 +2249,15 @@ class ParentDirectoryManager(BaseService):
         Returns:
             Path to the created backup or None if failed
         """
-        try:
-            if not framework_template_path.exists() or not framework_template_path.is_file():
-                self.logger.warning(f"Cannot backup non-existent framework template: {framework_template_path}")
-                return None
-            
-            # Verify this is actually the framework template
-            if framework_template_path.name != "CLAUDE.md" or "framework" not in str(framework_template_path):
-                self.logger.warning(f"Backup requested for non-framework template: {framework_template_path}")
-                return None
-            
-            # Ensure backup directory exists
-            self.framework_backups_dir.mkdir(parents=True, exist_ok=True)
-            
-            # Generate backup filename with timestamp
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # Include milliseconds
-            backup_filename = f"framework_CLAUDE_md_{timestamp}.backup"
-            backup_path = self.framework_backups_dir / backup_filename
-            
-            # Handle duplicate timestamps (very unlikely but possible)
-            counter = 1
-            while backup_path.exists():
-                backup_filename = f"framework_CLAUDE_md_{timestamp}_{counter:02d}.backup"
-                backup_path = self.framework_backups_dir / backup_filename
-                counter += 1
-            
-            # Create the backup
-            shutil.copy2(framework_template_path, backup_path)
-            
-            # Rotate backups - keep only 2 most recent
-            self._rotate_framework_backups()
-            
-            self._log_info_if_not_quiet(f"Framework template backup created: {backup_path}")
-            return backup_path
-            
-        except Exception as e:
-            self.logger.error(f"Failed to backup framework template: {e}")
-            return None
+        # Delegate to BackupManager
+        return self._backup_manager.backup_framework_template(framework_template_path)
     
     def _rotate_framework_backups(self) -> None:
         """
         Rotate framework template backups, keeping only the 2 most recent copies.
         """
-        try:
-            if not self.framework_backups_dir.exists():
-                return
-            
-            # Find all framework backup files
-            backup_pattern = "framework_CLAUDE_md_*.backup"
-            backup_files = list(self.framework_backups_dir.glob(backup_pattern))
-            
-            if len(backup_files) <= 2:
-                return  # No rotation needed
-            
-            # Sort by modification time (newest first)
-            backup_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
-            
-            # Keep only the 2 most recent, remove the rest
-            files_to_remove = backup_files[2:]
-            
-            for old_backup in files_to_remove:
-                try:
-                    old_backup.unlink()
-                    self.logger.debug(f"Removed old framework backup: {old_backup}")
-                except Exception as remove_error:
-                    self.logger.error(f"Failed to remove old framework backup {old_backup}: {remove_error}")
-            
-            if files_to_remove:
-                self._log_info_if_not_quiet(f"Rotated framework backups: kept 2 most recent, removed {len(files_to_remove)} old backups")
-                
-        except Exception as e:
-            self.logger.error(f"Failed to rotate framework backups: {e}")
+        # Rotation is now handled automatically by BackupManager
+        pass
     
     def get_framework_backup_status(self) -> Dict[str, Any]:
         """
@@ -2361,40 +2266,8 @@ class ParentDirectoryManager(BaseService):
         Returns:
             Dictionary with backup status information
         """
-        try:
-            framework_template_path = self.framework_path / "framework" / "CLAUDE.md"
-            
-            status = {
-                "framework_template_exists": framework_template_path.exists(),
-                "framework_template_path": str(framework_template_path),
-                "backup_directory": str(self.framework_backups_dir),
-                "backup_directory_exists": self.framework_backups_dir.exists(),
-                "backup_count": 0,
-                "backups": []
-            }
-            
-            if self.framework_backups_dir.exists():
-                backup_pattern = "framework_CLAUDE_md_*.backup"
-                backup_files = list(self.framework_backups_dir.glob(backup_pattern))
-                backup_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
-                
-                status["backup_count"] = len(backup_files)
-                
-                for backup_file in backup_files:
-                    backup_stat = backup_file.stat()
-                    status["backups"].append({
-                        "filename": backup_file.name,
-                        "path": str(backup_file),
-                        "size": backup_stat.st_size,
-                        "created": datetime.fromtimestamp(backup_stat.st_mtime).isoformat(),
-                        "age_hours": round((datetime.now().timestamp() - backup_stat.st_mtime) / 3600, 2)
-                    })
-            
-            return status
-            
-        except Exception as e:
-            self.logger.error(f"Failed to get framework backup status: {e}")
-            return {"error": str(e)}
+        # Delegate to BackupManager
+        return self._backup_manager.get_framework_backup_status()
     
     async def _deduplicate_claude_md_files(self) -> List[Tuple[Path, str]]:
         """
