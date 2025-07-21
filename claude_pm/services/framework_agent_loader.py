@@ -49,6 +49,19 @@ class FrameworkAgentLoader:
     
     def _find_framework_directory(self) -> Optional[Path]:
         """Find directory containing framework/CLAUDE.md"""
+        # Check if we're running from a wheel installation
+        try:
+            import claude_pm
+            package_path = Path(claude_pm.__file__).parent
+            path_str = str(package_path.resolve())
+            if 'site-packages' in path_str or 'dist-packages' in path_str:
+                # For wheel installations, check data directory
+                data_framework = package_path / "data" / "framework" / "CLAUDE.md"
+                if data_framework.exists():
+                    return package_path / "data"
+        except Exception:
+            pass
+        
         current = Path.cwd()
         
         # Check current directory and parents

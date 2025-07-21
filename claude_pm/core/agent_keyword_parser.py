@@ -68,12 +68,6 @@ class AgentKeywordParser:
             "update documentation", "documnt", "docmnt", "documentat",  # Include typos
             "documenting", "document the", "update the documentation"
         ],
-        "ticketing": [
-            "ticket", "issue", "story", "epic",
-            "jira", "github issue", "bug report", "feature request",
-            "backlog", "sprint", "kanban", "todo", "tracking",
-            "new ticket", "create ticket", "performance issues"
-        ],
         "version_control": [
             "branch", "merge", "git", "commit", "push",
             "pull", "rebase", "cherry-pick", "tag",
@@ -100,8 +94,6 @@ class AgentKeywordParser:
         "operations": "ops",
         "doc": "documentation",
         "documenter": "documentation",
-        "ticket": "ticketing",
-        "ticketer": "ticketing",
         "git": "version_control",
         "vcs": "version_control",
         "versioner": "version_control"

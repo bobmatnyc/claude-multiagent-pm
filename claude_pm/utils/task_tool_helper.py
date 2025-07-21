@@ -101,6 +101,38 @@ except ImportError as e:
     class CorrectionType:
         CONTENT_CORRECTION = "content_correction"
 
+# Import memory monitoring
+try:
+    from claude_pm.monitoring import (
+        SubprocessMemoryMonitor, 
+        get_subprocess_memory_monitor,
+        MemoryThresholds
+    )
+    MEMORY_MONITORING_AVAILABLE = True
+except ImportError as e:
+    logging.error(f"Failed to import memory monitoring: {e}")
+    MEMORY_MONITORING_AVAILABLE = False
+    # Fallback implementation
+    class SubprocessMemoryMonitor:
+        def __init__(self, *args, **kwargs):
+            pass
+        def start_monitoring(self, *args, **kwargs):
+            pass
+        def stop_monitoring(self, *args, **kwargs):
+            return {"error": "Memory monitoring not available"}
+        def check_memory(self, *args, **kwargs):
+            return 0.0, "NOT_AVAILABLE"
+        def can_create_subprocess(self):
+            return True, "Memory monitoring not available"
+        def should_abort(self, *args, **kwargs):
+            return False
+    
+    class MemoryThresholds:
+        def __init__(self, **kwargs):
+            self.warning_mb = kwargs.get('warning_mb', 1024)
+            self.critical_mb = kwargs.get('critical_mb', 2048)
+            self.max_mb = kwargs.get('max_mb', 4096)
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -121,6 +153,12 @@ class TaskToolConfiguration:
     auto_model_optimization: bool = True
     model_override: Optional[str] = None
     performance_priority: str = "balanced"  # "speed", "quality", "balanced"
+    # Memory monitoring configuration
+    enable_memory_monitoring: bool = True
+    memory_warning_mb: int = 1024  # 1GB warning
+    memory_critical_mb: int = 2048  # 2GB critical
+    memory_max_mb: int = 4096  # 4GB hard limit
+    abort_on_memory_limit: bool = True
 
 
 class TaskToolHelper:
@@ -131,10 +169,20 @@ class TaskToolHelper:
     delegation tracking, and PM orchestrator integration.
     """
     
-    def __init__(self, working_directory: Optional[Path] = None, config: Optional[TaskToolConfiguration] = None, model_override: Optional[str] = None, model_config: Optional[Dict[str, Any]] = None):
+    def __init__(self, working_directory: Optional[Path] = None, config: Optional[TaskToolConfiguration] = None, model_override: Optional[str] = None, model_config: Optional[Dict[str, Any]] = None, verbose: bool = False):
         """Initialize Task Tool helper with PM orchestrator and model selection integration."""
         self.working_directory = Path(working_directory or os.getcwd())
         self.config = config or TaskToolConfiguration()
+        
+        # Check for test mode environment variable
+        test_mode = os.environ.get('CLAUDE_PM_TEST_MODE', '').lower() == 'true'
+        
+        # Enable verbose logging if test mode is active OR verbose flag is set
+        self.verbose = verbose or test_mode
+        
+        # If test mode enabled verbose logging, log this fact
+        if test_mode and not verbose:
+            logger.info("Test mode detected: Enabling verbose subprocess logging automatically")
         
         # Use CLI model override if provided
         if model_override and not self.config.model_override:
@@ -144,7 +192,8 @@ class TaskToolHelper:
         self.pm_orchestrator = PMOrchestrator(
             working_directory=self.working_directory,
             model_override=self.config.model_override,
-            model_config=model_config
+            model_config=model_config,
+            verbose=self.verbose
         )
         self._active_subprocesses: Dict[str, Dict[str, Any]] = {}
         self._subprocess_history: List[Dict[str, Any]] = []
@@ -176,7 +225,97 @@ class TaskToolHelper:
                 logger.error(f"Failed to initialize correction capture: {e}")
                 self.correction_capture = None
         
+        # Initialize memory monitoring
+        self.memory_monitor = None
+        if self.config.enable_memory_monitoring and MEMORY_MONITORING_AVAILABLE:
+            try:
+                # Create memory thresholds from config
+                thresholds = MemoryThresholds(
+                    warning_mb=self.config.memory_warning_mb,
+                    critical_mb=self.config.memory_critical_mb,
+                    max_mb=self.config.memory_max_mb
+                )
+                
+                # Get or create memory monitor instance
+                self.memory_monitor = get_subprocess_memory_monitor(
+                    thresholds=thresholds,
+                    log_dir=self.working_directory / '.claude-pm' / 'logs' / 'memory'
+                )
+                logger.info("Memory monitoring system initialized")
+            except Exception as e:
+                logger.error(f"Failed to initialize memory monitoring: {e}")
+                self.memory_monitor = None
+        
         logger.info(f"TaskToolHelper initialized with working directory: {self.working_directory}")
+    
+    def _log_subprocess_prompt(self, subprocess_id: str, prompt: str, agent_type: str, 
+                              task_description: str, model_info: Optional[Dict[str, Any]] = None) -> Optional[str]:
+        """
+        Log subprocess creation prompts when verbose mode is enabled.
+        
+        Args:
+            subprocess_id: ID of the subprocess
+            prompt: The generated prompt text
+            agent_type: Type of agent
+            task_description: Description of the task
+            model_info: Model configuration info
+            
+        Returns:
+            Path to the log file if created, None otherwise
+        """
+        if not self.verbose:
+            return None
+            
+        try:
+            # Create log directory structure
+            now = datetime.now()
+            
+            # Check for custom prompts directory from environment
+            prompts_dir_env = os.environ.get('CLAUDE_PM_PROMPTS_DIR')
+            if prompts_dir_env:
+                # Use the custom prompts directory
+                log_dir = Path(prompts_dir_env) / now.strftime("%Y-%m-%d")
+            else:
+                # Use default location
+                log_dir = self.working_directory / ".claude-pm" / "logs" / "prompts" / now.strftime("%Y-%m-%d")
+            
+            log_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Generate unique filename
+            timestamp = now.strftime("%H%M%S_%f")[:-3]  # Include milliseconds
+            filename = f"subprocess_{agent_type}_{timestamp}.json"
+            log_path = log_dir / filename
+            
+            # Prepare log entry
+            log_entry = {
+                "timestamp": now.isoformat(),
+                "subprocess_id": subprocess_id,
+                "agent_type": agent_type,
+                "task_description": task_description,
+                "prompt_text": prompt,
+                "metadata": {
+                    "framework_version": "014",
+                    "subprocess_type": "task_tool",
+                    "working_directory": str(self.working_directory),
+                    "prompt_length": len(prompt),
+                    "verbose_mode": True
+                }
+            }
+            
+            # Add model info if available
+            if model_info:
+                log_entry["model_info"] = model_info
+            
+            # Write log file
+            with open(log_path, 'w', encoding='utf-8') as f:
+                json.dump(log_entry, f, indent=2, ensure_ascii=False)
+            
+            logger.debug(f"Logged subprocess prompt to: {log_path}")
+            return str(log_path)
+            
+        except Exception as e:
+            logger.warning(f"Failed to log subprocess prompt: {e}")
+            return None
     
     async def create_agent_subprocess(
         self,
@@ -243,6 +382,21 @@ class TaskToolHelper:
         
         # Standard implementation without orchestration
         try:
+            # Check memory availability before creating subprocess
+            if self.memory_monitor and self.config.enable_memory_monitoring:
+                can_create, memory_status = self.memory_monitor.can_create_subprocess()
+                if not can_create:
+                    logger.error(f"Cannot create subprocess: {memory_status}")
+                    error_request_id = f"memory_error_{agent_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                    return TaskToolResponse(
+                        request_id=error_request_id,
+                        success=False,
+                        error=memory_status,
+                        enhanced_prompt=f"**{agent_type.title()}**: {task_description} [BLOCKED BY MEMORY]"
+                    )
+                elif "WARNING" in memory_status:
+                    logger.warning(f"Memory warning: {memory_status}")
+            
             # Generate subprocess ID
             subprocess_id = f"{agent_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
             
@@ -303,6 +457,17 @@ class TaskToolHelper:
                 "status": "created"
             })
             
+            # Start memory monitoring for this subprocess
+            if self.memory_monitor and self.config.enable_memory_monitoring:
+                try:
+                    self.memory_monitor.start_monitoring(subprocess_id, {
+                        "agent_type": agent_type,
+                        "task_description": task_description
+                    })
+                    logger.info(f"Started memory monitoring for subprocess {subprocess_id}")
+                except Exception as e:
+                    logger.warning(f"Failed to start memory monitoring: {e}")
+            
             # Collect memory for subprocess creation
             if self.config.memory_collection_required:
                 collect_pm_orchestrator_memory(
@@ -327,13 +492,39 @@ class TaskToolHelper:
             
             logger.info(f"Created Task Tool subprocess: {subprocess_id}")
             
+            # Log subprocess prompt if verbose mode is enabled
+            if self.verbose:
+                log_path = self._log_subprocess_prompt(
+                    subprocess_id=subprocess_id,
+                    prompt=prompt,
+                    agent_type=agent_type,
+                    task_description=task_description,
+                    model_info={
+                        "selected_model": selected_model,
+                        **model_config
+                    } if selected_model else None
+                )
+                if log_path:
+                    logger.info(f"Subprocess prompt logged to: {log_path}")
+            
+            # Add memory monitoring status
+            memory_monitoring_status = {
+                "enabled": self.memory_monitor is not None and self.config.enable_memory_monitoring,
+                "thresholds": {
+                    "warning_mb": self.config.memory_warning_mb,
+                    "critical_mb": self.config.memory_critical_mb,
+                    "max_mb": self.config.memory_max_mb
+                } if self.memory_monitor else None
+            }
+            
             return {
                 "success": True,
                 "subprocess_id": subprocess_id,
                 "subprocess_info": subprocess_info,
                 "prompt": prompt,
                 "usage_instructions": self._generate_usage_instructions(subprocess_info),
-                "correction_hook": correction_hook
+                "correction_hook": correction_hook,
+                "memory_monitoring": memory_monitoring_status
             }
             
         except Exception as e:
@@ -619,6 +810,7 @@ class TaskToolHelper:
     def _generate_usage_instructions(self, subprocess_info: Dict[str, Any]) -> str:
         """Generate usage instructions for Task Tool subprocess."""
         correction_status = "enabled" if self.correction_capture else "disabled"
+        memory_status = "enabled" if self.memory_monitor and self.config.enable_memory_monitoring else "disabled"
         
         return f"""
 Task Tool Subprocess Usage Instructions:
@@ -646,11 +838,20 @@ Integration Notes:
 - Escalation triggers are configured for automatic PM notification
 - Progress updates should be provided regularly
 - Correction capture is {correction_status} for automatic prompt improvement
+- Memory monitoring is {memory_status} for subprocess protection
 
 Model Configuration:
 - Selected Model: {subprocess_info.get('selected_model', 'Not specified')}
 - Model Config: {subprocess_info.get('model_config', {}).get('selection_method', 'default')}
 - Performance Profile: {subprocess_info.get('model_config', {}).get('performance_profile', {}).get('reasoning_quality', 'standard')}
+
+Memory Monitoring:
+- Status: {memory_status}
+- Warning Threshold: {self.config.memory_warning_mb}MB
+- Critical Threshold: {self.config.memory_critical_mb}MB
+- Maximum Limit: {self.config.memory_max_mb}MB
+- Auto-abort on limit: {self.config.abort_on_memory_limit}
+- Memory alerts will be logged to .claude-pm/logs/memory/memory-alerts.log
 
 Correction Capture Usage:
 - If the subprocess response needs correction, use the capture_correction method
@@ -661,26 +862,69 @@ Correction Capture Usage:
     def get_subprocess_status(self, subprocess_id: Optional[str] = None) -> Dict[str, Any]:
         """Get status of Task Tool subprocesses."""
         if subprocess_id:
-            return {
+            info = self._active_subprocesses.get(subprocess_id)
+            result = {
                 "subprocess_id": subprocess_id,
-                "info": self._active_subprocesses.get(subprocess_id),
+                "info": info,
                 "active": subprocess_id in self._active_subprocesses
             }
+            
+            # Add memory status if available
+            if info and self.memory_monitor and self.config.enable_memory_monitoring:
+                try:
+                    memory_mb, memory_status = self.memory_monitor.check_memory(subprocess_id)
+                    result["memory_status"] = {
+                        "current_mb": memory_mb,
+                        "status": memory_status,
+                        "should_abort": self.memory_monitor.should_abort(subprocess_id)
+                    }
+                except Exception as e:
+                    logger.warning(f"Failed to get memory status: {e}")
+            
+            return result
         
-        return {
+        # Get overall status
+        status = {
             "active_subprocesses": len(self._active_subprocesses),
             "total_subprocesses": len(self._subprocess_history),
             "active_agents": list(set(info["agent_type"] for info in self._active_subprocesses.values())),
             "recent_subprocesses": self._subprocess_history[-5:] if self._subprocess_history else []
         }
+        
+        # Add memory monitoring status
+        if self.memory_monitor and self.config.enable_memory_monitoring:
+            try:
+                status["memory_monitoring"] = {
+                    "enabled": True,
+                    "system_memory": self.memory_monitor.get_system_memory(),
+                    "subprocess_stats": self.memory_monitor.get_all_subprocess_stats()
+                }
+            except Exception as e:
+                logger.warning(f"Failed to get memory monitoring status: {e}")
+                status["memory_monitoring"] = {"enabled": True, "error": str(e)}
+        else:
+            status["memory_monitoring"] = {"enabled": False}
+        
+        return status
     
     def complete_subprocess(self, subprocess_id: str, results: Dict[str, Any]) -> bool:
         """Mark subprocess as complete and process results."""
         if subprocess_id in self._active_subprocesses:
+            # Stop memory monitoring first
+            memory_stats = None
+            if self.memory_monitor and self.config.enable_memory_monitoring:
+                try:
+                    memory_stats = self.memory_monitor.stop_monitoring(subprocess_id)
+                    logger.info(f"Memory monitoring stopped for {subprocess_id}: {memory_stats}")
+                except Exception as e:
+                    logger.warning(f"Failed to stop memory monitoring: {e}")
+            
             # Update subprocess info
             self._active_subprocesses[subprocess_id]["status"] = "completed"
             self._active_subprocesses[subprocess_id]["completion_time"] = datetime.now().isoformat()
             self._active_subprocesses[subprocess_id]["results"] = results
+            if memory_stats:
+                self._active_subprocesses[subprocess_id]["memory_stats"] = memory_stats
             
             # Update history
             for entry in self._subprocess_history:
@@ -688,6 +932,8 @@ Correction Capture Usage:
                     entry["status"] = "completed"
                     entry["completion_time"] = datetime.now().isoformat()
                     entry["results"] = results
+                    if memory_stats:
+                        entry["memory_stats"] = memory_stats
                     break
             
             # Complete delegation in PM orchestrator
@@ -698,9 +944,14 @@ Correction Capture Usage:
             
             # Collect completion memory
             if self.config.memory_collection_required:
+                memory_summary = ""
+                if memory_stats and "memory_stats" in memory_stats:
+                    peak_mb = memory_stats["memory_stats"].get("peak_mb", "N/A")
+                    memory_summary = f" (peak memory: {peak_mb}MB)"
+                
                 collect_pm_orchestrator_memory(
                     category="architecture:design",
-                    content=f"Completed Task Tool subprocess {subprocess_id}: {results.get('summary', 'No summary')}",
+                    content=f"Completed Task Tool subprocess {subprocess_id}: {results.get('summary', 'No summary')}{memory_summary}",
                     priority="medium",
                     delegation_id=subprocess_id
                 )
@@ -800,6 +1051,77 @@ Correction Capture Usage:
                 performance_metrics={"enabled": True}
             )
     
+    def check_subprocess_memory(self, subprocess_id: str) -> Dict[str, Any]:
+        """Check memory status for a specific subprocess and take action if needed."""
+        if not self.memory_monitor or not self.config.enable_memory_monitoring:
+            return {"enabled": False, "message": "Memory monitoring not enabled"}
+        
+        try:
+            memory_mb, status = self.memory_monitor.check_memory(subprocess_id)
+            should_abort = self.memory_monitor.should_abort(subprocess_id)
+            
+            result = {
+                "subprocess_id": subprocess_id,
+                "memory_mb": memory_mb,
+                "status": status,
+                "should_abort": should_abort,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            # Handle critical situations
+            if should_abort and self.config.abort_on_memory_limit:
+                logger.error(f"Subprocess {subprocess_id} exceeded memory limit, recommending abort")
+                result["action"] = "ABORT_RECOMMENDED"
+                result["reason"] = f"Memory usage ({memory_mb}MB) exceeded limit ({self.config.memory_max_mb}MB)"
+                
+                # Mark subprocess as aborted in tracking
+                if subprocess_id in self._active_subprocesses:
+                    self._active_subprocesses[subprocess_id]["status"] = "aborted_memory"
+                    self._active_subprocesses[subprocess_id]["abort_time"] = datetime.now().isoformat()
+                    
+            elif status == "CRITICAL":
+                logger.warning(f"Subprocess {subprocess_id} memory critical: {memory_mb}MB")
+                result["action"] = "WARNING"
+                result["reason"] = f"Memory usage ({memory_mb}MB) is critical"
+                
+            return result
+            
+        except Exception as e:
+            logger.error(f"Failed to check subprocess memory: {e}")
+            return {"enabled": True, "error": str(e)}
+    
+    def get_memory_report(self) -> Dict[str, Any]:
+        """Get comprehensive memory report for all subprocesses."""
+        if not self.memory_monitor or not self.config.enable_memory_monitoring:
+            return {"enabled": False, "message": "Memory monitoring not enabled"}
+        
+        try:
+            report = {
+                "timestamp": datetime.now().isoformat(),
+                "system_memory": self.memory_monitor.get_system_memory(),
+                "subprocess_stats": self.memory_monitor.get_all_subprocess_stats(),
+                "configuration": {
+                    "warning_mb": self.config.memory_warning_mb,
+                    "critical_mb": self.config.memory_critical_mb,
+                    "max_mb": self.config.memory_max_mb,
+                    "abort_on_limit": self.config.abort_on_memory_limit
+                },
+                "active_subprocesses": len(self._active_subprocesses),
+                "memory_alerts": []
+            }
+            
+            # Check each subprocess and collect alerts
+            for subprocess_id in self._active_subprocesses:
+                check_result = self.check_subprocess_memory(subprocess_id)
+                if check_result.get("status") in ["WARNING", "CRITICAL", "ABORTED"]:
+                    report["memory_alerts"].append(check_result)
+            
+            return report
+            
+        except Exception as e:
+            logger.error(f"Failed to generate memory report: {e}")
+            return {"enabled": True, "error": str(e)}
+    
     def list_available_agents(self) -> Dict[str, List[str]]:
         """List all available agents for Task Tool subprocess creation."""
         return self.pm_orchestrator.list_available_agents()
@@ -859,6 +1181,19 @@ Correction Capture Usage:
                     },
                     "available_models": self.get_available_models() if self.model_selector else [],
                     "model_mapping_available": bool(self.model_selector and hasattr(self.model_selector, 'get_agent_model_mapping'))
+                },
+                "memory_monitoring": {
+                    "enabled": self.memory_monitor is not None and self.config.enable_memory_monitoring,
+                    "available": MEMORY_MONITORING_AVAILABLE,
+                    "configuration": {
+                        "enable_memory_monitoring": self.config.enable_memory_monitoring,
+                        "memory_warning_mb": self.config.memory_warning_mb,
+                        "memory_critical_mb": self.config.memory_critical_mb,
+                        "memory_max_mb": self.config.memory_max_mb,
+                        "abort_on_memory_limit": self.config.abort_on_memory_limit
+                    },
+                    "system_memory": self.memory_monitor.get_system_memory() if self.memory_monitor else None,
+                    "active_monitors": len(self.memory_monitor.active_monitors) if self.memory_monitor and hasattr(self.memory_monitor, 'active_monitors') else 0
                 }
             }
             

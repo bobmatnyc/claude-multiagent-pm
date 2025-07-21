@@ -25,11 +25,13 @@ Usage:
 """
 
 import logging
+import os
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Tuple, Union
 
 from ..services.shared_prompt_cache import SharedPromptCache
 from .base_agent_loader import prepend_base_instructions
+from ..services.task_complexity_analyzer import TaskComplexityAnalyzer, ComplexityLevel, ModelType
 
 # Module-level logger
 logger = logging.getLogger(__name__)
@@ -43,7 +45,6 @@ AGENT_CACHE_PREFIX = "agent_prompt:"
 # Agent name mappings (agent name -> MD file name)
 AGENT_MAPPINGS = {
     "documentation": "documentation-agent.md",
-    "ticketing": "ticketing-agent.md",
     "version_control": "version-control-agent.md",
     "qa": "qa-agent.md",
     "research": "research-agent.md",
@@ -51,6 +52,34 @@ AGENT_MAPPINGS = {
     "security": "security-agent.md",
     "engineer": "engineer-agent.md",
     "data_engineer": "data-agent.md",  # Note: data-agent.md maps to data_engineer
+}
+
+# Model configuration thresholds
+MODEL_THRESHOLDS = {
+    ModelType.HAIKU: {"min_complexity": 0, "max_complexity": 30},
+    ModelType.SONNET: {"min_complexity": 31, "max_complexity": 70},
+    ModelType.OPUS: {"min_complexity": 71, "max_complexity": 100}
+}
+
+# Default model for each agent type (fallback when dynamic selection is disabled)
+DEFAULT_AGENT_MODELS = {
+    'orchestrator': 'claude-4-opus',
+    'engineer': 'claude-4-opus',
+    'architecture': 'claude-4-opus',
+    'documentation': 'claude-sonnet-4-20250514',
+    'version_control': 'claude-sonnet-4-20250514',
+    'qa': 'claude-sonnet-4-20250514',
+    'research': 'claude-sonnet-4-20250514',
+    'ops': 'claude-sonnet-4-20250514',
+    'security': 'claude-sonnet-4-20250514',
+    'data_engineer': 'claude-sonnet-4-20250514'
+}
+
+# Model name mappings for Claude API
+MODEL_NAME_MAPPINGS = {
+    ModelType.HAIKU: "claude-3-haiku-20240307",
+    ModelType.SONNET: "claude-sonnet-4-20250514",
+    ModelType.OPUS: "claude-4-opus"
 }
 
 
@@ -106,17 +135,148 @@ def load_agent_prompt_from_md(agent_name: str, force_reload: bool = False) -> Op
 
 
 
-def get_agent_prompt(agent_name: str, force_reload: bool = False, **kwargs) -> str:
+def _analyze_task_complexity(task_description: str, context_size: int = 0, **kwargs) -> Dict[str, Any]:
     """
-    Get agent prompt from MD file.
+    Analyze task complexity using TaskComplexityAnalyzer.
+    
+    Args:
+        task_description: Description of the task
+        context_size: Size of context in characters
+        **kwargs: Additional parameters for complexity analysis
+        
+    Returns:
+        Dictionary containing complexity analysis results
+    """
+    try:
+        analyzer = TaskComplexityAnalyzer()
+        
+        # Extract additional parameters from kwargs
+        file_count = kwargs.get('file_count', 0)
+        integration_points = kwargs.get('integration_points', 0)
+        requires_research = kwargs.get('requires_research', False)
+        requires_testing = kwargs.get('requires_testing', False)
+        requires_documentation = kwargs.get('requires_documentation', False)
+        technical_depth = kwargs.get('technical_depth', None)
+        
+        # Analyze task complexity
+        result = analyzer.analyze_task(
+            task_description=task_description,
+            context_size=context_size,
+            file_count=file_count,
+            integration_points=integration_points,
+            requires_research=requires_research,
+            requires_testing=requires_testing,
+            requires_documentation=requires_documentation,
+            technical_depth=technical_depth
+        )
+        
+        return {
+            "complexity_score": result.complexity_score,
+            "complexity_level": result.complexity_level,
+            "recommended_model": result.recommended_model,
+            "optimal_prompt_size": result.optimal_prompt_size,
+            "scoring_breakdown": result.scoring_breakdown,
+            "analysis_details": result.analysis_details
+        }
+        
+    except Exception as e:
+        logger.warning(f"Failed to analyze task complexity: {e}")
+        return {
+            "complexity_score": 50,
+            "complexity_level": ComplexityLevel.MEDIUM,
+            "recommended_model": ModelType.SONNET,
+            "optimal_prompt_size": (700, 1000),
+            "error": str(e)
+        }
+
+
+def _get_model_config(agent_name: str, complexity_analysis: Optional[Dict[str, Any]] = None) -> Tuple[str, Dict[str, Any]]:
+    """
+    Get model configuration based on agent type and task complexity.
+    
+    Args:
+        agent_name: Name of the agent
+        complexity_analysis: Results from task complexity analysis
+        
+    Returns:
+        Tuple of (selected_model, model_config)
+    """
+    # Check if dynamic model selection is enabled
+    enable_dynamic_selection = os.getenv('ENABLE_DYNAMIC_MODEL_SELECTION', 'true').lower() == 'true'
+    
+    # Debug logging
+    logger.debug(f"Environment ENABLE_DYNAMIC_MODEL_SELECTION: {os.getenv('ENABLE_DYNAMIC_MODEL_SELECTION')}")
+    logger.debug(f"Enable dynamic selection: {enable_dynamic_selection}")
+    
+    # Check for per-agent override in environment
+    agent_override_key = f"CLAUDE_PM_{agent_name.upper()}_MODEL_SELECTION"
+    agent_override = os.getenv(agent_override_key, '').lower()
+    
+    if agent_override == 'true':
+        enable_dynamic_selection = True
+    elif agent_override == 'false':
+        enable_dynamic_selection = False
+    
+    # Log model selection decision
+    logger.info(f"Model selection for {agent_name}: dynamic={enable_dynamic_selection}, "
+                f"complexity_available={complexity_analysis is not None}")
+    
+    # Dynamic model selection based on complexity
+    if enable_dynamic_selection and complexity_analysis:
+        recommended_model = complexity_analysis.get('recommended_model', ModelType.SONNET)
+        selected_model = MODEL_NAME_MAPPINGS.get(recommended_model, DEFAULT_AGENT_MODELS.get(agent_name, 'claude-sonnet-4-20250514'))
+        
+        model_config = {
+            "selection_method": "dynamic_complexity_based",
+            "complexity_score": complexity_analysis.get('complexity_score', 50),
+            "complexity_level": complexity_analysis.get('complexity_level', ComplexityLevel.MEDIUM).value,
+            "optimal_prompt_size": complexity_analysis.get('optimal_prompt_size', (700, 1000)),
+            "scoring_breakdown": complexity_analysis.get('scoring_breakdown', {}),
+            "analysis_details": complexity_analysis.get('analysis_details', {})
+        }
+        
+        # Log metrics
+        logger.info(f"Dynamic model selection for {agent_name}: "
+                    f"model={selected_model}, "
+                    f"complexity_score={model_config['complexity_score']}, "
+                    f"complexity_level={model_config['complexity_level']}")
+        
+        # Track model selection metrics
+        log_model_selection(
+            agent_name=agent_name,
+            selected_model=selected_model,
+            complexity_score=model_config['complexity_score'],
+            selection_method=model_config['selection_method']
+        )
+        
+    else:
+        # Use default model mapping
+        selected_model = DEFAULT_AGENT_MODELS.get(agent_name, 'claude-sonnet-4-20250514')
+        model_config = {
+            "selection_method": "default_mapping",
+            "reason": "dynamic_selection_disabled" if not enable_dynamic_selection else "no_complexity_analysis"
+        }
+    
+    return selected_model, model_config
+
+
+def get_agent_prompt(agent_name: str, force_reload: bool = False, return_model_info: bool = False, **kwargs) -> Union[str, Tuple[str, str, Dict[str, Any]]]:
+    """
+    Get agent prompt from MD file with optional dynamic model selection.
     
     Args:
         agent_name: Agent name (e.g., 'documentation', 'ticketing')
         force_reload: Force reload from source, bypassing cache
-        **kwargs: Additional arguments for specific agents (e.g., force_refresh_help for ticketing)
+        return_model_info: If True, returns tuple (prompt, model, config)
+        **kwargs: Additional arguments including:
+            - task_description: Description of the task for complexity analysis
+            - context_size: Size of context for complexity analysis
+            - enable_complexity_analysis: Override for complexity analysis
+            - Additional complexity factors (file_count, integration_points, etc.)
         
     Returns:
-        str: Complete agent prompt with base instructions prepended
+        str or tuple: Complete agent prompt with base instructions prepended,
+                      or tuple of (prompt, selected_model, model_config) if return_model_info=True
     """
     # Load from MD file
     prompt = load_agent_prompt_from_md(agent_name, force_reload)
@@ -124,8 +284,30 @@ def get_agent_prompt(agent_name: str, force_reload: bool = False, **kwargs) -> s
     if prompt is None:
         raise ValueError(f"No agent prompt MD file found for: {agent_name}")
     
-    # Handle ticketing agent template formatting if needed
-    if agent_name == "ticketing" and "{dynamic_help}" in prompt:
+    # Analyze task complexity if task description is provided
+    complexity_analysis = None
+    task_description = kwargs.get('task_description', '')
+    enable_analysis = kwargs.get('enable_complexity_analysis', True)
+    
+    if task_description and enable_analysis:
+        # Remove already specified parameters from kwargs to avoid duplicates
+        analysis_kwargs = {k: v for k, v in kwargs.items() 
+                          if k not in ['task_description', 'context_size']}
+        complexity_analysis = _analyze_task_complexity(
+            task_description=task_description,
+            context_size=kwargs.get('context_size', 0),
+            **analysis_kwargs
+        )
+    
+    # Get model configuration (always happens, even without complexity analysis)
+    selected_model, model_config = _get_model_config(agent_name, complexity_analysis)
+    
+    # Always store model selection info in kwargs for potential use by callers
+    kwargs['_selected_model'] = selected_model
+    kwargs['_model_config'] = model_config
+    
+    # Handle dynamic template formatting if needed
+    if "{dynamic_help}" in prompt:
         try:
             # Import CLI helper module to get dynamic help
             from ..orchestration.ai_trackdown_tools import CLIHelpFormatter
@@ -140,8 +322,20 @@ def get_agent_prompt(agent_name: str, force_reload: bool = False, **kwargs) -> s
             # Remove the placeholder if we can't fill it
             prompt = prompt.replace("{dynamic_help}", "")
     
-    # Prepend base instructions
-    return prepend_base_instructions(prompt)
+    # Add model selection metadata to prompt if dynamic selection is enabled
+    if selected_model and model_config.get('selection_method') == 'dynamic_complexity_based':
+        model_metadata = f"\n<!-- Model Selection: {selected_model} (Complexity: {model_config.get('complexity_level', 'UNKNOWN')}) -->\n"
+        prompt = model_metadata + prompt
+    
+    # Prepend base instructions with dynamic template based on complexity
+    complexity_score = model_config.get('complexity_score', 50) if model_config else 50
+    final_prompt = prepend_base_instructions(prompt, complexity_score=complexity_score)
+    
+    # Return model info if requested
+    if return_model_info:
+        return final_prompt, selected_model, model_config
+    else:
+        return final_prompt
 
 
 # Backward-compatible functions
@@ -149,10 +343,6 @@ def get_documentation_agent_prompt() -> str:
     """Get the complete Documentation Agent prompt with base instructions."""
     return get_agent_prompt("documentation")
 
-
-def get_ticketing_agent_prompt(force_refresh_help: bool = False) -> str:
-    """Get the complete Ticketing Agent prompt with AI Trackdown Tools integration."""
-    return get_agent_prompt("ticketing", force_refresh_help=force_refresh_help)
 
 
 def get_version_control_agent_prompt() -> str:
@@ -190,6 +380,29 @@ def get_data_engineer_agent_prompt() -> str:
     return get_agent_prompt("data_engineer")
 
 
+def get_agent_prompt_with_model_info(agent_name: str, force_reload: bool = False, **kwargs) -> Tuple[str, str, Dict[str, Any]]:
+    """
+    Get agent prompt with model selection information.
+    
+    Args:
+        agent_name: Agent name (e.g., 'documentation', 'ticketing')
+        force_reload: Force reload from source, bypassing cache
+        **kwargs: Additional arguments for prompt generation and model selection
+        
+    Returns:
+        Tuple of (prompt, selected_model, model_config)
+    """
+    # Use get_agent_prompt with return_model_info=True
+    result = get_agent_prompt(agent_name, force_reload, return_model_info=True, **kwargs)
+    
+    # If result is a tuple, return it directly
+    if isinstance(result, tuple):
+        return result
+    
+    # Fallback (shouldn't happen)
+    return result, DEFAULT_AGENT_MODELS.get(agent_name, 'claude-sonnet-4-20250514'), {"selection_method": "default"}
+
+
 # Utility functions
 def list_available_agents() -> Dict[str, Dict[str, Any]]:
     """
@@ -206,7 +419,8 @@ def list_available_agents() -> Dict[str, Dict[str, Any]]:
         agents[agent_name] = {
             "md_file": md_filename if md_path.exists() else None,
             "md_path": str(md_path) if md_path.exists() else None,
-            "has_md": md_path.exists()
+            "has_md": md_path.exists(),
+            "default_model": DEFAULT_AGENT_MODELS.get(agent_name, 'claude-sonnet-4-20250514')
         }
     
     return agents
@@ -254,3 +468,105 @@ def validate_agent_files() -> Dict[str, bool]:
         }
     
     return results
+
+
+def get_model_selection_metrics() -> Dict[str, Any]:
+    """
+    Get metrics about model selection usage.
+    
+    Returns:
+        dict: Metrics including feature flag status and selection counts
+    """
+    # Check feature flag status
+    global_enabled = os.getenv('ENABLE_DYNAMIC_MODEL_SELECTION', 'true').lower() == 'true'
+    
+    # Check per-agent overrides
+    agent_overrides = {}
+    for agent_name in AGENT_MAPPINGS.keys():
+        override_key = f"CLAUDE_PM_{agent_name.upper()}_MODEL_SELECTION"
+        override_value = os.getenv(override_key, '')
+        if override_value:
+            agent_overrides[agent_name] = override_value.lower() == 'true'
+    
+    # Get cache instance to check for cached metrics
+    try:
+        cache = SharedPromptCache.get_instance()
+        selection_stats = cache.get("agent_loader:model_selection_stats") or {}
+    except Exception:
+        selection_stats = {}
+    
+    return {
+        "feature_flag": {
+            "global_enabled": global_enabled,
+            "agent_overrides": agent_overrides
+        },
+        "model_thresholds": {
+            model_type.value: thresholds 
+            for model_type, thresholds in MODEL_THRESHOLDS.items()
+        },
+        "default_models": DEFAULT_AGENT_MODELS,
+        "selection_stats": selection_stats
+    }
+
+
+def log_model_selection(agent_name: str, selected_model: str, complexity_score: int, selection_method: str) -> None:
+    """
+    Log model selection for metrics tracking.
+    
+    Args:
+        agent_name: Name of the agent
+        selected_model: Model that was selected
+        complexity_score: Complexity score from analysis
+        selection_method: Method used for selection
+    """
+    try:
+        # Get cache instance
+        cache = SharedPromptCache.get_instance()
+        
+        # Get existing stats
+        stats_key = "agent_loader:model_selection_stats"
+        stats = cache.get(stats_key) or {
+            "total_selections": 0,
+            "by_model": {},
+            "by_agent": {},
+            "by_method": {},
+            "complexity_distribution": {
+                "0-30": 0,
+                "31-70": 0,
+                "71-100": 0
+            }
+        }
+        
+        # Update stats
+        stats["total_selections"] += 1
+        
+        # By model
+        if selected_model not in stats["by_model"]:
+            stats["by_model"][selected_model] = 0
+        stats["by_model"][selected_model] += 1
+        
+        # By agent
+        if agent_name not in stats["by_agent"]:
+            stats["by_agent"][agent_name] = {}
+        if selected_model not in stats["by_agent"][agent_name]:
+            stats["by_agent"][agent_name][selected_model] = 0
+        stats["by_agent"][agent_name][selected_model] += 1
+        
+        # By method
+        if selection_method not in stats["by_method"]:
+            stats["by_method"][selection_method] = 0
+        stats["by_method"][selection_method] += 1
+        
+        # Complexity distribution
+        if complexity_score <= 30:
+            stats["complexity_distribution"]["0-30"] += 1
+        elif complexity_score <= 70:
+            stats["complexity_distribution"]["31-70"] += 1
+        else:
+            stats["complexity_distribution"]["71-100"] += 1
+        
+        # Store updated stats with 24 hour TTL
+        cache.set(stats_key, stats, ttl=86400)
+        
+    except Exception as e:
+        logger.warning(f"Failed to log model selection metrics: {e}")

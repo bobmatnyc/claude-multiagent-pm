@@ -51,7 +51,7 @@ def discover_agents(force_refresh=False):
         Dictionary of discovered agents
     """
     registry = AgentRegistry()
-    return registry.discover_agents_sync(force_refresh=force_refresh)
+    return registry.discover_agents(force_refresh=force_refresh)
 
 def get_core_agent_types():
     """

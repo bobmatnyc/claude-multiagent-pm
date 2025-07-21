@@ -141,13 +141,14 @@ class ModularCLI:
         """Create the main CLI group with core functionality."""
         
         @click.group()
-        @click.version_option(prog_name="Claude Multi-Agent PM Framework")
+        @click.version_option(version=None, package_name="claude-multiagent-pm", prog_name="Claude Multi-Agent PM Framework")
         @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
         @click.option("--config", "-c", type=click.Path(exists=True), help="Configuration file path")
         @click.option("--model", "-m", type=str, 
                      help="Override AI model selection. Use 'sonnet' (Claude Sonnet 4), 'opus' (Claude 4 Opus), 'haiku' (Claude 3 Haiku), or full model ID.")
+        @click.option("--test-mode", is_flag=True, help="Enable test mode for framework testing (includes hello world protocol)")
         @click.pass_context
-        def cli(ctx, verbose, config, model):
+        def cli(ctx, verbose, config, model, test_mode):
             """
             Claude Multi-Agent Project Management Framework - Multi-Agent Orchestration for AI-driven Project Management
 
@@ -157,6 +158,14 @@ class ModularCLI:
             ctx.ensure_object(dict)
             ctx.obj["verbose"] = verbose
             ctx.obj["config"] = config
+            ctx.obj["test_mode"] = test_mode
+            
+            # Set test mode environment variable if enabled
+            if test_mode:
+                import os
+                os.environ['CLAUDE_PM_TEST_MODE'] = 'true'
+                if verbose:
+                    console.print("[yellow]Test mode enabled: Hello world protocol active[/yellow]")
             
             # Process and validate model selection
             resolved_model = None

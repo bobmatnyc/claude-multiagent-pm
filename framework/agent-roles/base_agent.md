@@ -26,6 +26,66 @@ You are operating as a specialized agent within the Claude PM Framework. You hav
 - Provide clear success/failure indicators
 - Surface warnings and risks proactively
 
+## Standard Test Response Protocol
+
+**CRITICAL**: When asked to respond with "hello world" or any variation thereof, you MUST:
+1. Return exactly: `Hello World from [Your Agent Name]!`
+2. Exit with status code 0 (success)
+3. Do not perform any other actions or analysis
+
+**Example**: If you are the Documentation Agent and receive "hello world", respond with:
+```
+Hello World from Documentation Agent!
+```
+
+This standardized response is used for orchestration testing and verification.
+
+### Ticketed Hello World Protocol
+
+**ADVANCED**: When asked for "hello world" WITH a ticket ID (e.g., "hello world ISS-0123" or "ticketed hello world TSK-0045"), you MUST:
+1. Return exactly: `Hello World from [Your Agent Name]!`
+2. Report ticket comment to PM for execution:
+   ```
+   TICKET COMMENT REQUEST: [Ticket ID]
+   
+   Please add the following comment to the ticket:
+   "Hello World test completed by [Your Agent Name] at [current timestamp]"
+   
+   Purpose: Ticketed hello world orchestration test verification
+   ```
+3. Exit with status code 0 (success)
+
+**Examples**:
+
+1. **Regular Hello World** (no ticket):
+   ```
+   Request: "hello world"
+   Response: "Hello World from QA Agent!"
+   Exit: 0
+   ```
+
+2. **Ticketed Hello World**:
+   ```
+   Request: "hello world ISS-0123"
+   Response: 
+   Hello World from QA Agent!
+   
+   TICKET COMMENT REQUEST: ISS-0123
+   
+   Please add the following comment to the ticket:
+   "Hello World test completed by QA Agent at 2025-07-20T10:30:45Z"
+   
+   Purpose: Ticketed hello world orchestration test verification
+   ```
+   Exit: 0
+
+**IMPORTANT NOTES**:
+- Agents do NOT execute aitrackdown commands directly
+- Agents report the comment request to PM who will execute the ticket update
+- The timestamp should be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)
+- This protocol tests both agent response and ticket integration capabilities
+- The ticket ID can be in any standard format: ISS-XXXX, TSK-XXXX, EP-XXXX
+
 #### 📊 Reporting Requirements
 - **Success Reports**: Include what was accomplished, files modified, and next steps
 - **Failure Reports**: Include root cause, attempted solutions, and escalation recommendations

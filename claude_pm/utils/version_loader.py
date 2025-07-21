@@ -20,7 +20,7 @@ Usage:
     # Get package version (from package.json or VERSION file)
     package_version = get_package_version()
     
-    # Get framework version (from FRAMEWORK_VERSION file)
+    # Get framework version (from framework/VERSION file)
     framework_version = get_framework_version()
     
     # Get service version
@@ -32,6 +32,12 @@ import os
 from pathlib import Path
 from typing import Dict, Optional, Any
 from functools import lru_cache
+import sys
+
+try:
+    from importlib import metadata
+except ImportError:
+    import importlib_metadata as metadata
 
 from ..core.logging_config import setup_logging
 
@@ -57,7 +63,12 @@ class VersionLoader:
         if framework_path := os.getenv('CLAUDE_PM_FRAMEWORK_PATH'):
             return Path(framework_path)
         
-        # Try from current module path
+        # Check if we're running from a wheel/installed package
+        if self._is_wheel_installation():
+            # For wheel installations, return the package directory itself
+            return Path(__file__).parent.parent
+        
+        # Try from current module path (source installation)
         current_file = Path(__file__)
         
         # Go up from claude_pm/utils/version_loader.py to find root
@@ -78,16 +89,33 @@ class VersionLoader:
         # Fallback to current module's parent
         return potential_root
     
+    def _is_wheel_installation(self) -> bool:
+        """Check if we're running from a wheel/installed package."""
+        # Check if we're in site-packages or dist-packages
+        current_path = Path(__file__).resolve()
+        path_str = str(current_path)
+        return 'site-packages' in path_str or 'dist-packages' in path_str
+    
     @lru_cache(maxsize=32)
     def get_package_version(self) -> str:
         """
-        Get package version from package.json or VERSION file.
+        Get package version from package metadata, package.json, or VERSION file.
         
         Returns:
             Package version string
         """
         try:
-            # Try package.json first (primary source)
+            # First, try to get version from package metadata (wheel installations)
+            if self._is_wheel_installation():
+                try:
+                    version = metadata.version('claude-multiagent-pm')
+                    self._version_cache['package'] = version
+                    logger.debug(f"Loaded package version from metadata: {version}")
+                    return version
+                except metadata.PackageNotFoundError:
+                    logger.debug("Package metadata not found, trying fallback methods")
+            
+            # Try package.json first (source installations)
             package_json_path = self.framework_root / 'package.json'
             if package_json_path.exists():
                 with open(package_json_path, 'r') as f:
@@ -131,20 +159,12 @@ class VersionLoader:
     @lru_cache(maxsize=32)
     def get_framework_version(self) -> str:
         """
-        Get framework version from FRAMEWORK_VERSION file.
+        Get framework version from framework/VERSION file.
         
         Returns:
             Framework version string (serial number format)
         """
         try:
-            # Try FRAMEWORK_VERSION file first
-            framework_version_file = self.framework_root / 'FRAMEWORK_VERSION'
-            if framework_version_file.exists():
-                version = framework_version_file.read_text().strip()
-                self._version_cache['framework'] = version
-                logger.debug(f"Loaded framework version: {version}")
-                return version
-            
             # Try framework/VERSION
             framework_version_file = self.framework_root / 'framework' / 'VERSION'
             if framework_version_file.exists():
@@ -175,15 +195,7 @@ class VersionLoader:
         try:
             # Service version file mapping
             service_version_files = {
-                "memory": "MEMORY_VERSION",
-                "agents": "AGENTS_VERSION",
-                "ticketing": "TICKETING_VERSION",
-                "documentation": "DOCUMENTATION_VERSION",
-                "services": "SERVICES_VERSION",
-                "cli": "CLI_VERSION",
-                "integration": "INTEGRATION_VERSION",
                 "health": "HEALTH_VERSION",
-                "framework": "FRAMEWORK_VERSION",
                 # Service-specific files
                 # "memory_service": "claude_pm/services/memory/VERSION",  # REMOVED - service deprecated
                 "agents_service": "claude_pm/agents/VERSION",
@@ -226,7 +238,7 @@ class VersionLoader:
         
         # Add service versions
         service_names = [
-            "memory", "agents", "ticketing", "documentation", "services", 
+            "memory", "agents", "documentation", "services", 
             "cli", "integration", "health", "agents_service", 
             "cli_service", "services_core", "version_control_service", 
             "framework_core", "script_system", "deployment_scripts"

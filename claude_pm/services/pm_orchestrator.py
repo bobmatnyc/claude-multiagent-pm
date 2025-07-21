@@ -90,11 +90,21 @@ class PMOrchestrator:
     the agent prompt builder for automated Task Tool subprocess delegation.
     """
     
-    def __init__(self, working_directory: Optional[Path] = None, model_override: Optional[str] = None, model_config: Optional[Dict[str, Any]] = None):
+    def __init__(self, working_directory: Optional[Path] = None, model_override: Optional[str] = None, model_config: Optional[Dict[str, Any]] = None, verbose: bool = False):
         """Initialize PM orchestrator with core agent loader integration."""
         self.working_directory = Path(working_directory or os.getcwd())
         self._delegation_history: List[Dict[str, Any]] = []
         self._active_delegations: Dict[str, AgentDelegationContext] = {}
+        
+        # Check for test mode environment variable
+        test_mode = os.environ.get('CLAUDE_PM_TEST_MODE', '').lower() == 'true'
+        
+        # Enable verbose logging if test mode is active OR verbose flag is set
+        self.verbose = verbose or test_mode
+        
+        # If test mode enabled verbose logging, log this fact
+        if test_mode and not verbose:
+            logger.info("Test mode detected: Enabling verbose prompt logging automatically")
         
         # Initialize synchronous core agent loader
         if AGENT_LOADER_AVAILABLE:
@@ -139,6 +149,7 @@ class PMOrchestrator:
         logger.info(f"PMOrchestrator initialized with working directory: {self.working_directory}")
         logger.info(f"  Shared cache: {'enabled' if self._shared_cache else 'disabled'}")
         logger.info(f"  Model override: {self.model_override or 'none'}")
+        logger.info(f"  Verbose mode: {self.verbose}")
         if self.model_override:
             logger.info(f"  Override source: {self.model_config.get('source', 'unknown')}")
     
@@ -174,6 +185,78 @@ class PMOrchestrator:
         except Exception as e:
             logger.error(f"Failed to initialize ModelSelector: {e}")
             self._model_selector = None
+    
+    def _log_prompt_to_file(self, prompt: str, agent_type: str, task_description: str, 
+                           model_info: Optional[Dict[str, Any]] = None) -> Optional[str]:
+        """
+        Log prompts to JSON files when verbose mode is enabled.
+        
+        Args:
+            prompt: The generated prompt text
+            agent_type: Type of agent being prompted
+            task_description: Description of the task
+            model_info: Model configuration and selection info
+            
+        Returns:
+            Path to the log file if created, None otherwise
+        """
+        if not self.verbose:
+            return None
+            
+        try:
+            # Create log directory structure
+            now = datetime.now()
+            
+            # Check for custom prompts directory from environment
+            prompts_dir_env = os.environ.get('CLAUDE_PM_PROMPTS_DIR')
+            if prompts_dir_env:
+                # Use the custom prompts directory
+                log_dir = Path(prompts_dir_env) / now.strftime("%Y-%m-%d")
+            else:
+                # Use default location
+                log_dir = self.working_directory / ".claude-pm" / "logs" / "prompts" / now.strftime("%Y-%m-%d")
+            
+            log_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Generate unique filename
+            timestamp = now.strftime("%H%M%S_%f")[:-3]  # Include milliseconds
+            filename = f"prompt_{agent_type}_{timestamp}.json"
+            log_path = log_dir / filename
+            
+            # Prepare log entry
+            log_entry = {
+                "timestamp": now.isoformat(),
+                "agent_type": agent_type,
+                "task_description": task_description,
+                "prompt_text": prompt,
+                "metadata": {
+                    "framework_version": "014",
+                    "delegation_id": f"{agent_type}_{now.strftime('%Y%m%d_%H%M%S')}",
+                    "working_directory": str(self.working_directory),
+                    "prompt_length": len(prompt),
+                    "verbose_mode": True
+                }
+            }
+            
+            # Add model info if available
+            if model_info:
+                log_entry["model_info"] = model_info
+            elif self.model_override:
+                log_entry["model_info"] = {
+                    "selected_model": self.model_override,
+                    "source": "cli_override"
+                }
+            
+            # Write log file
+            with open(log_path, 'w', encoding='utf-8') as f:
+                json.dump(log_entry, f, indent=2, ensure_ascii=False)
+            
+            logger.debug(f"Logged prompt to: {log_path}")
+            return str(log_path)
+            
+        except Exception as e:
+            logger.warning(f"Failed to log prompt to file: {e}")
+            return None
     
     def generate_agent_prompt(
         self,
@@ -297,6 +380,20 @@ class PMOrchestrator:
             })
             
             logger.info(f"Generated prompt for {agent_type} delegation: {delegation_id}")
+            
+            # Log prompt to file if verbose mode is enabled
+            if self.verbose:
+                log_path = self._log_prompt_to_file(
+                    prompt=enhanced_prompt,
+                    agent_type=agent_type,
+                    task_description=task_description,
+                    model_info={
+                        "selected_model": effective_model,
+                        **effective_config
+                    } if effective_model else None
+                )
+                if log_path:
+                    logger.info(f"Prompt logged to: {log_path}")
             
             # Cache the generated prompt if shared cache is available
             if self._shared_cache and delegation_cache_key:
@@ -530,7 +627,8 @@ def quick_delegate(
     deliverables: Optional[List[str]] = None,
     working_directory: Optional[Path] = None,
     model_override: Optional[str] = None,
-    model_config: Optional[Dict[str, Any]] = None
+    model_config: Optional[Dict[str, Any]] = None,
+    verbose: bool = False
 ) -> str:
     """
     Quick delegation helper for PM orchestrator.
@@ -543,11 +641,12 @@ def quick_delegate(
         working_directory: Working directory path
         model_override: Model override from CLI
         model_config: Model configuration metadata
+        verbose: Enable verbose logging
         
     Returns:
         Complete Task Tool prompt ready for subprocess creation
     """
-    orchestrator = PMOrchestrator(working_directory, model_override, model_config)
+    orchestrator = PMOrchestrator(working_directory, model_override, model_config, verbose)
     return orchestrator.generate_agent_prompt(
         agent_type=agent_type,
         task_description=task_description,
@@ -556,9 +655,9 @@ def quick_delegate(
     )
 
 
-def create_shortcut_prompts(model_override: Optional[str] = None, model_config: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
+def create_shortcut_prompts(model_override: Optional[str] = None, model_config: Optional[Dict[str, Any]] = None, verbose: bool = False) -> Dict[str, str]:
     """Create shortcut prompts for common PM orchestrator operations."""
-    orchestrator = PMOrchestrator(model_override=model_override, model_config=model_config)
+    orchestrator = PMOrchestrator(model_override=model_override, model_config=model_config, verbose=verbose)
     
     shortcuts = {
         "push": orchestrator.generate_agent_prompt(

@@ -160,6 +160,16 @@ class TemplateManager:
         """Discover all available template sources"""
         self._template_sources = []
         
+        # Check if we're running from a wheel installation
+        is_wheel_install = False
+        try:
+            import claude_pm
+            package_path = Path(claude_pm.__file__).parent
+            path_str = str(package_path.resolve())
+            is_wheel_install = 'site-packages' in path_str or 'dist-packages' in path_str
+        except Exception:
+            pass
+        
         # Framework templates (highest priority)
         framework_templates = Path.cwd() / "framework" / "templates"
         if framework_templates.exists():
@@ -186,10 +196,25 @@ class TemplateManager:
         try:
             import claude_pm
             package_path = Path(claude_pm.__file__).parent
-            system_templates = package_path / "templates"
-            if system_templates.exists():
-                self._template_sources.append(system_templates)
-                logger.debug(f"Found system templates: {system_templates}")
+            
+            # For wheel installations, check the data directory
+            if is_wheel_install:
+                data_templates = package_path / "data" / "templates"
+                if data_templates.exists():
+                    self._template_sources.append(data_templates)
+                    logger.debug(f"Found system templates in data directory: {data_templates}")
+                else:
+                    # Fallback to legacy location
+                    system_templates = package_path / "templates"
+                    if system_templates.exists():
+                        self._template_sources.append(system_templates)
+                        logger.debug(f"Found system templates: {system_templates}")
+            else:
+                # Source installation
+                system_templates = package_path / "templates"
+                if system_templates.exists():
+                    self._template_sources.append(system_templates)
+                    logger.debug(f"Found system templates: {system_templates}")
         except Exception as e:
             logger.warning(f"Failed to find system templates: {e}")
         

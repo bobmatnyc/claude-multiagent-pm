@@ -288,30 +288,6 @@ class SystemAgentConfigManager:
             priority=45
         )
         
-        self._agents["ticketing"] = SystemAgentConfig(
-            agent_type="ticketing",
-            agent_name="Ticketing Agent",
-            description="Universal ticketing interface and lifecycle management",
-            default_model=ModelType.SONNET.value,
-            capabilities=[
-                "ticket_management", "workflow_automation", "integration_management",
-                "lifecycle_tracking", "reporting"
-            ],
-            specializations=["ticketing", "workflow", "tracking"],
-            performance_requirements={
-                "reasoning_depth": "standard",
-                "task_complexity": "medium",
-                "creativity_required": False,
-                "speed_priority": True
-            },
-            model_preferences={
-                "preferred_models": [ModelType.SONNET.value],
-                "minimum_reasoning_tier": "advanced",
-                "context_requirements": "medium"
-            },
-            priority=60
-        )
-        
         self._agents["version_control"] = SystemAgentConfig(
             agent_type="version_control",
             agent_name="Version Control Agent",

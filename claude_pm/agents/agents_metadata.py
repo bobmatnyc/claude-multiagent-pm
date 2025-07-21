@@ -29,37 +29,6 @@ DOCUMENTATION_CONFIG = {
     }
 }
 
-# Ticketing Agent Metadata
-TICKETING_CONFIG = {
-    "name": "ticketing_agent",
-    "version": "2.0.0",
-    "type": "core_agent",
-    "capabilities": [
-        "universal_ticketing_interface",
-        "multi_platform_support",
-        "ticket_lifecycle_management",
-        "workflow_automation",
-        "ai_trackdown_integration",
-        "github_issues_compatibility",
-        "jira_compatibility",
-        "real_time_sync"
-    ],
-    "primary_interface": "ai_trackdown_cli",
-    "supported_platforms": [
-        "ai-trackdown",
-        "github",
-        "jira",
-        "linear",
-        "asana",
-        "trello"
-    ],
-    "performance_targets": {
-        "ticket_creation": "1s",
-        "ticket_update": "1s",
-        "bulk_operations": "10s",
-        "sync_interval": "5m"
-    }
-}
 
 # Version Control Agent Metadata
 VERSION_CONTROL_CONFIG = {
@@ -225,7 +194,6 @@ DATA_ENGINEER_CONFIG = {
 # Aggregate all configs for easy access
 ALL_AGENT_CONFIGS = {
     "documentation": DOCUMENTATION_CONFIG,
-    "ticketing": TICKETING_CONFIG,
     "version_control": VERSION_CONTROL_CONFIG,
     "qa": QA_CONFIG,
     "research": RESEARCH_CONFIG,

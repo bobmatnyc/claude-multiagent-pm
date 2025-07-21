@@ -11,7 +11,6 @@ with fallback to Python constants for backward compatibility.
 # Import from unified agent loader
 from .agent_loader import (
     get_documentation_agent_prompt,
-    get_ticketing_agent_prompt,
     get_version_control_agent_prompt,
     get_qa_agent_prompt,
     get_research_agent_prompt,
@@ -27,7 +26,6 @@ from .agent_loader import (
 # Import agent metadata (previously AGENT_CONFIG)
 from .agents_metadata import (
     DOCUMENTATION_CONFIG,
-    TICKETING_CONFIG,
     VERSION_CONTROL_CONFIG,
     QA_CONFIG,
     RESEARCH_CONFIG,
@@ -42,7 +40,6 @@ from .agents_metadata import (
 __all__ = [
     # Agent prompt functions
     'get_documentation_agent_prompt',
-    'get_ticketing_agent_prompt',
     'get_version_control_agent_prompt',
     'get_qa_agent_prompt',
     'get_research_agent_prompt',
@@ -56,7 +53,6 @@ __all__ = [
     'validate_agent_files',
     # Agent configs
     'DOCUMENTATION_CONFIG',
-    'TICKETING_CONFIG',
     'VERSION_CONTROL_CONFIG',
     'QA_CONFIG',
     'RESEARCH_CONFIG',
@@ -76,12 +72,6 @@ SYSTEM_AGENTS = {
         'config': DOCUMENTATION_CONFIG,
         'version': '2.0.0',
         'integration': 'claude_pm_framework'
-    },
-    'ticketing': {
-        'prompt_function': get_ticketing_agent_prompt,
-        'config': TICKETING_CONFIG,
-        'version': '2.0.0',
-        'integration': 'ai_trackdown_tools'
     },
     'version_control': {
         'prompt_function': get_version_control_agent_prompt,

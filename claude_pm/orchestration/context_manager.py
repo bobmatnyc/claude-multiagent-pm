@@ -70,7 +70,7 @@ class ContextManager:
                    len(self.filters))
     
     def _initialize_default_filters(self) -> Dict[str, ContextFilter]:
-        """Initialize default context filters for all 9 core agent types."""
+        """Initialize default context filters for all 8 core agent types."""
         filters = {
             "documentation": ContextFilter(
                 agent_type="documentation",
@@ -116,15 +116,6 @@ class ContextManager:
                 directory_patterns=[".git/", ".github/"],
                 priority_keywords=["git", "branch", "merge", "commit", "version"],
                 context_sections=["git_status", "branch_info", "recent_commits"]
-            ),
-            
-            "ticketing": ContextFilter(
-                agent_type="ticketing",
-                include_patterns=[r"ISSUE", r"TICKET", r"TODO", r"FIXME"],
-                file_extensions=[".md", ".txt", ".json"],
-                directory_patterns=[".claude-pm/tickets/", "issues/", ".github/ISSUE_TEMPLATE/"],
-                priority_keywords=["issue", "ticket", "bug", "feature", "task"],
-                context_sections=["active_tickets", "ticket_status", "priorities"]
             ),
             
             "ops": ContextFilter(
@@ -459,7 +450,6 @@ class ContextManager:
             "engineer": ["qa", "research", "data_engineer"],
             "research": ["engineer", "documentation"],
             "version_control": ["documentation", "qa"],
-            "ticketing": ["qa", "engineer", "documentation"],
             "ops": ["security", "qa", "engineer"],
             "security": ["qa", "ops", "engineer"],
             "data_engineer": ["engineer", "ops", "security"]

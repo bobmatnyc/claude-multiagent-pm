@@ -108,6 +108,9 @@ def create_pm_orchestrator_with_cli_context(ctx: click.Context, working_director
     # Get CLI model override
     model_override = get_model_override(ctx)
     
+    # Get verbose flag from context
+    verbose = ctx.obj.get("verbose", False) if ctx and ctx.obj else False
+    
     # Create model config metadata
     model_config = {}
     if model_override:
@@ -121,7 +124,8 @@ def create_pm_orchestrator_with_cli_context(ctx: click.Context, working_director
     return PMOrchestrator(
         working_directory=working_directory,
         model_override=model_override,
-        model_config=model_config
+        model_config=model_config,
+        verbose=verbose
     )
 
 
@@ -142,6 +146,9 @@ def create_task_tool_helper_with_cli_context(ctx: click.Context, working_directo
     # Get CLI model override
     model_override = get_model_override(ctx)
     
+    # Get verbose flag from context
+    verbose = ctx.obj.get("verbose", False) if ctx and ctx.obj else False
+    
     # Create model config metadata
     model_config = {}
     if model_override:
@@ -156,7 +163,8 @@ def create_task_tool_helper_with_cli_context(ctx: click.Context, working_directo
         working_directory=working_directory,
         config=config,
         model_override=model_override,
-        model_config=model_config
+        model_config=model_config,
+        verbose=verbose
     )
 
 

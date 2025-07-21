@@ -66,15 +66,7 @@ class SubsystemVersionManager:
 
     # Standard subsystem version files
     SUBSYSTEM_FILES = {
-        "memory": "MEMORY_VERSION",
-        "agents": "AGENTS_VERSION", 
-        "ticketing": "TICKETING_VERSION",
-        "documentation": "DOCUMENTATION_VERSION",
-        "services": "SERVICES_VERSION",
-        "cli": "CLI_VERSION",
-        "integration": "INTEGRATION_VERSION",
-        "health": "HEALTH_VERSION",
-        "framework": "FRAMEWORK_VERSION"
+        "health": "HEALTH_VERSION"
     }
     
     # Service-specific version files (relative to framework path)

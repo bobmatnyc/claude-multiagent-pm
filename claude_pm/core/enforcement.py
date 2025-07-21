@@ -66,7 +66,6 @@ class AgentDisplayNames:
     # Core agent types with their display names (for framework compatibility)
     CORE_AGENT_DISPLAY_NAMES = {
         "documentation_agent": "Documenter",
-        "ticketing_agent": "Ticketing",
         "version_control_agent": "GitAgent",
     }
 

@@ -471,26 +471,33 @@ def register_setup_commands(cli_group):
                     dir_path.mkdir(parents=True, exist_ok=True)
                     console.print(f"✅ Created directory: {dir_path}")
                 
-                # Deploy CLAUDE.md to parent directory with force flag
-                if force:
-                    console.print("[bold blue]🚀 Deploying CLAUDE.md to parent directory[/bold blue]")
-                    try:
-                        from ..services.parent_directory_manager import ParentDirectoryManager
-                        
-                        # Initialize Parent Directory Manager
-                        manager = ParentDirectoryManager()
-                        await manager._initialize()
-                        
-                        # Get current working directory and parent directory
-                        current_dir = Path.cwd()
-                        parent_dir = current_dir.parent
-                        
-                        # Deploy CLAUDE.md with force flag
+                # Always attempt to deploy CLAUDE.md to parent directory (not just with force flag)
+                # This ensures framework is deployed immediately after pip install
+                console.print("[bold blue]🚀 Deploying CLAUDE.md to parent directory[/bold blue]")
+                
+                # Get current working directory and parent directory
+                current_dir = Path.cwd()
+                parent_dir = current_dir.parent
+                target_file = parent_dir / "CLAUDE.md"
+                
+                try:
+                    from ..services.parent_directory_manager import ParentDirectoryManager
+                    
+                    # Initialize Parent Directory Manager
+                    manager = ParentDirectoryManager()
+                    await manager._initialize()
+                    
+                    # Check if CLAUDE.md already exists
+                    if target_file.exists() and not force:
+                        console.print(f"[dim]ℹ️  CLAUDE.md already exists at {target_file}[/dim]")
+                        console.print(f"[dim]   Use --force to update it[/dim]")
+                    else:
+                        # Deploy CLAUDE.md
                         operation = await manager.install_template_to_parent_directory(
                             target_directory=parent_dir,
                             template_id="claude_md",
                             template_variables=None,  # Use defaults
-                            force=True  # Force deployment when --force flag is used
+                            force=force  # Use force flag if provided
                         )
                         
                         if operation.success:
@@ -500,17 +507,17 @@ def register_setup_commands(cli_group):
                         else:
                             console.print(f"❌ CLAUDE.md deployment failed: {operation.error_message}")
                             logger.error(f"CLAUDE.md deployment failed: {operation.error_message}")
-                        
-                        if 'manager' in locals():
-                            await manager._cleanup()
-                        
-                    except Exception as deploy_error:
-                        console.print(f"❌ CLAUDE.md deployment error: {deploy_error}")
-                        logger.error(f"CLAUDE.md deployment error: {deploy_error}")
-                        # Continue with initialization even if deployment fails
+                    
+                    if 'manager' in locals():
+                        await manager._cleanup()
+                    
+                except Exception as deploy_error:
+                    console.print(f"❌ CLAUDE.md deployment error: {deploy_error}")
+                    logger.error(f"CLAUDE.md deployment error: {deploy_error}")
+                    # Continue with initialization even if deployment fails
                 
-                # Load framework into Claude Code after successful deployment
-                if force:
+                # Load framework into Claude Code if CLAUDE.md was deployed
+                if target_file.exists():
                     console.print("[bold blue]🔄 Loading framework into Claude Code...[/bold blue]")
                     try:
                         from ..services.claude_code_integration import load_framework_into_claude_code, create_framework_loading_summary
