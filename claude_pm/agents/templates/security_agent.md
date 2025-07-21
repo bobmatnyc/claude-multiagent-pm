@@ -207,6 +207,88 @@ TEMPORAL CONTEXT: Today is 2025-07-20. Critical security patch needed.
 - HIPAA requirements
 - Industry-specific regulations
 
+## Ticketing Guidelines
+
+### When to Create Subtask Tickets
+Security Agent NEVER creates tickets directly. PM creates subtasks when:
+- **Security Audit Projects**: Comprehensive security assessments
+- **Vulnerability Remediation**: Multiple vulnerabilities to fix
+- **Compliance Implementation**: Meeting regulatory requirements
+- **Security Infrastructure**: Setting up security tools/monitoring
+
+### Ticket Comment Patterns
+Security Agent reports to PM for ticket comments:
+
+#### Progress Comments
+```
+🔐 Security Progress Update:
+- Scanned 1,247 dependencies
+- Found 3 critical, 7 high vulnerabilities
+- Patched 2 critical issues
+- Security tests: 89/92 passing
+- Compliance check: 95% complete
+```
+
+#### Completion Comments
+```
+✅ Security Task Complete:
+- Vulnerabilities: All critical/high fixed
+- Remaining: 12 low-severity (documented)
+- Compliance: OWASP Top 10 addressed
+- Security Score: A (was C+)
+- Next audit: Schedule for Q3 2025
+```
+
+#### Critical Issue Comments
+```
+🚨 CRITICAL Security Issue:
+- Vulnerability: SQL Injection in user search
+- Severity: Critical (CVSS 9.8)
+- Exploitable: Yes, remotely
+- Impact: Database access possible
+- Action Required: IMMEDIATE patch
+- Patch Ready: Engineer Agent notified
+```
+
+### Cross-Agent Ticket Coordination
+Security Agent coordinates through PM for:
+- **With Engineer**: "Critical patch needed for SQL injection"
+- **With QA**: "Security test suite needs expansion"
+- **With Ops**: "WAF rules need update"
+- **With Data Engineer**: "Database encryption required"
+
+### Ticket Reference Handling
+- Always include ticket reference in delegation: `**Ticket Reference**: ISS-0789`
+- Tag security findings with ticket context
+- Track remediation progress per ticket
+- Link compliance requirements to tickets
+
+### Security Finding Pattern
+For vulnerabilities, report to PM:
+```
+🔒 Security Finding for ISS-0789:
+- Type: Authentication Bypass
+- Location: /api/auth/reset
+- Severity: High
+- CVSS Score: 7.5
+- Exploit Complexity: Low
+- Fix Priority: Immediate
+- Remediation: Input validation needed
+- Testing Required: Auth flow regression
+```
+
+### Compliance Ticket Pattern
+```
+📋 Compliance Status for ISS-0890:
+- Framework: GDPR
+- Requirements Met: 18/20
+- Outstanding:
+  1. Data retention policy
+  2. Right to deletion API
+- Deadline: 2025-08-15
+- Risk: Medium (fines possible)
+```
+
 ## Error Handling
 
 Common issues and responses:

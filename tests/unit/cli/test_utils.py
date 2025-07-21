@@ -3,6 +3,7 @@
 
 import pytest
 import os
+import sys
 import asyncio
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock, AsyncMock
@@ -127,7 +128,7 @@ class TestModelOverride:
         ctx = Mock()
         ctx.obj = {'model': 'test-model'}
         
-        with patch('claude_pm.cli.cli_utils.ModelSelector') as mock_selector:
+        with patch('claude_pm.services.model_selector.ModelSelector') as mock_selector:
             with patch.dict(os.environ, {}, clear=True):
                 selector = create_model_selector_with_override(ctx)
                 
@@ -140,7 +141,7 @@ class TestModelOverride:
         ctx = Mock()
         ctx.obj = {}
         
-        with patch('claude_pm.cli.cli_utils.ModelSelector') as mock_selector:
+        with patch('claude_pm.services.model_selector.ModelSelector') as mock_selector:
             selector = create_model_selector_with_override(ctx)
             
             mock_selector.assert_called_once()
@@ -150,7 +151,7 @@ class TestModelOverride:
         ctx = Mock()
         ctx.obj = {'model': 'new-model'}
         
-        with patch('claude_pm.cli.cli_utils.ModelSelector') as mock_selector:
+        with patch('claude_pm.services.model_selector.ModelSelector') as mock_selector:
             # Set existing environment variable
             os.environ['CLAUDE_PM_MODEL_OVERRIDE'] = 'old-model'
             
@@ -171,7 +172,7 @@ class TestPMOrchestratorCreation:
         ctx = Mock()
         ctx.obj = {'model': 'test-model'}
         
-        with patch('claude_pm.cli.cli_utils.PMOrchestrator') as mock_orchestrator:
+        with patch('claude_pm.services.pm_orchestrator.PMOrchestrator') as mock_orchestrator:
             result = create_pm_orchestrator_with_cli_context(ctx)
             
             mock_orchestrator.assert_called_once()
@@ -187,7 +188,7 @@ class TestPMOrchestratorCreation:
         ctx.obj = {}
         working_dir = Path('/test/dir')
         
-        with patch('claude_pm.cli.cli_utils.PMOrchestrator') as mock_orchestrator:
+        with patch('claude_pm.services.pm_orchestrator.PMOrchestrator') as mock_orchestrator:
             result = create_pm_orchestrator_with_cli_context(ctx, working_dir)
             
             call_kwargs = mock_orchestrator.call_args.kwargs
@@ -198,7 +199,7 @@ class TestPMOrchestratorCreation:
         ctx = Mock()
         ctx.obj = {'model': 'test-model'}
         
-        with patch('claude_pm.cli.cli_utils.TaskToolHelper') as mock_helper:
+        with patch('claude_pm.utils.task_tool_helper.TaskToolHelper') as mock_helper:
             result = create_task_tool_helper_with_cli_context(ctx)
             
             mock_helper.assert_called_once()
@@ -294,7 +295,7 @@ class TestUtilityFunctions:
     
     def test_confirm_action(self):
         """Test confirming action."""
-        with patch('claude_pm.cli.cli_utils.Confirm.ask') as mock_confirm:
+        with patch('rich.prompt.Confirm.ask') as mock_confirm:
             mock_confirm.return_value = True
             
             result = confirm_action("Delete everything?")
@@ -387,8 +388,9 @@ class TestErrorHandling:
             
             assert exc_info.value.code == 1
             mock_console.print.assert_called()
-            call_args = str(mock_console.print.call_args)
-            assert "Connection error" in call_args
+            # Check that the error message was printed
+            calls = [str(call) for call in mock_console.print.call_args_list]
+            assert any("Connection error" in call for call in calls)
     
     def test_handle_service_errors_file_not_found(self):
         """Test handling file not found errors."""
@@ -401,7 +403,9 @@ class TestErrorHandling:
                 test_func()
             
             assert exc_info.value.code == 1
-            assert "File not found" in str(mock_console.print.call_args)
+            # Check that the error message was printed
+            calls = [str(call) for call in mock_console.print.call_args_list]
+            assert any("File not found" in call for call in calls)
     
     def test_handle_service_errors_permission(self):
         """Test handling permission errors."""
@@ -414,7 +418,9 @@ class TestErrorHandling:
                 test_func()
             
             assert exc_info.value.code == 1
-            assert "Permission denied" in str(mock_console.print.call_args)
+            # Check that the error message was printed
+            calls = [str(call) for call in mock_console.print.call_args_list]
+            assert any("Permission denied" in call for call in calls)
 
 
 class TestProjectValidation:
@@ -583,9 +589,12 @@ class TestCommonOptions:
         def test_command(verbose, config):
             return f"verbose={verbose}, config={config}"
         
+        # Check that the function was decorated by click
+        assert hasattr(test_command, '__click_params__')
         # Check that options were added
-        assert any(opt.name == 'verbose' for opt in test_command.params)
-        assert any(opt.name == 'config' for opt in test_command.params)
+        param_names = [p.name for p in test_command.__click_params__]
+        assert 'verbose' in param_names
+        assert 'config' in param_names
     
     def test_common_options_with_model_decorator(self):
         """Test common options with model decorator."""
@@ -593,10 +602,13 @@ class TestCommonOptions:
         def test_command(verbose, config, model):
             return f"verbose={verbose}, config={config}, model={model}"
         
+        # Check that the function was decorated by click
+        assert hasattr(test_command, '__click_params__')
         # Check that all options were added
-        assert any(opt.name == 'verbose' for opt in test_command.params)
-        assert any(opt.name == 'config' for opt in test_command.params)
-        assert any(opt.name == 'model' for opt in test_command.params)
+        param_names = [p.name for p in test_command.__click_params__]
+        assert 'verbose' in param_names
+        assert 'config' in param_names
+        assert 'model' in param_names
 
 
 # Import for mock_open

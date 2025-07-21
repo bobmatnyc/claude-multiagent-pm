@@ -162,7 +162,7 @@ def load_base_agent_instructions(force_reload: bool = False) -> Optional[str]:
             cached_content = cache.get(cache_key)
             if cached_content is not None:
                 logger.debug(f"Base agent instructions loaded from cache (test_mode={test_mode})")
-                return cached_content
+                return str(cached_content)
         
         # Load from file
         if not BASE_AGENT_FILE.exists():
@@ -276,6 +276,7 @@ def _build_dynamic_prompt(content: str, template: PromptTemplate) -> str:
     for section_key, section_config in TEMPLATE_SECTIONS.items():
         if template_name in section_config["templates"]:
             section_name = section_config["content"]
+            assert isinstance(section_name, str), "Section name must be string"
             if section_name in sections:
                 filtered_lines.append(sections[section_name])
     

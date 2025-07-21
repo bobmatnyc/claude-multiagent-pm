@@ -25,9 +25,7 @@ from claude_pm.services.prompt_improvement_pipeline import (
     PipelineConfig, 
     PipelineExecution,
     PipelineStatus,
-    PipelineStage,
-    run_pipeline_for_agents,
-    get_pipeline_dashboard
+    PipelineStage
 )
 from claude_pm.services.prompt_improver import (
     PromptImprover,
@@ -1085,55 +1083,49 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_convenience_functions(self, temp_dir):
         """Test convenience functions"""
-        # Test run_pipeline_for_agents
-        with patch('claude_pm.services.prompt_improvement_pipeline.PromptImprovementPipeline') as mock_pipeline:
-            mock_instance = Mock()
-            mock_pipeline.return_value = mock_instance
-            
-            mock_results = Mock()
-            mock_results.execution_id = 'test_exec'
-            mock_results.improvement_summary = {'total_improvements': 5, 'deployed_improvements': 3}
-            mock_results.agent_results = {'Documentation': {}, 'Engineer': {}}
-            mock_results.recommendations = ['Test recommendation']
-            
-            mock_instance.run_full_pipeline = AsyncMock(return_value=mock_results)
-            
-            results = await run_pipeline_for_agents(['Documentation', 'Engineer'])
-            
-            assert results['execution_id'] == 'test_exec'
-            assert results['total_improvements'] == 5
-            assert results['deployed_improvements'] == 3
-            assert len(results['agent_results']) == 2
+        # Test run_full_pipeline for specific agents
+        pipeline = PromptImprovementPipeline(temp_dir)
+        
+        # Mock the execution manager
+        mock_results = Mock()
+        mock_results.execution_id = 'test_exec'
+        mock_results.improvement_summary = {'total_improvements': 5, 'deployed_improvements': 3}
+        mock_results.agent_results = {'Documentation': {}, 'Engineer': {}}
+        mock_results.recommendations = ['Test recommendation']
+        
+        pipeline.execution_manager.run_full_pipeline = AsyncMock(return_value=mock_results)
+        
+        results = await pipeline.run_full_pipeline(['Documentation', 'Engineer'])
+        
+        assert results.execution_id == 'test_exec'
+        assert results.improvement_summary['total_improvements'] == 5
+        assert results.improvement_summary['deployed_improvements'] == 3
+        assert len(results.agent_results) == 2
     
     @pytest.mark.asyncio
     async def test_pipeline_dashboard(self, temp_dir):
         """Test pipeline dashboard generation"""
-        with patch('claude_pm.services.prompt_improvement_pipeline.PromptImprovementPipeline') as mock_pipeline:
-            mock_instance = Mock()
-            mock_pipeline.return_value = mock_instance
-            
-            # Mock health status
-            mock_health = {
-                'pipeline_status': 'healthy',
-                'active_executions': 0,
-                'component_health': {}
-            }
-            mock_instance.monitor_pipeline_health = AsyncMock(return_value=mock_health)
-            
-            # Mock analytics
-            mock_analytics = {
-                'execution_summary': {'success_rate': 0.95}
-            }
-            mock_instance.get_pipeline_analytics = AsyncMock(return_value=mock_analytics)
-            
-            # Mock active executions
-            mock_instance.active_executions = {}
-            
-            dashboard = await get_pipeline_dashboard()
-            
-            assert 'dashboard_generated' in dashboard
-            assert 'health_status' in dashboard
-            assert 'analytics' in dashboard
+        pipeline = PromptImprovementPipeline(temp_dir)
+        
+        # Mock health status
+        mock_health = Mock()
+        mock_health.status = 'healthy'
+        mock_health.active_executions = 0
+        mock_health.recent_failures = 0
+        mock_health.success_rate = 0.95
+        mock_health.average_execution_time = 120.5
+        mock_health.storage_usage_mb = 150.0
+        mock_health.alerts = []
+        mock_health.last_check = datetime.now()
+        
+        pipeline.monitoring.check_pipeline_health = AsyncMock(return_value=mock_health)
+        
+        # Get health status (equivalent to dashboard)
+        health = await pipeline.get_pipeline_health()
+        
+        assert health['status'] == 'healthy'
+        assert health['active_executions'] == 0
+        assert health['success_rate'] == 0.95
             assert 'active_executions' in dashboard
             assert 'system_status' in dashboard
     

@@ -14,11 +14,12 @@ Test Implementation: 2025-07-15
 import asyncio
 import json
 import pytest
+import pytest_asyncio
 import tempfile
 import shutil
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from typing import Dict, List, Any
 
 # Import test target
@@ -46,24 +47,30 @@ class TestAgentProfileLoader:
     """Test suite for AgentProfileLoader."""
     
     @pytest.fixture
-    async def temp_dir(self):
+    def temp_dir(self):
         """Create temporary directory for testing."""
         temp_dir = Path(tempfile.mkdtemp())
         yield temp_dir
         shutil.rmtree(temp_dir)
     
     @pytest.fixture
-    async def mock_config(self):
+    def mock_config(self):
         """Create mock configuration."""
-        config = Mock(spec=Config)
-        config.get = Mock(return_value=None)
-        return config
+        # Return a dictionary instead of Mock object since Config expects a dict
+        return {}
     
     @pytest.fixture
-    async def profile_loader(self, temp_dir, mock_config):
+    def profile_loader(self, temp_dir, mock_config):
         """Create agent profile loader for testing."""
-        # Mock working directory
-        with patch('claude_pm.services.agent_profile_loader.os.getcwd', return_value=str(temp_dir)):
+        # Create a fake framework path with agent-roles directory
+        framework_path = temp_dir / 'framework'
+        agent_roles_dir = framework_path / 'agent-roles'
+        agent_roles_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Mock working directory, framework path, and user home to use temp dir
+        with patch('claude_pm.services.agent_profile_loader.os.getcwd', return_value=str(temp_dir)), \
+             patch.object(AgentProfileLoader, '_detect_framework_path', return_value=framework_path), \
+             patch('claude_pm.services.agent_profile_loader.profile_manager.Path.home', return_value=temp_dir):
             loader = AgentProfileLoader(mock_config)
             
             # Create test directory structure
@@ -78,7 +85,7 @@ class TestAgentProfileLoader:
             yield loader
     
     @pytest.fixture
-    async def sample_profile_content(self):
+    def sample_profile_content(self):
         """Create sample profile content."""
         return """# Engineer Agent Profile
 
@@ -127,31 +134,34 @@ Software Engineer specializing in backend development and API design.
 **Training Enabled**: true
 """
     
+    @pytest.mark.asyncio
     async def test_profile_loader_initialization(self, profile_loader):
         """Test profile loader initialization."""
         assert profile_loader is not None
         assert profile_loader.working_directory is not None
         assert profile_loader.framework_path is not None
         assert profile_loader.user_home is not None
-        assert len(profile_loader.tier_paths) == 3
-        assert ProfileTier.PROJECT in profile_loader.tier_paths
-        assert ProfileTier.USER in profile_loader.tier_paths
-        assert ProfileTier.SYSTEM in profile_loader.tier_paths
+        assert profile_loader.profile_manager is not None
+        assert len(profile_loader.profile_manager.tier_paths) == 3
+        assert ProfileTier.PROJECT in profile_loader.profile_manager.tier_paths
+        assert ProfileTier.USER in profile_loader.profile_manager.tier_paths
+        assert ProfileTier.SYSTEM in profile_loader.profile_manager.tier_paths
     
+    @pytest.mark.asyncio
     async def test_create_profile_files(self, profile_loader, sample_profile_content):
         """Test creating profile files in different tiers."""
         # Create profile in project tier
-        project_path = profile_loader.tier_paths[ProfileTier.PROJECT]
+        project_path = profile_loader.profile_manager.tier_paths[ProfileTier.PROJECT]
         project_file = project_path / "engineer.md"
         project_file.write_text(sample_profile_content)
         
         # Create profile in user tier
-        user_path = profile_loader.tier_paths[ProfileTier.USER]
+        user_path = profile_loader.profile_manager.tier_paths[ProfileTier.USER]
         user_file = user_path / "engineer.md"
         user_file.write_text(sample_profile_content.replace("backend", "fullstack"))
         
         # Create profile in system tier
-        system_path = profile_loader.tier_paths[ProfileTier.SYSTEM]
+        system_path = profile_loader.profile_manager.tier_paths[ProfileTier.SYSTEM]
         system_file = system_path / "engineer.md"
         system_file.write_text(sample_profile_content.replace("backend", "generic"))
         
@@ -160,6 +170,7 @@ Software Engineer specializing in backend development and API design.
         assert user_file.exists()
         assert system_file.exists()
     
+    @pytest.mark.asyncio
     async def test_load_agent_profile_hierarchy(self, profile_loader, sample_profile_content):
         """Test loading agent profile with hierarchy precedence."""
         # Create profiles in different tiers
@@ -170,7 +181,7 @@ Software Engineer specializing in backend development and API design.
         
         try:
             # Load profile - should get project tier (highest precedence)
-            profile = await profile_loader.load_agent_profile("engineer")
+            profile = await profile_loader.load_agent_profile(agent_name="engineer")
             
             assert profile is not None
             assert profile.name == "engineer"
@@ -185,10 +196,11 @@ Software Engineer specializing in backend development and API design.
         finally:
             await profile_loader.stop()
     
+    @pytest.mark.asyncio
     async def test_load_agent_profile_user_tier(self, profile_loader, sample_profile_content):
         """Test loading agent profile from user tier when project tier doesn't exist."""
         # Create profile only in user tier
-        user_path = profile_loader.tier_paths[ProfileTier.USER]
+        user_path = profile_loader.profile_manager.tier_paths[ProfileTier.USER]
         user_file = user_path / "engineer.md"
         user_file.write_text(sample_profile_content.replace("backend", "fullstack"))
         
@@ -196,7 +208,7 @@ Software Engineer specializing in backend development and API design.
         
         try:
             # Load profile - should get user tier
-            profile = await profile_loader.load_agent_profile("engineer")
+            profile = await profile_loader.load_agent_profile(agent_name="engineer")
             
             assert profile is not None
             assert profile.name == "engineer"
@@ -206,10 +218,11 @@ Software Engineer specializing in backend development and API design.
         finally:
             await profile_loader.stop()
     
+    @pytest.mark.asyncio
     async def test_load_agent_profile_system_tier(self, profile_loader, sample_profile_content):
         """Test loading agent profile from system tier as fallback."""
         # Create profile only in system tier
-        system_path = profile_loader.tier_paths[ProfileTier.SYSTEM]
+        system_path = profile_loader.profile_manager.tier_paths[ProfileTier.SYSTEM]
         system_file = system_path / "engineer.md"
         system_file.write_text(sample_profile_content.replace("backend", "generic"))
         
@@ -217,7 +230,7 @@ Software Engineer specializing in backend development and API design.
         
         try:
             # Load profile - should get system tier
-            profile = await profile_loader.load_agent_profile("engineer")
+            profile = await profile_loader.load_agent_profile(agent_name="engineer")
             
             assert profile is not None
             assert profile.name == "engineer"
@@ -227,21 +240,23 @@ Software Engineer specializing in backend development and API design.
         finally:
             await profile_loader.stop()
     
+    @pytest.mark.asyncio
     async def test_load_nonexistent_profile(self, profile_loader):
         """Test loading nonexistent profile."""
         await profile_loader.start()
         
         try:
-            profile = await profile_loader.load_agent_profile("nonexistent")
+            profile = await profile_loader.load_agent_profile(agent_name="nonexistent")
             assert profile is None
             
         finally:
             await profile_loader.stop()
     
+    @pytest.mark.asyncio
     async def test_improved_prompt_integration(self, profile_loader, sample_profile_content):
         """Test improved prompt integration."""
         # Create base profile
-        project_path = profile_loader.tier_paths[ProfileTier.PROJECT]
+        project_path = profile_loader.profile_manager.tier_paths[ProfileTier.PROJECT]
         project_file = project_path / "engineer.md"
         project_file.write_text(sample_profile_content)
         
@@ -265,7 +280,7 @@ Software Engineer specializing in backend development and API design.
             assert success is True
             
             # Load profile with improved prompt
-            profile = await profile_loader.load_agent_profile("engineer")
+            profile = await profile_loader.load_agent_profile(agent_name="engineer")
             
             assert profile is not None
             assert profile.has_improved_prompt is True
@@ -280,10 +295,11 @@ Software Engineer specializing in backend development and API design.
         finally:
             await profile_loader.stop()
     
+    @pytest.mark.asyncio
     async def test_build_enhanced_task_prompt(self, profile_loader, sample_profile_content):
         """Test building enhanced task prompt."""
         # Create profile
-        project_path = profile_loader.tier_paths[ProfileTier.PROJECT]
+        project_path = profile_loader.profile_manager.tier_paths[ProfileTier.PROJECT]
         project_file = project_path / "engineer.md"
         project_file.write_text(sample_profile_content)
         
@@ -320,13 +336,14 @@ Software Engineer specializing in backend development and API design.
         finally:
             await profile_loader.stop()
     
+    @pytest.mark.asyncio
     async def test_list_available_agents(self, profile_loader, sample_profile_content):
         """Test listing available agents."""
         # Create profiles in different tiers
         await self.test_create_profile_files(profile_loader, sample_profile_content)
         
         # Create additional profiles
-        project_path = profile_loader.tier_paths[ProfileTier.PROJECT]
+        project_path = profile_loader.profile_manager.tier_paths[ProfileTier.PROJECT]
         (project_path / "documentation.md").write_text(sample_profile_content.replace("Engineer", "Documentation"))
         
         await profile_loader.start()
@@ -349,10 +366,11 @@ Software Engineer specializing in backend development and API design.
         finally:
             await profile_loader.stop()
     
+    @pytest.mark.asyncio
     async def test_performance_metrics(self, profile_loader, sample_profile_content):
         """Test performance metrics collection."""
         # Create profile
-        project_path = profile_loader.tier_paths[ProfileTier.PROJECT]
+        project_path = profile_loader.profile_manager.tier_paths[ProfileTier.PROJECT]
         project_file = project_path / "engineer.md"
         project_file.write_text(sample_profile_content)
         
@@ -361,7 +379,7 @@ Software Engineer specializing in backend development and API design.
         try:
             # Load profile multiple times
             for _ in range(3):
-                await profile_loader.load_agent_profile("engineer")
+                await profile_loader.load_agent_profile(agent_name="engineer")
             
             # Get performance metrics
             metrics = await profile_loader.get_performance_metrics()
@@ -376,10 +394,11 @@ Software Engineer specializing in backend development and API design.
         finally:
             await profile_loader.stop()
     
+    @pytest.mark.asyncio
     async def test_profile_validation(self, profile_loader, sample_profile_content):
         """Test profile integration validation."""
         # Create profile
-        project_path = profile_loader.tier_paths[ProfileTier.PROJECT]
+        project_path = profile_loader.profile_manager.tier_paths[ProfileTier.PROJECT]
         project_file = project_path / "engineer.md"
         project_file.write_text(sample_profile_content)
         
@@ -400,10 +419,11 @@ Software Engineer specializing in backend development and API design.
         finally:
             await profile_loader.stop()
     
+    @pytest.mark.asyncio
     async def test_cache_invalidation(self, profile_loader, sample_profile_content):
         """Test cache invalidation."""
         # Create profile
-        project_path = profile_loader.tier_paths[ProfileTier.PROJECT]
+        project_path = profile_loader.profile_manager.tier_paths[ProfileTier.PROJECT]
         project_file = project_path / "engineer.md"
         project_file.write_text(sample_profile_content)
         
@@ -411,20 +431,20 @@ Software Engineer specializing in backend development and API design.
         
         try:
             # Load profile
-            profile1 = await profile_loader.load_agent_profile("engineer")
+            profile1 = await profile_loader.load_agent_profile(agent_name="engineer")
             assert profile1 is not None
             
             # Invalidate cache
-            profile_loader.invalidate_cache("engineer")
+            profile_loader.profile_manager.invalidate_cache("engineer")
             
             # Load again - should reload from file
-            profile2 = await profile_loader.load_agent_profile("engineer")
+            profile2 = await profile_loader.load_agent_profile(agent_name="engineer")
             assert profile2 is not None
             
             # Invalidate all
-            profile_loader.invalidate_cache()
+            profile_loader.profile_manager.invalidate_cache()
             
-            profile3 = await profile_loader.load_agent_profile("engineer")
+            profile3 = await profile_loader.load_agent_profile(agent_name="engineer")
             assert profile3 is not None
             
         finally:
@@ -435,14 +455,13 @@ class TestTaskToolProfileIntegration:
     """Test suite for TaskToolProfileIntegration."""
     
     @pytest.fixture
-    async def mock_config(self):
+    def mock_config(self):
         """Create mock configuration."""
-        config = Mock(spec=Config)
-        config.get = Mock(return_value=None)
-        return config
+        # Return a dictionary instead of Mock object since Config expects a dict
+        return {}
     
     @pytest.fixture
-    async def mock_agent_loader(self):
+    def mock_agent_loader(self):
         """Create mock agent loader."""
         loader = Mock()
         loader.start = Mock(return_value=None)
@@ -454,7 +473,7 @@ class TestTaskToolProfileIntegration:
         return loader
     
     @pytest.fixture
-    async def mock_agent_profile(self):
+    def mock_agent_profile(self):
         """Create mock agent profile."""
         profile = Mock(spec=AgentProfile)
         profile.name = "engineer"
@@ -467,10 +486,11 @@ class TestTaskToolProfileIntegration:
         return profile
     
     @pytest.fixture
-    async def integration_service(self, mock_config):
+    def integration_service(self, mock_config):
         """Create integration service for testing."""
         return TaskToolProfileIntegration(mock_config)
     
+    @pytest.mark.asyncio
     async def test_task_tool_request_creation(self):
         """Test TaskToolRequest creation."""
         request = TaskToolRequest(
@@ -497,6 +517,7 @@ class TestTaskToolProfileIntegration:
         assert context['priority'] == "high"
         assert context['requirements'] == ["Secure tokens", "Token expiration"]
     
+    @pytest.mark.asyncio
     async def test_task_tool_response_creation(self):
         """Test TaskToolResponse creation."""
         response = TaskToolResponse(
@@ -516,10 +537,11 @@ class TestTaskToolProfileIntegration:
         assert response.response_time_ms == 250.0
     
     @patch('claude_pm.services.task_tool_profile_integration.AgentProfileLoader')
+    @pytest.mark.asyncio
     async def test_integration_service_initialization(self, mock_loader_class, integration_service):
         """Test integration service initialization."""
         mock_loader = Mock()
-        mock_loader.start = Mock()
+        mock_loader.start = AsyncMock()  # Use AsyncMock for async method
         mock_loader_class.return_value = mock_loader
         
         await integration_service._initialize()
@@ -528,13 +550,14 @@ class TestTaskToolProfileIntegration:
         mock_loader.start.assert_called_once()
     
     @patch('claude_pm.services.task_tool_profile_integration.AgentProfileLoader')
+    @pytest.mark.asyncio
     async def test_create_enhanced_subprocess(self, mock_loader_class, integration_service, mock_agent_profile):
         """Test creating enhanced subprocess."""
         # Setup mocks
         mock_loader = Mock()
-        mock_loader.start = Mock()
-        mock_loader.load_agent_profile = Mock(return_value=mock_agent_profile)
-        mock_loader.build_enhanced_task_prompt = Mock(return_value="Enhanced prompt content")
+        mock_loader.start = AsyncMock()
+        mock_loader.load_agent_profile = AsyncMock(return_value=mock_agent_profile)
+        mock_loader.build_enhanced_task_prompt = AsyncMock(return_value="Enhanced prompt content")
         mock_loader_class.return_value = mock_loader
         
         integration_service.agent_loader = mock_loader
@@ -553,7 +576,9 @@ class TestTaskToolProfileIntegration:
         
         assert response.success is True
         assert response.request_id == request.request_id
-        assert response.enhanced_prompt == "Enhanced prompt content"
+        # The enhanced prompt includes the base content plus task tool integration metadata
+        assert "Enhanced prompt content" in response.enhanced_prompt
+        assert "Task Tool Integration" in response.enhanced_prompt
         assert response.agent_profile == mock_agent_profile
         assert response.response_time_ms > 0
         
@@ -562,12 +587,13 @@ class TestTaskToolProfileIntegration:
         mock_loader.build_enhanced_task_prompt.assert_called_once()
     
     @patch('claude_pm.services.task_tool_profile_integration.AgentProfileLoader')
+    @pytest.mark.asyncio
     async def test_create_enhanced_subprocess_profile_not_found(self, mock_loader_class, integration_service):
         """Test creating enhanced subprocess when profile not found."""
         # Setup mocks
         mock_loader = Mock()
-        mock_loader.start = Mock()
-        mock_loader.load_agent_profile = Mock(return_value=None)
+        mock_loader.start = AsyncMock()
+        mock_loader.load_agent_profile = AsyncMock(return_value=None)
         mock_loader_class.return_value = mock_loader
         
         integration_service.agent_loader = mock_loader
@@ -585,6 +611,7 @@ class TestTaskToolProfileIntegration:
         assert "Agent profile not found" in response.error
         assert response.request_id == request.request_id
     
+    @pytest.mark.asyncio
     async def test_cache_key_generation(self, integration_service):
         """Test cache key generation."""
         request = TaskToolRequest(
@@ -601,6 +628,7 @@ class TestTaskToolProfileIntegration:
         assert "task_tool_enhanced:engineer:" in cache_key
         assert len(cache_key.split(':')) == 3
     
+    @pytest.mark.asyncio
     async def test_request_history_management(self, integration_service):
         """Test request history management."""
         # Create multiple requests
@@ -634,6 +662,7 @@ class TestTaskToolProfileIntegration:
         for entry in filtered_history:
             assert entry['agent_name'] == "engineer"
     
+    @pytest.mark.asyncio
     async def test_performance_metrics_update(self, integration_service):
         """Test performance metrics update."""
         # Initial metrics
@@ -649,6 +678,7 @@ class TestTaskToolProfileIntegration:
         assert integration_service.performance_metrics['successful_enhancements'] > initial_metrics['successful_enhancements']
         assert integration_service.performance_metrics['average_response_time_ms'] > 0
     
+    @pytest.mark.asyncio
     async def test_batch_subprocess_creation(self, integration_service):
         """Test batch subprocess creation."""
         # Create multiple requests
@@ -680,6 +710,7 @@ class TestTaskToolProfileIntegration:
             assert response.success is True
             assert response.enhanced_prompt is not None
     
+    @pytest.mark.asyncio
     async def test_create_subprocess_from_dict(self, integration_service):
         """Test creating subprocess from dictionary."""
         request_data = {
@@ -715,14 +746,14 @@ class TestIntegrationWorkflow:
     """Test end-to-end integration workflow."""
     
     @pytest.fixture
-    async def temp_dir(self):
+    def temp_dir(self):
         """Create temporary directory for testing."""
         temp_dir = Path(tempfile.mkdtemp())
         yield temp_dir
         shutil.rmtree(temp_dir)
     
     @pytest.fixture
-    async def sample_profile_content(self):
+    def sample_profile_content(self):
         """Create sample profile content."""
         return """# Engineer Agent Profile
 
@@ -749,6 +780,7 @@ Software Engineer specializing in backend development.
 **Training Enabled**: true
 """
     
+    @pytest.mark.asyncio
     async def test_end_to_end_workflow(self, temp_dir, sample_profile_content):
         """Test complete end-to-end workflow."""
         # Setup directory structure
@@ -761,23 +793,16 @@ Software Engineer specializing in backend development.
         
         # Mock working directory
         with patch('claude_pm.services.agent_profile_loader.os.getcwd', return_value=str(temp_dir)):
-            # Create config
-            config = Mock(spec=Config)
-            config.get = Mock(return_value=None)
+            # Create config - use a dict instead of Mock
+            config = {}
             
             # Create integration service
             integration = TaskToolProfileIntegration(config)
             
             # Mock dependencies to avoid actual service initialization
             mock_loader = Mock()
-            mock_loader.start = Mock()
-            mock_loader.stop = Mock()
-            mock_loader.load_agent_profile = Mock()
-            mock_loader.build_enhanced_task_prompt = Mock(return_value="Enhanced prompt content")
-            mock_loader.get_performance_metrics = Mock(return_value={})
-            mock_loader.validate_profile_integration = Mock(return_value={'valid': True, 'issues': [], 'warnings': []})
-            
-            integration.agent_loader = mock_loader
+            mock_loader.start = AsyncMock()
+            mock_loader.stop = AsyncMock()
             
             # Create test profile
             test_profile = AgentProfile(
@@ -796,7 +821,12 @@ Software Engineer specializing in backend development.
                 training_enabled=True
             )
             
-            mock_loader.load_agent_profile.return_value = test_profile
+            mock_loader.load_agent_profile = AsyncMock(return_value=test_profile)
+            mock_loader.build_enhanced_task_prompt = AsyncMock(return_value="Enhanced prompt content")
+            mock_loader.get_performance_metrics = Mock(return_value={})
+            mock_loader.validate_profile_integration = Mock(return_value={'valid': True, 'issues': [], 'warnings': []})
+            
+            integration.agent_loader = mock_loader
             
             # Create request
             request = TaskToolRequest(
@@ -821,7 +851,9 @@ Software Engineer specializing in backend development.
             # Verify results
             assert response.success is True
             assert response.request_id == request.request_id
-            assert response.enhanced_prompt == "Enhanced prompt content"
+            # The enhanced prompt includes the base content plus task tool integration metadata
+            assert "Enhanced prompt content" in response.enhanced_prompt
+            assert "Task Tool Integration" in response.enhanced_prompt
             assert response.agent_profile == test_profile
             assert response.response_time_ms > 0
             

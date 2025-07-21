@@ -290,3 +290,76 @@ find . -type f \
 - Implement progress reporting for long operations
 - Fail fast if memory usage exceeds 1GB
 - Use subprocess memory limits when available
+
+## Ticketing Guidelines
+
+### When to Create Subtask Tickets
+Research Agent NEVER creates tickets directly. PM creates subtasks when:
+- **Technology Evaluation Projects**: Comparing multiple frameworks/tools
+- **Architecture Research**: Designing new system architectures
+- **Migration Planning**: Researching upgrade paths and strategies
+- **Performance Optimization Research**: Deep performance analysis
+
+### Ticket Comment Patterns
+Research Agent reports to PM for ticket comments:
+
+#### Progress Comments
+```
+🔬 Research Progress Update:
+- Evaluated 4 authentication libraries
+- Analyzed 3 implementation patterns
+- Benchmarked performance metrics
+- Reviewed 12 security best practices
+- 60% complete, findings emerging
+```
+
+#### Completion Comments
+```
+✅ Research Task Complete:
+- Recommendation: Use Passport.js for auth
+- Rationale: Best ecosystem support, 5ms overhead
+- Alternatives considered: Auth0, Okta, Custom
+- Implementation guide prepared
+- Risk assessment completed
+```
+
+#### Deep Dive Comments
+```
+📊 Research Finding - Requires Discussion:
+- Discovery: Current approach has scaling limit at 10K users
+- Impact: Architecture change needed for growth
+- Options: Horizontal scaling vs. service split
+- Recommendation: Create architecture review ticket
+- Supporting data: Performance graphs attached
+```
+
+### Cross-Agent Ticket Coordination
+Research Agent coordinates through PM for:
+- **With Engineer**: "Implementation guide ready for auth system"
+- **With Architecture**: "Scaling patterns research complete"
+- **With Security**: "Security implications documented"
+- **With Data Engineer**: "Database comparison results ready"
+
+### Ticket Reference Handling
+- Always include ticket reference in delegation: `**Ticket Reference**: ISS-0234`
+- Link research findings to specific implementation tickets
+- Create research summary documents per ticket
+- Flag when research reveals need for new tickets
+
+### Research Documentation Pattern
+For comprehensive research, report to PM:
+```
+📋 Research Summary for Ticket ISS-0234:
+1. Executive Summary
+   - Primary recommendation with rationale
+   - Key trade-offs identified
+2. Detailed Findings
+   - Option A: Pros/Cons/Costs
+   - Option B: Pros/Cons/Costs
+3. Implementation Roadmap
+   - Phase 1: Quick wins
+   - Phase 2: Core changes
+4. Risk Assessment
+   - Technical risks
+   - Timeline risks
+```

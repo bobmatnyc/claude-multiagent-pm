@@ -125,18 +125,19 @@ class InstallationTester {
     }
 
     testDependencyInstallation() {
-        return this.test('Dependencies installed correctly', () => {
-            const packageDir = path.join(this.testDir, 'node_modules', '@bobmatnyc', 'claude-multiagent-pm');
-            const aiTrackdownDir = path.join(packageDir, 'node_modules', '@bobmatnyc', 'ai-trackdown-tools');
-            
-            if (!fs.existsSync(aiTrackdownDir)) {
-                return '@bobmatnyc/ai-trackdown-tools dependency not installed';
+        return this.test('Python dependencies installed correctly', () => {
+            // Check if Python package installation worked
+            try {
+                const pythonCheck = execSync('python3 -c "import click, rich, pydantic"', {
+                    encoding: 'utf8',
+                    stdio: 'pipe'
+                });
+                // Python core dependencies are available
+            } catch (error) {
+                return 'Python core dependencies not installed';
             }
             
-            const aiTrackdownPackage = path.join(aiTrackdownDir, 'package.json');
-            if (!fs.existsSync(aiTrackdownPackage)) {
-                return 'ai-trackdown-tools package.json not found';
-            }
+            // Note: ai-trackdown-pytools is optional and installed separately via pip
             
             return true;
         });

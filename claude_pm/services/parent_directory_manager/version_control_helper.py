@@ -14,10 +14,10 @@ Key Features:
 """
 
 import os
-import subprocess
 from pathlib import Path
 from typing import Optional, List, Dict, Tuple, Any
 import logging
+from claude_pm.utils.subprocess_manager import SubprocessManager
 
 
 class VersionControlHelper:
@@ -39,6 +39,9 @@ class VersionControlHelper:
         self.working_dir = Path(working_dir)
         self.logger = logger or logging.getLogger(__name__)
         
+        # Initialize subprocess manager
+        self.subprocess_manager = SubprocessManager()
+        
         # Cache git repository detection
         self._is_git_repo: Optional[bool] = None
         self._git_root: Optional[Path] = None
@@ -54,29 +57,27 @@ class VersionControlHelper:
             return self._is_git_repo
         
         try:
-            result = subprocess.run(
+            result = self.subprocess_manager.run(
                 ["git", "rev-parse", "--git-dir"],
                 cwd=self.working_dir,
                 capture_output=True,
-                text=True,
-                check=False
+                text=True
             )
-            self._is_git_repo = result.returncode == 0
+            self._is_git_repo = result.success
             
             if self._is_git_repo:
                 # Get the root of the git repository
-                root_result = subprocess.run(
+                root_result = self.subprocess_manager.run(
                     ["git", "rev-parse", "--show-toplevel"],
                     cwd=self.working_dir,
                     capture_output=True,
-                    text=True,
-                    check=False
+                    text=True
                 )
-                if root_result.returncode == 0:
+                if root_result.success:
                     self._git_root = Path(root_result.stdout.strip())
             
             return self._is_git_repo
-        except (subprocess.SubprocessError, FileNotFoundError):
+        except (OSError, FileNotFoundError):
             self._is_git_repo = False
             return False
     
@@ -102,16 +103,15 @@ class VersionControlHelper:
             return None
         
         try:
-            result = subprocess.run(
+            result = self.subprocess_manager.run(
                 ["git", "rev-parse", "--abbrev-ref", "HEAD"],
                 cwd=self.working_dir,
                 capture_output=True,
-                text=True,
-                check=False
+                text=True
             )
-            if result.returncode == 0:
+            if result.success:
                 return result.stdout.strip()
-        except subprocess.SubprocessError:
+        except Exception:
             pass
         
         return None
@@ -127,16 +127,15 @@ class VersionControlHelper:
             return False
         
         try:
-            result = subprocess.run(
+            result = self.subprocess_manager.run(
                 ["git", "status", "--porcelain"],
                 cwd=self.working_dir,
                 capture_output=True,
-                text=True,
-                check=False
+                text=True
             )
-            if result.returncode == 0:
+            if result.success:
                 return bool(result.stdout.strip())
-        except subprocess.SubprocessError:
+        except Exception:
             pass
         
         return False
@@ -166,16 +165,15 @@ class VersionControlHelper:
             else:
                 relative_path = file_path
             
-            result = subprocess.run(
+            result = self.subprocess_manager.run(
                 ["git", "status", "--porcelain", str(relative_path)],
                 cwd=self.working_dir,
                 capture_output=True,
-                text=True,
-                check=False
+                text=True
             )
-            if result.returncode == 0 and result.stdout:
+            if result.success and result.stdout:
                 return result.stdout.strip()
-        except subprocess.SubprocessError:
+        except Exception:
             pass
         
         return None
@@ -194,14 +192,13 @@ class VersionControlHelper:
             return False
         
         try:
-            result = subprocess.run(
+            result = self.subprocess_manager.run(
                 ["git", "check-ignore", str(file_path)],
                 cwd=self.working_dir,
-                capture_output=True,
-                check=False
+                capture_output=True
             )
-            return result.returncode == 0
-        except subprocess.SubprocessError:
+            return result.success
+        except Exception:
             return False
     
     def add_to_gitignore(self, pattern: str) -> bool:
@@ -259,42 +256,38 @@ class VersionControlHelper:
         
         try:
             # Get commit hash
-            hash_result = subprocess.run(
+            hash_result = self.subprocess_manager.run(
                 ["git", "rev-parse", "HEAD"],
                 cwd=self.working_dir,
                 capture_output=True,
-                text=True,
-                check=False
+                text=True
             )
             
             # Get commit message
-            msg_result = subprocess.run(
+            msg_result = self.subprocess_manager.run(
                 ["git", "log", "-1", "--pretty=%B"],
                 cwd=self.working_dir,
                 capture_output=True,
-                text=True,
-                check=False
+                text=True
             )
             
             # Get commit author
-            author_result = subprocess.run(
+            author_result = self.subprocess_manager.run(
                 ["git", "log", "-1", "--pretty=%an <%ae>"],
                 cwd=self.working_dir,
                 capture_output=True,
-                text=True,
-                check=False
+                text=True
             )
             
             # Get commit date
-            date_result = subprocess.run(
+            date_result = self.subprocess_manager.run(
                 ["git", "log", "-1", "--pretty=%ai"],
                 cwd=self.working_dir,
                 capture_output=True,
-                text=True,
-                check=False
+                text=True
             )
             
-            if all(r.returncode == 0 for r in [hash_result, msg_result, author_result, date_result]):
+            if all(r.success for r in [hash_result, msg_result, author_result, date_result]):
                 return {
                     "hash": hash_result.stdout.strip(),
                     "message": msg_result.stdout.strip(),
@@ -302,7 +295,7 @@ class VersionControlHelper:
                     "date": date_result.stdout.strip()
                 }
                 
-        except subprocess.SubprocessError:
+        except Exception:
             pass
         
         return None
@@ -327,21 +320,20 @@ class VersionControlHelper:
             else:
                 cmd = ["git", "tag", version]
             
-            result = subprocess.run(
+            result = self.subprocess_manager.run(
                 cmd,
                 cwd=self.working_dir,
                 capture_output=True,
-                text=True,
-                check=False
+                text=True
             )
             
-            if result.returncode == 0:
+            if result.success:
                 self.logger.info(f"Created git tag: {version}")
                 return True
             else:
                 self.logger.warning(f"Failed to create git tag: {result.stderr}")
                 return False
                 
-        except subprocess.SubprocessError as e:
+        except Exception as e:
             self.logger.warning(f"Error creating git tag: {e}")
             return False

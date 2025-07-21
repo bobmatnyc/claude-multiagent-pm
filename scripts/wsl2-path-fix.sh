@@ -171,7 +171,7 @@ if command -v aitrackdown >/dev/null 2>&1; then
     echo "   ✅ aitrackdown: $version"
 else
     echo "   ⚠️  aitrackdown: not found (may need manual installation)"
-    echo "      Run: npm install -g @bobmatnyc/ai-trackdown-tools"
+    echo "      Run: pip install --user ai-trackdown-pytools==1.1.0"
 fi
 
 echo ""
@@ -180,7 +180,7 @@ echo ""
 echo "📋 Next steps:"
 echo "   1. Restart your terminal or run: source ~/.bashrc"
 echo "   2. Test claude-pm: claude-pm --version"
-echo "   3. If aitrackdown is missing: npm install -g @bobmatnyc/ai-trackdown-tools"
+echo "   3. Install Python ticketing: pip install --user ai-trackdown-pytools==1.1.0"
 echo "   4. Run full diagnostic: ~/.claude-pm/wsl2-diagnostic.sh"
 echo ""
 echo "🔗 If you continue to have issues:"

@@ -4,6 +4,7 @@ import ast
 import logging
 from pathlib import Path
 from typing import Optional, Tuple, List, Dict, Any
+from dataclasses import dataclass
 
 from .models import AgentMetadata
 from .classification import AgentClassifier
@@ -12,13 +13,11 @@ from .model_configuration import ModelConfigurator
 logger = logging.getLogger(__name__)
 
 
+@dataclass
 class MetadataExtractor:
     """Extracts metadata from agent files."""
-    
-    def __init__(self, classifier: AgentClassifier, model_configurator: ModelConfigurator):
-        """Initialize metadata extractor with dependencies."""
-        self.classifier = classifier
-        self.model_configurator = model_configurator
+    classifier: AgentClassifier
+    model_configurator: ModelConfigurator
     
     async def extract_agent_metadata(self, agent_file: Path, tier: str) -> Optional[AgentMetadata]:
         """

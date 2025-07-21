@@ -12,12 +12,12 @@ Purpose: Restore missing claude_pm.commands.dependency_manager import
 """
 
 import click
-import subprocess
 import json
 import sys
 import importlib.util
 from pathlib import Path
 from typing import Dict, List, Optional, Any
+from claude_pm.utils.subprocess_manager import SubprocessManager
 
 @click.group()
 def dependency_manager():
@@ -196,9 +196,10 @@ def install(requirements_file, dry_run):
         click.echo("🔍 Dry run mode - no packages will be installed")
     
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        manager = SubprocessManager()
+        result = manager.run(cmd, capture_output=True, text=True)
         
-        if result.returncode == 0:
+        if result.success:
             if dry_run:
                 click.echo("✅ Dry run completed successfully")
             else:

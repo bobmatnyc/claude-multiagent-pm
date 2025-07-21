@@ -464,6 +464,270 @@ This ensures users are aware of the continuous optimization happening behind the
 
 ---
 
+## 🎫 TICKETING INTEGRATION
+
+### MANDATORY: When Tickets Are Required
+
+**CRITICAL: Create tickets for ALL work that meets these criteria:**
+
+1. **Complex Tasks** (ANY of these conditions):
+   - Requires coordination of 3+ agents
+   - Spans multiple work sessions or days
+   - Has significant architectural impact
+   - Involves breaking changes or major features
+
+2. **Multi-Agent Work** (ALWAYS create tickets when):
+   - Different agents need to collaborate
+   - Dependencies exist between agent tasks
+   - Results need to be integrated across agents
+   - Work requires sequential agent operations
+
+3. **Sprint Planning** (Tickets REQUIRED for):
+   - Features planned for specific releases
+   - Work with defined deadlines
+   - Tasks requiring progress tracking
+   - Multi-day development efforts
+
+4. **Bug Fixes & Issues** (Create tickets for):
+   - Any reported bugs or errors
+   - Performance problems
+   - Security vulnerabilities
+   - Test failures requiring investigation
+
+### PM's Exclusive Ticketing Authority
+
+**CRITICAL: PM owns ALL ticket operations - agents NEVER touch tickets directly**
+
+#### Ticket Creation Workflow
+
+1. **Analyze Work Complexity**:
+   ```bash
+   # PM evaluates task and creates appropriate ticket type
+   
+   # For large features spanning sprints
+   aitrackdown create --title "Epic: [Feature Name]" --type epic
+   # Output: EP-0001
+   
+   # For standard development tasks
+   aitrackdown create --title "[Agent]: [Task Description]" --type issue
+   # Output: ISS-0456
+   
+   # For small, focused work items
+   aitrackdown create --title "[Agent]: [Specific Task]" --type task
+   # Output: TSK-0789
+   ```
+
+2. **Ticket Naming Conventions**:
+   - Start with agent name: "Engineer: Implement user auth"
+   - Be specific and measurable: "QA: Add 90% test coverage for auth module"
+   - Include acceptance criteria in description
+
+3. **Link Related Tickets**:
+   ```bash
+   # Create parent epic for large features
+   aitrackdown create --title "Epic: User Authentication System" --type epic
+   # EP-0001
+   
+   # Create child issues linked to epic
+   aitrackdown create --title "Engineer: JWT token implementation" --type issue --parent EP-0001
+   # ISS-0456
+   ```
+
+### Agent Ticketing Responsibilities
+
+**Agents receive ticket context but NEVER update tickets directly:**
+
+1. **Agent Receives Ticket Reference**:
+   - PM includes ticket ID in Task Tool delegation
+   - Agent understands work is tracked
+   - Agent focuses on technical execution
+
+2. **Agent Progress Reporting**:
+   - Reports completion percentage to PM
+   - Identifies blockers or issues
+   - Provides detailed status updates
+   - Suggests next steps or dependencies
+
+3. **Agent Comment Patterns**:
+   ```
+   # Agent reports back to PM:
+   "Completed JWT implementation for ISS-0456:
+   - Created auth middleware
+   - Implemented token generation
+   - Added refresh token logic
+   - All tests passing
+   - Ready for security review"
+   ```
+
+### Sprint Management with Tickets
+
+**For multi-day activities and sprint planning:**
+
+1. **Sprint Initialization**:
+   ```bash
+   # Create sprint epic
+   aitrackdown create --title "Sprint 24: Authentication & Security" --type epic
+   # EP-0010
+   
+   # Add sprint tasks
+   aitrackdown create --title "Engineer: Core auth implementation" --type issue --parent EP-0010
+   aitrackdown create --title "Security: Auth security audit" --type issue --parent EP-0010
+   aitrackdown create --title "QA: Auth integration tests" --type issue --parent EP-0010
+   ```
+
+2. **Daily Sprint Updates**:
+   - PM reviews all sprint tickets each morning
+   - Updates ticket status based on agent reports
+   - Identifies blockers and adjusts priorities
+   - Communicates progress in daily summary
+
+3. **Sprint Velocity Tracking**:
+   - Monitor completed vs planned tickets
+   - Adjust future sprint capacity
+   - Identify patterns in estimation accuracy
+
+### Complex Task Ticket Patterns
+
+**For tasks requiring multiple agents or complex workflows:**
+
+1. **Hierarchical Ticket Structure**:
+   ```
+   EP-0001: User Authentication System
+   ├── ISS-0456: Engineer - Core auth implementation
+   │   ├── TSK-0790: Create auth middleware
+   │   ├── TSK-0791: Implement JWT logic
+   │   └── TSK-0792: Add refresh tokens
+   ├── ISS-0457: Data Engineer - Redis session store
+   │   ├── TSK-0793: Configure Redis
+   │   └── TSK-0794: Implement session logic
+   ├── ISS-0458: QA - Auth test suite
+   └── ISS-0459: Security - Auth security audit
+   ```
+
+2. **Cross-Agent Dependencies**:
+   ```bash
+   # Create tickets with clear dependencies
+   aitrackdown create --title "Data Engineer: Set up Redis" --type issue
+   # ISS-0457
+   
+   aitrackdown create --title "Engineer: Implement sessions" --type issue --depends-on ISS-0457
+   # ISS-0458 (blocked until ISS-0457 complete)
+   ```
+
+### Ticket Status Management
+
+**PM manages complete ticket lifecycle:**
+
+1. **Status Progression**:
+   ```bash
+   # New ticket created
+   aitrackdown create --title "Engineer: Add user profiles" --type issue
+   # ISS-0460 (status: open)
+   
+   # Agent starts work
+   aitrackdown update ISS-0460 --status in-progress
+   
+   # Agent reports completion
+   aitrackdown update ISS-0460 --status completed
+   
+   # If blocked
+   aitrackdown update ISS-0460 --status blocked --comment "Waiting for database schema"
+   ```
+
+2. **Comment Integration**:
+   ```bash
+   # PM adds agent reports as comments
+   aitrackdown comment ISS-0460 "Engineer reports: Profile schema designed, awaiting review"
+   
+   # PM adds integration notes
+   aitrackdown comment ISS-0460 "PM Note: Coordinating with Data Engineer for schema migration"
+   ```
+
+### Ticketing Best Practices
+
+1. **Always Create Tickets BEFORE Delegation**:
+   - Ensures work is tracked from start
+   - Provides clear scope to agents
+   - Enables progress monitoring
+
+2. **Use Descriptive Titles**:
+   - ❌ "Fix bug"
+   - ✅ "Engineer: Fix JWT expiration not being validated in auth middleware"
+
+3. **Include Acceptance Criteria**:
+   ```bash
+   aitrackdown create --title "QA: Auth module test coverage" \
+     --description "Acceptance: 90% coverage, all edge cases tested, integration tests passing"
+   ```
+
+4. **Regular Status Updates**:
+   - Update tickets after each agent report
+   - Add comments for important decisions
+   - Track blockers immediately
+
+5. **Close Tickets Only After Verification**:
+   - Verify agent work is complete
+   - Run validation tests
+   - Ensure integration successful
+   - Then close ticket
+
+### Integration with TodoWrite
+
+**Tickets and TodoWrite work together:**
+
+1. **Ticket-First for Complex Work**:
+   ```
+   # Create ticket first
+   aitrackdown create --title "Implement payment processing" --type epic
+   # EP-0015
+   
+   # Then create TodoWrite entries referencing ticket
+   TodoWrite:
+   - Engineer: Create payment gateway integration (EP-0015/ISS-0501)
+   - Data Engineer: Set up payment database tables (EP-0015/ISS-0502)
+   - Security: Audit payment security (EP-0015/ISS-0503)
+   ```
+
+2. **TodoWrite for Execution Tracking**:
+   - Tickets track overall progress
+   - TodoWrite tracks immediate tasks
+   - Both reference each other
+
+### Ticket Reporting Commands
+
+**PM's ticket management toolkit:**
+
+```bash
+# View all open tickets
+aitrackdown list --status open
+
+# View sprint tickets
+aitrackdown list --parent EP-0010
+
+# Check blocked tickets
+aitrackdown list --status blocked
+
+# View ticket details with comments
+aitrackdown show ISS-0456
+
+# Search tickets by agent
+aitrackdown search "Engineer:"
+
+# Generate sprint report
+aitrackdown report --sprint EP-0010
+```
+
+### Critical Ticketing Rules
+
+1. **PM NEVER reads ticket markdown files directly**
+2. **Agents NEVER update tickets - only report to PM**
+3. **Create tickets BEFORE complex work begins**
+4. **Update tickets IMMEDIATELY after agent reports**
+5. **Include ticket IDs in all agent delegations**
+6. **Verify work before closing tickets**
+
+---
+
 ## B) TODO AND TASK TOOLS
 
 ### 🚨 MANDATORY: TodoWrite Integration with Task Tool

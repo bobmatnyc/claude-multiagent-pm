@@ -11,6 +11,7 @@ import asyncio
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime
+from dataclasses import dataclass, field
 
 from claude_pm.services.template_manager import (
     TemplateManager,
@@ -19,31 +20,31 @@ from claude_pm.services.template_manager import (
 )
 
 
+@dataclass
 class TemplateVersion:
     """Represents a template version."""
-    def __init__(self, template_id: str, version: str = "1.0.0"):
-        self.template_id = template_id
-        self.version = version
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
-        self.backup_path: Optional[str] = None
-        self.metadata: Optional[Dict[str, Any]] = None
+    template_id: str
+    version: str = "1.0.0"
+    created_at: datetime = field(default_factory=datetime.now)
+    updated_at: datetime = field(default_factory=datetime.now)
+    backup_path: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 
+@dataclass
 class TemplateValidationResult:
     """Result of template validation."""
-    def __init__(self, template_id: str, is_valid: bool = True):
-        self.template_id = template_id
-        self.is_valid = is_valid
-        self.errors: List[str] = []
-        self.warnings: List[str] = []
+    template_id: str
+    is_valid: bool = True
+    errors: List[str] = field(default_factory=list)
+    warnings: List[str] = field(default_factory=list)
 
 
+@dataclass
 class TemplateData:
     """Container for template data."""
-    def __init__(self, content: str, version: TemplateVersion):
-        self.content = content
-        self.version = version
+    content: str
+    version: TemplateVersion
 
 
 class TemplateDeploymentIntegration:
@@ -395,17 +396,17 @@ class TemplateDeploymentIntegration:
     async def get_deployment_aware_template_config(self) -> Any:
         """Get deployment-aware template configuration."""
         # Create a mock config object
+        @dataclass
         class DeploymentConfig:
-            def __init__(self):
-                self.deployment_type = type('DeploymentType', (), {'value': 'local_source'})()
-                self.is_development = True
-                self.confidence = "high"
-                self.template_sources = [
-                    TemplateSource.SYSTEM,
-                    TemplateSource.FRAMEWORK,
-                    TemplateSource.USER,
-                    TemplateSource.PROJECT
-                ]
-                self.framework_path = Path.cwd()
+            deployment_type: Any = field(default_factory=lambda: type('DeploymentType', (), {'value': 'local_source'})())
+            is_development: bool = True
+            confidence: str = "high"
+            template_sources: List[TemplateSource] = field(default_factory=lambda: [
+                TemplateSource.SYSTEM,
+                TemplateSource.FRAMEWORK,
+                TemplateSource.USER,
+                TemplateSource.PROJECT
+            ])
+            framework_path: Path = field(default_factory=Path.cwd)
         
         return DeploymentConfig()

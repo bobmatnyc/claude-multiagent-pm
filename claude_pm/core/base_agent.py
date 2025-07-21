@@ -158,7 +158,7 @@ class BaseAgent(BaseService, ABC):
                 "memory_service_connected": False
             }
     
-    async def disable_memory_integration(self) -> Dict[str, Any]:
+    def disable_memory_integration(self) -> Dict[str, Any]:
         """
         Disable memory integration for the agent.
         
@@ -612,7 +612,7 @@ class BaseAgent(BaseService, ABC):
 
         return {"success": True, "message_id": len(self.collaboration_history), "queued": True}
 
-    async def get_pm_notifications(self) -> List[Dict[str, Any]]:
+    def get_pm_notifications(self) -> List[Dict[str, Any]]:
         """Get pending PM notifications and clear the queue."""
         notifications = self.pm_notification_queue.copy()
         self.pm_notification_queue.clear()
@@ -639,31 +639,31 @@ class BaseAgent(BaseService, ABC):
             priority="high",
         )
 
-    async def enable_pm_collaboration(self) -> Dict[str, Any]:
+    def enable_pm_collaboration(self) -> Dict[str, Any]:
         """Enable PM collaboration mode."""
         self.pm_collaboration_enabled = True
         return {"collaboration_enabled": True}
 
-    async def disable_pm_collaboration(self) -> Dict[str, Any]:
+    def disable_pm_collaboration(self) -> Dict[str, Any]:
         """Disable PM collaboration mode."""
         self.pm_collaboration_enabled = False
         return {"collaboration_enabled": False}
 
-    async def get_collaboration_history(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+    def get_collaboration_history(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
         """Get collaboration history with PM."""
         if limit:
             return self.collaboration_history[-limit:]
         return self.collaboration_history
 
-    async def get_agent_capabilities(self) -> List[str]:
+    def get_agent_capabilities(self) -> List[str]:
         """Get agent capabilities."""
         return self.capabilities
 
-    async def validate_capability(self, capability: str) -> bool:
+    def validate_capability(self, capability: str) -> bool:
         """Validate if agent has a specific capability."""
         return capability in self.capabilities
 
-    async def add_capability(self, capability: str) -> Dict[str, Any]:
+    def add_capability(self, capability: str) -> Dict[str, Any]:
         """Add a new capability to the agent."""
         if capability not in self.capabilities:
             self.capabilities.append(capability)
@@ -676,7 +676,7 @@ class BaseAgent(BaseService, ABC):
             "reason": "already_exists",
         }
 
-    async def remove_capability(self, capability: str) -> Dict[str, Any]:
+    def remove_capability(self, capability: str) -> Dict[str, Any]:
         """Remove a capability from the agent."""
         if capability in self.capabilities:
             self.capabilities.remove(capability)

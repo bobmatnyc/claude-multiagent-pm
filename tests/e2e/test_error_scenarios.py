@@ -30,26 +30,27 @@ from contextlib import asynccontextmanager
 
 from claude_pm.services.memory import (
     FlexibleMemoryService,
-    MemoryTriggerService,
-    MemoryRecallService,
+    # MemoryTriggerService,  # Removed from simplified memory module
+    # MemoryRecallService,  # Removed from simplified memory module
     MemoryCategory,
     MemoryItem,
     MemoryQuery,
-    TriggerType,
-    TriggerPriority,
-    TriggerEvent,
-    TriggerResult,
-    HookContext,
-    create_memory_trigger_service,
+    # TriggerType,  # Removed from simplified memory module
+    # TriggerPriority,  # Removed from simplified memory module
+    # TriggerEvent,  # Removed from simplified memory module
+    # TriggerResult,  # Removed from simplified memory module
+    # HookContext,  # Removed from simplified memory module
+    # create_memory_trigger_service,  # Removed from simplified memory module
     create_memory_recall_service,
 )
-from claude_pm.services.memory.memory_trigger_service import MemoryTriggerOrchestrator
-from claude_pm.services.memory.memory_context_enhancer import MemoryContextEnhancer, RecallTrigger
-from claude_pm.services.memory.services.circuit_breaker import (
-    CircuitBreaker,
-    CircuitState as CircuitBreakerState,
-    CircuitBreakerConfig,
-)
+# Memory trigger service and context enhancer have been removed from the framework
+# from claude_pm.services.memory.memory_trigger_service import MemoryTriggerOrchestrator
+# from claude_pm.services.memory.memory_context_enhancer import MemoryContextEnhancer, RecallTrigger
+# from claude_pm.services.memory.services.circuit_breaker import (
+#     CircuitBreaker,
+#     CircuitState as CircuitBreakerState,
+#     CircuitBreakerConfig,
+# )
 
 
 @dataclass

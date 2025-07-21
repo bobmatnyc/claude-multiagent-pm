@@ -12,7 +12,6 @@ import os
 import sys
 import tempfile
 import shutil
-import subprocess
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, Optional, List
@@ -21,6 +20,8 @@ import click
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
+
+from claude_pm.utils.subprocess_manager import SubprocessManager
 
 console = Console()
 
@@ -82,6 +83,7 @@ class VersionManager:
     def __init__(self, verbose: bool = False):
         self.verbose = verbose
         self.framework_path = self._detect_framework_path()
+        self.subprocess_manager = SubprocessManager()
         
     def _detect_framework_path(self) -> Path:
         """Detect the framework path."""
@@ -164,12 +166,12 @@ class VersionManager:
         
         for name, cmd in commands.items():
             try:
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
-                if result.returncode == 0:
+                result = self.subprocess_manager.run(cmd, capture_output=True, text=True, timeout=5)
+                if result.success:
                     components[name] = result.stdout.strip()
                 else:
                     components[name] = "not-available"
-            except (subprocess.TimeoutExpired, FileNotFoundError):
+            except (OSError, FileNotFoundError):
                 components[name] = "not-available"
                 
         return components
@@ -186,12 +188,12 @@ class VersionManager:
         
         for key, cmd in commands.items():
             try:
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
-                if result.returncode == 0:
+                result = self.subprocess_manager.run(cmd, capture_output=True, text=True, timeout=5)
+                if result.success:
                     git_info[key] = result.stdout.strip()
                 else:
                     git_info[key] = "unknown"
-            except (subprocess.TimeoutExpired, FileNotFoundError):
+            except (OSError, FileNotFoundError):
                 git_info[key] = "not-a-git-repo"
                 
         # Determine if repo is clean
@@ -258,6 +260,7 @@ class UpgradeManager:
         self.safe_mode = safe_mode
         self.verbose = verbose
         self.safe_manager = SafeModeManager(verbose=verbose) if safe_mode else None
+        self.subprocess_manager = SubprocessManager()
         
     async def upgrade_framework(self, target_version: Optional[str] = None) -> bool:
         """Upgrade the framework to the specified or latest version."""
@@ -293,9 +296,9 @@ class UpgradeManager:
             if self.verbose:
                 console.print(f"Running: {' '.join(cmd)}")
                 
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            result = self.subprocess_manager.run(cmd, capture_output=True, text=True)
             
-            if result.returncode == 0:
+            if result.success:
                 console.print("[green]✅ Upgrade completed successfully[/green]")
                 return True
             else:
@@ -314,6 +317,7 @@ class RollbackManager:
         self.safe_mode = safe_mode
         self.verbose = verbose
         self.safe_manager = SafeModeManager(verbose=verbose) if safe_mode else None
+        self.subprocess_manager = SubprocessManager()
         
     async def rollback_to_version(self, version: str) -> bool:
         """Rollback to a specific version."""
@@ -343,9 +347,9 @@ class RollbackManager:
             if self.verbose:
                 console.print(f"Running: {' '.join(cmd)}")
                 
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            result = self.subprocess_manager.run(cmd, capture_output=True, text=True)
             
-            if result.returncode == 0:
+            if result.success:
                 console.print(f"[green]✅ Rollback to {version} completed successfully[/green]")
                 return True
             else:
@@ -401,8 +405,9 @@ def cli_flags(ctx, safe, verbose, dry_run, test_mode):
             remaining_args = [arg for arg in sys.argv[1:] if arg != "--test-mode"]
             cmd = [sys.executable, claude_pm_path] + remaining_args
             
-            # Use subprocess instead of os.execvp to maintain environment
-            result = subprocess.run(cmd, env=os.environ.copy())
+            # Use subprocess manager to maintain environment
+            manager = SubprocessManager()
+            result = manager.run(cmd, env=os.environ.copy())
             sys.exit(result.returncode)
             
         except Exception as e:

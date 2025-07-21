@@ -584,28 +584,28 @@ class ConfigurationService(IConfigurationService):
         
         self._logger.info("ConfigurationService disposed")
     
-    async def initialize(self) -> bool:
+    def initialize(self) -> bool:
         """
-        Initialize the configuration service asynchronously.
+        Initialize the configuration service.
         
         Returns:
             True if initialization successful
         """
         try:
             # Configuration service is already initialized in __init__
-            # This method provides async interface compatibility
-            self._logger.debug("ConfigurationService async initialization complete")
+            # This method provides interface compatibility
+            self._logger.debug("ConfigurationService initialization complete")
             return True
         except Exception as e:
             self._logger.error(f"Failed to initialize configuration service: {e}")
             return False
     
-    async def shutdown(self) -> None:
+    def shutdown(self) -> None:
         """
-        Shutdown the configuration service asynchronously.
+        Shutdown the configuration service.
         """
         try:
             self.dispose()
-            self._logger.debug("ConfigurationService async shutdown complete")
+            self._logger.debug("ConfigurationService shutdown complete")
         except Exception as e:
             self._logger.error(f"Error during configuration service shutdown: {e}")

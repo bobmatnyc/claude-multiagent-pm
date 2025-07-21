@@ -24,7 +24,7 @@ from claude_pm.orchestration.backwards_compatible_orchestrator import (
     OrchestrationMode,
     ReturnCode
 )
-from claude_pm.orchestration.message_bus import SimpleMessageBus, MessageResponse, MessageStatus
+from claude_pm.orchestration.message_bus import SimpleMessageBus, Response, MessageStatus
 
 
 class TestOrchestrationPatterns:

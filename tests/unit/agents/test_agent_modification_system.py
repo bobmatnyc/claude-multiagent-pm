@@ -22,6 +22,7 @@ Created for ISS-0118: Agent Registry and Hierarchical Discovery System
 import asyncio
 import json
 import pytest
+import pytest_asyncio
 import tempfile
 import time
 from pathlib import Path
@@ -264,7 +265,7 @@ class TestAgentModificationTracker:
 class TestAgentPersistenceService:
     """Test suite for AgentPersistenceService."""
     
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def persistence_service(self):
         """Create persistence service for testing."""
         # Mock the service to avoid complex initialization
@@ -318,7 +319,7 @@ class TestAgentPersistenceService:
 class TestAgentLifecycleManager:
     """Test suite for AgentLifecycleManager."""
     
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def lifecycle_manager(self):
         """Create lifecycle manager for testing."""
         # Mock the manager to avoid complex initialization
@@ -379,7 +380,7 @@ class TestAgentLifecycleManager:
 class TestIntegratedSystem:
     """Integration tests for the complete modification tracking system."""
     
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def integrated_system(self):
         """Set up mocked integrated system for testing."""
         # Create mocked services

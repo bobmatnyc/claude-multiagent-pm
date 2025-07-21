@@ -22,8 +22,7 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from claude_pm.services.memory.services.unified_service import FlexibleMemoryService
-from claude_pm.services.memory.interfaces.models import MemoryCategory, MemoryQuery
+from claude_pm.services.memory import FlexibleMemoryService, MemoryCategory, MemoryQuery
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

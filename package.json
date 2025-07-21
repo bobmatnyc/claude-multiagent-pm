@@ -14,7 +14,7 @@
     "development-framework",
     "automation",
     "trackdown",
-    "ai-trackdown-tools",
+    "ai-trackdown-pytools",
     "task-management",
     "issue-tracking",
     "pr-management",
@@ -75,8 +75,7 @@
     "cleanup:auto": "node install/preuninstall.js --automatic",
     "uninstall:complete": "node install/preuninstall.js --interactive && npm uninstall -g @bobmatnyc/claude-multiagent-pm",
     "prepublishOnly": "npm run pre-publish:no-docker",
-    "ai-trackdown-setup": "npm install -g @bobmatnyc/ai-trackdown-tools",
-    "verify-dependencies": "aitrackdown --version && atd --version",
+    "verify-dependencies": "python -c \"import ai_trackdown; print('ai-trackdown-pytools installed')\"",
     "test": "node install/validate.js --verbose",
     "validate-env": "node install/validate.js",
     "install-to": "node install/install.js",
@@ -132,10 +131,7 @@
     "docs/CHANGELOG.md",
     "LICENSE"
   ],
-  "dependencies": {
-    "@bobmatnyc/ai-trackdown-tools": "^1.2.0",
-    "tree-sitter-languages": "^1.10.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "standard-version": "^9.5.0"
   },

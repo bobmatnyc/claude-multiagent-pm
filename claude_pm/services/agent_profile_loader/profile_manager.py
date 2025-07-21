@@ -71,7 +71,6 @@ class ProfileManager:
             exists = "✓" if path.exists() else "✗"
             logger.info(f"  {tier.value}: {path} {exists}")
     
-    @cache_result("agent_profile:{agent_name}:{working_dir}", ttl=1800, namespace="profile_loader")
     async def load_agent_profile(self, agent_name: str, force_refresh: bool = False) -> Optional[AgentProfile]:
         """
         Load agent profile following three-tier hierarchy with improved prompt integration.
@@ -107,21 +106,18 @@ class ProfileManager:
                     logger.debug(f"Loaded {agent_name} profile from {tier.value} tier")
                     return profile
             
-            # No profile found - this is an error condition
+            # No profile found - return None as per the Optional[AgentProfile] type hint
             checked_paths = []
             for tier in [ProfileTier.PROJECT, ProfileTier.USER, ProfileTier.SYSTEM]:
                 tier_path = self.tier_paths[tier]
                 checked_paths.append(f"{tier.value}: {tier_path}")
             
-            error_msg = (
-                f"Agent profile '{agent_name}' not found in any tier.\n"
-                f"Searched paths:\n" + "\n".join(f"  - {path}" for path in checked_paths)
+            logger.warning(
+                f"Agent profile '{agent_name}' not found in any tier. "
+                f"Searched paths: {', '.join(checked_paths)}"
             )
-            logger.error(error_msg)
-            raise FileNotFoundError(error_msg)
+            return None
             
-        except FileNotFoundError:
-            raise  # Re-raise FileNotFoundError
         except Exception as e:
             logger.error(f"Error loading profile for {agent_name}: {e}")
             raise RuntimeError(f"Failed to load agent profile '{agent_name}': {e}")

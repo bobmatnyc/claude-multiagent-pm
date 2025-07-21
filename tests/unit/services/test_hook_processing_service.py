@@ -4,6 +4,7 @@ Tests all components including error detection, execution engine, and monitoring
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 import json
 import time
@@ -584,7 +585,7 @@ class TestHookProcessingService:
 class TestAgentIntegrationHooks:
     """Test suite for agent integration hooks."""
     
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def integration_hooks(self):
         service = HookProcessingService()
         await service.start()

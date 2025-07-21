@@ -30,21 +30,22 @@ from unittest.mock import Mock, AsyncMock
 
 from claude_pm.services.memory import (
     FlexibleMemoryService,
-    MemoryTriggerService,
-    MemoryRecallService,
+    # MemoryTriggerService,  # Removed from simplified memory module
+    # MemoryRecallService,  # Removed from simplified memory module
     MemoryCategory,
     MemoryItem,
     MemoryQuery,
-    TriggerType,
-    TriggerPriority,
-    TriggerEvent,
-    TriggerResult,
-    HookContext,
-    create_memory_trigger_service,
+    # TriggerType,  # Removed from simplified memory module
+    # TriggerPriority,  # Removed from simplified memory module
+    # TriggerEvent,  # Removed from simplified memory module
+    # TriggerResult,  # Removed from simplified memory module
+    # HookContext,  # Removed from simplified memory module
+    # create_memory_trigger_service,  # Removed from simplified memory module
     create_memory_recall_service,
 )
-from claude_pm.services.memory.memory_context_enhancer import MemoryContextEnhancer, RecallTrigger
-from claude_pm.services.memory.recommendation_engine import RecommendationEngine, RecommendationType
+# Memory trigger service and recommendation engine have been removed from the framework
+# from claude_pm.services.memory.memory_context_enhancer import MemoryContextEnhancer, RecallTrigger
+# from claude_pm.services.memory.recommendation_engine import RecommendationEngine, RecommendationType
 
 
 @dataclass
@@ -302,27 +303,28 @@ class RealWorldScenarioFramework:
 
         return {"success": False, "step_id": step.step_id, "error": "Unknown validation operation"}
 
-    def _validate_trigger_results(
-        self, results: List[TriggerResult], expected: Dict[str, Any]
-    ) -> bool:
-        """Validate trigger results against expectations."""
-        if not results:
-            return expected.get("allow_empty_results", False)
+    # Trigger functionality has been removed from the framework
+    # def _validate_trigger_results(
+    #     self, results: List[TriggerResult], expected: Dict[str, Any]
+    # ) -> bool:
+    #     """Validate trigger results against expectations."""
+    #     if not results:
+    #         return expected.get("allow_empty_results", False)
 
-        successful_results = [r for r in results if r.success]
+    #     successful_results = [r for r in results if r.success]
 
-        # Check minimum success count
-        min_success = expected.get("min_successful_triggers", 1)
-        if len(successful_results) < min_success:
-            return False
+    #     # Check minimum success count
+    #     min_success = expected.get("min_successful_triggers", 1)
+    #     if len(successful_results) < min_success:
+    #         return False
 
-        # Check memory IDs are present
-        if expected.get("require_memory_ids", True):
-            for result in successful_results:
-                if not result.memory_id:
-                    return False
+    #     # Check memory IDs are present
+    #     if expected.get("require_memory_ids", True):
+    #         for result in successful_results:
+    #             if not result.memory_id:
+    #                 return False
 
-        return True
+    #     return True
 
     def _validate_recall_results(self, result, expected: Dict[str, Any]) -> bool:
         """Validate recall results against expectations."""

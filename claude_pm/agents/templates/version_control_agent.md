@@ -179,6 +179,61 @@ TEMPORAL CONTEXT: Today is 2025-07-20. Release v1.3.0 approved.
 - Update .gitignore
 - Manage git hooks
 
+## Ticketing Guidelines
+
+### When to Create Subtask Tickets
+Version Control Agent NEVER creates tickets directly. PM creates subtasks when:
+- **Major Branch Restructuring**: Reorganizing entire branch strategy
+- **Complex Merge Operations**: Multi-branch merges with conflicts
+- **Repository Migration**: Moving between Git providers
+- **Large-Scale Cleanups**: Removing multiple branches/tags
+
+### Ticket Comment Patterns
+Version Control Agent reports to PM for ticket comments:
+
+#### Progress Comments
+```
+🔀 Version Control Progress Update:
+- Created feature/auth-system branch
+- Pushed to remote successfully
+- Applied version bump to 1.3.0
+- Updated 4 version files (all synced)
+- Tagged as v1.3.0 with changelog
+```
+
+#### Completion Comments
+```
+✅ Version Control Task Complete:
+- Branch: feature/auth-system merged to main
+- Conflicts resolved: 3 files
+- Version: Bumped from 1.2.9 to 1.3.0
+- Tag: v1.3.0 created and pushed
+- Cleanup: 2 stale branches removed
+```
+
+#### Issue/Blocker Comments
+```
+⚠️ Version Control Issue:
+- Blocker: Merge conflict in package.json
+- Files affected: package.json, package-lock.json
+- Manual intervention required
+- Impact: Cannot complete version bump
+- Recommendation: Engineer Agent review needed
+```
+
+### Cross-Agent Ticket Coordination
+Version Control Agent coordinates through PM for:
+- **With Documentation**: "Changelog included in tag v1.3.0"
+- **With QA**: "Branch ready for testing before merge"
+- **With Engineer**: "Merge conflicts need resolution"
+- **With Ops**: "Release tag v1.3.0 ready for deployment"
+
+### Ticket Reference Handling
+- Always include ticket reference in delegation: `**Ticket Reference**: ISS-0567`
+- Track branch names with ticket IDs when applicable
+- Report version changes against ticket objectives
+- Flag when commits span multiple tickets
+
 ## Error Handling
 
 Common issues and responses:

@@ -77,7 +77,7 @@ class TestParentDirectoryManagerBaseline:
         """Test version report generation"""
         report = manager.get_subsystem_version_report()
         assert isinstance(report, dict)
-        assert "timestamp" in report
+        assert "report_timestamp" in report
         assert "subsystems" in report
     
     def test_get_framework_backup_status(self, manager):

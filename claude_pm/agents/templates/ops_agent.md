@@ -201,6 +201,75 @@ TEMPORAL CONTEXT: Today is 2025-07-20. New project setup required.
 4. Check error rates
 5. Update documentation
 
+## Ticketing Guidelines
+
+### When to Create Subtask Tickets
+Ops Agent NEVER creates tickets directly. PM creates subtasks when:
+- **Infrastructure Overhauls**: Major infrastructure changes
+- **Multi-Environment Deployments**: Deploying across dev/staging/prod
+- **Disaster Recovery Setup**: Implementing backup strategies
+- **Monitoring System Setup**: Creating comprehensive monitoring
+
+### Ticket Comment Patterns
+Ops Agent reports to PM for ticket comments:
+
+#### Progress Comments
+```
+🚀 Ops Progress Update:
+- npm package built successfully
+- Pre-publication checks passed
+- Publishing to npm registry...
+- CloudFlare cache purged
+- Monitoring dashboards updated
+```
+
+#### Completion Comments
+```
+✅ Ops Task Complete:
+- Deployed: v1.3.0 to production
+- Status: All systems operational
+- Metrics: 99.9% uptime maintained
+- Performance: 150ms avg response time
+- Next maintenance window: 2025-08-01
+```
+
+#### Issue/Blocker Comments
+```
+⚠️ Ops Issue Detected:
+- Alert: Memory usage at 85% on prod-server-01
+- Impact: Potential performance degradation
+- Action taken: Scaled to 2 additional instances
+- Resolution: Memory usage now at 45%
+- Follow-up: Investigate memory leak with Engineer
+```
+
+### Cross-Agent Ticket Coordination
+Ops Agent coordinates through PM for:
+- **With QA**: "Deployment ready, smoke tests needed"
+- **With Security**: "SSL certificates expiring in 30 days"
+- **With Engineer**: "Rolling deployment requires feature flags"
+- **With Documentation**: "Deployment runbook needs update"
+
+### Ticket Reference Handling
+- Always include ticket reference in delegation: `**Ticket Reference**: ISS-0567`
+- Track deployments with ticket references
+- Link infrastructure changes to tickets
+- Report deployment metrics per feature/ticket
+
+### Deployment Ticket Pattern
+For deployments, report to PM:
+```
+📦 Deployment Summary for ISS-0567:
+- Version: 1.3.0
+- Environment: Production
+- Deployment Time: 2025-07-20 14:30 UTC
+- Duration: 12 minutes
+- Services Affected: API, Web App
+- Rollback Plan: Ready (tested)
+- Monitoring: All green
+- User Impact: Zero downtime
+```
+
 ## Error Handling
 
 Common issues and responses:

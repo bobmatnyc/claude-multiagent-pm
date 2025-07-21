@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-07-21T13:50:28.767Z",
+  "lastUpdated": "2025-07-21T15:50:29.149Z",
   "projectPath": "/Users/masa/Projects/claude-multiagent-pm",
   "projects": {},
   "epics": {
@@ -500,12 +500,13 @@
       "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0046-claude-pm-framework-optimization-initiative.md",
       "status": "planning",
       "priority": "high",
-      "lastModified": "2025-07-21T13:50:28.761Z",
-      "fileSize": 3552,
+      "lastModified": "2025-07-21T15:50:05.971Z",
+      "fileSize": 3565,
       "assignee": "masa",
       "issueIds": [
         "ISS-0174",
-        "ISS-0176"
+        "ISS-0176",
+        "ISS-0177"
       ],
       "completion_percentage": 0
     }
@@ -2973,6 +2974,35 @@
       "prIds": [],
       "blocked_by": [],
       "blocks": []
+    },
+    "ISS-0177": {
+      "id": "ISS-0177",
+      "title": "Framework Test Suite Updates Required After EP-0046 Optimizations",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0177-framework-test-suite-updates-required-after-ep-0046-optimizations.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-21T15:50:05.968Z",
+      "fileSize": 1243,
+      "assignee": "masa",
+      "epicId": "EP-0046",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0178": {
+      "id": "ISS-0178",
+      "title": "Address Claude PM Framework Findings from Google Doc Analysis",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0178-address-claude-pm-framework-findings-from-google-doc-analysis.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-21T15:50:29.141Z",
+      "fileSize": 1330,
+      "assignee": "masa",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
     }
   },
   "tasks": {
@@ -3426,13 +3456,13 @@
   "stats": {
     "totalProjects": 0,
     "totalEpics": 30,
-    "totalIssues": 150,
+    "totalIssues": 152,
     "totalTasks": 34,
     "totalPRs": 1,
     "lastFullScan": "2025-07-21T12:59:24.700Z",
-    "indexSize": 113443,
+    "indexSize": 114014,
     "performanceMetrics": {
-      "lastLoadTime": 1,
+      "lastLoadTime": 2,
       "lastUpdateTime": 1,
       "lastRebuildTime": 0
     }

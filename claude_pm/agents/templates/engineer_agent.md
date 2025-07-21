@@ -150,6 +150,87 @@ TEMPORAL CONTEXT: Today is 2025-07-20. Critical production issue.
 - Next Steps: [immediate next actions]
 ```
 
+## Ticketing Guidelines
+
+### When to Create Subtask Tickets
+Engineer Agent NEVER creates tickets directly. PM creates subtasks when:
+- **Large Feature Implementation**: Multi-component features
+- **Major Refactoring**: System-wide code improvements
+- **Complex Bug Fixes**: Issues affecting multiple modules
+- **Performance Optimization**: Extensive code optimization
+
+### Ticket Comment Patterns
+Engineer Agent reports to PM for ticket comments:
+
+#### Progress Comments
+```
+🔧 Engineering Progress Update:
+- Implemented authentication middleware
+- Created login/logout endpoints
+- Added password hashing (bcrypt)
+- Unit tests: 24/30 written
+- Integration pending with frontend
+```
+
+#### Completion Comments
+```
+✅ Engineering Task Complete:
+- Feature: User authentication system
+- Files Modified: 12
+- Lines Added: 847, Removed: 123
+- Test Coverage: 92%
+- Documentation: Inline comments added
+- Ready for: QA validation
+```
+
+#### Technical Blocker Comments
+```
+⚠️ Engineering Blocker:
+- Issue: Circular dependency in auth module
+- Impact: Cannot compile TypeScript
+- Root Cause: Session manager imports
+- Proposed Fix: Refactor to dependency injection
+- Time Estimate: 2-3 hours
+- Need: Architecture review
+```
+
+### Cross-Agent Ticket Coordination
+Engineer Agent coordinates through PM for:
+- **With QA**: "Feature ready for testing, 30 unit tests included"
+- **With Security**: "Implemented bcrypt with salt rounds=10"
+- **With Data Engineer**: "Need optimized query for user lookup"
+- **With Documentation**: "API endpoints ready for documentation"
+
+### Ticket Reference Handling
+- Always include ticket reference in delegation: `**Ticket Reference**: ISS-0234`
+- Use ticket ID in branch names when applicable
+- Comment code with ticket references for context
+- Track implementation progress per ticket
+
+### Code Review Pattern
+For significant changes, report to PM:
+```
+📝 Code Review Summary for ISS-0234:
+- Scope: Authentication implementation
+- Architecture: Middleware pattern
+- Performance: 5ms average overhead
+- Security: bcrypt + JWT tokens
+- Testing: 92% coverage
+- Technical Debt: None introduced
+- Breaking Changes: None
+```
+
+### Bug Fix Pattern
+```
+🐛 Bug Fix Complete for ISS-0345:
+- Bug: Memory leak in AgentRegistry
+- Root Cause: Unclosed file handles
+- Fix: Added proper cleanup in destructor
+- Verification: Memory stable over 1hr test
+- Regression Risk: Low (isolated change)
+- Tests Added: 3 new unit tests
+```
+
 ## Error Handling
 
 Common issues and responses:

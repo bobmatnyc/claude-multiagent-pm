@@ -97,17 +97,20 @@ class DependencyManager:
     - Version compatibility checking
     - Health monitoring and reporting
     - Installation result caching
+    
+    Note: AI Trackdown Tools is now installed exclusively via Python (ai-trackdown-pytools).
     """
     
     # Core dependencies required for framework operation
     CORE_DEPENDENCIES = {
         "ai-trackdown-tools": {
             "type": DependencyType.AI_TRACKDOWN_TOOLS,
-            "npm_package": "@bobmatnyc/ai-trackdown-tools",
-            "required_version": ">=1.1.0",
+            "python_package": "ai_trackdown",
+            "pip_package": "ai-trackdown-pytools==1.1.0",
+            "required_version": "==1.1.0",
             "critical": True,
-            "commands": ["aitrackdown", "atd"],
-            "description": "AI Trackdown Tools for issue tracking and project management"
+            "commands": [],  # Python package, no CLI commands
+            "description": "AI Trackdown Python tools for issue tracking and project management"
         },
         "python": {
             "type": DependencyType.SYSTEM_BINARY,
@@ -244,8 +247,30 @@ class DependencyManager:
     
     async def _check_ai_trackdown_tools(self, dependency_info: DependencyInfo, config: Dict[str, Any]) -> None:
         """Check AI Trackdown Tools installation"""
-        commands = config.get("commands", ["aitrackdown", "atd"])
+        python_package = config.get("python_package", "ai_trackdown_pytools")
         
+        # Try to import as Python package
+        try:
+            module = importlib.import_module(python_package)
+            dependency_info.is_installed = True
+            dependency_info.installation_method = InstallationMethod.PIP
+            
+            # Try to get version from module
+            if hasattr(module, "__version__"):
+                dependency_info.version = module.__version__
+            elif hasattr(module, "version"):
+                dependency_info.version = module.version
+            else:
+                dependency_info.version = "1.1.0"  # Default version
+            
+            return
+            
+        except ImportError:
+            # Python package not found, check for command availability
+            pass
+        
+        # Fall back to checking command availability
+        commands = config.get("commands", ["aitrackdown", "atd"])
         for command in commands:
             if await self._check_command_available(command):
                 dependency_info.is_installed = True
@@ -262,7 +287,7 @@ class DependencyManager:
                 break
         
         if not dependency_info.is_installed:
-            dependency_info.error_message = f"Commands not found: {commands}"
+            dependency_info.error_message = f"Python package '{python_package}' not found and commands not available: {commands}"
     
     async def _check_system_binary(self, dependency_info: DependencyInfo, config: Dict[str, Any]) -> None:
         """Check system binary installation"""
@@ -369,8 +394,12 @@ class DependencyManager:
     
     async def _check_ai_trackdown_tools_available(self) -> bool:
         """Check if AI Trackdown Tools are available"""
-        return (await self._check_command_available("aitrackdown") or 
-                await self._check_command_available("atd"))
+        # Only check Python package
+        try:
+            import ai_trackdown_pytools
+            return True
+        except ImportError:
+            return False
     
     def _detect_python_command(self) -> str:
         """Detect the correct Python command to use"""
@@ -393,8 +422,11 @@ class DependencyManager:
     
     def _select_best_installation_method(self, dep_type: DependencyType, config: Dict[str, Any]) -> InstallationMethod:
         """Select the best installation method for a dependency type"""
+        # AI_TRACKDOWN_TOOLS is always installed via pip
+        if dep_type == DependencyType.AI_TRACKDOWN_TOOLS:
+            return InstallationMethod.PIP
+            
         method_map = {
-            DependencyType.AI_TRACKDOWN_TOOLS: InstallationMethod.NPM_GLOBAL,
             DependencyType.PYTHON_PACKAGE: InstallationMethod.PIP,
             DependencyType.NPM_GLOBAL: InstallationMethod.NPM_GLOBAL,
             DependencyType.NPM_LOCAL: InstallationMethod.NPM_LOCAL,
@@ -497,25 +529,36 @@ class DependencyManager:
             return result
     
     async def _install_ai_trackdown_tools(self, name: str, config: Dict[str, Any], method: InstallationMethod) -> InstallationResult:
-        """Install AI Trackdown Tools via npm"""
-        npm_package = config.get("npm_package", "@bobmatnyc/ai-trackdown-tools")
+        """Install AI Trackdown Tools via pip only"""
+        # Always install via pip
+        pip_package = config.get("pip_package", "ai-trackdown-pytools==1.1.0")
+        python_cmd = self._detect_python_command()
         
         start_time = datetime.now()
         result = await self._run_command(
-            ["npm", "install", "-g", npm_package],
+            [python_cmd, "-m", "pip", "install", "--user", pip_package],
             timeout=self.installation_timeout
         )
         duration = (datetime.now() - start_time).total_seconds()
         
         success = result.returncode == 0
+        
+        # If failed due to externally managed environment, retry with --break-system-packages
+        if not success and "externally-managed-environment" in result.stderr:
+            result = await self._run_command(
+                [python_cmd, "-m", "pip", "install", "--user", "--break-system-packages", pip_package],
+                timeout=self.installation_timeout
+            )
+            success = result.returncode == 0
+        
         return InstallationResult(
-            success=success,
-            dependency_name=name,
-            method=method,
-            logs=f"stdout: {result.stdout}\nstderr: {result.stderr}",
-            error_message=result.stderr if not success else None,
-            duration_seconds=duration
-        )
+                success=success,
+                dependency_name=name,
+                method=method,
+                logs=f"stdout: {result.stdout}\nstderr: {result.stderr}",
+                error_message=result.stderr if not success else None,
+                duration_seconds=duration
+            )
     
     async def _install_python_package(self, name: str, config: Dict[str, Any], method: InstallationMethod) -> InstallationResult:
         """Install Python package via pip"""
@@ -670,11 +713,9 @@ class DependencyManager:
                 priority = "CRITICAL" if is_critical else "RECOMMENDED"
                 method = self._select_best_installation_method(dep_info.type, config)
                 
-                if method == InstallationMethod.NPM_GLOBAL:
-                    package = config.get("npm_package", name)
-                    cmd = f"npm install -g {package}"
-                elif method == InstallationMethod.PIP:
-                    package = config.get("package_name", name)
+                if method == InstallationMethod.PIP:
+                    # Use pip_package for AI_TRACKDOWN_TOOLS, package_name for others
+                    package = config.get("pip_package") or config.get("package_name", name)
                     cmd = f"pip install {package}"
                 elif method == InstallationMethod.SYSTEM:
                     cmd = f"Install {name} via your system package manager"

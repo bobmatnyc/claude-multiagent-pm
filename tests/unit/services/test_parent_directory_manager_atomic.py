@@ -169,8 +169,12 @@ class TestParentDirectoryManagerAtomic:
         """Test getting subsystem versions"""
         versions = manager.get_subsystem_versions()
         assert isinstance(versions, dict)
-        # Should return empty dict when no files exist
-        assert versions == {}
+        # Check the expected structure
+        assert 'detection_timestamp' in versions
+        assert 'framework_path' in versions
+        assert 'subsystems' in versions
+        # Should have empty subsystems when no files exist
+        assert versions['subsystems'] == {}
     
     def test_get_subsystem_version(self, manager):
         """Test getting specific subsystem version"""
@@ -197,7 +201,8 @@ class TestParentDirectoryManagerAtomic:
         report = manager.get_subsystem_version_report()
         
         assert isinstance(report, dict)
-        assert "timestamp" in report
+        # The key is now 'report_timestamp' instead of 'timestamp'
+        assert "report_timestamp" in report
         assert "subsystems" in report
         assert isinstance(report["subsystems"], dict)
     

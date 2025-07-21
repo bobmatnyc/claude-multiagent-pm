@@ -37,11 +37,11 @@ from contextlib import asynccontextmanager
 import json
 
 from .interfaces import (
-    IService, IConfigurationService, ILogger, IHealthMonitor,
-    ICacheService, IServiceContainer, IErrorHandler,
-    ServiceHealth, ServiceMetrics
+    IServiceLifecycle, IConfigurationService, IHealthMonitor,
+    ICacheService, IServiceContainer, IErrorHandler
 )
-from .container import get_default_container, injectable
+from .base_service import ServiceHealth, ServiceMetrics
+from .container import ServiceContainer
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,7 @@ class CircuitBreakerState:
     success_threshold: int = 3  # For half-open state
 
 
-class EnhancedBaseService(IService, ABC):
+class EnhancedBaseService(IServiceLifecycle, ABC):
     """
     Enhanced base service implementation with dependency injection and resilience patterns.
     

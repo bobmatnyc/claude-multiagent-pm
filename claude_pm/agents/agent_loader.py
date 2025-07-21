@@ -104,7 +104,7 @@ def load_agent_prompt_from_md(agent_name: str, force_reload: bool = False) -> Op
             cached_content = cache.get(cache_key)
             if cached_content is not None:
                 logger.debug(f"Agent prompt for '{agent_name}' loaded from cache")
-                return cached_content
+                return str(cached_content)
         
         # Get MD file path
         md_filename = AGENT_MAPPINGS.get(agent_name)
@@ -135,7 +135,7 @@ def load_agent_prompt_from_md(agent_name: str, force_reload: bool = False) -> Op
 
 
 
-def _analyze_task_complexity(task_description: str, context_size: int = 0, **kwargs) -> Dict[str, Any]:
+def _analyze_task_complexity(task_description: str, context_size: int = 0, **kwargs: Any) -> Dict[str, Any]:
     """
     Analyze task complexity using TaskComplexityAnalyzer.
     
@@ -260,7 +260,7 @@ def _get_model_config(agent_name: str, complexity_analysis: Optional[Dict[str, A
     return selected_model, model_config
 
 
-def get_agent_prompt(agent_name: str, force_reload: bool = False, return_model_info: bool = False, **kwargs) -> Union[str, Tuple[str, str, Dict[str, Any]]]:
+def get_agent_prompt(agent_name: str, force_reload: bool = False, return_model_info: bool = False, **kwargs: Any) -> Union[str, Tuple[str, str, Dict[str, Any]]]:
     """
     Get agent prompt from MD file with optional dynamic model selection.
     
@@ -341,46 +341,62 @@ def get_agent_prompt(agent_name: str, force_reload: bool = False, return_model_i
 # Backward-compatible functions
 def get_documentation_agent_prompt() -> str:
     """Get the complete Documentation Agent prompt with base instructions."""
-    return get_agent_prompt("documentation")
+    prompt = get_agent_prompt("documentation", return_model_info=False)
+    assert isinstance(prompt, str), "Expected string when return_model_info=False"
+    return prompt
 
 
 
 def get_version_control_agent_prompt() -> str:
     """Get the complete Version Control Agent prompt with base instructions."""
-    return get_agent_prompt("version_control")
+    prompt = get_agent_prompt("version_control", return_model_info=False)
+    assert isinstance(prompt, str), "Expected string when return_model_info=False"
+    return prompt
 
 
 def get_qa_agent_prompt() -> str:
     """Get the complete QA Agent prompt with base instructions."""
-    return get_agent_prompt("qa")
+    prompt = get_agent_prompt("qa", return_model_info=False)
+    assert isinstance(prompt, str), "Expected string when return_model_info=False"
+    return prompt
 
 
 def get_research_agent_prompt() -> str:
     """Get the complete Research Agent prompt with base instructions."""
-    return get_agent_prompt("research")
+    prompt = get_agent_prompt("research", return_model_info=False)
+    assert isinstance(prompt, str), "Expected string when return_model_info=False"
+    return prompt
 
 
 def get_ops_agent_prompt() -> str:
     """Get the complete Ops Agent prompt with base instructions."""
-    return get_agent_prompt("ops")
+    prompt = get_agent_prompt("ops", return_model_info=False)
+    assert isinstance(prompt, str), "Expected string when return_model_info=False"
+    return prompt
 
 
 def get_security_agent_prompt() -> str:
     """Get the complete Security Agent prompt with base instructions."""
-    return get_agent_prompt("security")
+    prompt = get_agent_prompt("security", return_model_info=False)
+    assert isinstance(prompt, str), "Expected string when return_model_info=False"
+    return prompt
 
 
 def get_engineer_agent_prompt() -> str:
     """Get the complete Engineer Agent prompt with base instructions."""
-    return get_agent_prompt("engineer")
+    prompt = get_agent_prompt("engineer", return_model_info=False)
+    assert isinstance(prompt, str), "Expected string when return_model_info=False"
+    return prompt
 
 
 def get_data_engineer_agent_prompt() -> str:
     """Get the complete Data Engineer Agent prompt with base instructions."""
-    return get_agent_prompt("data_engineer")
+    prompt = get_agent_prompt("data_engineer", return_model_info=False)
+    assert isinstance(prompt, str), "Expected string when return_model_info=False"
+    return prompt
 
 
-def get_agent_prompt_with_model_info(agent_name: str, force_reload: bool = False, **kwargs) -> Tuple[str, str, Dict[str, Any]]:
+def get_agent_prompt_with_model_info(agent_name: str, force_reload: bool = False, **kwargs: Any) -> Tuple[str, str, Dict[str, Any]]:
     """
     Get agent prompt with model selection information.
     
@@ -451,7 +467,7 @@ def clear_agent_cache(agent_name: Optional[str] = None) -> None:
         logger.error(f"Error clearing agent cache: {e}")
 
 
-def validate_agent_files() -> Dict[str, bool]:
+def validate_agent_files() -> Dict[str, Dict[str, Any]]:
     """
     Validate that all expected agent files exist.
     

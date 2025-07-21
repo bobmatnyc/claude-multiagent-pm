@@ -74,12 +74,12 @@ class IConfigurationService(ABC):
         pass
     
     @abstractmethod
-    async def initialize(self) -> bool:
+    def initialize(self) -> bool:
         """Initialize configuration service"""
         pass
     
     @abstractmethod
-    async def shutdown(self) -> None:
+    def shutdown(self) -> None:
         """Shutdown configuration service"""
         pass
 

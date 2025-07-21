@@ -11,6 +11,7 @@ Purpose: Restore missing claude_pm.core.agent_registry import with synchronous o
 
 # Import AgentRegistry from synchronous services and expose it at core level
 from claude_pm.services.agent_registry_sync import AgentRegistry, AgentMetadata
+from typing import Dict, Set, List, Any, Optional
 
 # Expose key classes and functions for core framework access
 __all__ = [
@@ -28,7 +29,7 @@ __all__ = [
 ]
 
 # Create convenience aliases for common operations
-def create_agent_registry(cache_service=None):
+def create_agent_registry(cache_service: Any = None) -> AgentRegistry:
     """
     Create a new AgentRegistry instance
     
@@ -40,7 +41,7 @@ def create_agent_registry(cache_service=None):
     """
     return AgentRegistry(cache_service=cache_service)
 
-def discover_agents(force_refresh=False):
+def discover_agents(force_refresh: bool = False) -> Dict[str, AgentMetadata]:
     """
     Convenience function for synchronous agent discovery
     
@@ -53,7 +54,7 @@ def discover_agents(force_refresh=False):
     registry = AgentRegistry()
     return registry.discover_agents(force_refresh=force_refresh)
 
-def get_core_agent_types():
+def get_core_agent_types() -> Set[str]:
     """
     Get the set of core agent types
     
@@ -63,7 +64,7 @@ def get_core_agent_types():
     registry = AgentRegistry()
     return registry.core_agent_types
 
-def get_specialized_agent_types():
+def get_specialized_agent_types() -> Set[str]:
     """
     Get the set of specialized agent types beyond core 9
     
@@ -74,7 +75,7 @@ def get_specialized_agent_types():
     return registry.specialized_agent_types
 
 # Add convenience method for synchronous access with camelCase naming
-def listAgents():
+def listAgents() -> Dict[str, Dict[str, Any]]:
     """
     Synchronous function for listing all agents (camelCase compatibility)
     
@@ -89,7 +90,7 @@ def listAgents():
     return registry.listAgents()
 
 # Add synchronous convenience functions
-def list_agents(agent_type=None, tier=None):
+def list_agents(agent_type: Optional[str] = None, tier: Optional[str] = None) -> List[AgentMetadata]:
     """
     Synchronous function to list agents with optional filtering
     
@@ -103,7 +104,7 @@ def list_agents(agent_type=None, tier=None):
     registry = AgentRegistry()
     return registry.list_agents(agent_type=agent_type, tier=tier)
 
-def discover_agents_sync(force_refresh=False):
+def discover_agents_sync(force_refresh: bool = False) -> Dict[str, AgentMetadata]:
     """
     Synchronous function for agent discovery
     
@@ -116,7 +117,7 @@ def discover_agents_sync(force_refresh=False):
     registry = AgentRegistry()
     return registry.discover_agents(force_refresh=force_refresh)
 
-def get_agent(agent_name):
+def get_agent(agent_name: str) -> Optional[Dict[str, Any]]:
     """
     Synchronous function to get a specific agent
     
@@ -140,7 +141,7 @@ def get_agent(agent_name):
         }
     return None
 
-def get_registry_stats():
+def get_registry_stats() -> Dict[str, Any]:
     """
     Synchronous function to get registry statistics
     

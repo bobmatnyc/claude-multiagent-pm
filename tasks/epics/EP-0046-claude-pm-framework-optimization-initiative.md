@@ -7,7 +7,7 @@ status: planning
 priority: high
 assignee: masa
 created_date: 2025-07-21T13:48:58.693Z
-updated_date: 2025-07-21T13:50:28.761Z
+updated_date: 2025-07-21T15:50:05.971Z
 estimated_tokens: 0
 actual_tokens: 0
 ai_context:
@@ -21,6 +21,7 @@ related_issues:
   - ISS-0174
   - ISS-0175
   - ISS-0176
+  - ISS-0177
 dependencies: []
 completion_percentage: 0
 content: >-

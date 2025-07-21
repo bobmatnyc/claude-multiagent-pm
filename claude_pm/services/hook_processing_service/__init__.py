@@ -5,7 +5,7 @@ Handles hook execution, error detection, and monitoring for agent workflows.
 Main facade class for the hook processing service.
 """
 
-import logging
+import logging as standard_logging
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 
@@ -23,7 +23,7 @@ class HookProcessingService:
     """Main service for processing hooks with comprehensive error detection and monitoring."""
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
-        self.logger = logging.getLogger(__name__)
+        self.logger = standard_logging.getLogger(__name__)
         self.config = config or {}
         
         # Initialize subsystems

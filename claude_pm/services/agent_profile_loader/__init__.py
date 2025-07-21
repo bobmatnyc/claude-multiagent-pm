@@ -138,7 +138,7 @@ class AgentProfileLoader(BaseService):
         Returns:
             AgentProfile if found, None otherwise
         """
-        return await self.profile_manager.load_agent_profile(agent_name, force_refresh)
+        return await self.profile_manager.load_agent_profile(agent_name=agent_name, force_refresh=force_refresh)
     
     async def save_improved_prompt(self, improved_prompt: ImprovedPrompt) -> bool:
         """Save improved prompt to training system."""

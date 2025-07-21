@@ -31,7 +31,7 @@ class ScaffoldingWorkflow:
         self.current_recommendation = None
         self.approval_status = ApprovalStatus.PENDING
 
-    async def analyze_design_doc(self, design_doc_path: Path) -> Dict[str, Any]:
+    def analyze_design_doc(self, design_doc_path: Path) -> Dict[str, Any]:
         """
         Placeholder for design document analysis.
         Use Claude Code Task Tool for actual analysis.
@@ -42,7 +42,7 @@ class ScaffoldingWorkflow:
             "recommendation": "Delegate to Claude Code Task Tool"
         }
 
-    async def generate_scaffolding_recommendation(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_scaffolding_recommendation(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
         """
         Placeholder for scaffolding recommendation generation.
         Use Claude Code Task Tool for actual recommendation.
@@ -53,7 +53,7 @@ class ScaffoldingWorkflow:
             "recommendation": "Delegate to Claude Code Task Tool"
         }
 
-    async def present_to_pm(self, recommendation: Dict[str, Any]) -> Dict[str, Any]:
+    def present_to_pm(self, recommendation: Dict[str, Any]) -> Dict[str, Any]:
         """
         Placeholder for PM presentation.
         Use Claude Code Task Tool for actual presentation.
@@ -64,7 +64,7 @@ class ScaffoldingWorkflow:
             "approval_status": self.approval_status.value
         }
 
-    async def handle_pm_decision(self, decision: str, feedback: Optional[str] = None) -> Dict[str, Any]:
+    def handle_pm_decision(self, decision: str, feedback: Optional[str] = None) -> Dict[str, Any]:
         """
         Placeholder for PM decision handling.
         Use Claude Code Task Tool for actual decision handling.
@@ -75,7 +75,7 @@ class ScaffoldingWorkflow:
             "decision": decision
         }
 
-    async def implement_scaffolding(self, approved_recommendation: Dict[str, Any]) -> Dict[str, Any]:
+    def implement_scaffolding(self, approved_recommendation: Dict[str, Any]) -> Dict[str, Any]:
         """
         Placeholder for scaffolding implementation.
         Use Claude Code Task Tool for actual implementation.

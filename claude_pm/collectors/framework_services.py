@@ -185,7 +185,7 @@ class FrameworkServicesCollector(HealthCollector):
 
         return reports
 
-    async def _check_memory_service(self) -> ServiceHealthReport:
+    def _check_memory_service(self) -> ServiceHealthReport:
         """Check memory service availability - SERVICE REMOVED."""
         return create_service_health_report(
             name="memory_service",
@@ -390,7 +390,7 @@ class ProjectIndexingHealthCollector(HealthCollector):
 
         return reports
 
-    async def _check_project_indexer(self) -> ServiceHealthReport:
+    def _check_project_indexer(self) -> ServiceHealthReport:
         """Check project indexer service health - SERVICE REMOVED."""
         return create_service_health_report(
             name="project_indexer",

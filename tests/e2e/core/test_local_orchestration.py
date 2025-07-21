@@ -28,7 +28,7 @@ from claude_pm.orchestration.backwards_compatible_orchestrator import (
     ReturnCode,
     OrchestrationMetrics
 )
-from claude_pm.orchestration.message_bus import SimpleMessageBus, MessageResponse, MessageStatus
+from claude_pm.orchestration.message_bus import SimpleMessageBus, Response, MessageStatus
 from claude_pm.orchestration.context_manager import create_context_manager
 from claude_pm.services.agent_registry_sync import AgentRegistry
 from claude_pm.utils.task_tool_helper import TaskToolConfiguration
@@ -102,7 +102,7 @@ class TestLocalOrchestration:
         orchestrator._local_executor._context_manager = mock_context_manager
         
         # Mock message bus response
-        mock_message_bus.send_request.return_value = MessageResponse(
+        mock_message_bus.send_request.return_value = Response(
             status=MessageStatus.COMPLETED,
             data={"result": "Task completed"},
             error=None
@@ -144,7 +144,7 @@ class TestLocalOrchestration:
         
         # Register handler
         mock_message_bus.register_handler = MagicMock()
-        mock_message_bus.send_request.return_value = MessageResponse(
+        mock_message_bus.send_request.return_value = Response(
             status=MessageStatus.COMPLETED,
             data={"result": agent_handler.return_value},
             error=None
@@ -395,7 +395,7 @@ class TestLocalOrchestration:
         """Test error propagation in LOCAL mode."""
         # Set up message bus to return error
         error_message = "Agent processing failed"
-        mock_message_bus.send_request.return_value = MessageResponse(
+        mock_message_bus.send_request.return_value = Response(
             status=MessageStatus.ERROR,
             data=None,
             error=error_message

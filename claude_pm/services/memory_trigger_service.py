@@ -363,7 +363,7 @@ class MemoryTriggerService:
                 return True
         return False
     
-    async def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> Dict[str, Any]:
         """Get service statistics"""
         return {
             'events_processed': self.stats['events_processed'],

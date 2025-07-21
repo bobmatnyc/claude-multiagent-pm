@@ -61,10 +61,10 @@ class TestDependencyManager(unittest.TestCase):
         # Check ai-trackdown-tools configuration
         ai_trackdown_config = self.dependency_manager.CORE_DEPENDENCIES["ai-trackdown-tools"]
         self.assertEqual(ai_trackdown_config["type"], DependencyType.AI_TRACKDOWN_TOOLS)
-        self.assertEqual(ai_trackdown_config["npm_package"], "@bobmatnyc/ai-trackdown-tools")
+        self.assertEqual(ai_trackdown_config["pip_package"], "ai-trackdown-pytools==1.1.0")
+        self.assertEqual(ai_trackdown_config["python_package"], "ai_trackdown")
         self.assertTrue(ai_trackdown_config["critical"])
-        self.assertIn("aitrackdown", ai_trackdown_config["commands"])
-        self.assertIn("atd", ai_trackdown_config["commands"])
+        self.assertEqual(ai_trackdown_config["commands"], [])  # No CLI commands for Python package
 
     def test_dependency_info_creation(self):
         """Test DependencyInfo dataclass creation."""
@@ -310,8 +310,8 @@ class TestDependencyManager(unittest.TestCase):
         await self.dependency_manager._check_ai_trackdown_tools(dependency_info, config)
 
         self.assertTrue(dependency_info.is_installed)
-        self.assertEqual(dependency_info.installation_method, InstallationMethod.NPM_GLOBAL)
-        self.assertEqual(dependency_info.version, "1.1.1")
+        self.assertEqual(dependency_info.installation_method, InstallationMethod.PIP)
+        self.assertEqual(dependency_info.version, "1.1.0")
 
     @patch("claude_pm.services.dependency_manager.DependencyManager._check_command_available")
     @patch("claude_pm.services.dependency_manager.DependencyManager._run_command")

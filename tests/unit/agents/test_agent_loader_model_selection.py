@@ -42,7 +42,8 @@ class TestAgentLoaderModelSelection:
     def mock_prepend_base(self):
         """Mock the prepend_base_instructions function."""
         with patch('claude_pm.agents.agent_loader.prepend_base_instructions') as mock:
-            mock.side_effect = lambda x: f"BASE_INSTRUCTIONS\n{x}"
+            # Accept any keyword arguments including complexity_score
+            mock.side_effect = lambda x, **kwargs: f"BASE_INSTRUCTIONS\n{x}"
             yield mock
     
     @pytest.fixture
@@ -359,7 +360,8 @@ class TestBackwardCompatibility:
         for func, agent_name in funcs:
             result = func()
             assert result == "Test agent prompt"
-            mock_get_agent_prompt.assert_called_with(agent_name)
+            # The actual call includes return_model_info=False parameter
+            mock_get_agent_prompt.assert_called_with(agent_name, return_model_info=False)
 
 
 if __name__ == "__main__":

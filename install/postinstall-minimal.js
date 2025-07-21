@@ -94,7 +94,8 @@ class MinimalPostInstall {
                 'requests>=2.31.0',
                 'openai>=1.0.0',
                 'python-frontmatter>=1.0.0',
-                'mistune>=3.0.0'
+                'mistune>=3.0.0',
+                'ai-trackdown-pytools==1.1.0'  // Python ticketing system
             ];
             
             // TEMPORARILY DISABLED: Memory system dependencies causing installation failures
@@ -196,51 +197,23 @@ class MinimalPostInstall {
     }
 
     /**
-     * Ensure aitrackdown alias is available after ai-trackdown-tools installation
+     * Check if ai-trackdown-pytools is available
      */
-    ensureAitrackdownAlias(pythonCmd) {
-        this.log('Checking aitrackdown alias availability...');
+    checkAiTrackdownAvailable(pythonCmd) {
+        this.log('Checking ai-trackdown-pytools availability...');
         
         try {
-            // First check if aitrackdown command is already available
-            try {
-                execSync('which aitrackdown', { stdio: 'pipe' });
-                this.log('✅ aitrackdown alias already available');
-                return { available: true, created: false };
-            } catch (e) {
-                // Command not found, proceed to create alias
-            }
+            // Check if ai-trackdown module is available
+            execSync(`${pythonCmd} -c "import ai_trackdown; print('ai-trackdown-pytools available')"`, { 
+                stdio: 'pipe',
+                timeout: 10000
+            });
             
-            // Run the ensure_aitrackdown_alias.py script
-            const scriptPath = path.join(this.packageRoot, 'scripts', 'ensure_aitrackdown_alias.py');
-            
-            if (!fs.existsSync(scriptPath)) {
-                this.log('⚠️ ensure_aitrackdown_alias.py script not found', 'warn');
-                return { available: false, created: false };
-            }
-            
-            try {
-                const output = execSync(`${pythonCmd} ${scriptPath}`, { 
-                    cwd: this.packageRoot,
-                    stdio: 'pipe',
-                    encoding: 'utf8',
-                    timeout: 30000
-                });
-                
-                if (output.includes('already exists') || output.includes('created successfully')) {
-                    this.log('✅ aitrackdown alias ensured');
-                    return { available: true, created: true };
-                } else {
-                    this.log('⚠️ aitrackdown alias creation returned unexpected output', 'warn');
-                    return { available: false, created: false };
-                }
-            } catch (scriptError) {
-                this.log(`⚠️ Failed to ensure aitrackdown alias: ${scriptError.message}`, 'warn');
-                return { available: false, created: false };
-            }
+            this.log('✅ ai-trackdown-pytools is available');
+            return { available: true, version: '1.1.0' };
         } catch (e) {
-            this.log(`⚠️ Error checking aitrackdown alias: ${e.message}`, 'warn');
-            return { available: false, created: false };
+            this.log('⚠️ ai-trackdown-pytools not detected - ticketing features may be limited', 'warn');
+            return { available: false, version: null };
         }
     }
 
@@ -446,13 +419,13 @@ class MinimalPostInstall {
                 console.log(`   CLI Package: ${validation.cliAvailable ? '✅' : '❌'}`);
                 console.log(`   Memory System: ${validation.memorySystemAvailable ? '✅' : '❌'}`);
                 
-                // Check aitrackdown alias status
+                // Check ai-trackdown-pytools status
                 let aitrackdownAvailable = false;
                 try {
-                    execSync('which aitrackdown', { stdio: 'pipe' });
+                    execSync(`${pythonCmd} -c "import ai_trackdown"`, { stdio: 'pipe' });
                     aitrackdownAvailable = true;
                 } catch (e) {}
-                console.log(`   Aitrackdown Alias: ${aitrackdownAvailable ? '✅' : '⚠️ (manual setup may be needed)'}`);
+                console.log(`   AI-Trackdown-Pytools: ${aitrackdownAvailable ? '✅' : '⚠️ (pip install ai-trackdown-pytools==1.1.0)'}`);
             }
         }
         
@@ -468,7 +441,7 @@ class MinimalPostInstall {
         console.log('   • If Python dependencies fail: Check Python 3.8+ is installed');
         console.log('   • If permission errors occur: Try with --break-system-packages flag');
         console.log('   • If memory system fails: AI features will be limited but core CLI works');
-        console.log('   • If aitrackdown alias missing: Run "python scripts/ensure_aitrackdown_alias.py"');
+        console.log('   • If ai-trackdown-pytools missing: Run "pip install ai-trackdown-pytools==1.1.0"');
         console.log('   • For detailed logs: Check ~/.claude-pm/logs/ after initialization');
         
         console.log('\n📚 Documentation:');
@@ -680,7 +653,7 @@ class MinimalPostInstall {
             if (pythonInstallSuccess) {
                 this.log('✅ Python package installation completed successfully');
                 
-                // Ensure aitrackdown alias after Python package installation
+                // Check ai-trackdown-pytools after Python package installation
                 const pythonCommands = ['python3', 'python'];
                 let pythonCmd = null;
                 for (const cmd of pythonCommands) {
@@ -694,9 +667,9 @@ class MinimalPostInstall {
                 }
                 
                 if (pythonCmd) {
-                    const aliasResult = this.ensureAitrackdownAlias(pythonCmd);
-                    if (!aliasResult.available) {
-                        this.log('ℹ️ aitrackdown alias may need manual setup for ticketing functionality');
+                    const trackdownResult = this.checkAiTrackdownAvailable(pythonCmd);
+                    if (!trackdownResult.available) {
+                        this.log('ℹ️ ai-trackdown-pytools not detected - run "pip install ai-trackdown-pytools==1.1.0" for ticketing features');
                     }
                 }
             } else {

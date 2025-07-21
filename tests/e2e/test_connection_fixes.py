@@ -16,7 +16,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from claude_pm.services.health_dashboard import HealthDashboardOrchestrator
-from claude_pm.commands.health_commands import CMPMHealthMonitor
+from claude_pm.services.health_monitor import HealthMonitorService
 from claude_pm.core.connection_manager import get_connection_manager
 # from claude_pm.services.memory_service import MemoryService  # REMOVED - service no longer available
 
@@ -103,7 +103,7 @@ async def test_health_monitor_stability():
     
     try:
         # Create health monitor
-        monitor = CMPMHealthMonitor()
+        monitor = HealthMonitorService()
         
         # Run multiple health checks
         for i in range(3):

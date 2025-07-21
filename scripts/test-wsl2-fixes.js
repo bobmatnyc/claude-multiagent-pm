@@ -337,7 +337,7 @@ class WSL2FixValidator {
             console.log('   📚 Suggested actions:');
             console.log('   1. Run the WSL2 fix script: scripts/wsl2-path-fix.sh');
             console.log('   2. Restart your shell: source ~/.bashrc');
-            console.log('   3. Reinstall missing packages: npm install -g @bobmatnyc/ai-trackdown-tools');
+            console.log('   3. Install Python ticketing package: pip install --user ai-trackdown-pytools==1.1.0');
             console.log('   4. Check GitHub issue: https://github.com/bobmatnyc/claude-multiagent-pm/issues/1');
         }
         

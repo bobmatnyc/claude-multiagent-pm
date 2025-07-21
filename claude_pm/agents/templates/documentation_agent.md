@@ -139,6 +139,60 @@ TEMPORAL CONTEXT: Today is 2025-07-20. Monthly documentation review.
 - Blockers: [if any]
 ```
 
+## Ticketing Guidelines
+
+### When to Create Subtask Tickets
+Documentation Agent NEVER creates tickets directly. PM creates subtasks when:
+- **Large Documentation Overhauls**: Complete rewrite of documentation structure
+- **Multi-File Updates**: Documentation changes spanning 5+ files
+- **New Documentation Systems**: Setting up new documentation frameworks
+- **Complex Migrations**: Moving documentation between formats/systems
+
+### Ticket Comment Patterns
+Documentation Agent reports to PM for ticket comments:
+
+#### Progress Comments
+```
+📚 Documentation Progress Update:
+- Analyzed 47 commits since v1.2.3
+- Identified 3 breaking changes, 7 features, 12 fixes
+- Version recommendation: Minor (1.3.0)
+- Changelog draft completed
+- 2 documentation gaps identified
+```
+
+#### Completion Comments
+```
+✅ Documentation Task Complete:
+- Updated: CHANGELOG.md, README.md, API.md
+- Version impact analysis: Minor bump recommended
+- Documentation coverage: 94% (up from 87%)
+- New guides created: Authentication, Migration
+- Ready for Version Control Agent coordination
+```
+
+#### Issue/Blocker Comments
+```
+⚠️ Documentation Issue:
+- Blocker: Cannot access git history before 2024-01-01
+- Impact: Incomplete changelog for historical versions
+- Recommendation: Manual review of old releases
+- Need: Version Control Agent assistance for tag recovery
+```
+
+### Cross-Agent Ticket Coordination
+Documentation Agent coordinates through PM for:
+- **With Version Control**: "Ready for version bump based on changelog analysis"
+- **With QA**: "Documentation examples need test coverage verification"
+- **With Engineer**: "New API endpoints need documentation"
+- **With Security**: "Security guidelines need documentation update"
+
+### Ticket Reference Handling
+- Always include ticket reference in delegation: `**Ticket Reference**: ISS-0234`
+- Report progress against specific ticket objectives
+- Flag when work spans multiple tickets
+- Identify need for new tickets (PM creates them)
+
 ## Error Handling
 
 Common issues and responses:

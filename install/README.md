@@ -1,6 +1,6 @@
 # Claude PM Framework - Deployment System
 
-This directory contains the portable deployment system for the Claude PM Framework, enabling full framework deployments to any directory with complete ai-trackdown-tools integration.
+This directory contains the portable deployment system for the Claude PM Framework, enabling full framework deployments to any directory with complete ai-trackdown-pytools integration.
 
 ## 🚀 Quick Start
 
@@ -51,8 +51,8 @@ deployment-directory/
 ├── templates/              # Project templates
 ├── schemas/                # Data schemas
 ├── bin/                    # CLI wrappers
-│   ├── aitrackdown*        # Main CLI wrapper
-│   └── atd*                # CLI alias
+│   ├── aitrackdown*        # Placeholder script (ai-trackdown-pytools is a Python library)
+│   └── atd*                # Placeholder script (ai-trackdown-pytools is a Python library)
 ├── scripts/                # Deployment scripts
 │   └── health-check*       # Health validation
 ├── requirements/           # Python dependencies
@@ -99,12 +99,12 @@ npm uninstall -g @bobmatnyc/claude-multiagent-pm  # Triggers preuninstall.js
 Main deployment script that creates a complete framework deployment.
 
 **Features:**
-- Environment validation (Node.js, Python, ai-trackdown-tools)
+- Environment validation (Node.js, Python, ai-trackdown-pytools)
 - Framework core deployment
-- AI-trackdown CLI wrapper creation
 - Task hierarchy initialization
 - Configuration generation
 - Platform-specific optimizations
+- Python package integration
 
 **Usage:**
 ```bash
@@ -176,36 +176,33 @@ Legacy installation script (maintained for compatibility).
 
 ## 🔍 AI-Trackdown Integration
 
-### CLI Wrapper Creation
-The deployment system creates platform-specific CLI wrappers:
+### Python Library Integration
+The ai-trackdown-pytools is a Python library that provides programmatic access to task management:
 
-**Unix (Linux/macOS):**
-```bash
-#!/bin/bash
-cd "/path/to/deployment"
-node "/path/to/ai-trackdown-tools/dist/index.js" "$@"
+**Python Usage:**
+```python
+from ai_trackdown import Task, Issue, Epic
+
+# Create a new task
+task = Task(
+    id="TSK-001",
+    title="Implement feature",
+    description="Feature implementation",
+    status="open"
+)
+
+# Create an issue
+issue = Issue(
+    id="ISS-001",
+    title="Bug fix",
+    priority="high"
+)
 ```
 
-**Windows:**
-```batch
-@echo off
-cd /d "C:\path\to\deployment"
-node "C:\path\to\ai-trackdown-tools\dist\index.js" %*
-```
-
-### Path Resolution
-The deployment system automatically:
-1. Locates ai-trackdown-tools in global node_modules
-2. Tries local node_modules as fallback
-3. Uses npm ls to find installation
-4. Creates environment-specific wrappers
-
-### CLI Commands Available
-- `./bin/aitrackdown` - Main CLI command
-- `./bin/atd` - Alias for aitrackdown
-- `./bin/aitrackdown status` - Current status
-- `./bin/aitrackdown epic list` - List epics
-- `./bin/aitrackdown issue list` - List issues
+### Integration Notes
+- ai-trackdown-pytools is a Python library, not a CLI tool
+- Access task management features through Python code
+- The deployment creates placeholder scripts that inform users about Python usage
 
 ## 🏥 Health Monitoring
 
@@ -237,15 +234,15 @@ node install/validate-deployment.js --target /path/to/deployment --verbose
 ### Required Software
 - **Node.js**: 16.0.0 or higher
 - **Python**: 3.8 or higher
-- **ai-trackdown-tools**: 1.0.1 or higher
+- **ai-trackdown-pytools**: 1.1.0 (Python package)
 
 ### Installation Commands
 ```bash
-# Install ai-trackdown-tools globally
-npm install -g @bobmatnyc/ai-trackdown-tools
+# Install ai-trackdown-pytools via pip
+pip install --user ai-trackdown-pytools==1.1.0
 
 # Verify installation
-aitrackdown --version
+python -c "import ai_trackdown; print('ai-trackdown-pytools installed')"
 ```
 
 ## 📋 Deployment Checklist
@@ -253,7 +250,7 @@ aitrackdown --version
 ### Pre-Deployment
 - [ ] Node.js 16+ installed
 - [ ] Python 3.8+ installed
-- [ ] ai-trackdown-tools installed globally
+- [ ] ai-trackdown-pytools installed via pip
 - [ ] Target directory accessible
 
 ### Deployment Process
@@ -274,13 +271,13 @@ aitrackdown --version
 
 ### Common Issues
 
-**1. ai-trackdown-tools not found**
+**1. ai-trackdown-pytools not found**
 ```bash
-# Install globally
-npm install -g @bobmatnyc/ai-trackdown-tools
+# Install via pip
+pip install --user ai-trackdown-pytools==1.1.0
 
 # Verify installation
-npm list -g @bobmatnyc/ai-trackdown-tools
+python -c "import ai_trackdown; print('Installed')"
 ```
 
 **2. CLI wrappers not executable**

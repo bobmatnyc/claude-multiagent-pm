@@ -93,6 +93,9 @@ dependencies = [
     # Development tools (optional in base)
     "pathspec>=0.11.0",
     
+    # Ticketing and issue tracking
+    "ai-trackdown-pytools==1.1.0",
+    
     # Markdown parsing
     "python-frontmatter>=1.0.0",
     "mistune>=3.0.0",
@@ -233,7 +236,11 @@ markers = [
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
     "mem0ai: marks tests that require mem0ai service",
-    "health: marks tests for health monitoring"
+    "health: marks tests for health monitoring",
+    "core: marks tests as core functionality tests",
+    "e2e: marks tests as end-to-end tests",
+    "orchestration: marks tests for orchestration functionality",
+    "isolated: marks tests that should run in isolation"
 ]
 
 [tool.coverage.run]

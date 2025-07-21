@@ -184,6 +184,76 @@ TEMPORAL CONTEXT: Today is 2025-07-20. Feature ready for QA.
 - Authentication/authorization checks
 - Input validation testing
 
+## Ticketing Guidelines
+
+### When to Create Subtask Tickets
+QA Agent NEVER creates tickets directly. PM creates subtasks when:
+- **Comprehensive Test Suite Creation**: Building new test frameworks
+- **Major Regression Testing**: Testing across multiple releases
+- **Performance Testing Campaigns**: Load/stress testing setup
+- **Security Audit Testing**: Full security test implementation
+
+### Ticket Comment Patterns
+QA Agent reports to PM for ticket comments:
+
+#### Progress Comments
+```
+✅ QA Progress Update:
+- Unit tests: 156/162 passing (96%)
+- Integration tests: 45/45 passing
+- E2E tests: 12/15 passing (3 flaky)
+- Coverage: 87% (target: 80%)
+- Performance: All benchmarks met
+```
+
+#### Completion Comments
+```
+✅ QA Task Complete:
+- Test Suite: All 217 tests passing
+- Coverage: 89% achieved
+- Performance: Response time <200ms
+- Security: No vulnerabilities found
+- Quality Gate: PASSED - Ready for release
+```
+
+#### Issue/Blocker Comments
+```
+⚠️ QA Issue Found:
+- Failed Tests: 6 integration tests failing
+- Root Cause: Database connection timeout
+- Impact: Cannot validate data persistence
+- Severity: High - Blocks release
+- Recommendation: Data Engineer investigation needed
+```
+
+### Cross-Agent Ticket Coordination
+QA Agent coordinates through PM for:
+- **With Engineer**: "6 failing tests need fixes in auth module"
+- **With Security**: "Found potential SQL injection in user input"
+- **With Ops**: "Test environment needs Redis service"
+- **With Data Engineer**: "Test data fixtures need update"
+
+### Ticket Reference Handling
+- Always include ticket reference in delegation: `**Ticket Reference**: ISS-0456`
+- Map test failures to specific ticket features
+- Track quality metrics per ticket
+- Report test coverage by feature/ticket
+
+### Bug Ticket Creation Pattern
+When QA finds bugs, report to PM for ticket creation:
+```
+🐛 Bug Found - Needs Ticket:
+- Title: Authentication fails with special characters
+- Severity: High
+- Steps to Reproduce:
+  1. Enter email with '+' character
+  2. Submit login form
+  3. Observe 500 error
+- Expected: Successful login
+- Actual: Server error
+- Test Case: test_auth_special_chars
+```
+
 ## Error Handling
 
 Common issues and responses:

@@ -9,7 +9,7 @@ import asyncio
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 from ..core.base_service import BaseService
 from ..core.response_types import TaskToolResponse
@@ -38,8 +38,8 @@ class HealthMonitorService(BaseService):
         )
 
         # Background monitoring process
-        self._monitor_process: Optional[subprocess.Popen] = None
-        self._last_health_report: Optional[Dict] = None
+        self._monitor_process: Optional[asyncio.subprocess.Process] = None
+        self._last_health_report: Optional[Dict[str, Any]] = None
 
     async def _initialize(self) -> None:
         """Initialize the health monitor service."""
@@ -78,7 +78,7 @@ class HealthMonitorService(BaseService):
             # Check background monitoring status
             if self.enable_background_monitoring:
                 checks["background_monitoring"] = (
-                    self._monitor_process is not None and self._monitor_process.poll() is None
+                    self._monitor_process is not None and self._monitor_process.returncode is None
                 )
             else:
                 checks["background_monitoring"] = True  # Not required
@@ -150,7 +150,7 @@ class HealthMonitorService(BaseService):
                 performance_metrics={"status": "error", "timestamp": datetime.now().isoformat()}
             ).__dict__
 
-    async def _load_health_report(self) -> Optional[Dict]:
+    async def _load_health_report(self) -> Optional[Dict[str, Any]]:
         """Load the latest health report from file."""
         try:
             import json
@@ -162,11 +162,12 @@ class HealthMonitorService(BaseService):
 
             if health_report_path.exists():
                 with open(health_report_path, "r") as f:
-                    return json.load(f)
+                    data: Dict[str, Any] = json.load(f)
+                    return data
 
         except Exception as e:
             self.logger.warning(f"Failed to load health report: {e}")
-
+        
         return None
 
     async def _test_health_check(self) -> bool:
@@ -205,7 +206,7 @@ class HealthMonitorService(BaseService):
         while not self._stop_event.is_set():
             try:
                 # Start background monitoring process if not running
-                if not self._monitor_process or self._monitor_process.poll() is not None:
+                if not self._monitor_process or self._monitor_process.returncode is not None:
                     await self._start_background_monitoring()
 
                 # Wait for interval or stop signal
@@ -333,7 +334,7 @@ class HealthMonitorService(BaseService):
 
     def is_background_monitoring_active(self) -> bool:
         """Check if background monitoring is active."""
-        return self._monitor_process is not None and self._monitor_process.poll() is None
+        return self._monitor_process is not None and self._monitor_process.returncode is None
 
     async def get_subsystem_versions(self) -> Dict:
         """Get subsystem version information from parent directory manager."""
@@ -443,7 +444,7 @@ class HealthMonitorService(BaseService):
                 performance_metrics={"enhanced_timestamp": datetime.now().isoformat()}
             ).__dict__
 
-    def check_framework_health(self):
+    def check_framework_health(self) -> Dict[str, Any]:
         """Synchronous framework health check for backward compatibility."""
         try:
             # Run the async health check method synchronously
@@ -476,7 +477,7 @@ class HealthMonitorService(BaseService):
                 "performance_metrics": {"framework_health_error": False}
             }
     
-    def _sync_health_check(self):
+    def _sync_health_check(self) -> Dict[str, bool]:
         """Helper method for synchronous health check in new event loop."""
         new_loop = asyncio.new_event_loop()
         asyncio.set_event_loop(new_loop)

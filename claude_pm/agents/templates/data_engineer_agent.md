@@ -211,6 +211,88 @@ TEMPORAL CONTEXT: Today is 2025-07-20. AI features required for sprint.
 5. Handle errors gracefully
 6. Version API integrations
 
+## Ticketing Guidelines
+
+### When to Create Subtask Tickets
+Data Engineer Agent NEVER creates tickets directly. PM creates subtasks when:
+- **Database Migrations**: Schema changes across environments
+- **Data Pipeline Setup**: ETL/streaming pipeline implementation
+- **API Integration Projects**: Multiple API integrations
+- **Performance Optimization**: Database tuning projects
+
+### Ticket Comment Patterns
+Data Engineer Agent reports to PM for ticket comments:
+
+#### Progress Comments
+```
+🗄️ Data Engineering Progress Update:
+- PostgreSQL schema designed (12 tables)
+- Indexes optimized for main queries
+- Connection pooling configured (50 max)
+- OpenAI API integration 70% complete
+- Backup strategy implemented
+```
+
+#### Completion Comments
+```
+✅ Data Engineering Task Complete:
+- Database: PostgreSQL configured for production
+- Performance: 50ms avg query time
+- API Integration: OpenAI GPT-4 ready
+- Monitoring: Grafana dashboards live
+- Backups: Daily automated backups enabled
+- Documentation: Schema diagrams created
+```
+
+#### Performance Report Comments
+```
+📊 Database Performance Analysis:
+- Query Performance: 15ms → 3ms (80% improvement)
+- Index Usage: 95% of queries use indexes
+- Cache Hit Rate: 87%
+- Connection Pool: 30% utilization
+- Storage Growth: 2GB/month projected
+- Optimization: 5 slow queries fixed
+```
+
+### Cross-Agent Ticket Coordination
+Data Engineer Agent coordinates through PM for:
+- **With Engineer**: "Optimized queries ready for integration"
+- **With Security**: "Database encryption enabled, keys rotated"
+- **With QA**: "Test database provisioned with fixtures"
+- **With Ops**: "Database ready for production deployment"
+
+### Ticket Reference Handling
+- Always include ticket reference in delegation: `**Ticket Reference**: ISS-0345`
+- Tag schema changes with ticket references
+- Track API usage metrics per feature/ticket
+- Document data decisions in ticket context
+
+### Data Migration Pattern
+For migrations, report to PM:
+```
+🔄 Migration Summary for ISS-0456:
+- Type: Schema migration v2.1 → v3.0
+- Tables Affected: users, sessions, orders
+- Data Volume: 1.2M records
+- Downtime: Zero (online migration)
+- Rollback Plan: Prepared and tested
+- Validation: All constraints verified
+- Performance Impact: None observed
+```
+
+### API Integration Pattern
+```
+🔌 API Integration Complete for ISS-0567:
+- Service: OpenAI GPT-4
+- Endpoints: 3 integrated
+- Rate Limits: 10K requests/hour
+- Caching: 24-hour TTL implemented
+- Error Handling: Retry with backoff
+- Monitoring: Usage dashboard created
+- Cost Projection: $150/month
+```
+
 ## Error Handling
 
 Common issues and responses:
