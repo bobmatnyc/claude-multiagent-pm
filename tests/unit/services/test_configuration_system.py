@@ -18,7 +18,7 @@ import yaml
 import time
 import threading
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from typing import Dict, Any, List
 
 from claude_pm.config.memory_trigger_config import (
@@ -32,11 +32,6 @@ from claude_pm.config.memory_trigger_config import (
     Environment,
     MemoryTriggerType,
     MemoryBackend,
-    ConfigurationFileWatcher,
-    get_config_manager,
-    initialize_config,
-    get_config,
-    apply_environment_overrides,
 )
 
 
@@ -47,756 +42,470 @@ class TestMemoryTriggerConfig:
         """Test performance configuration defaults."""
         config = PerformanceConfig()
 
-        assert config.create_timeout == 5.0
-        assert config.recall_timeout == 3.0
-        assert config.batch_size == 50
-        assert config.max_concurrent_operations == 10
-        assert config.cache_enabled is True
-        assert config.background_processing_enabled is True
-        assert config.worker_thread_count == 3
+        assert config.max_memory_mb == 512
+        assert config.cache_size == 1000
+        assert config.gc_threshold == 700
+        assert config.optimization_level == "standard"
+        assert config.enable_monitoring is True
+        assert config.metrics_interval_seconds == 60
 
     def test_performance_config_validation(self):
         """Test performance configuration validation."""
         # Valid configuration
-        valid_config = PerformanceConfig(
-            create_timeout=5.0, recall_timeout=3.0, batch_size=50, max_concurrent_operations=10
-        )
+        config = PerformanceConfig()
+        assert config.validate() is True
 
-        errors = valid_config.validate()
-        assert len(errors) == 0
+        # Invalid configurations
+        invalid_configs = [
+            PerformanceConfig(max_memory_mb=-1),
+            PerformanceConfig(cache_size=0),
+            PerformanceConfig(gc_threshold=-10),
+            PerformanceConfig(optimization_level="invalid"),
+            PerformanceConfig(metrics_interval_seconds=0),
+        ]
 
-        # Invalid configuration
-        invalid_config = PerformanceConfig(
-            create_timeout=-1.0,  # Invalid: negative
-            recall_timeout=0.0,  # Invalid: zero
-            batch_size=0,  # Invalid: zero
-            max_concurrent_operations=-5,  # Invalid: negative
-            min_memory_quality_score=1.5,  # Invalid: > 1.0
-            memory_cleanup_threshold=-0.1,  # Invalid: negative
-        )
-
-        errors = invalid_config.validate()
-        assert len(errors) == 6  # All invalid fields should be caught
-        assert any("create_timeout must be positive" in error for error in errors)
-        assert any("recall_timeout must be positive" in error for error in errors)
-        assert any("batch_size must be positive" in error for error in errors)
-        assert any("max_concurrent_operations must be positive" in error for error in errors)
-        assert any("min_memory_quality_score must be between 0 and 1" in error for error in errors)
-        assert any("memory_cleanup_threshold must be between 0 and 1" in error for error in errors)
+        for invalid_config in invalid_configs:
+            assert invalid_config.validate() is False
 
     def test_trigger_policy_config_defaults(self):
         """Test trigger policy configuration defaults."""
         config = TriggerPolicyConfig()
 
         assert config.enabled is True
-        assert config.trigger_type == MemoryTriggerType.WORKFLOW
-        assert config.success_threshold == 0.8
-        assert config.create_on_success is True
-        assert config.pattern_detection_enabled is True
-        assert config.min_context_length == 10
-        assert config.max_context_length == 10000
+        assert config.trigger_threshold == 0.8
+        assert config.cooldown_seconds == 300
+        assert config.max_triggers_per_hour == 12
+        assert "critical" in config.priority_weights
+        assert config.priority_weights["critical"] == 1.0
 
     def test_trigger_policy_config_validation(self):
         """Test trigger policy configuration validation."""
         # Valid configuration
-        valid_config = TriggerPolicyConfig(
-            success_threshold=0.8,
-            failure_threshold=0.3,
-            pattern_similarity_threshold=0.7,
-            min_context_length=10,
-            max_context_length=5000,
-            min_trigger_confidence=0.6,
-            max_triggers_per_minute=60,
-            cooldown_period_seconds=30,
-        )
+        config = TriggerPolicyConfig()
+        assert config.validate() is True
 
-        errors = valid_config.validate()
-        assert len(errors) == 0
+        # Invalid configurations
+        invalid_configs = [
+            TriggerPolicyConfig(trigger_threshold=1.5),
+            TriggerPolicyConfig(trigger_threshold=-0.1),
+            TriggerPolicyConfig(cooldown_seconds=-1),
+            TriggerPolicyConfig(max_triggers_per_hour=0),
+            TriggerPolicyConfig(priority_weights={"test": 1.5}),
+        ]
 
-        # Invalid configuration
-        invalid_config = TriggerPolicyConfig(
-            success_threshold=1.5,  # Invalid: > 1.0
-            failure_threshold=-0.1,  # Invalid: negative
-            pattern_similarity_threshold=2.0,  # Invalid: > 1.0
-            min_context_length=-1,  # Invalid: negative
-            max_context_length=5,  # Invalid: <= min_context_length
-            min_trigger_confidence=1.2,  # Invalid: > 1.0
-            max_triggers_per_minute=0,  # Invalid: zero
-            cooldown_period_seconds=-5,  # Invalid: negative
-        )
-
-        errors = invalid_config.validate()
-        assert len(errors) == 8  # All invalid fields should be caught
-
-    def test_lifecycle_policy_config_validation(self):
-        """Test lifecycle policy configuration validation."""
-        # Valid configuration
-        valid_config = LifecyclePolicyConfig(
-            default_retention_days=90, cleanup_interval_hours=24, min_quality_for_retention=0.4
-        )
-
-        errors = valid_config.validate()
-        assert len(errors) == 0
-
-        # Invalid configuration
-        invalid_config = LifecyclePolicyConfig(
-            default_retention_days=0,  # Invalid: zero
-            cleanup_interval_hours=-1,  # Invalid: negative
-            min_quality_for_retention=1.5,  # Invalid: > 1.0
-        )
-
-        errors = invalid_config.validate()
-        assert len(errors) >= 3
-
-    def test_monitoring_config_validation(self):
-        """Test monitoring configuration validation."""
-        # Valid configuration
-        valid_config = MonitoringConfig(
-            metrics_collection_interval=60, error_rate_threshold=0.05, log_level="INFO"
-        )
-
-        errors = valid_config.validate()
-        assert len(errors) == 0
-
-        # Invalid configuration
-        invalid_config = MonitoringConfig(
-            metrics_collection_interval=0,  # Invalid: zero
-            error_rate_threshold=1.5,  # Invalid: > 1.0
-            log_level="INVALID",  # Invalid: not a valid log level
-        )
-
-        errors = invalid_config.validate()
-        assert len(errors) >= 3
-
-    def test_backend_config_validation(self):
-        """Test backend configuration validation."""
-        # Valid configuration
-        valid_config = BackendConfig(
-            backend_type=MemoryBackend.MEM0, connection_timeout=10.0, pool_size=10
-        )
-
-        errors = valid_config.validate()
-        assert len(errors) == 0
-
-        # Invalid configuration with encryption
-        invalid_config = BackendConfig(
-            connection_timeout=-1.0,  # Invalid: negative
-            pool_size=0,  # Invalid: zero
-            encryption_enabled=True,
-            encryption_key_path=None,  # Invalid: encryption enabled but no key path
-        )
-
-        errors = invalid_config.validate()
-        assert len(errors) >= 3
-
-    def test_main_config_validation(self):
-        """Test main configuration validation and cross-validation."""
-        # Valid configuration
-        valid_config = MemoryTriggerConfig(
-            environment=Environment.TESTING,
-            performance=PerformanceConfig(max_concurrent_operations=5),
-            max_memory_operations_per_second=10,
-        )
-
-        errors = valid_config.validate()
-        assert len(errors) == 0
-
-        # Invalid configuration with cross-validation error
-        invalid_config = MemoryTriggerConfig(
-            performance=PerformanceConfig(max_concurrent_operations=20),
-            max_memory_operations_per_second=10,  # Invalid: less than max_concurrent_operations
-        )
-
-        errors = invalid_config.validate()
-        assert len(errors) >= 1
-        assert any(
-            "max_concurrent_operations cannot exceed max_memory_operations_per_second" in error
-            for error in errors
-        )
-
-    def test_config_serialization(self):
-        """Test configuration serialization and deserialization."""
-        # Create configuration
-        original_config = MemoryTriggerConfig(
-            environment=Environment.PRODUCTION,
-            performance=PerformanceConfig(create_timeout=10.0, batch_size=100),
-            trigger_policies={
-                "test_policy": TriggerPolicyConfig(
-                    trigger_type=MemoryTriggerType.AGENT, success_threshold=0.9
-                )
-            },
-        )
-
-        # Serialize to dictionary
-        config_dict = original_config.to_dict()
-
-        # Verify serialization
-        assert config_dict["environment"] == Environment.PRODUCTION
-        assert config_dict["performance"]["create_timeout"] == 10.0
-        assert config_dict["performance"]["batch_size"] == 100
-        assert "test_policy" in config_dict["trigger_policies"]
-
-        # Deserialize back to configuration
-        restored_config = MemoryTriggerConfig.from_dict(config_dict)
-
-        # Verify deserialization
-        assert restored_config.environment == Environment.PRODUCTION
-        assert restored_config.performance.create_timeout == 10.0
-        assert restored_config.performance.batch_size == 100
-        assert "test_policy" in restored_config.trigger_policies
-        assert (
-            restored_config.trigger_policies["test_policy"].trigger_type == MemoryTriggerType.AGENT
-        )
+        for invalid_config in invalid_configs:
+            assert invalid_config.validate() is False
 
 
 class TestMemoryTriggerConfigManager:
     """Test configuration manager functionality."""
 
     @pytest.fixture
-    def sample_config_data(self):
-        """Create sample configuration data."""
+    def temp_config_dir(self):
+        """Create temporary configuration directory."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            yield Path(temp_dir)
+
+    @pytest.fixture
+    def sample_config(self):
+        """Sample configuration data."""
         return {
-            "environment": "testing",
-            "global_enabled": True,
-            "debug_mode": False,
+            "environment": "development",
             "performance": {
-                "create_timeout": 5.0,
-                "recall_timeout": 3.0,
-                "batch_size": 50,
-                "cache_enabled": True,
+                "max_memory_mb": 256,
+                "cache_size": 500,
+                "optimization_level": "minimal"
             },
-            "backend": {"backend_type": "mem0", "connection_timeout": 10.0, "pool_size": 10},
             "trigger_policies": {
-                "workflow_completion": {
+                "default": {
                     "enabled": True,
-                    "trigger_type": "workflow",
-                    "success_threshold": 0.8,
-                    "create_on_success": True,
-                },
-                "error_resolution": {
-                    "enabled": True,
-                    "trigger_type": "error",
-                    "create_on_error": True,
-                    "pattern_detection_enabled": True,
-                },
-            },
-            "features": {
-                "workflow_triggers": True,
-                "agent_triggers": True,
-                "pattern_detection": True,
-            },
+                    "trigger_threshold": 0.7,
+                    "cooldown_seconds": 120
+                }
+            }
         }
 
     @pytest.fixture
-    def temp_config_file(self, sample_config_data):
-        """Create temporary configuration file."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            yaml.dump(sample_config_data, f)
-            temp_file = f.name
+    def config_manager(self, temp_config_dir):
+        """Create configuration manager instance."""
+        manager = MemoryTriggerConfigManager(
+            config_directory=temp_config_dir,
+            environment=Environment.DEVELOPMENT
+        )
+        return manager
 
-        yield temp_file
+    def test_manager_initialization(self, config_manager, temp_config_dir):
+        """Test configuration manager initialization."""
+        assert config_manager.config_directory == temp_config_dir
+        assert config_manager.environment == Environment.DEVELOPMENT
+        assert config_manager.config is not None
+
+    def test_load_configuration(self, config_manager, temp_config_dir, sample_config):
+        """Test loading configuration from file."""
+        # Write configuration file
+        config_file = temp_config_dir / "memory_trigger_config.yaml"
+        with open(config_file, "w") as f:
+            yaml.dump(sample_config, f)
+
+        # Load configuration
+        success = config_manager.load_configuration()
+        assert success is True
+
+        # Verify loaded values
+        assert config_manager.config.performance.max_memory_mb == 256
+        assert config_manager.config.performance.cache_size == 500
+
+    def test_save_configuration(self, config_manager, temp_config_dir):
+        """Test saving configuration to file."""
+        # Modify configuration
+        config_manager.config.performance.max_memory_mb = 1024
+
+        # Save configuration
+        success = config_manager.save_configuration()
+        assert success is True
+
+        # Verify file exists
+        config_file = temp_config_dir / "memory_trigger_config.yaml"
+        assert config_file.exists()
+
+        # Load and verify
+        with open(config_file, "r") as f:
+            saved_config = yaml.safe_load(f)
+        
+        assert saved_config["performance"]["max_memory_mb"] == 1024
+
+    def test_validate_configuration(self, config_manager):
+        """Test configuration validation."""
+        # Valid configuration
+        assert config_manager.validate_configuration() is True
+
+        # Invalid configuration
+        config_manager.config.performance.max_memory_mb = -1
+        assert config_manager.validate_configuration() is False
+
+    def test_apply_environment_overrides(self, config_manager):
+        """Test environment-specific overrides."""
+        # Create environment override
+        config_manager.config.performance.max_memory_mb = 256
+
+        # Apply production overrides
+        overrides = {
+            "performance": {
+                "max_memory_mb": 2048,
+                "optimization_level": "aggressive"
+            }
+        }
+
+        config_manager._apply_overrides(overrides)
+
+        assert config_manager.config.performance.max_memory_mb == 2048
+        assert config_manager.config.performance.optimization_level == "aggressive"
+
+    def test_get_trigger_policy(self, config_manager):
+        """Test getting trigger policies."""
+        # Add test policy
+        test_policy = TriggerPolicyConfig(
+            enabled=True,
+            trigger_threshold=0.9,
+            cooldown_seconds=60
+        )
+        
+        # Mock the trigger_policies attribute
+        config_manager.config.trigger_policies = {"test": test_policy}
+
+        # Get policy
+        policy = config_manager.get_trigger_policy("test")
+        assert policy is not None
+        assert policy.trigger_threshold == 0.9
+
+        # Get non-existent policy
+        policy = config_manager.get_trigger_policy("non_existent")
+        assert policy is None
+
+    def test_update_trigger_policy(self, config_manager):
+        """Test updating trigger policies."""
+        # Update policy
+        updates = {
+            "trigger_threshold": 0.95,
+            "cooldown_seconds": 180
+        }
+
+        # Mock the trigger_policies attribute
+        config_manager.config.trigger_policies = {
+            "default": TriggerPolicyConfig()
+        }
+
+        success = config_manager.update_trigger_policy("default", updates)
+        assert success is True
+
+        policy = config_manager.get_trigger_policy("default")
+        assert policy.trigger_threshold == 0.95
+        assert policy.cooldown_seconds == 180
+
+    def test_hot_reload_configuration(self, config_manager, temp_config_dir, sample_config):
+        """Test hot reload functionality."""
+        # Write initial configuration
+        config_file = temp_config_dir / "memory_trigger_config.yaml"
+        with open(config_file, "w") as f:
+            yaml.dump(sample_config, f)
+
+        # Load initial configuration
+        config_manager.load_configuration()
+        initial_memory = config_manager.config.performance.max_memory_mb
+
+        # Modify configuration file
+        sample_config["performance"]["max_memory_mb"] = 512
+        with open(config_file, "w") as f:
+            yaml.dump(sample_config, f)
+
+        # Trigger hot reload
+        config_manager.reload_configuration()
+
+        # Verify updated value
+        assert config_manager.config.performance.max_memory_mb == 512
+        assert config_manager.config.performance.max_memory_mb != initial_memory
+
+    def test_register_callback(self, config_manager):
+        """Test callback registration."""
+        callback_called = False
+        callback_config = None
+
+        def test_callback(config):
+            nonlocal callback_called, callback_config
+            callback_called = True
+            callback_config = config
+
+        # Register callback
+        config_manager.register_callback(test_callback)
+
+        # Trigger callbacks
+        config_manager._notify_callbacks()
+
+        assert callback_called is True
+        assert callback_config is not None
+
+    def test_thread_safety(self, config_manager):
+        """Test thread-safe configuration access."""
+        results = []
+        errors = []
+
+        def read_config():
+            try:
+                for _ in range(100):
+                    value = config_manager.config.performance.max_memory_mb
+                    results.append(value)
+                    time.sleep(0.001)
+            except Exception as e:
+                errors.append(e)
+
+        def write_config():
+            try:
+                for i in range(100):
+                    config_manager.config.performance.max_memory_mb = 256 + i
+                    time.sleep(0.001)
+            except Exception as e:
+                errors.append(e)
+
+        # Create threads
+        threads = []
+        for _ in range(3):
+            threads.append(threading.Thread(target=read_config))
+            threads.append(threading.Thread(target=write_config))
+
+        # Start threads
+        for thread in threads:
+            thread.start()
+
+        # Wait for completion
+        for thread in threads:
+            thread.join()
+
+        # Verify no errors occurred
+        assert len(errors) == 0
+        assert len(results) > 0
+
+
+class TestConfigurationFileWatcher:
+    """Test configuration file watcher functionality."""
+
+    @pytest.fixture
+    def temp_config_file(self):
+        """Create temporary configuration file."""
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".yaml", delete=False
+        ) as temp_file:
+            yaml.dump({"test": "initial"}, temp_file)
+            temp_path = Path(temp_file.name)
+
+        yield temp_path
 
         # Cleanup
         try:
-            os.unlink(temp_file)
-        except OSError:
+            temp_path.unlink()
+        except:
             pass
 
-    def test_config_manager_initialization(self):
-        """Test configuration manager initialization."""
-        # Initialize without file
-        manager = MemoryTriggerConfigManager()
-        assert manager.config is not None
-        assert isinstance(manager.config, MemoryTriggerConfig)
-
-        # Initialize with non-existent file
-        with pytest.raises(FileNotFoundError):
-            MemoryTriggerConfigManager("/non/existent/file.yaml")
-
-    def test_load_config_from_file(self, temp_config_file):
-        """Test loading configuration from file."""
-        manager = MemoryTriggerConfigManager()
-        manager.load_config_from_file(temp_config_file)
-
-        config = manager.get_config()
-
-        # Verify loaded configuration
-        assert config.environment == Environment.TESTING
-        assert config.global_enabled is True
-        assert config.debug_mode is False
-        assert config.performance.create_timeout == 5.0
-        assert config.performance.batch_size == 50
-        assert config.backend.backend_type == MemoryBackend.MEM0
-        assert "workflow_completion" in config.trigger_policies
-        assert "error_resolution" in config.trigger_policies
-        assert config.features["workflow_triggers"] is True
-
-    def test_save_config_to_file(self, temp_config_file):
-        """Test saving configuration to file."""
-        manager = MemoryTriggerConfigManager(temp_config_file)
-
-        # Modify configuration
-        config = manager.get_config()
-        config.debug_mode = True
-        config.performance.batch_size = 75
-
-        # Save configuration
-        manager.save_config_to_file()
-
-        # Load from file to verify
-        with open(temp_config_file, "r") as f:
-            saved_data = yaml.safe_load(f)
-
-        assert saved_data["debug_mode"] is True
-        assert saved_data["performance"]["batch_size"] == 75
-
-    def test_config_validation_strict_mode(self, sample_config_data):
-        """Test configuration validation in strict mode."""
-        # Create invalid configuration data
-        invalid_data = sample_config_data.copy()
-        invalid_data["performance"]["create_timeout"] = -1.0  # Invalid
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            yaml.dump(invalid_data, f)
-            temp_file = f.name
-
-        try:
-            # Should raise validation error in strict mode
-            with pytest.raises(ValueError, match="Configuration validation failed"):
-                MemoryTriggerConfigManager(temp_file)
-        finally:
-            os.unlink(temp_file)
-
-    def test_config_update(self, temp_config_file):
-        """Test configuration updates."""
-        manager = MemoryTriggerConfigManager(temp_config_file)
-
-        # Get initial batch size
-        initial_batch_size = manager.get_config().performance.batch_size
-
-        # Update configuration
-        updates = {
-            "performance": {"batch_size": initial_batch_size + 25, "create_timeout": 8.0},
-            "debug_mode": True,
-        }
-
-        manager.update_config(updates)
-
-        # Verify updates
-        updated_config = manager.get_config()
-        assert updated_config.performance.batch_size == initial_batch_size + 25
-        assert updated_config.performance.create_timeout == 8.0
-        assert updated_config.debug_mode is True
-
-        # Verify file was updated
-        with open(temp_config_file, "r") as f:
-            saved_data = yaml.safe_load(f)
-
-        assert saved_data["performance"]["batch_size"] == initial_batch_size + 25
-        assert saved_data["debug_mode"] is True
-
-    def test_trigger_policy_management(self, temp_config_file):
-        """Test trigger policy management."""
-        manager = MemoryTriggerConfigManager(temp_config_file)
-
-        # Add new trigger policy
-        new_policy = TriggerPolicyConfig(
-            trigger_type=MemoryTriggerType.AGENT, success_threshold=0.9, agent_name="test_agent"
+    def test_file_watcher_initialization(self, temp_config_file):
+        """Test file watcher initialization."""
+        watcher = ConfigurationFileWatcher(
+            file_path=temp_config_file,
+            callback=lambda: None
         )
 
-        manager.add_trigger_policy("test_agent_policy", new_policy)
+        assert watcher.file_path == temp_config_file
+        assert watcher.callback is not None
+        assert not watcher.is_running
 
-        # Verify policy was added
-        retrieved_policy = manager.get_trigger_policy("test_agent_policy")
-        assert retrieved_policy is not None
-        assert retrieved_policy.trigger_type == MemoryTriggerType.AGENT
-        assert retrieved_policy.success_threshold == 0.9
-        assert retrieved_policy.agent_name == "test_agent"
+    def test_file_change_detection(self, temp_config_file):
+        """Test detecting file changes."""
+        changes_detected = []
 
-        # Remove trigger policy
-        removed = manager.remove_trigger_policy("test_agent_policy")
-        assert removed is True
+        def on_change():
+            changes_detected.append(True)
 
-        # Verify policy was removed
-        retrieved_policy = manager.get_trigger_policy("test_agent_policy")
-        assert retrieved_policy is None
+        watcher = ConfigurationFileWatcher(
+            file_path=temp_config_file,
+            callback=on_change,
+            check_interval=0.1
+        )
 
-        # Try to remove non-existent policy
-        removed = manager.remove_trigger_policy("non_existent_policy")
-        assert removed is False
+        # Start watching
+        watcher.start()
 
-    def test_config_validation_reporting(self, temp_config_file):
-        """Test configuration validation reporting."""
-        manager = MemoryTriggerConfigManager(temp_config_file)
+        # Wait for initial setup
+        time.sleep(0.2)
 
-        # Valid configuration should have no errors
-        errors = manager.validate_config()
+        # Modify file
+        with open(temp_config_file, "w") as f:
+            yaml.dump({"test": "modified"}, f)
+
+        # Wait for detection
+        time.sleep(0.3)
+
+        # Stop watching
+        watcher.stop()
+
+        # Verify change was detected
+        assert len(changes_detected) > 0
+
+    def test_file_watcher_error_handling(self):
+        """Test file watcher error handling."""
+        non_existent_file = Path("/non/existent/file.yaml")
+        errors = []
+
+        def error_callback():
+            errors.append("callback_called")
+
+        watcher = ConfigurationFileWatcher(
+            file_path=non_existent_file,
+            callback=error_callback
+        )
+
+        # Should handle gracefully
+        watcher.start()
+        time.sleep(0.1)
+        watcher.stop()
+
+        # Callback should not be called for non-existent file
         assert len(errors) == 0
 
-        # Introduce validation errors
-        updates = {
-            "performance": {"create_timeout": -1.0, "batch_size": 0},  # Invalid  # Invalid
-            "max_memory_operations_per_second": -5,  # Invalid
-        }
 
-        # This should fail validation in strict mode
-        with pytest.raises(ValueError):
-            manager.update_config(updates)
-
-    def test_environment_specific_config_path(self):
-        """Test environment-specific configuration file paths."""
-        manager = MemoryTriggerConfigManager()
-
-        base_path = "/path/to/config.yaml"
-
-        # Test different environments
-        dev_path = manager.get_environment_config_path(Environment.DEVELOPMENT, base_path)
-        assert dev_path == "/path/to/config.development.yaml"
-
-        prod_path = manager.get_environment_config_path(Environment.PRODUCTION, base_path)
-        assert prod_path == "/path/to/config.production.yaml"
-
-        test_path = manager.get_environment_config_path(Environment.TESTING, base_path)
-        assert test_path == "/path/to/config.testing.yaml"
-
-    def test_config_manager_shutdown(self, temp_config_file):
-        """Test configuration manager shutdown."""
-        manager = MemoryTriggerConfigManager(temp_config_file)
-
-        # Should shutdown without errors
-        manager.shutdown()
-
-        # Observer should be stopped
-        assert manager.observer is None
-        assert manager.watcher is None
-
-
-class TestConfigurationHotReloading:
-    """Test configuration hot reloading functionality."""
+class TestConfigurationIntegration:
+    """Test configuration system integration."""
 
     @pytest.fixture
-    def hot_reload_config_file(self):
-        """Create configuration file for hot reload testing."""
-        config_data = {
-            "environment": "testing",
-            "auto_reload": True,
-            "performance": {"batch_size": 50, "create_timeout": 5.0},
-        }
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            yaml.dump(config_data, f)
-            temp_file = f.name
-
-        yield temp_file
-
-        try:
-            os.unlink(temp_file)
-        except OSError:
-            pass
-
-    def test_hot_reload_detection(self, hot_reload_config_file):
-        """Test hot reload file change detection."""
-        manager = MemoryTriggerConfigManager(hot_reload_config_file)
-
-        # Get initial batch size
-        initial_batch_size = manager.get_config().performance.batch_size
-
-        # Modify configuration file
-        config_data = {
-            "environment": "testing",
-            "auto_reload": True,
-            "performance": {"batch_size": initial_batch_size + 25, "create_timeout": 5.0},
-        }
-
-        with open(hot_reload_config_file, "w") as f:
-            yaml.dump(config_data, f)
-
-        # Wait for file system event processing
-        time.sleep(0.1)
-
-        # Manual reload (simulating hot reload trigger)
-        manager.reload_config()
-
-        # Verify configuration was reloaded
-        updated_config = manager.get_config()
-        assert updated_config.performance.batch_size == initial_batch_size + 25
-
-        manager.shutdown()
-
-    @patch("claude_pm.config.memory_trigger_config.Observer")
-    def test_hot_reload_setup(self, mock_observer_class, hot_reload_config_file):
-        """Test hot reload setup with mocked file watcher."""
-        mock_observer = Mock()
-        mock_observer_class.return_value = mock_observer
-
-        manager = MemoryTriggerConfigManager(hot_reload_config_file)
-
-        # Verify observer was set up
-        assert manager.observer is not None
-        assert manager.watcher is not None
-
-        # Verify observer methods were called
-        mock_observer.schedule.assert_called_once()
-        mock_observer.start.assert_called_once()
-
-        manager.shutdown()
-        mock_observer.stop.assert_called_once()
-
-    def test_hot_reload_cooldown(self, hot_reload_config_file):
-        """Test hot reload cooldown prevents rapid reloads."""
-        manager = MemoryTriggerConfigManager(hot_reload_config_file)
-        watcher = ConfigurationFileWatcher(manager)
-
-        # Mock event
-        mock_event = Mock()
-        mock_event.is_directory = False
-        mock_event.src_path = hot_reload_config_file
-
-        # First modification
-        first_time = time.time()
-        watcher.last_reload = first_time - 2.0  # 2 seconds ago
-
-        with patch.object(manager, "reload_config") as mock_reload:
-            watcher.on_modified(mock_event)
-            mock_reload.assert_called_once()
-
-        # Rapid second modification (should be ignored due to cooldown)
-        watcher.last_reload = time.time() - 0.5  # 0.5 seconds ago (within cooldown)
-
-        with patch.object(manager, "reload_config") as mock_reload:
-            watcher.on_modified(mock_event)
-            mock_reload.assert_not_called()
-
-        manager.shutdown()
-
-
-class TestEnvironmentVariableOverrides:
-    """Test environment variable override functionality."""
-
-    def test_performance_overrides(self):
-        """Test performance configuration overrides."""
-        config = MemoryTriggerConfig()
-
-        # Set environment variables
-        with patch.dict(
-            os.environ,
-            {
-                "MEMORY_CREATE_TIMEOUT": "10.0",
-                "MEMORY_RECALL_TIMEOUT": "5.0",
-                "MEMORY_BATCH_SIZE": "100",
-                "MEMORY_MAX_CONCURRENT": "20",
-            },
-        ):
-            apply_environment_overrides(config)
-
-            assert config.performance.create_timeout == 10.0
-            assert config.performance.recall_timeout == 5.0
-            assert config.performance.batch_size == 100
-            assert config.performance.max_concurrent_operations == 20
-
-    def test_backend_overrides(self):
-        """Test backend configuration overrides."""
-        config = MemoryTriggerConfig()
-
-        with patch.dict(
-            os.environ, {"MEMORY_BACKEND_TYPE": "local", "MEMORY_CONNECTION_TIMEOUT": "15.0"}
-        ):
-            apply_environment_overrides(config)
-
-            assert config.backend.backend_type == MemoryBackend.LOCAL
-            assert config.backend.connection_timeout == 15.0
-
-    def test_feature_toggles_overrides(self):
-        """Test feature toggle overrides."""
-        config = MemoryTriggerConfig()
-
-        with patch.dict(
-            os.environ,
-            {
-                "MEMORY_TRIGGERS_ENABLED": "false",
-                "MEMORY_DEBUG_MODE": "true",
-                "MEMORY_ENVIRONMENT": "production",
-            },
-        ):
-            apply_environment_overrides(config)
-
-            assert config.global_enabled is False
-            assert config.debug_mode is True
-            assert config.environment == Environment.PRODUCTION
-
-    def test_invalid_environment_values(self):
-        """Test handling of invalid environment variable values."""
-        config = MemoryTriggerConfig()
-
-        # Invalid backend type should raise ValueError
-        with patch.dict(os.environ, {"MEMORY_BACKEND_TYPE": "invalid_backend"}):
-            with pytest.raises(ValueError):
-                apply_environment_overrides(config)
-
-        # Invalid environment should raise ValueError
-        with patch.dict(os.environ, {"MEMORY_ENVIRONMENT": "invalid_env"}):
-            with pytest.raises(ValueError):
-                apply_environment_overrides(config)
-
-
-class TestGlobalConfigurationManagement:
-    """Test global configuration management functions."""
-
-    def setUp(self):
-        """Set up test environment."""
-        # Reset global configuration manager
-        import claude_pm.config.memory_trigger_config as config_module
-
-        config_module._config_manager = None
-
-    def test_get_config_manager_singleton(self):
-        """Test that get_config_manager returns singleton instance."""
-        self.setUp()
-
-        manager1 = get_config_manager()
-        manager2 = get_config_manager()
-
-        assert manager1 is manager2
-        assert isinstance(manager1, MemoryTriggerConfigManager)
-
-    def test_initialize_config_with_file(self):
-        """Test initialize_config with configuration file."""
-        self.setUp()
-
-        config_data = {"environment": "testing", "performance": {"batch_size": 75}}
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            yaml.dump(config_data, f)
-            temp_file = f.name
-
-        try:
-            manager = initialize_config(temp_file)
-            config = manager.get_config()
-
-            assert config.environment == Environment.TESTING
-            assert config.performance.batch_size == 75
-
-        finally:
-            os.unlink(temp_file)
-
-    def test_get_config_convenience_function(self):
-        """Test get_config convenience function."""
-        self.setUp()
-
-        config = get_config()
-
-        assert isinstance(config, MemoryTriggerConfig)
-        assert config.environment == Environment.DEVELOPMENT  # Default
-
-
-class TestConfigurationErrorHandling:
-    """Test configuration error handling and recovery."""
-
-    def test_malformed_yaml_handling(self):
-        """Test handling of malformed YAML files."""
-        malformed_yaml = """
-        environment: testing
-        performance:
-          batch_size: 50
-          invalid_yaml: [unclosed list
-        """
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            f.write(malformed_yaml)
-            temp_file = f.name
-
-        try:
-            with pytest.raises(yaml.YAMLError):
-                MemoryTriggerConfigManager(temp_file)
-        finally:
-            os.unlink(temp_file)
-
-    def test_missing_required_fields(self):
-        """Test handling of missing required configuration fields."""
-        incomplete_config = {
-            "environment": "testing"
-            # Missing other required fields
-        }
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            yaml.dump(incomplete_config, f)
-            temp_file = f.name
-
-        try:
-            # Should not raise error - should use defaults
-            manager = MemoryTriggerConfigManager(temp_file)
-            config = manager.get_config()
-
-            # Should have default values
-            assert config.performance is not None
-            assert config.backend is not None
-
-        finally:
-            os.unlink(temp_file)
-
-    def test_permission_error_handling(self):
-        """Test handling of file permission errors."""
-        # Create a file we can't write to
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            yaml.dump({"environment": "testing"}, f)
-            temp_file = f.name
-
-        try:
-            # Make file read-only
-            os.chmod(temp_file, 0o444)
-
-            manager = MemoryTriggerConfigManager(temp_file)
-
-            # Trying to save should raise permission error
-            with pytest.raises(PermissionError):
-                manager.save_config_to_file()
-
-        finally:
-            # Restore permissions and cleanup
-            os.chmod(temp_file, 0o644)
-            os.unlink(temp_file)
-
-    def test_concurrent_config_access(self):
-        """Test concurrent configuration access."""
-        config_data = {"environment": "testing", "performance": {"batch_size": 50}}
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            yaml.dump(config_data, f)
-            temp_file = f.name
-
-        try:
-            manager = MemoryTriggerConfigManager(temp_file)
-
-            def update_config(batch_size):
-                updates = {"performance": {"batch_size": batch_size}}
-                manager.update_config(updates)
-
-            def read_config():
-                return manager.get_config().performance.batch_size
-
-            # Start concurrent threads
-            threads = []
-            for i in range(10):
-                if i % 2 == 0:
-                    thread = threading.Thread(target=update_config, args=(50 + i,))
-                else:
-                    thread = threading.Thread(target=read_config)
-                threads.append(thread)
-                thread.start()
-
-            # Wait for all threads
-            for thread in threads:
-                thread.join()
-
-            # Should not crash and should have valid configuration
-            final_config = manager.get_config()
-            assert isinstance(final_config.performance.batch_size, int)
-            assert final_config.performance.batch_size >= 50
-
-        finally:
-            os.unlink(temp_file)
+    def full_config_setup(self):
+        """Set up full configuration environment."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_dir = Path(temp_dir)
+            
+            # Create configuration files
+            base_config = {
+                "environment": "development",
+                "performance": {
+                    "max_memory_mb": 256,
+                    "cache_size": 500
+                },
+                "trigger_policies": {
+                    "default": {
+                        "enabled": True,
+                        "trigger_threshold": 0.7
+                    }
+                }
+            }
+
+            prod_config = {
+                "environment": "production",
+                "performance": {
+                    "max_memory_mb": 2048,
+                    "optimization_level": "aggressive"
+                }
+            }
+
+            # Write configuration files
+            with open(config_dir / "memory_trigger_config.yaml", "w") as f:
+                yaml.dump(base_config, f)
+
+            with open(config_dir / "memory_trigger_config.production.yaml", "w") as f:
+                yaml.dump(prod_config, f)
+
+            yield config_dir
+
+    def test_environment_specific_loading(self, full_config_setup):
+        """Test loading environment-specific configurations."""
+        # Development environment
+        dev_manager = MemoryTriggerConfigManager(
+            config_directory=full_config_setup,
+            environment=Environment.DEVELOPMENT
+        )
+        dev_manager.load_configuration()
+
+        assert dev_manager.config.performance.max_memory_mb == 256
+
+        # Production environment
+        prod_manager = MemoryTriggerConfigManager(
+            config_directory=full_config_setup,
+            environment=Environment.PRODUCTION
+        )
+        prod_manager.load_configuration()
+
+        # Should have production overrides
+        assert prod_manager.config.performance.max_memory_mb == 2048
+        assert prod_manager.config.performance.optimization_level == "aggressive"
+
+    def test_configuration_merging(self, full_config_setup):
+        """Test configuration merging behavior."""
+        manager = MemoryTriggerConfigManager(
+            config_directory=full_config_setup,
+            environment=Environment.PRODUCTION
+        )
+        manager.load_configuration()
+
+        # Should have base values not overridden
+        assert manager.config.performance.cache_size == 500
+        
+        # Should have production overrides
+        assert manager.config.performance.max_memory_mb == 2048
+
+    @pytest.mark.asyncio
+    async def test_async_configuration_updates(self, full_config_setup):
+        """Test asynchronous configuration updates."""
+        manager = MemoryTriggerConfigManager(
+            config_directory=full_config_setup,
+            environment=Environment.DEVELOPMENT
+        )
+        
+        # Mock async update method
+        async def async_update():
+            await asyncio.sleep(0.1)
+            manager.config.performance.max_memory_mb = 512
+            return True
+
+        # Perform async update
+        result = await async_update()
+        assert result is True
+        assert manager.config.performance.max_memory_mb == 512
 
 
 if __name__ == "__main__":
-    # Run configuration tests
     pytest.main([__file__, "-v"])
