@@ -1,0 +1,134 @@
+{
+  "test_suite": "Research Agent Memory Safety",
+  "timestamp": "2025-07-20T11:59:04.711541",
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0,
+    "success_rate": "100.0%",
+    "execution_time_seconds": 30.524006128311157
+  },
+  "tests": [
+    {
+      "name": "directory_exclusions",
+      "passed": true,
+      "max_memory_mb": 39.515625,
+      "memory_readings": [
+        {
+          "subprocess_id": "research_20250720_115834",
+          "memory_mb": 39.5,
+          "status": "OK",
+          "should_abort": false,
+          "timestamp": "2025-07-20T11:58:35.275397"
+        },
+        {
+          "subprocess_id": "research_20250720_115834",
+          "memory_mb": 39.5,
+          "status": "OK",
+          "should_abort": false,
+          "timestamp": "2025-07-20T11:58:36.275868"
+        },
+        {
+          "subprocess_id": "research_20250720_115834",
+          "memory_mb": 39.5,
+          "status": "OK",
+          "should_abort": false,
+          "timestamp": "2025-07-20T11:58:37.276432"
+        },
+        {
+          "subprocess_id": "research_20250720_115834",
+          "memory_mb": 39.515625,
+          "status": "OK",
+          "should_abort": false,
+          "timestamp": "2025-07-20T11:58:38.277374"
+        },
+        {
+          "subprocess_id": "research_20250720_115834",
+          "memory_mb": 39.515625,
+          "status": "OK",
+          "should_abort": false,
+          "timestamp": "2025-07-20T11:58:39.278611"
+        }
+      ],
+      "details": "Max memory: 39.5MB (limit: 512MB)"
+    },
+    {
+      "name": "memory_monitoring_accuracy",
+      "passed": true,
+      "initial_memory_mb": 41.109375,
+      "memory_timeline": [
+        {
+          "time": 1,
+          "memory_mb": 41.109375,
+          "status": "OK",
+          "should_abort": false
+        },
+        {
+          "time": 2,
+          "memory_mb": 41.109375,
+          "status": "OK",
+          "should_abort": false
+        },
+        {
+          "time": 3,
+          "memory_mb": 41.109375,
+          "status": "OK",
+          "should_abort": false
+        },
+        {
+          "time": 4,
+          "memory_mb": 41.109375,
+          "status": "OK",
+          "should_abort": false
+        },
+        {
+          "time": 5,
+          "memory_mb": 41.109375,
+          "status": "OK",
+          "should_abort": false
+        }
+      ],
+      "memory_report": {
+        "timestamp": "2025-07-20T11:58:44.352636",
+        "system_memory": {
+          "total_mb": 32768.0,
+          "available_mb": 9773.4,
+          "used_mb": 12933.3,
+          "percent": 70.2,
+          "free_mb": 314.1
+        },
+        "subprocess_stats": {},
+        "configuration": {
+          "warning_mb": 256,
+          "critical_mb": 512,
+          "max_mb": 1024,
+          "abort_on_limit": true
+        },
+        "active_subprocesses": 0,
+        "memory_alerts": []
+      },
+      "details": "Memory monitoring tracked successfully"
+    },
+    {
+      "name": "memory_limit_abort",
+      "passed": true,
+      "abort_detected": false,
+      "abort_reason": null,
+      "details": "Abort mechanism ready"
+    },
+    {
+      "name": "safe_directory_pattern",
+      "passed": true,
+      "max_memory_mb": 42.15625,
+      "execution_time": 10.023546934127808,
+      "details": "Safe pattern used max 42.2MB in 10.0s"
+    },
+    {
+      "name": "memory_warnings_logging",
+      "passed": true,
+      "warnings_seen": [],
+      "subprocess_count": 1,
+      "details": "Warning system tracked 0 warnings"
+    }
+  ]
+}

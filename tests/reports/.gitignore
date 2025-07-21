@@ -1,0 +1,37 @@
+# Test Reports - Not tracked in git
+# These are generated artifacts from test runs
+
+# Coverage reports
+coverage/
+*.coverage
+.coverage.*
+coverage.xml
+coverage.json
+htmlcov/
+
+# Test results
+results/*.json
+results/*.xml
+results/*.log
+junit.xml
+
+# Validation reports  
+validation/*.html
+validation/*.tmp
+validation/*_temp*
+
+# Performance reports
+performance/
+*.perf
+*.benchmark
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+__pycache__/
+
+# Keep directory structure
+!.gitignore
+!*/
+!README.md

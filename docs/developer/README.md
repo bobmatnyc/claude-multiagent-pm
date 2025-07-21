@@ -84,6 +84,7 @@ Deep dives into the framework's design and implementation.
 - **Create an Agent**: [Custom Agents Guide](./extensions/custom-agents.md) → [Agent API](./api/agents.md)
 - **Build Integration**: [Integration Guide](./extensions/integrations.md) → [Services API](./api/services.md)
 - **Improve Performance**: [Architecture Overview](./architecture/overview.md) → [Performance Tips](./contributing/performance.md)
+- **Publish to PyPI**: [PyPI Publication Guide](../PYPI_PUBLICATION_GUIDE.md) → [Release Process](./contributing/release-process.md)
 
 ### By Component
 - **Core System**: [Core API](./api/core.md) | [System Architecture](./architecture/overview.md)

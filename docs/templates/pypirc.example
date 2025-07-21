@@ -1,0 +1,26 @@
+# Example ~/.pypirc configuration file
+# Copy this to ~/.pypirc and update with your tokens
+# 
+# To get tokens:
+# - Production PyPI: https://pypi.org/manage/account/token/
+# - Test PyPI: https://test.pypi.org/manage/account/token/
+#
+# IMPORTANT: Keep this file secure with proper permissions:
+# chmod 600 ~/.pypirc
+
+[distutils]
+index-servers =
+    pypi
+    testpypi
+
+[pypi]
+username = __token__
+password = pypi-YOUR-PRODUCTION-TOKEN-HERE
+
+[testpypi]
+username = __token__
+password = pypi-YOUR-TEST-TOKEN-HERE
+
+# Alternative: You can also use environment variables instead:
+# export TWINE_USERNAME=__token__
+# export TWINE_PASSWORD=pypi-YOUR-TOKEN-HERE

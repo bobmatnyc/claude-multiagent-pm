@@ -162,7 +162,6 @@ claude-pm
 | Agent | Nickname | Primary Role | When It's Used |
 |-------|----------|--------------|----------------|
 | **Documentation** | `Documenter` | Pattern analysis & operational understanding | Documentation tasks, changelog generation |
-| **Ticketing** | `Ticketer` | Universal ticketing with GitHub Issues sync | Project tracking, issue management |
 | **Version Control** | `Versioner` | Git operations & branch management | Git operations, version management |
 | **QA** | `QA` | Testing & quality validation | Quality checks, testing workflows |
 | **Research** | `Researcher` | Investigation & analysis | Research tasks, best practice analysis |
@@ -170,6 +169,7 @@ claude-pm
 | **Security** | `Security` | Security analysis & vulnerability assessment | Security audits, compliance checks |
 | **Engineer** | `Engineer` | Code implementation & development | Code writing, feature implementation |
 | **Data Engineer** | `Data Engineer` | Data store & AI API management | Database operations, API integrations |
+| **PM Orchestrator** | `PM` | Multi-agent orchestration & coordination | Project management, workflow coordination |
 
 ### 🔄 Agent Orchestration Pattern
 

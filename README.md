@@ -1,6 +1,6 @@
 # Claude PM Framework
 
-[![Version](https://img.shields.io/badge/version-1.2.3-blue.svg)](https://www.npmjs.com/package/@bobmatnyc/claude-multiagent-pm)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://www.npmjs.com/package/@bobmatnyc/claude-multiagent-pm)
 [![Framework](https://img.shields.io/badge/framework-014--005-green.svg)](./framework/CLAUDE.md)
 [![Node.js](https://img.shields.io/badge/node->=16.0.0-green.svg)](https://nodejs.org/)
 [![Python](https://img.shields.io/badge/python->=3.8.0-green.svg)](https://python.org/)
@@ -35,6 +35,16 @@ cd your-project
 claude-pm
 ```
 
+> **⚠️ Important Notice for Developers**
+> 
+> Starting with v1.3.0, editable/source installations are deprecated. If you're running from a cloned repository, please migrate to the PyPI package:
+> 
+> ```bash
+> python scripts/migrate_to_pypi.py
+> ```
+> 
+> See [Migration Guide](./docs/MIGRATION.md) for details.
+
 ## 📖 Getting Started
 
 **New to Claude PM Framework?** Start with our comprehensive user guide:
@@ -43,11 +53,13 @@ claude-pm
 
 The user guide covers everything from basic concepts to advanced workflows, including practical examples and best practices for orchestrating AI-driven development workflows.
 
-## Key Features (v1.2.3)
+## Key Features (v1.3.0)
 
+- **💾 Memory Safety Protection**: Real-time subprocess memory monitoring prevents system crashes from runaway processes
 - **🎯 Custom Agent Creation**: Create project-specific agents tailored to your domain - architecture, performance, UI/UX, compliance, and more
 - **🤖 Agent Registry & Hierarchical Discovery**: Dynamic agent discovery with project → user → system precedence
 - **⚡ Performance Optimization**: 99.7% improvement through SharedPromptCache integration
+- **💰 Prompt Optimization**: 50-66% token reduction through intelligent task analysis and dynamic model selection
 - **🧠 Agent Training System**: Self-improving agents that learn from experience
 - **📋 AI Trackdown Tools Integration**: GitHub Issues sync with hierarchical Epic → Issue → Task → PR structure
 - **🏗️ Two-Tier Agent Architecture**: Simplified architecture with extensible custom agent support
@@ -128,6 +140,37 @@ One of Claude PM Framework's most powerful features is its **built-in agent trai
 
 This means your custom agents get **smarter and more efficient** the more you use them, without manual intervention.
 
+## 💰 Prompt Optimization & Token Reduction (v1.3.0)
+
+The Claude PM Framework includes intelligent prompt optimization that automatically reduces token usage by 50-66% while maintaining or improving task execution quality:
+
+### Three-Phase Optimization
+1. **Task Complexity Analysis**: Analyzes task requirements to determine complexity level
+2. **Dynamic Model Selection**: Automatically selects the optimal Claude model (Haiku/Sonnet/Opus)
+3. **Adaptive Prompt Templates**: Adjusts agent instructions based on task needs
+
+### Key Benefits
+- **50-66% Token Reduction**: Significant cost savings on API usage
+- **Faster Response Times**: Smaller prompts process more quickly
+- **Smart Model Selection**: Right model for the right task
+- **Enabled by Default**: No configuration needed - works automatically
+
+### Configuration
+```bash
+# Prompt optimization is enabled by default in v1.3.0+
+# To disable (not recommended):
+export ENABLE_DYNAMIC_MODEL_SELECTION=false
+
+# The framework automatically optimizes all agent interactions
+```
+
+### How It Works
+- **Simple Tasks** (e.g., "List files") → Haiku model + minimal instructions
+- **Medium Tasks** (e.g., "Fix bug") → Sonnet model + standard instructions  
+- **Complex Tasks** (e.g., "Refactor system") → Opus model + comprehensive context
+
+See [Prompt Optimization Guide](./docs/guides/prompt-optimization-guide.md) for detailed configuration and best practices.
+
 ## Three Essential Commands
 
 - **`push`** - Complete development pipeline: documentation, testing, Git operations, and changelog generation
@@ -176,7 +219,14 @@ push  # Multi-agent quality pipeline before merge
 
 ### Version History (Most Recent First)
 
-#### v1.2.3 (Current) - July 2025
+#### v1.3.0 (Current) - July 2025
+- **Memory Safety Protection**: Real-time subprocess memory monitoring system
+- **Automatic Resource Protection**: Prevents crashes from runaway processes (8GB+ prevention)
+- **Configurable Thresholds**: Warning (1GB), Critical (2GB), Hard Limit (4GB) with env overrides
+- **Comprehensive Logging**: Detailed memory statistics and alerts for debugging
+- **Pre-flight Checks**: Verifies sufficient memory before subprocess creation
+
+#### v1.2.3 - July 2025
 - **Maintenance Release**: Documentation updates and test reorganization
 - **Base Agent Updates**: Added ticket update requirements for consistency
 - **Test Coverage**: Added BaseAgentManager unit tests
@@ -251,6 +301,23 @@ push  # Multi-agent quality pipeline before merge
 - **Agent Restructuring**: Complete system architecture overhaul
 - **Memory Expansion**: Enhanced memory system capabilities
 - **Framework Foundation**: Core multi-agent capabilities established
+
+## Installation
+
+### NPM (Recommended)
+```bash
+npm install -g @bobmatnyc/claude-multiagent-pm
+```
+
+### PyPI
+```bash
+pip install claude-multiagent-pm
+```
+
+### Verify Installation
+```bash
+claude-pm --version
+```
 
 ## Common Use Cases
 

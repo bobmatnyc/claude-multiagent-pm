@@ -97,7 +97,7 @@ Historical documentation and legacy content.
 - **Creating a new project** → [Quick Start](./user/getting-started/quickstart.md)
 - **Understanding agents** → [Agent Types](./user/guides/agent-types.md)
 - **Writing custom agents** → [Custom Agents](./developer/extensions/custom-agents.md)
-- **Debugging issues** → [Troubleshooting](./user/guides/troubleshooting.md)
+- **Debugging issues** → [Troubleshooting](./TROUBLESHOOTING.md)
 - **Contributing code** → [Contributing Guide](./developer/contributing/CONTRIBUTING.md)
 
 ### By Audience

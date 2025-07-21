@@ -33,6 +33,13 @@ Optimization strategies and benchmarks.
 - **[Resource Management](./performance/resources.md)** - Memory and CPU optimization
 - **[Monitoring](./performance/monitoring.md)** - Performance monitoring setup
 
+### [Technical Patterns](./patterns/README.md)
+Implementation patterns and best practices.
+
+- **[Orchestration Patterns](./orchestration-patterns.md)** - Message bus and orchestration design
+- **[Defensive Programming](../development/defensive-programming-guide.md)** - Error prevention patterns
+- **[Performance Tuning](../operations/performance-tuning.md)** - Optimization techniques
+
 ### [Deployment](./deployment/README.md)
 Production deployment and operations.
 

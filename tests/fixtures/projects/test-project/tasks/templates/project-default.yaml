@@ -1,0 +1,87 @@
+name: project-default
+description: Default project template
+type: project
+frontmatter_template:
+  title: "{{title}}"
+  description: "{{description}}"
+  status: planning
+  priority: medium
+  assignee: unassigned
+  created_date: "{{created_date}}"
+  updated_date: "{{updated_date}}"
+  estimated_tokens: 0
+  actual_tokens: 0
+  ai_context: 
+    - project-management
+    - planning
+    - development
+  sync_status: local
+  completion_percentage: 0
+  tags: []
+  dependencies: []
+  milestone: null
+  project_id: "{{project_id}}"
+  type: project
+  name: "{{name}}"
+  git_origin: "{{git_origin}}"
+  git_branch: "{{git_branch}}"
+  repository_url: "{{repository_url}}"
+  clone_url: "{{clone_url}}"
+  default_branch: "{{default_branch}}"
+  languages: []
+  framework: "{{framework}}"
+  team_members: []
+  license: null
+  related_projects: []
+content_template: |
+  # {{title}}
+
+  ## Project Overview
+  {{description}}
+
+  ## Project Information
+  - **Repository**: {{repository_url}}
+  - **Git Origin**: {{git_origin}}
+  - **Default Branch**: {{default_branch}}
+  - **Framework**: {{framework}}
+  - **Languages**: {{languages}}
+
+  ## Team Members
+  {{team_members}}
+
+  ## Project Goals
+  - [ ] Goal 1
+  - [ ] Goal 2
+  - [ ] Goal 3
+
+  ## Project Structure
+  This project follows the AI-Trackdown hierarchical structure:
+  - **Epics**: High-level features or objectives
+  - **Issues**: Specific problems or tasks within epics
+  - **Tasks**: Granular work items within issues
+  - **PRs**: Pull requests for code changes
+
+  ## Getting Started
+  1. Clone the repository
+  2. Set up development environment
+  3. Create your first epic with `aitrackdown epic create`
+  4. Break down epics into issues with `aitrackdown issue create`
+  5. Create tasks for specific work items with `aitrackdown task create`
+
+  ## Development Workflow
+  1. Pick up a task from the backlog
+  2. Create a feature branch
+  3. Work on the task
+  4. Create a pull request
+  5. Track the PR with `aitrackdown pr create`
+
+  ## Notes
+  - Use `aitrackdown status` to check project status
+  - Use `aitrackdown project show` to view project details
+  - Use `aitrackdown epic list` to see all epics
+ai_context_defaults:
+  - project-management
+  - planning
+  - development
+  - git-workflow
+  - collaboration

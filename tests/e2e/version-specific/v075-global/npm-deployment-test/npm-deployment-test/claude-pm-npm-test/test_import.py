@@ -25,10 +25,14 @@ try:
         print(f"Added to Python path: {npm_package_path.resolve()}")
     else:
         print("❌ NPM package not found")
-        sys.exit(1)
+        # Don't exit during test collection
+        if __name__ == "__main__":
+            sys.exit(1)
 except Exception as e:
     print(f"❌ Error finding NPM package: {e}")
-    sys.exit(1)
+    # Don't exit during test collection
+    if __name__ == "__main__":
+        sys.exit(1)
 
 # Test 2: Try importing claude_pm
 print("\nTest 2: Claude PM Import")

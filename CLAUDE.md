@@ -1,17 +1,116 @@
-# Claude Multi-Agent PM Project Development Rules v0.7.0
+# Claude Multi-Agent PM Framework Development Rules v1.2.5
 
-> **⚠️ CRITICAL DISTINCTION: PROJECT DEVELOPMENT RULES**
+> **🚨 THIS FILE IS FOR FRAMEWORK DEVELOPERS ONLY**
 > 
-> **This file contains development rules for working on the claude-multiagent-pm framework codebase itself.**
+> **This file contains development rules for contributors working on the claude-multiagent-pm framework codebase itself.**
 > 
-> **📍 If you are USING the framework in your projects:**
-> - Look for `framework/CLAUDE.md` in your deployed project directory
-> - These are development rules for framework contributors, not end-users
+> **📍 If you are USING the framework:**
+> - DO NOT follow these rules - they are for framework development only
+> - Look for `framework/CLAUDE.md` in your deployed project for usage instructions
+> - These rules apply ONLY to the framework source code repository
 > 
-> **📍 If you are DEVELOPING the framework codebase:**
-> - These rules below apply to you
-> - Follow all protection mechanisms and testing protocols
-> - Maintain backward compatibility and version consistency
+> **📍 If you are DEVELOPING the framework:**
+> - Follow ALL rules below strictly
+> - Maintain clean root directory structure
+> - Run comprehensive tests before commits
+> - Preserve backward compatibility
+
+---
+
+## 📂 ROOT DIRECTORY HYGIENE RULES
+
+### ✅ ALLOWED ROOT DOCUMENTS (ONLY THESE)
+1. **CLAUDE.md** - Framework development rules (this file)
+2. **README.md** - Framework overview and quick start
+3. **CHANGELOG.md** - Version history and changes
+4. **RELEASE_NOTES.md** - Detailed release information
+
+### ⛔ STRICT DIRECTORY ORGANIZATION
+- **ALL tests** → `tests/` directory (NO test files in root)
+- **ALL documentation** → `docs/` directory (except the 4 allowed root files)
+- **ALL scripts** → `scripts/` directory
+- **ALL build artifacts** → `.gitignore` them (never commit)
+- **NO temporary files** in root directory
+- **NO example files** in root directory
+- **NO generated reports** in root directory
+
+### 🧹 ROOT CLEANUP CHECKLIST
+Before committing, ensure:
+- [ ] Only 4 allowed .md files exist in root
+- [ ] All test files are in `tests/`
+- [ ] All docs are in `docs/`
+- [ ] No temporary or generated files in root
+- [ ] `.gitignore` is properly configured
+
+---
+
+## 🔄 DEVELOPMENT WORKFLOW
+
+### 1. Feature Development Process
+```bash
+# 1. Create feature branch
+git checkout -b feature/your-feature-name
+
+# 2. Make changes following all rules
+# 3. Run comprehensive tests
+pytest tests/
+npm test
+
+# 4. Verify root directory hygiene
+ls -la | grep -E '\.(md|py|js|json)$'  # Should show only allowed files
+
+# 5. Run integrity checks
+python scripts/test_framework_integrity.py
+python scripts/validate_version_consistency.py
+
+# 6. Commit with conventional commits
+git commit -m "feat: Add new capability" 
+# or "fix:", "docs:", "test:", "refactor:", "chore:"
+
+# 7. Push and create PR
+git push origin feature/your-feature-name
+```
+
+### 2. Testing Requirements
+**MANDATORY before ANY commit:**
+- ✅ Unit tests pass: `pytest tests/unit/`
+- ✅ Integration tests pass: `pytest tests/integration/`
+- ✅ E2E tests pass: `pytest tests/e2e/`
+- ✅ Framework integrity validated
+- ✅ Version consistency verified
+- ✅ Root directory hygiene maintained
+
+### 3. Code Review Checklist
+- [ ] No files in root except 4 allowed .md files
+- [ ] All tests in `tests/` directory
+- [ ] All docs in `docs/` directory
+- [ ] No deployment code mixed with development code
+- [ ] Framework template (`framework/CLAUDE.md`) unchanged
+- [ ] Version files synchronized if version changed
+- [ ] Backward compatibility maintained
+
+---
+
+## 👥 CONTRIBUTION GUIDELINES
+
+### Pull Request Requirements
+1. **Title**: Use conventional commit format
+2. **Description**: Explain what and why (not how)
+3. **Tests**: Include tests for new features
+4. **Documentation**: Update relevant docs
+5. **Breaking Changes**: Clearly marked and justified
+
+### Coding Standards
+- **Python**: Follow PEP 8, use type hints
+- **JavaScript**: Follow ESLint configuration
+- **Markdown**: Use consistent formatting
+- **File Organization**: Respect directory structure
+
+### Documentation Standards
+- **Root Docs**: Only 4 allowed files, keep concise
+- **Feature Docs**: Detailed docs go in `docs/features/`
+- **API Docs**: Technical docs go in `docs/technical/`
+- **Examples**: All examples go in `docs/examples/`
 
 ---
 
@@ -53,310 +152,183 @@
 
 ---
 
-## 📋 DEVELOPMENT WORKFLOW RULES
+## 📋 VERSION MANAGEMENT
 
-### Framework Version Management (Current: v0.7.0)
-- **VERSION File**: Must match package.json version (currently 0.7.0)
-- **Package.json**: Primary version source for npm deployment
-- **Template Versions**: Update `CLAUDE_MD_VERSION` when making content changes
-- **Version Format**: `FRAMEWORK_VERSION-NNN` (e.g., `0.7.0-001`)
-- **Serial Increments**: Increment serial number for same framework version
+### Framework Version Rules (Current: v1.2.5)
+- **VERSION File**: Must match package.json version
+- **Package.json**: Primary version source for npm
+- **pyproject.toml**: Primary version source for PyPI
+- **__version__.py**: Must match other version files
+- **Synchronization**: All 4 files must have identical versions
 
-### For Framework Changes:
-1. **Test in Development Environment First**
-   - Use `--force` flag carefully and only for testing
-   - Verify deployment works before committing changes
-   - Check backup creation is functioning
-
-2. **Version Alignment Protocol**
-   - Ensure VERSION file matches package.json version
-   - Update template variables when framework version changes
-   - Test deployment with version checking enabled
-
-3. **Deployment Testing**
-   - Run `python -m claude_pm.cli setup --show-version-check` to test
-   - Verify version comparison logic works correctly
-   - Ensure backups are created and rotated properly
-
-### For Code Changes:
-1. **Parent Directory Manager Modifications**
-   - Never remove protection methods
-   - Test backup functionality after any changes
-   - Maintain backward compatibility for existing deployments
-
-2. **Template System Changes**
-   - Preserve framework template priority over template manager
-   - Maintain handlebars variable substitution
-   - Keep version checking logic intact
+### Version Update Process
+1. **Update all version files simultaneously**
+2. **Run validation**: `python scripts/validate_version_consistency.py`
+3. **Test thoroughly before release**
+4. **Tag release**: `git tag vX.Y.Z`
 
 ---
 
-## 🔧 MAINTENANCE COMMANDS
+## 🔧 DEVELOPMENT COMMANDS
 
-### Framework Health Monitoring
-```python
-# Check framework protection status
-from claude_pm.services.parent_directory_manager import ParentDirectoryManager
-manager = ParentDirectoryManager()
-await manager._initialize()
-status = manager.get_framework_backup_status()
-```
-
-### Backup Management
+### Essential Development Scripts
 ```bash
-# Trigger backup through setup command
-python -m claude_pm.cli setup --show-version-check
+# Run all tests
+pytest tests/
 
-# View backup history
-ls -la .claude-pm/framework_backups/
-```
+# Run specific test categories
+pytest tests/unit/
+pytest tests/integration/
+pytest tests/e2e/
 
-### Version Validation
-```bash
-# Check version consistency
-python -c "import claude_pm; print(claude_pm.__version__)"
-cat VERSION
-node -p "require('./package.json').version"
-```
-
----
-
-## 🚀 SCRIPT DEPLOYMENT AUTOMATION
-
-**CRITICAL**: Use automated deployment system to ensure changes are properly applied.
-
-### Deployment Commands
-```bash
-# Deploy all scripts (claude-pm, cmpm) to ~/.local/bin/
-python scripts/deploy_scripts.py --deploy
-
-# Deploy specific script only
-python scripts/deploy_scripts.py --deploy-script claude-pm
-
-# Check for deployment drift (recommended before changes)
-python scripts/deploy_scripts.py --check
-
-# View comprehensive deployment status
-python scripts/deploy_scripts.py --status
-
-# Verify deployed scripts are working
-python scripts/deploy_scripts.py --verify
-```
-
-### Post-Change Deployment Protocol
-1. **ALWAYS run deployment after changes**:
-   ```bash
-   python scripts/deploy_scripts.py --deploy
-   ```
-
-2. **Check status before and after**:
-   ```bash
-   python scripts/deploy_scripts.py --status
-   ```
-
-3. **Verify deployment works**:
-   ```bash
-   python scripts/deploy_scripts.py --verify
-   ```
-
-### Deployment Features
-- **Automatic Backups**: Creates timestamped backups before deployment
-- **Checksum Validation**: Detects drift between source and deployed scripts
-- **Version Tracking**: Monitors script versions and deployment history
-- **Rollback Support**: Can rollback to previous versions if needed
-- **Integration**: Updates main deployment config with script status
-
-### Emergency Rollback
-```bash
-# Rollback specific script to previous version
-python scripts/deploy_scripts.py --rollback claude-pm
-```
-
----
-
-## 🧪 FRAMEWORK INTEGRITY TESTING
-
-**CRITICAL**: Run integrity tests before making changes to prevent template corruption.
-
-### Testing Commands
-```bash
-# Run all framework integrity tests
+# Check framework integrity
 python scripts/test_framework_integrity.py
 
-# Run only template handlebars tests
-python test_framework_template.py
-
-# Check deployment script status
-python scripts/deploy_scripts.py --status
-
-# Validate version consistency across all files
+# Validate version consistency
 python scripts/validate_version_consistency.py
+
+# Check root directory hygiene
+ls -la | grep -v "^d" | grep -v -E "(CLAUDE|README|CHANGELOG|RELEASE_NOTES)\.md$"
+# Should return empty - no other files allowed in root
 ```
 
-### Test Validation Scope
-- **Handlebars Variables**: Ensures `framework/CLAUDE.md` uses `{{VARIABLE}}` format
-- **Version Consistency**: Validates VERSION file, package.json, and Python package versions match
-- **Template Structure**: Checks that all required variables are present and properly formatted
-- **Deployment Integrity**: Validates template processing and variable substitution
-- **Backup System**: Verifies backup creation and rotation functionality
 
-### Testing Protocol
-1. **Before committing changes** to framework template
-2. **Before deployment** to parent directories  
-3. **After modifying** deployment scripts
-4. **After version updates** to ensure consistency
-5. **In CI/CD pipelines** to catch template corruption early
+## 🧪 TESTING REQUIREMENTS
 
----
+### Test Categories (ALL REQUIRED)
+1. **Unit Tests** (`tests/unit/`)
+   - Test individual components in isolation
+   - Mock external dependencies
+   - Fast execution, high coverage
 
-## 📁 CRITICAL FILE LOCATIONS
+2. **Integration Tests** (`tests/integration/`)
+   - Test component interactions
+   - Verify service integrations
+   - Test with real file system
 
-### Protected Files (NEVER DELETE)
-- `framework/CLAUDE.md` - Master template (**ESSENTIAL FOR ALL DEPLOYMENTS**)
-- `.claude-pm/framework_backups/` - Automatic backups
-- `claude_pm/services/parent_directory_manager.py` - Protection code
-- `VERSION` - Framework version reference (must match package.json)
+3. **E2E Tests** (`tests/e2e/`)
+   - Test complete workflows
+   - Simulate real usage scenarios
+   - Verify CLI functionality
 
-### ⚠️ CLEANUP PROCESS WARNING
-**Any automated cleanup, maintenance, or file management processes MUST EXCLUDE:**
-- `framework/CLAUDE.md` (critical for all deployments)
-- `VERSION` file (version reference)
-- `.claude-pm/framework_backups/` directory
-- Protection mechanism code
+4. **Framework Integrity Tests**
+   - Template validation
+   - Version consistency
+   - Protection mechanisms
 
-**These files are NOT temporary and MUST persist across all operations.**
-**Deletion will cascade to break ALL managed project deployments.**
+### Pre-Commit Testing Checklist
+```bash
+# 1. Run all tests
+pytest tests/ -v
 
-### Configuration Files
-- `.claude-pm/parent_directory_manager/` - Service state
-- `.claude-pm/config.json` - Framework configuration
-- `package.json` - NPM package configuration and primary version source
+# 2. Check code coverage
+pytest tests/ --cov=claude_pm --cov-report=html
 
----
+# 3. Validate framework integrity
+python scripts/test_framework_integrity.py
 
-## 🚀 DEPLOYMENT SAFETY PROTOCOLS
+# 4. Check version consistency
+python scripts/validate_version_consistency.py
 
-### Pre-Deployment Checklist
-1. **Verify Framework Template Integrity**
-   - Check `framework/CLAUDE.md` exists and has expected content
-   - Ensure backups are being created
-   - Test version comparison logic
+# 5. Lint Python code
+flake8 claude_pm/
+mypy claude_pm/
 
-2. **Version Consistency Validation**
-   - Ensure VERSION file matches package.json
-   - Verify Python package version alignment
-   - Test template variable substitution
+# 6. Lint JavaScript code
+npm run lint
 
-3. **Test with Version Checking**
-   - Use `--show-version-check` flag to see decision logic
-   - Verify skip behavior works for same versions
-   - Confirm force override works when needed
-
-4. **Monitor Backup System**
-   - Ensure old backups are properly cleaned up
-   - Verify only 2 most recent copies are kept
-   - Check backup file naming consistency
+# 7. Verify root directory hygiene
+bash scripts/check_root_hygiene.sh
+```
 
 ---
 
-## ⚡ EMERGENCY RECOVERY PROCEDURES
+## 📁 PROJECT STRUCTURE
 
-### Framework Template Recovery
-1. **Check Recent Backups**:
-   ```bash
-   ls -la .claude-pm/framework_backups/
-   ```
+### Root Directory (KEEP CLEAN!)
+```
+claude-multiagent-pm/
+├── CLAUDE.md              # This file - development rules
+├── README.md              # Project overview
+├── CHANGELOG.md           # Version history
+├── RELEASE_NOTES.md       # Release details
+├── package.json           # NPM configuration
+├── pyproject.toml         # Python package config
+├── VERSION                # Version reference
+├── .gitignore            # Git ignore rules
+├── claude_pm/            # Source code
+├── framework/            # Deployment templates
+├── tests/                # ALL tests go here
+├── docs/                 # ALL other docs go here
+├── scripts/              # Development scripts
+└── requirements/         # Python dependencies
+```
 
-2. **Restore from Backup**:
-   ```bash
-   cp .claude-pm/framework_backups/framework_CLAUDE_md_[timestamp].backup framework/CLAUDE.md
-   ```
+### Key Development Directories
+- `claude_pm/` - Framework source code
+- `tests/` - ALL test files (unit, integration, e2e)
+- `docs/` - ALL documentation except 4 root files
+- `scripts/` - Development and build scripts
+- `framework/` - Deployment templates (DO NOT MODIFY)
 
-3. **Verify Restoration**:
-   ```bash
-   python -m claude_pm.cli setup --show-version-check
-   ```
-
-### Version Mismatch Recovery
-1. **Check all version sources**:
-   ```bash
-   cat VERSION
-   node -p "require('./package.json').version"
-   python -c "import claude_pm; print(claude_pm.__version__)"
-   ```
-
-2. **Align versions manually** if automated tools fail
-
-3. **Test deployment** after version alignment
-
-### Protection System Recovery
-1. **Never disable protection code**
-2. **Fix the underlying issue instead**
-3. **Test fixes in development environment**
-4. **Ensure backups remain functional**
+### Protected Framework Files
+- `framework/CLAUDE.md` - Deployment template (NEVER EDIT DIRECTLY)
+- `VERSION` - Version synchronization file
+- Protection mechanisms in `parent_directory_manager.py`
 
 ---
 
-## 🔒 SECURITY CONSIDERATIONS
 
-- Framework template controls all deployment behavior across projects
-- Version consistency prevents security vulnerabilities from misaligned deployments
-- Corruption could affect all managed projects
-- Backup system provides recovery capability
-- Version checking prevents accidental downgrades
-- Protection methods prevent accidental deletion
-
----
-
-## 📖 DEVELOPER GUIDELINES
-
-### When Adding New Features:
-1. **Preserve Existing Protection Mechanisms**
-2. **Add Tests for New Functionality**
-3. **Document Any Changes to Protection Logic**
-4. **Maintain Backward Compatibility**
-5. **Ensure Version Consistency**
-
-### When Debugging Issues:
-1. **Check Framework Template First**
-2. **Verify Backup System Operation**
-3. **Review Version Comparison Logic**
-4. **Test with Clean Environment**
-5. **Validate Version Alignment**
-
-### When Updating Versions:
-1. **Update VERSION file first**
-2. **Align package.json version**
-3. **Update template version references**
-4. **Test deployment with new version**
-5. **Verify backup system handles version changes**
-
----
-
-## 🎯 FRAMEWORK DEVELOPMENT BEST PRACTICES
+## 🛠️ DEVELOPMENT BEST PRACTICES
 
 ### Code Quality Standards
-- All changes must pass integrity tests
-- Version consistency is mandatory
-- Protection mechanisms are non-negotiable
-- Backup functionality must remain intact
+1. **Type Hints**: Use Python type hints everywhere
+2. **Docstrings**: Document all public functions/classes
+3. **Error Handling**: Explicit error messages
+4. **Logging**: Use structured logging
+5. **Testing**: Maintain >80% code coverage
 
-### Testing Requirements
-- Run full test suite before commits
-- Validate template integrity after changes
-- Test deployment scenarios with version checking
-- Verify backup system operation
+### Commit Message Format
+```
+type(scope): subject
 
-### Documentation Updates
-- Keep development rules current with code changes
-- Update version references when framework versions change
-- Maintain clear distinction between development and usage documentation
+body (optional)
+
+footer (optional)
+```
+
+Types: feat, fix, docs, style, refactor, test, chore
+
+### Branch Naming Convention
+- `feature/description` - New features
+- `fix/description` - Bug fixes
+- `docs/description` - Documentation only
+- `refactor/description` - Code refactoring
+- `test/description` - Test additions/fixes
 
 ---
 
-**Remember**: This framework template is the foundation of the entire multi-project system. 
-Treat it with extreme care, maintain version consistency, and always verify protection mechanisms are working properly.
+## 🚫 COMMON MISTAKES TO AVOID
 
-**Framework Version**: 0.7.0  
-**Documentation Version**: 0.7.0-001  
-**Last Updated**: 2025-07-14
+1. **Adding files to root directory** - Use proper subdirectories
+2. **Mixing deployment with development** - Keep concerns separated
+3. **Editing framework/CLAUDE.md directly** - This breaks deployments
+4. **Inconsistent versions** - Always sync all 4 version files
+5. **Skipping tests** - All PRs must have passing tests
+6. **Poor commit messages** - Use conventional commits
+
+---
+
+## 📞 GETTING HELP
+
+- **Documentation**: Check `docs/development/`
+- **Issues**: File on GitHub with clear reproduction steps
+- **Questions**: Use discussions, not issues
+- **Security**: Email security concerns privately
+
+---
+
+**Documentation Version**: 010  
+**Last Updated**: 2025-07-20
+
+**Remember**: This file is for FRAMEWORK DEVELOPERS ONLY. If you're using the framework in your projects, refer to the deployed `framework/CLAUDE.md` instead.

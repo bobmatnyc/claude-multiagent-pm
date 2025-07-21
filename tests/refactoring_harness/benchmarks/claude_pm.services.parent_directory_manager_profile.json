@@ -1,0 +1,12 @@
+{
+  "module_name": "claude_pm.services.parent_directory_manager",
+  "import_time": 0.0007972499879542738,
+  "memory_usage": {
+    "import_memory_mb": 0.20650959014892578,
+    "peak_memory_mb": 0.34981346130371094,
+    "current_memory_mb": 0.20650959014892578
+  },
+  "cpu_usage": {},
+  "function_benchmarks": {},
+  "timestamp": "2025-07-18 21:29:12.224069"
+}
