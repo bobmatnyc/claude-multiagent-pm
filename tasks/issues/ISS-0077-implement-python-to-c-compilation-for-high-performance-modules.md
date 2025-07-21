@@ -1,6 +1,6 @@
 ---
 issue_id: ISS-0077
-epic_id: ISS-0076
+epic_id: EP-0076
 title: Implement Python-to-C compilation for high-performance modules
 description: |-
   # Python-to-C Performance Optimization Implementation

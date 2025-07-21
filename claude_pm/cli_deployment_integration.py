@@ -40,7 +40,8 @@ def add_deployment_enforcement_to_cli(cli_group):
     SKIP_DEPLOYMENT_CHECK = {
         'deploy', 'verify', 'status', 'diagnose', 'list', 'undeploy',
         'version', 'help', 'util', 'agents', 'monitoring', 'service',
-        'project-index', 'analytics', 'workflow', 'tickets'
+        'project-index', 'analytics', 'workflow', 'tickets',
+        'init'  # Skip deployment check for init - it's the command that sets up deployment
     }
     
     # Wrap all existing commands with deployment enforcement

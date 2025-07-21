@@ -16,9 +16,18 @@ from pathlib import Path
 # Script version - tracks claude-pm script updates independently
 def get_script_version():
     """Get script version - injected during deployment."""
-    return "013"
+    return "016"
 
 SCRIPT_VERSION = get_script_version()
+
+# Check for package installation first
+def check_package_installation():
+    """Check if claude-multiagent-pm is installed as a package."""
+    try:
+        import claude_pm
+        return Path(claude_pm.__file__).parent.parent
+    except ImportError:
+        return None
 
 # Add the framework path to Python path for imports
 # Dynamic framework path detection
@@ -40,10 +49,24 @@ def detect_framework_path():
     if script_path.parent == Path.home() / ".local" / "bin":
         # Look for framework in typical locations
         framework_candidates = [
-            Path("/Users/masa/Projects/claude-multiagent-pm"),  # Development location (highest priority)
+            # Check for deprecated source mode first
             Path.home() / "Projects" / "claude-multiagent-pm",
             Path.home() / ".claude-pm",
         ]
+        
+        # Check if deprecated source mode is being used
+        deprecated_path = Path.home() / "Projects" / "claude-multiagent-pm"
+        if deprecated_path.exists() and (deprecated_path / "claude_pm").exists():
+            # Console not available yet - warnings will be shown later
+            # console.print("[yellow]⚠️  DEPRECATION WARNING: Detected editable installation[/yellow]")
+            # console.print("[yellow]   Source directory usage is deprecated and will be removed in v2.0[/yellow]")
+            # console.print("[yellow]   Please install from PyPI: pip install claude-multiagent-pm[/yellow]")
+            # console.print("[dim]   Set CLAUDE_PM_SOURCE_MODE=deprecated to suppress this warning[/dim]")
+            # console.print("")
+            
+            # Allow deprecated mode with environment variable
+            # if os.environ.get("CLAUDE_PM_SOURCE_MODE") == "deprecated":
+            return deprecated_path
         
         for candidate in framework_candidates:
             if (candidate / "claude_pm").exists():
@@ -79,6 +102,11 @@ def detect_framework_path():
         # npm command failed or not available - continue with other detection methods
         pass
     
+    # Check if package is installed first
+    package_path = check_package_installation()
+    if package_path:
+        return package_path
+    
     # Fallback to ~/.claude-pm
     return Path.home() / ".claude-pm"
 
@@ -101,6 +129,13 @@ def get_framework_version(framework_path_override=None):
     """Get framework version from multiple sources."""
     # Use provided framework path or global one
     fw_path = framework_path_override or framework_path
+    
+    # First try to get version from installed Python package
+    try:
+        import claude_pm
+        return claude_pm.__version__
+    except (ImportError, AttributeError):
+        pass
     
     # For deployed version, check config.json first
     config_json = Path.home() / ".claude-pm" / "config.json"
@@ -353,8 +388,13 @@ def check_parent_claude_md_status():
         template_version = "unknown"
         try:
             template_content = framework_template.read_text()
-            # Look for FRAMEWORK_VERSION in template (it uses handlebars {{FRAMEWORK_VERSION}})
-            # We'll use the actual framework version from VERSION file instead
+            # SIMPLIFIED VERSIONING APPROACH (as of 2025-07-20):
+            # - We use a single serial number for framework versions (e.g., "015")
+            # - The VERSION file contains this single number
+            # - CLAUDE_MD_VERSION in the template matches the VERSION file exactly
+            # - FRAMEWORK_VERSION gets replaced with the same value during deployment
+            # - This eliminates confusion from two-part versions like "015-003"
+            # The comparison logic checks if parent_version != template_version
             version_file = framework_path / "framework" / "VERSION"
             if version_file.exists():
                 template_version = version_file.read_text().strip()
@@ -428,11 +468,20 @@ def check_parent_claude_md_status():
         parent_version = "unknown"
         try:
             parent_content = parent_claude_md.read_text()
-            # Look for FRAMEWORK_VERSION in the deployed template
+            # Look for version in the deployed template
+            # Try FRAMEWORK_VERSION first (deployed version), then CLAUDE_MD_VERSION (for older deployments)
             import re
             version_match = re.search(r'FRAMEWORK_VERSION:\s*(\S+)', parent_content)
             if version_match:
                 parent_version = version_match.group(1)
+            else:
+                # Fallback to CLAUDE_MD_VERSION for compatibility
+                version_match = re.search(r'CLAUDE_MD_VERSION:\s*(\S+)', parent_content)
+                if version_match:
+                    parent_version = version_match.group(1)
+                    # Handle old two-part versions by taking just the first part
+                    if '-' in parent_version:
+                        parent_version = parent_version.split('-')[0]
         except Exception:
             pass
         
@@ -527,7 +576,7 @@ def create_minimal_claude_md():
     template = f'''# Claude PM Framework Configuration - Deployment
 
 <!-- 
-CLAUDE_MD_VERSION: {framework_version}-001
+CLAUDE_MD_VERSION: {framework_version}
 FRAMEWORK_VERSION: {framework_version}
 DEPLOYMENT_DATE: {deployment_date}
 LAST_UPDATED: {deployment_date}
@@ -845,7 +894,7 @@ def perform_automatic_backup_and_update(current_dir, parent_claude_md, template_
                 # Apply basic template substitutions
                 deployment_date = datetime.now().isoformat()
                 replacements = {
-                    '{{CLAUDE_MD_VERSION}}': f'{framework_version}-001',
+                    '{{CLAUDE_MD_VERSION}}': framework_version,
                     '{{FRAMEWORK_VERSION}}': framework_version,
                     '{{DEPLOYMENT_DATE}}': deployment_date,
                     '{{LAST_UPDATED}}': deployment_date,
@@ -1067,6 +1116,7 @@ Pure Python CLI for Claude-powered project management and task orchestration
   --upgrade [VERSION]     Upgrade to latest or specified version
   --rollback VERSION      Rollback to specific version
   --dry-run              Show what would be done without executing
+  --test-mode            Enable test mode with prompt logging to .claude-pm/logs/prompts/
 
 [bold]⚡ YOLO Mode (Default):[/bold]
   claude-pm               Launch Claude CLI directly (YOLO mode - fast startup)
@@ -1311,6 +1361,24 @@ def check_memory_status():
     #     }
 
 
+def ensure_prompts_directory():
+    """
+    Ensure the .claude-pm/logs/prompts directory exists for test mode.
+    This is called when --test-mode is enabled.
+    
+    Returns:
+        Path: The path to the prompts directory
+    """
+    try:
+        current_dir = Path.cwd()
+        prompts_dir = current_dir / ".claude-pm" / "logs" / "prompts"
+        prompts_dir.mkdir(parents=True, exist_ok=True)
+        return prompts_dir
+    except Exception as e:
+        # Silently fail - don't interrupt the user's workflow
+        return None
+
+
 def ensure_project_initialized():
     """
     Ensure the project has a .claude-pm directory with basic structure.
@@ -1328,6 +1396,7 @@ def ensure_project_initialized():
             # Create the basic structure silently
             dirs_to_create = [
                 claude_pm_dir / "logs",
+                claude_pm_dir / "logs" / "prompts",  # Add prompts subdirectory
                 claude_pm_dir / "agents",
                 claude_pm_dir / "agents" / "project-specific",
                 claude_pm_dir / "config",
@@ -1377,7 +1446,7 @@ def ensure_project_initialized():
         return False
 
 
-def launch_claude_cli_yolo():
+def launch_claude_cli_yolo(test_mode=False):
     """Launch Claude CLI in proper YOLO mode with essential flags and AbortSignal configuration."""
     validation = validate_claude_cli()
     
@@ -1389,6 +1458,17 @@ def launch_claude_cli_yolo():
         console.print("   • Add Claude CLI to your PATH")
         console.print("   • Restart your terminal")
         sys.exit(1)
+    
+    # Handle test mode setup
+    if test_mode:
+        prompts_dir = ensure_prompts_directory()
+        if prompts_dir:
+            console.print(f"[dim]Test mode enabled - prompts will be logged to: {prompts_dir}[/dim]")
+            # Set environment variable for Claude CLI to enable prompt logging
+            os.environ["CLAUDE_PM_TEST_MODE"] = "true"
+            os.environ["CLAUDE_PM_PROMPTS_DIR"] = str(prompts_dir)
+        else:
+            console.print("[yellow]⚠️ Could not create prompts directory for test mode[/yellow]")
     
     # Launch Claude CLI with essential YOLO mode flags using wrapper
     try:
@@ -1414,6 +1494,10 @@ def launch_claude_cli_yolo():
                 "--dangerously-skip-permissions"
             ]
             
+            # Add test mode flag if enabled
+            if test_mode:
+                wrapper_args.extend(["--test-mode", "--verbose"])
+            
             console.print(f"[dim]Launching Claude with wrapper: {' '.join(wrapper_args[2:])}[/dim]")
             
             # Use os.execvp with the wrapper
@@ -1429,6 +1513,10 @@ def launch_claude_cli_yolo():
                 "--dangerously-skip-permissions"
             ]
             
+            # Add test mode flag if enabled (verbose flag for prompt logging)
+            if test_mode:
+                claude_args.append("--verbose")
+            
             console.print(f"[dim]Launching Claude with: {' '.join(claude_args[1:])}[/dim]")
             
             # Use os.execvp for proper terminal handling in YOLO mode
@@ -1439,7 +1527,7 @@ def launch_claude_cli_yolo():
         sys.exit(1)
 
 
-def launch_claude_cli_with_args(args):
+def launch_claude_cli_with_args(args, test_mode=False):
     """Launch Claude CLI with pass-through arguments and AbortSignal configuration."""
     validation = validate_claude_cli()
     
@@ -1447,6 +1535,17 @@ def launch_claude_cli_with_args(args):
         console.print("[red]❌ Claude CLI validation failed[/red]")
         console.print(f"   Error: {validation['error']}")
         sys.exit(1)
+    
+    # Handle test mode setup
+    if test_mode:
+        prompts_dir = ensure_prompts_directory()
+        if prompts_dir:
+            console.print(f"[dim]Test mode enabled - prompts will be logged to: {prompts_dir}[/dim]")
+            # Set environment variable for Claude CLI to enable prompt logging
+            os.environ["CLAUDE_PM_TEST_MODE"] = "true"
+            os.environ["CLAUDE_PM_PROMPTS_DIR"] = str(prompts_dir)
+        else:
+            console.print("[yellow]⚠️ Could not create prompts directory for test mode[/yellow]")
     
     # Launch Claude CLI with pass-through args plus essential flags using wrapper
     try:
@@ -1470,7 +1569,13 @@ def launch_claude_cli_with_args(args):
                 "node", str(wrapper_path),
                 "--model", "opus",
                 "--dangerously-skip-permissions"
-            ] + args
+            ]
+            
+            # Add test mode flag if enabled
+            if test_mode:
+                wrapper_args.extend(["--test-mode", "--verbose"])
+                
+            wrapper_args.extend(args)
             
             console.print(f"[dim]Launching Claude with wrapper: {' '.join(wrapper_args[2:])}[/dim]")
             
@@ -1485,7 +1590,13 @@ def launch_claude_cli_with_args(args):
                 "claude",
                 "--model", "opus",
                 "--dangerously-skip-permissions"
-            ] + args
+            ]
+            
+            # Add test mode flag if enabled (verbose flag for prompt logging)
+            if test_mode:
+                claude_args.append("--verbose")
+                
+            claude_args.extend(args)
             
             console.print(f"[dim]Launching Claude with: {' '.join(claude_args[1:])}[/dim]")
             
@@ -1873,7 +1984,7 @@ def main():
     args = sys.argv[1:]
     
     # Enhanced flags that trigger Python CLI system
-    enhanced_flags = ["--safe", "--upgrade", "--rollback", "--dry-run", "--cleanup"]
+    enhanced_flags = ["--safe", "--upgrade", "--rollback", "--dry-run", "--cleanup", "--test-mode"]
     version_flags = ["--version"]  # Removed -v to avoid conflict with verbose
     help_flags = ["--help", "-h"]
     
@@ -1896,11 +2007,19 @@ def main():
         handle_cleanup_command(args)
         return
     
-    # Check for enhanced flags
+    # Check for test mode flag specifically or from environment
+    test_mode = "--test-mode" in args or os.environ.get("CLAUDE_PM_TEST_MODE") == "true"
+    
+    # Remove --test-mode from args if present (it's not a Claude CLI flag)
+    if "--test-mode" in args:
+        args = [arg for arg in args if arg != "--test-mode"]
+    
+    # Check for enhanced flags (excluding test-mode from triggering enhanced flags handler)
+    # test-mode should only go through enhanced flags when used with other enhanced flags
     has_enhanced_flags = any(
-        arg in enhanced_flags or 
+        arg in [f for f in enhanced_flags if f != "--test-mode"] or 
         arg.startswith("--format=") or
-        any(flag in args for flag in enhanced_flags)
+        any(flag in args for flag in [f for f in enhanced_flags if f != "--test-mode"])
         for arg in args
     )
     
@@ -1918,6 +2037,21 @@ def main():
     # Handle enhanced flags
     if has_enhanced_flags:
         handle_enhanced_flags()
+        return
+    
+    # Handle standalone --test-mode flag (when no other args present)
+    if test_mode and not args:
+        # Launch Claude CLI in YOLO mode with test mode enabled
+        display_comprehensive_status()
+        
+        if not validate_framework_deployment():
+            console.print("[red]❌ Claude PM Framework not properly deployed![/red]")
+            console.print("[yellow]💡 Use 'claude-pm init' to initialize the framework[/yellow]")
+            sys.exit(1)
+        
+        console.print("[green]✅ All systems validated - launching Claude CLI with test mode[/green]")
+        console.print("")
+        launch_claude_cli_yolo(test_mode=True)
         return
     
     # Handle basic flags
@@ -1995,7 +2129,7 @@ def main():
         
         console.print("[green]✅ All systems validated - launching Claude CLI with pass-through flags[/green]")
         console.print("")
-        launch_claude_cli_with_args(args)
+        launch_claude_cli_with_args(args, test_mode=test_mode)
         return
     
     # Handle no arguments case - Framework validation required per ISS-0112
@@ -2043,7 +2177,22 @@ def main():
         console.print("[green]✅ All systems validated - launching Claude CLI in YOLO mode[/green]")
         console.print("")
         # Framework validated - launch Claude CLI in proper YOLO mode
-        launch_claude_cli_yolo()
+        launch_claude_cli_yolo(test_mode=test_mode)
+        return
+    
+    # Handle case where --test-mode is used with other arguments
+    if test_mode and args:
+        # Pass through to Claude CLI with test mode enabled
+        display_comprehensive_status()
+        
+        if not validate_framework_deployment():
+            console.print("[red]❌ Claude PM Framework not properly deployed![/red]")
+            console.print("[yellow]💡 Use 'claude-pm init' to initialize the framework[/yellow]")
+            sys.exit(1)
+        
+        console.print("[green]✅ All systems validated - launching Claude CLI with test mode[/green]")
+        console.print("")
+        launch_claude_cli_with_args(args, test_mode=test_mode)
         return
     
     # For other commands, delegate to Python framework

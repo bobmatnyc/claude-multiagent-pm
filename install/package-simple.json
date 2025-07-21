@@ -1,0 +1,57 @@
+{
+  "name": "@bobmatnyc/claude-multiagent-pm",
+  "version": "1.2.3",
+  "description": "Claude Multi-Agent PM Framework - NPM installer for Python package",
+  "main": "bin/claude-pm",
+  "bin": {
+    "claude-pm": "./bin/claude-pm"
+  },
+  "keywords": [
+    "claude",
+    "project-management",
+    "ai-orchestration",
+    "subprocess-coordination",
+    "development-framework",
+    "automation",
+    "python-cli",
+    "installer"
+  ],
+  "author": {
+    "name": "Robert (Masa) Matsuoka",
+    "email": "masa@matsuoka.com",
+    "url": "https://github.com/matsuoka"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bobmatnyc/claude-multiagent-pm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bobmatnyc/claude-multiagent-pm/issues"
+  },
+  "homepage": "https://github.com/bobmatnyc/claude-multiagent-pm#readme",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "scripts": {
+    "postinstall": "node install/postinstall-simple.js",
+    "test": "echo 'Tests run from Python package'"
+  },
+  "files": [
+    "bin/",
+    "install/postinstall-simple.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}

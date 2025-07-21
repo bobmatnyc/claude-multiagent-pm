@@ -123,7 +123,11 @@ class ClaudeWrapper {
 // Main execution
 if (require.main === module) {
     const wrapper = new ClaudeWrapper();
-    const args = process.argv.slice(2);
+    let args = process.argv.slice(2);
+    
+    // Filter out --test-mode flag as it's not a Claude CLI flag
+    // It's handled by the claude-pm wrapper for prompt logging
+    args = args.filter(arg => arg !== '--test-mode');
     
     // Launch Claude CLI with enhanced environment
     wrapper.launchClaude(args);

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-07-18T18:23:01.769Z",
+  "lastUpdated": "2025-07-20T21:33:20.631Z",
   "projectPath": "/Users/masa/Projects/claude-multiagent-pm",
   "projects": {},
   "epics": {
@@ -123,7 +123,7 @@
     "EP-0021": {
       "id": "EP-0021",
       "title": "Documentation Update v4.2.0 - User Config Directory",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0021-documentation-update-v4-2-0-user-config-directory.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0021-documentation-update-v420-user-config-directory.md",
       "status": "planning",
       "priority": "medium",
       "lastModified": "2025-07-09T02:04:06.153Z",
@@ -363,10 +363,81 @@
       ],
       "completion_percentage": 0
     },
+    "EP-0042": {
+      "id": "EP-0042",
+      "title": "Complete Spin Travel Mock Data System Implementation",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0042-complete-spin-travel-mock-data-system-implementation.md",
+      "status": "active",
+      "priority": "high",
+      "lastModified": "2025-07-18T22:36:45.717Z",
+      "fileSize": 2208,
+      "assignee": "masa",
+      "tags": [
+        "spin-travel",
+        "mock-data",
+        "implementation"
+      ],
+      "issueIds": [
+        "ISS-0129",
+        "ISS-0130",
+        "ISS-0131",
+        "ISS-0132",
+        "ISS-0133",
+        "ISS-0134",
+        "ISS-0135",
+        "ISS-0136",
+        "ISS-0137",
+        "ISS-0138",
+        "ISS-0139",
+        "ISS-0140",
+        "ISS-0141",
+        "ISS-0142",
+        "ISS-0143",
+        "ISS-0144",
+        "ISS-0145",
+        "ISS-0146",
+        "ISS-0147",
+        "ISS-0148",
+        "ISS-0149",
+        "ISS-0150",
+        "ISS-0151",
+        "ISS-0152",
+        "ISS-0153"
+      ],
+      "completion_percentage": 0
+    },
+    "EP-0043": {
+      "id": "EP-0043",
+      "title": "Placeholder Epic - EP-0043",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0043-placeholder-epic-ep-0043.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-19T13:20:10.394Z",
+      "fileSize": 1297,
+      "assignee": "masa",
+      "issueIds": [
+        "ISS-0155"
+      ],
+      "completion_percentage": 0
+    },
+    "EP-0076": {
+      "id": "EP-0076",
+      "title": "Python-to-C Performance Optimization Epic",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0076-python-to-c-performance-optimization-epic.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-11T16:01:35.718Z",
+      "fileSize": 2779,
+      "assignee": "masa",
+      "issueIds": [
+        "ISS-0077"
+      ],
+      "completion_percentage": 0
+    },
     "EP-9999": {
       "id": "EP-9999",
       "title": "Placeholder Epic - EP-9999",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-9999-placeholder-epic.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-9999-placeholder-epic-ep-9999.md",
       "status": "planning",
       "priority": "medium",
       "lastModified": "2025-07-18T15:42:08.927Z",
@@ -374,20 +445,6 @@
       "assignee": "masa",
       "issueIds": [
         "ISS-0126"
-      ],
-      "completion_percentage": 0
-    },
-    "ISS-0076": {
-      "id": "ISS-0076",
-      "title": "Python-to-C Performance Optimization Epic",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/ISS-0076-placeholder-epic.md",
-      "status": "planning",
-      "priority": "high",
-      "lastModified": "2025-07-11T16:01:35.718Z",
-      "fileSize": 2780,
-      "assignee": "masa",
-      "issueIds": [
-        "ISS-0077"
       ],
       "completion_percentage": 0
     }
@@ -416,7 +473,7 @@
     "ISS-0002": {
       "id": "ISS-0002",
       "title": "Implement Comprehensive Health Slash Command for All Subsystems",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0002-comprehensive-health-slash-command.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0002-implement-comprehensive-health-slash-command-for-all-subsystems.md",
       "status": "completed",
       "priority": "high",
       "lastModified": "2025-07-09T01:12:11.278Z",
@@ -436,7 +493,7 @@
     "ISS-0003": {
       "id": "ISS-0003",
       "title": "Convert All Managed Projects to ai-trackdown-tools",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0003-convert-managed-projects-to-ai-trackdown.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0003-convert-all-managed-projects-to-ai-trackdown-tools.md",
       "status": "completed",
       "priority": "high",
       "lastModified": "2025-07-09T03:22:00.682Z",
@@ -517,7 +574,7 @@
     "ISS-0024": {
       "id": "ISS-0024",
       "title": "Update docs/user-guide for new user config directory structure",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0024-update-docs-user-guide-for-new-user-config-directory-structure.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0024-update-docsuser-guide-for-new-user-config-directory-structure.md",
       "status": "planning",
       "priority": "medium",
       "lastModified": "2025-07-09T02:04:25.355Z",
@@ -534,7 +591,7 @@
     "ISS-0025": {
       "id": "ISS-0025",
       "title": "Update VERSION across framework to 4.2.0",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0025-update-version-across-framework-to-4-2-0.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0025-update-version-across-framework-to-420.md",
       "status": "planning",
       "priority": "medium",
       "lastModified": "2025-07-09T02:03:57.113Z",
@@ -631,7 +688,7 @@
     "ISS-0034": {
       "id": "ISS-0034",
       "title": "Migrate Legacy Environment Variables to CLAUDE_MULTIAGENT_PM_ Prefix",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0034-migrate-legacy-environment-variables-to-claude-multiagent-pm-prefix.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0034-migrate-legacy-environment-variables-to-claude_multiagent_pm_-prefix.md",
       "status": "planning",
       "priority": "medium",
       "lastModified": "2025-07-09T02:51:27.956Z",
@@ -817,7 +874,7 @@
     "ISS-0046": {
       "id": "ISS-0046",
       "title": "Implement /cmpm:health slash command - Comprehensive system health dashboard",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0046-implement-cmpm-health-slash-command-comprehensive-system-health-dashboard.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0046-implement-cmpmhealth-slash-command-comprehensive-system-health-dashboard.md",
       "status": "completed",
       "priority": "medium",
       "lastModified": "2025-07-09T03:39:17.898Z",
@@ -832,7 +889,7 @@
     "ISS-0047": {
       "id": "ISS-0047",
       "title": "Implement /cmpm:agents slash command - Active agent registry overview",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0047-implement-cmpm-agents-slash-command-active-agent-registry-overview.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0047-implement-cmpmagents-slash-command-active-agent-registry-overview.md",
       "status": "completed",
       "priority": "medium",
       "lastModified": "2025-07-09T03:39:21.792Z",
@@ -879,11 +936,11 @@
     "ISS-0052": {
       "id": "ISS-0052",
       "title": "Publish claude-pm-portfolio-manager as @bobmatnyc/claude-pm-portfolio-manager NPM package",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0052-publish-claude-pm-portfolio-manager-as-bobmatnyc-claude-pm-portfolio-manager-npm-package.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0052-publish-claude-pm-portfolio-manager-as-bobmatnycclaude-pm-portfolio-manager-npm-package.md",
       "status": "planning",
       "priority": "high",
       "lastModified": "2025-07-09T14:30:00.000Z",
-      "fileSize": 5796,
+      "fileSize": 5802,
       "assignee": "devops-team",
       "epicId": "EP-0032",
       "taskIds": [],
@@ -1258,7 +1315,7 @@
       "status": "completed",
       "priority": "high",
       "lastModified": "2025-07-13T19:28:18.754Z",
-      "fileSize": 13034,
+      "fileSize": 13033,
       "assignee": "masa",
       "tags": [
         "performance",
@@ -1266,7 +1323,7 @@
         "phase-1",
         "mathematical-functions"
       ],
-      "epicId": "ISS-0076",
+      "epicId": "EP-0076",
       "taskIds": [],
       "prIds": [],
       "blocked_by": [],
@@ -1378,7 +1435,7 @@
     "ISS-0085": {
       "id": "ISS-0085",
       "title": "Modularize claude-pm script from monolithic 3,048-line file",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0085-modularize-claude-pm-script-from-monolithic-3-048-line-file.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0085-modularize-claude-pm-script-from-monolithic-3048-line-file.md",
       "status": "completed",
       "priority": "medium",
       "lastModified": "2025-07-14T23:30:00.000Z",
@@ -1441,7 +1498,7 @@
     "ISS-0089": {
       "id": "ISS-0089",
       "title": "Restructure README docs per Dirk's feedback",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0089-restructure-readme-docs-per-dirk-s-feedback.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0089-restructure-readme-docs-per-dirks-feedback.md",
       "status": "planning",
       "priority": "high",
       "lastModified": "2025-07-13T21:31:34.928Z",
@@ -1485,7 +1542,7 @@
     "ISS-0092": {
       "id": "ISS-0092",
       "title": "Remove mandatory epic_id requirement from ticket parser",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0092-remove-mandatory-epic-id-requirement-from-ticket-parser.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0092-remove-mandatory-epic_id-requirement-from-ticket-parser.md",
       "status": "planning",
       "priority": "high",
       "lastModified": "2025-07-13T22:01:14.484Z",
@@ -1700,7 +1757,7 @@
     "ISS-0106": {
       "id": "ISS-0106",
       "title": "Implement v1.0.0 Publication Pipeline",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0106-implement-v1-0-0-publication-pipeline.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0106-implement-v100-publication-pipeline.md",
       "status": "planning",
       "priority": "high",
       "lastModified": "2025-07-14T01:14:49.675Z",
@@ -1728,7 +1785,7 @@
     "ISS-0108": {
       "id": "ISS-0108",
       "title": "AI-Trackdown-PyTools v1.0.0 Enterprise Parity Roadmap",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0108-ai-trackdown-pytools-v1-0-0-enterprise-parity-roadmap.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0108-ai-trackdown-pytools-v100-enterprise-parity-roadmap.md",
       "status": "planning",
       "priority": "critical",
       "lastModified": "2025-07-14T01:15:19.332Z",
@@ -1742,7 +1799,7 @@
     "ISS-0109": {
       "id": "ISS-0109",
       "title": "Node.js Memory Leak: 8GB Heap Exhaustion in Framework Wrapper",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0109-node-js-memory-leak-8gb-heap-exhaustion-in-framework-wrapper.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0109-nodejs-memory-leak-8gb-heap-exhaustion-in-framework-wrapper.md",
       "status": "planning",
       "priority": "high",
       "lastModified": "2025-07-14T02:48:59.918Z",
@@ -1801,7 +1858,7 @@
     "ISS-0113": {
       "id": "ISS-0113",
       "title": "Resume v0.8.3 publication after subprocess validation protocol implementation",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0113-resume-v0-8-3-publication-after-subprocess-validation-protocol-implementation.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0113-resume-v083-publication-after-subprocess-validation-protocol-implementation.md",
       "status": "planning",
       "priority": "high",
       "lastModified": "2025-07-15T00:11:48.577Z",
@@ -1839,7 +1896,7 @@
     "ISS-0115": {
       "id": "ISS-0115",
       "title": "Update package.json with proper postinstall script configuration",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0115-update-package-json-with-proper-postinstall-script-configuration.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0115-update-packagejson-with-proper-postinstall-script-configuration.md",
       "status": "planning",
       "priority": "high",
       "lastModified": "2025-07-15T01:25:45.540Z",
@@ -2001,15 +2058,648 @@
       "id": "ISS-0127",
       "title": "Documentation Reorganization - Clean Structure and Archive Old Content",
       "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0127-documentation-reorganization-clean-structure-and-archive-old-content.md",
-      "status": "planning",
+      "status": "resolved",
       "priority": "high",
-      "lastModified": "2025-07-18T18:23:01.761Z",
-      "fileSize": 4608,
+      "lastModified": "2025-07-18T18:58:00.000Z",
+      "fileSize": 8454,
       "assignee": "masa",
       "tags": [
         "documentation",
         "refactoring",
         "infrastructure"
+      ],
+      "taskIds": [
+        "TSK-0022",
+        "TSK-0023",
+        "TSK-0024",
+        "TSK-0025",
+        "TSK-0026"
+      ],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0128": {
+      "id": "ISS-0128",
+      "title": "Test Directory Reorganization - Clean Structure and Categorization",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0128-test-directory-reorganization-clean-structure-and-categorization.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-18T19:09:20.328Z",
+      "fileSize": 8620,
+      "assignee": "masa",
+      "tags": [
+        "testing",
+        "refactoring",
+        "quality"
+      ],
+      "taskIds": [
+        "TSK-0027",
+        "TSK-0028",
+        "TSK-0029",
+        "TSK-0030",
+        "TSK-0031"
+      ],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0129": {
+      "id": "ISS-0129",
+      "title": "CLI-1: Set up main CLI framework with Click",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0129-cli-1-set-up-main-cli-framework-with-click.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-18T19:28:35.521Z",
+      "fileSize": 1756,
+      "assignee": "masa",
+      "tags": [
+        "cli",
+        "implementation"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0130": {
+      "id": "ISS-0130",
+      "title": "CLI-2: Implement generate commands (customer, booking, payment)",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0130-cli-2-implement-generate-commands-customer-booking-payment.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-18T19:27:09.646Z",
+      "fileSize": 1084,
+      "assignee": "masa",
+      "tags": [
+        "cli",
+        "implementation"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0131": {
+      "id": "ISS-0131",
+      "title": "CLI-3: Add scenario and batch generation commands",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0131-cli-3-add-scenario-and-batch-generation-commands.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-18T19:27:17.710Z",
+      "fileSize": 1024,
+      "assignee": "masa",
+      "tags": [
+        "cli",
+        "implementation"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0132": {
+      "id": "ISS-0132",
+      "title": "CLI-4: Integrate data management commands",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0132-cli-4-integrate-data-management-commands.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-18T19:28:00.832Z",
+      "fileSize": 954,
+      "assignee": "masa",
+      "tags": [
+        "cli",
+        "implementation"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0133": {
+      "id": "ISS-0133",
+      "title": "CLI-5: Create utility commands (validate, stats, seed)",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0133-cli-5-create-utility-commands-validate-stats-seed.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-18T19:28:01.071Z",
+      "fileSize": 982,
+      "assignee": "masa",
+      "tags": [
+        "cli",
+        "implementation"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0134": {
+      "id": "ISS-0134",
+      "title": "CLI-6: Build interactive mode wizard",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0134-cli-6-build-interactive-mode-wizard.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-18T19:28:01.292Z",
+      "fileSize": 929,
+      "assignee": "masa",
+      "tags": [
+        "cli",
+        "implementation",
+        "ux"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0135": {
+      "id": "ISS-0135",
+      "title": "CLI-7: Add output formatting options (JSON, table, CSV)",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0135-cli-7-add-output-formatting-options-json-table-csv.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-18T19:28:01.512Z",
+      "fileSize": 962,
+      "assignee": "masa",
+      "tags": [
+        "cli",
+        "implementation"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0136": {
+      "id": "ISS-0136",
+      "title": "CLI-8: Configure package entry point",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0136-cli-8-configure-package-entry-point.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-18T19:28:01.733Z",
+      "fileSize": 933,
+      "assignee": "masa",
+      "tags": [
+        "cli",
+        "implementation",
+        "setup"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0137": {
+      "id": "ISS-0137",
+      "title": "TEST-1: Unit tests for customer generator",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0137-test-1-unit-tests-for-customer-generator.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-18T19:28:01.956Z",
+      "fileSize": 946,
+      "assignee": "masa",
+      "tags": [
+        "testing",
+        "unit-tests"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0138": {
+      "id": "ISS-0138",
+      "title": "TEST-2: Unit tests for flight generator",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0138-test-2-unit-tests-for-flight-generator.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-18T19:28:02.181Z",
+      "fileSize": 932,
+      "assignee": "masa",
+      "tags": [
+        "testing",
+        "unit-tests"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0139": {
+      "id": "ISS-0139",
+      "title": "TEST-3: Unit tests for hotel generator",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0139-test-3-unit-tests-for-hotel-generator.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-18T19:28:02.401Z",
+      "fileSize": 930,
+      "assignee": "masa",
+      "tags": [
+        "testing",
+        "unit-tests"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0140": {
+      "id": "ISS-0140",
+      "title": "TEST-4: Unit tests for payment generator",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0140-test-4-unit-tests-for-payment-generator.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-18T19:28:02.624Z",
+      "fileSize": 940,
+      "assignee": "masa",
+      "tags": [
+        "testing",
+        "unit-tests"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0141": {
+      "id": "ISS-0141",
+      "title": "TEST-5: Integration tests for complete booking flows",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0141-test-5-integration-tests-for-complete-booking-flows.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-18T19:28:02.851Z",
+      "fileSize": 965,
+      "assignee": "masa",
+      "tags": [
+        "testing",
+        "integration-tests"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0142": {
+      "id": "ISS-0142",
+      "title": "TEST-6: Validation service test coverage",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0142-test-6-validation-service-test-coverage.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-18T19:28:03.078Z",
+      "fileSize": 940,
+      "assignee": "masa",
+      "tags": [
+        "testing",
+        "unit-tests"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0143": {
+      "id": "ISS-0143",
+      "title": "TEST-7: Data persistence layer tests",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0143-test-7-data-persistence-layer-tests.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-18T19:28:03.301Z",
+      "fileSize": 911,
+      "assignee": "masa",
+      "tags": [
+        "testing",
+        "integration-tests"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0144": {
+      "id": "ISS-0144",
+      "title": "TEST-8: CLI command tests",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0144-test-8-cli-command-tests.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-18T19:28:03.524Z",
+      "fileSize": 901,
+      "assignee": "masa",
+      "tags": [
+        "testing",
+        "cli"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0145": {
+      "id": "ISS-0145",
+      "title": "TEST-9: Performance and load tests",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0145-test-9-performance-and-load-tests.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-18T19:28:03.751Z",
+      "fileSize": 921,
+      "assignee": "masa",
+      "tags": [
+        "testing",
+        "performance"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0146": {
+      "id": "ISS-0146",
+      "title": "TEST-10: Edge case test scenarios",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0146-test-10-edge-case-test-scenarios.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-18T19:28:03.976Z",
+      "fileSize": 912,
+      "assignee": "masa",
+      "tags": [
+        "testing",
+        "edge-cases"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0147": {
+      "id": "ISS-0147",
+      "title": "DOC-1: Write user guide with practical examples",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0147-doc-1-write-user-guide-with-practical-examples.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-18T19:28:04.199Z",
+      "fileSize": 946,
+      "assignee": "masa",
+      "tags": [
+        "documentation",
+        "user-guide"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0148": {
+      "id": "ISS-0148",
+      "title": "DOC-2: Create API reference documentation",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0148-doc-2-create-api-reference-documentation.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-18T19:28:04.427Z",
+      "fileSize": 917,
+      "assignee": "masa",
+      "tags": [
+        "documentation",
+        "api"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0149": {
+      "id": "ISS-0149",
+      "title": "DOC-3: Document system architecture",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0149-doc-3-document-system-architecture.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-18T19:28:04.657Z",
+      "fileSize": 932,
+      "assignee": "masa",
+      "tags": [
+        "documentation",
+        "architecture"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0150": {
+      "id": "ISS-0150",
+      "title": "DOC-4: Write quick start tutorial",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0150-doc-4-write-quick-start-tutorial.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-18T19:28:04.882Z",
+      "fileSize": 888,
+      "assignee": "masa",
+      "tags": [
+        "documentation",
+        "tutorial"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0151": {
+      "id": "ISS-0151",
+      "title": "DOC-5: Create troubleshooting guide",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0151-doc-5-create-troubleshooting-guide.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-18T19:28:05.115Z",
+      "fileSize": 879,
+      "assignee": "masa",
+      "tags": [
+        "documentation",
+        "support"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0152": {
+      "id": "ISS-0152",
+      "title": "DOC-6: Add contributing guidelines",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0152-doc-6-add-contributing-guidelines.md",
+      "status": "planning",
+      "priority": "low",
+      "lastModified": "2025-07-18T19:28:05.347Z",
+      "fileSize": 917,
+      "assignee": "masa",
+      "tags": [
+        "documentation",
+        "community"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0153": {
+      "id": "ISS-0153",
+      "title": "Implement Geographic Opportunity Value Tests Based on Salesforce Maps Research",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0153-implement-geographic-opportunity-value-tests-based-on-salesforce-maps-research.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-18T22:36:45.713Z",
+      "fileSize": 11983,
+      "assignee": "masa",
+      "tags": [
+        "testing",
+        "salesforce-maps",
+        "geographic-analysis",
+        "opportunity-value"
+      ],
+      "epicId": "EP-0042",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0154": {
+      "id": "ISS-0154",
+      "title": "Fix TypeScript environment variable access - use bracket notation",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0154-fix-typescript-environment-variable-access-use-bracket-notation.md",
+      "status": "completed",
+      "priority": "high",
+      "lastModified": "2025-07-19T13:18:44.680Z",
+      "fileSize": 2503,
+      "assignee": "masa",
+      "tags": [
+        "bug",
+        "typescript",
+        "technical-debt"
+      ],
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0155": {
+      "id": "ISS-0155",
+      "title": "EP-0043 Refactoring Implementation - Phase 1 Complete",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0155-ep-0043-refactoring-implementation-phase-1-complete.md",
+      "status": "completed",
+      "priority": "high",
+      "lastModified": "2025-07-19T13:20:10.393Z",
+      "fileSize": 8927,
+      "assignee": "masa",
+      "tags": [
+        "refactoring",
+        "implementation",
+        "documentation",
+        "phase-1-complete",
+        "backward-compatibility"
+      ],
+      "epicId": "EP-0043",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0156": {
+      "id": "ISS-0156",
+      "title": "Fix remaining TypeScript errors - variable declarations and undefined checks",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0156-fix-remaining-typescript-errors-variable-declarations-and-undefined-checks.md",
+      "status": "completed",
+      "priority": "high",
+      "lastModified": "2025-07-19T13:30:50.916Z",
+      "fileSize": 1990,
+      "assignee": "masa",
+      "tags": [
+        "bug",
+        "typescript",
+        "technical-debt"
+      ],
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0162": {
+      "id": "ISS-0162",
+      "title": "Continue E2E Test Implementation - Prompt Filtering and Integration",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0162-continue-e2e-test-implementation-prompt-filtering-and-integration.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-20T03:19:06.771Z",
+      "fileSize": 3758,
+      "assignee": "masa",
+      "epicId": "EP-0044",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0163": {
+      "id": "ISS-0163",
+      "title": "Improve deployment architecture to eliminate source directory dependencies",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0163-improve-deployment-architecture-to-eliminate-source-directory-dependencies.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-20T03:42:56.093Z",
+      "fileSize": 788,
+      "assignee": "masa",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0166": {
+      "id": "ISS-0166",
+      "title": "Add --verbose option to claude-pm for prompt logging",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0166-add-verbose-option-to-claude-pm-for-prompt-logging.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-20T05:21:11.093Z",
+      "fileSize": 761,
+      "assignee": "masa",
+      "epicId": "EP-0001",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0169": {
+      "id": "ISS-0169",
+      "title": "Add Tree-sitter support for enhanced semantic code analysis",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0169-add-tree-sitter-support-for-enhanced-semantic-code-analysis.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-20T21:33:20.622Z",
+      "fileSize": 3064,
+      "assignee": "masa",
+      "tags": [
+        "enhancement",
+        "performance",
+        "architecture"
       ],
       "taskIds": [],
       "prIds": [],
@@ -2034,7 +2724,7 @@
     "TSK-0002": {
       "id": "TSK-0002",
       "title": "Validate ai-trackdown CLI Functionality and Fix Indexing Issues",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0002-validate-cli-functionality.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0002-validate-ai-trackdown-cli-functionality-and-fix-indexing-issues.md",
       "status": "completed",
       "priority": "high",
       "lastModified": "2025-07-09T02:59:08.584Z",
@@ -2201,19 +2891,139 @@
       "assignee": "qa-test@example.com",
       "issueId": "ISS-0110",
       "subtasks": []
+    },
+    "TSK-0022": {
+      "id": "TSK-0022",
+      "title": "Phase 1: Backup and create directory structure",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0022-phase-1-backup-and-create-directory-structure.md",
+      "status": "completed",
+      "priority": "medium",
+      "lastModified": "2025-07-18T18:31:01.302Z",
+      "fileSize": 3279,
+      "assignee": "documenter",
+      "issueId": "ISS-0127",
+      "subtasks": []
+    },
+    "TSK-0023": {
+      "id": "TSK-0023",
+      "title": "Phase 2: Migrate core documentation",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0023-phase-2-migrate-core-documentation.md",
+      "status": "completed",
+      "priority": "medium",
+      "lastModified": "2025-07-18T18:31:45.000Z",
+      "fileSize": 2946,
+      "assignee": "documenter",
+      "issueId": "ISS-0127",
+      "subtasks": []
+    },
+    "TSK-0024": {
+      "id": "TSK-0024",
+      "title": "Phase 3: Archive old content and cleanup",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0024-phase-3-archive-old-content-and-cleanup.md",
+      "status": "completed",
+      "priority": "medium",
+      "lastModified": "2025-07-18T20:15:00.000Z",
+      "fileSize": 3224,
+      "assignee": "documenter",
+      "issueId": "ISS-0127",
+      "subtasks": []
+    },
+    "TSK-0025": {
+      "id": "TSK-0025",
+      "title": "Phase 4: Create navigation and validate links",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0025-phase-4-create-navigation-and-validate-links.md",
+      "status": "completed",
+      "priority": "medium",
+      "lastModified": "2025-07-18T20:15:00.000Z",
+      "fileSize": 3021,
+      "assignee": "documenter",
+      "issueId": "ISS-0127",
+      "subtasks": []
+    },
+    "TSK-0026": {
+      "id": "TSK-0026",
+      "title": "Phase 5: Final validation",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0026-phase-5-final-validation.md",
+      "status": "complete",
+      "priority": "medium",
+      "lastModified": "2025-07-18T18:55:00.000Z",
+      "fileSize": 3430,
+      "assignee": "qa",
+      "issueId": "ISS-0127",
+      "subtasks": []
+    },
+    "TSK-0027": {
+      "id": "TSK-0027",
+      "title": "Phase 1: Backup and create test directory structure",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0027-phase-1-backup-and-create-test-directory-structure.md",
+      "status": "completed",
+      "priority": "medium",
+      "lastModified": "2025-07-18T20:13:45.000Z",
+      "fileSize": 2152,
+      "assignee": "qa",
+      "issueId": "ISS-0128",
+      "subtasks": []
+    },
+    "TSK-0028": {
+      "id": "TSK-0028",
+      "title": "Phase 2: Organize unit tests by module",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0028-phase-2-organize-unit-tests-by-module.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-18T19:08:59.716Z",
+      "fileSize": 673,
+      "assignee": "qa",
+      "issueId": "ISS-0128",
+      "subtasks": []
+    },
+    "TSK-0029": {
+      "id": "TSK-0029",
+      "title": "Phase 3: Migrate integration and e2e tests",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0029-phase-3-migrate-integration-and-e2e-tests.md",
+      "status": "completed",
+      "priority": "medium",
+      "lastModified": "2025-07-18T22:26:00.000Z",
+      "fileSize": 1964,
+      "assignee": "qa",
+      "issueId": "ISS-0128",
+      "subtasks": []
+    },
+    "TSK-0030": {
+      "id": "TSK-0030",
+      "title": "Phase 4: Setup test configuration and utilities",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0030-phase-4-setup-test-configuration-and-utilities.md",
+      "status": "completed",
+      "priority": "medium",
+      "lastModified": "2025-07-18T19:45:00.000Z",
+      "fileSize": 2467,
+      "assignee": "qa",
+      "issueId": "ISS-0128",
+      "subtasks": []
+    },
+    "TSK-0031": {
+      "id": "TSK-0031",
+      "title": "Phase 5: Cleanup and validate test suite",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0031-phase-5-cleanup-and-validate-test-suite.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-18T19:09:20.325Z",
+      "fileSize": 677,
+      "assignee": "qa",
+      "issueId": "ISS-0128",
+      "subtasks": []
     }
   },
   "prs": {},
   "stats": {
     "totalProjects": 0,
-    "totalEpics": 24,
-    "totalIssues": 105,
-    "totalTasks": 14,
+    "totalEpics": 26,
+    "totalIssues": 138,
+    "totalTasks": 24,
     "totalPRs": 0,
-    "lastFullScan": "2025-07-18T15:51:39.460Z",
+    "lastFullScan": "2025-07-19T14:26:21.274Z",
     "indexSize": 0,
     "performanceMetrics": {
-      "lastLoadTime": 1,
+      "lastLoadTime": 2,
       "lastUpdateTime": 0,
       "lastRebuildTime": 0
     }

@@ -292,14 +292,55 @@ bin/
 /*TEST*.md
 /qa_*.json
 /*validation*.json
+/validation_report_*.json
 /test_*.py
 /*test*.py
 
-# Exceptions: Core project documentation
+# npm version artifacts (prevent =X.X.X files in root)
+/=*.*.*
+/=*.*.0
+/=*.0.0
+
+# Coverage reports in root (already have coverage.xml above, but being explicit)
+/coverage.xml
+/coverage-*.xml
+/*.lcov
+
+# Prevent any markdown files in root except the 4 allowed
+/*.md
 !CLAUDE.md
 !README.md
 !CHANGELOG.md
-!DEPLOYMENT_WORKFLOW.md
+!RELEASE_NOTES.md
+
+# Build and deployment related files
+/BUILD_*.md
+/MANIFEST.in
+/build_config.py
+
+# Script files that might be accidentally created in root
+/check_*.py
+/migrate_*.py
+/test_*.py
+/validate_*.py
+/verify_*.py
+
+# Test project directories
+/test-project/
+/test_*/
+
+# Backup directories (be specific to root)
+/tests_backup_*/
+
+# PyPI packaging files in root
+/.npmignore
+/package-simple.json
+
+# Exception: Core project documentation
+!CLAUDE.md
+!README.md
+!CHANGELOG.md
+!RELEASE_NOTES.md
 
 ############################################################
 # End of .gitignore

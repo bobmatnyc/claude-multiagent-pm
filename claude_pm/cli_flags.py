@@ -362,9 +362,53 @@ class RollbackManager:
 @click.option("--safe", is_flag=True, help="Enable safe mode with confirmations and backups")
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
 @click.option("--dry-run", is_flag=True, help="Show what would be done without executing")
+@click.option("--test-mode", is_flag=True, help="Enable test mode with prompt logging to .claude-pm/logs/prompts/")
 @click.pass_context
-def cli_flags(ctx, safe, verbose, dry_run):
+def cli_flags(ctx, safe, verbose, dry_run, test_mode):
     """Claude Multi-Agent PM Framework - Enhanced CLI flags."""
+    # Handle test mode flag
+    if test_mode:
+        # Set up test mode environment
+        prompts_dir = Path.cwd() / ".claude-pm" / "logs" / "prompts"
+        prompts_dir.mkdir(parents=True, exist_ok=True)
+        
+        console.print("[bold blue]🧪 Test Mode Activated[/bold blue]")
+        console.print("═" * 60)
+        console.print(f"📁 Prompts directory: {prompts_dir}")
+        console.print("✅ Prompt logging enabled")
+        console.print("\n[dim]Launching Claude CLI with verbose mode for prompt logging...[/dim]")
+        
+        # Set environment variables
+        os.environ["CLAUDE_PM_TEST_MODE"] = "true"
+        os.environ["CLAUDE_PM_PROMPTS_DIR"] = str(prompts_dir)
+        
+        # Launch Claude via the main claude-pm script
+        # This ensures proper routing through the framework
+        try:
+            # Get the claude-pm script path
+            claude_pm_path = shutil.which("claude-pm")
+            if not claude_pm_path:
+                # Try to find it in the bin directory
+                bin_path = Path(__file__).parent.parent / "bin" / "claude-pm"
+                if bin_path.exists():
+                    claude_pm_path = str(bin_path)
+                else:
+                    console.print("[red]❌ claude-pm script not found[/red]")
+                    sys.exit(1)
+            
+            # Re-launch claude-pm without --test-mode flag to avoid infinite loop
+            # The environment variables will ensure test mode is active
+            remaining_args = [arg for arg in sys.argv[1:] if arg != "--test-mode"]
+            cmd = [sys.executable, claude_pm_path] + remaining_args
+            
+            # Use subprocess instead of os.execvp to maintain environment
+            result = subprocess.run(cmd, env=os.environ.copy())
+            sys.exit(result.returncode)
+            
+        except Exception as e:
+            console.print(f"[red]❌ Failed to launch Claude CLI: {e}[/red]")
+            sys.exit(1)
+    
     if ctx.invoked_subcommand is None:
         # If no subcommand is provided, show help
         click.echo(ctx.get_help())
@@ -374,6 +418,7 @@ def cli_flags(ctx, safe, verbose, dry_run):
         ctx.obj['safe'] = safe
         ctx.obj['verbose'] = verbose
         ctx.obj['dry_run'] = dry_run
+        ctx.obj['test_mode'] = test_mode
 
 
 @cli_flags.command()
@@ -438,6 +483,8 @@ def rollback(ctx, version):
         sys.exit(0 if success else 1)
     
     asyncio.run(run_rollback())
+
+
 
 
 @cli_flags.command()
