@@ -49,7 +49,7 @@ class VersionManager:
                         return f"{int(match.group(1)):03d}"
         return "014"  # Default fallback
     
-    def parse_current_version(self, content: str) -> Tuple[str, int]:
+    def parse_current_version(self, content: str) -> str:
         """
         Parse the current CLAUDE_MD_VERSION from existing content.
         
@@ -57,58 +57,65 @@ class VersionManager:
             content: Existing CLAUDE.md content
             
         Returns:
-            Tuple of (framework_version, serial_number)
+            str: Version number (e.g., "016")
         """
+        # First try simple serial format
+        match = re.search(r'CLAUDE_MD_VERSION:\s*(\d+)(?!-)', content)
+        if match:
+            return match.group(1)
+        
+        # Handle old format for backward compatibility
         match = re.search(r'CLAUDE_MD_VERSION:\s*(\d+)-(\d+)', content)
         if match:
-            return match.group(1), int(match.group(2))
-        return self.framework_version, 1
+            return match.group(1)  # Return just the framework part
+        
+        return self.framework_version
     
     def auto_increment_version(self, current_content: Optional[str] = None) -> str:
         """
-        Auto-increment the CLAUDE_MD_VERSION serial number.
+        Get the current framework version (no auto-increment for simple serial numbers).
         
         Args:
-            current_content: Current CLAUDE.md content to parse version from
+            current_content: Current CLAUDE.md content (unused with simple serials)
             
         Returns:
-            str: New version string (e.g., "015-003")
+            str: Current framework version (e.g., "016")
         """
-        if current_content:
-            framework_ver, serial = self.parse_current_version(current_content)
-            if framework_ver == self.framework_version:
-                return f"{framework_ver}-{serial + 1:03d}"
-        
-        return f"{self.framework_version}-001"
+        # With simple serial numbers, we just use the framework version
+        # Incrementing is done by updating the framework/VERSION file
+        return self.framework_version
     
     def compare_versions(self, version1: str, version2: str) -> int:
         """
         Compare two version strings.
         
         Args:
-            version1: First version string (e.g., "015-002")
-            version2: Second version string (e.g., "015-003")
+            version1: First version string (e.g., "016")
+            version2: Second version string (e.g., "017")
             
         Returns:
             int: -1 if version1 < version2, 0 if equal, 1 if version1 > version2
         """
-        def parse_version(v: str) -> Tuple[int, int]:
+        def parse_version(v: str) -> int:
+            # Handle simple serial format
+            if '-' not in v:
+                try:
+                    return int(v)
+                except ValueError:
+                    return 0
+            
+            # Handle old format for backward compatibility
             match = re.match(r'(\d+)-(\d+)', v)
             if match:
-                return int(match.group(1)), int(match.group(2))
-            return 0, 0
+                return int(match.group(1))  # Just compare framework part
+            return 0
         
-        v1_fw, v1_serial = parse_version(version1)
-        v2_fw, v2_serial = parse_version(version2)
+        v1 = parse_version(version1)
+        v2 = parse_version(version2)
         
-        if v1_fw < v2_fw:
+        if v1 < v2:
             return -1
-        elif v1_fw > v2_fw:
+        elif v1 > v2:
             return 1
         else:
-            if v1_serial < v2_serial:
-                return -1
-            elif v1_serial > v2_serial:
-                return 1
-            else:
-                return 0
+            return 0

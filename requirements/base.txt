@@ -30,3 +30,9 @@ pathspec>=0.11.0
 # Markdown parsing
 python-frontmatter>=1.0.0
 mistune>=3.0.0
+
+# Code analysis and parsing
+tree-sitter>=0.20.0
+tree-sitter-python>=0.20.0
+tree-sitter-javascript>=0.20.0
+tree-sitter-typescript>=0.20.0

@@ -56,8 +56,8 @@ class ContentValidator:
         if unexpected_vars:
             issues.append(f"Unsubstituted template variables: {', '.join(set(unexpected_vars))}")
         
-        # Validate version format
-        version_match = re.search(r'CLAUDE_MD_VERSION:\s*(\d+)-(\d+)', content)
+        # Validate version format - now accepts simple serial numbers
+        version_match = re.search(r'CLAUDE_MD_VERSION:\s*(\d+)(?:-(\d+))?', content)
         if not version_match:
             issues.append("Invalid or missing CLAUDE_MD_VERSION format")
         

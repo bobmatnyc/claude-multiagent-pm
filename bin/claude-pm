@@ -16,7 +16,7 @@ from pathlib import Path
 # Script version - tracks claude-pm script updates independently
 def get_script_version():
     """Get script version - injected during deployment."""
-    return "016"
+    return "017"
 
 SCRIPT_VERSION = get_script_version()
 

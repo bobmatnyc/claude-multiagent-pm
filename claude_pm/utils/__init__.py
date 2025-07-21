@@ -18,5 +18,8 @@ __all__ = [
     "prepare_code_review_context",
     "get_context_stats",
     "health_check",
-    "initialize_mcp_context"
+    "initialize_mcp_context",
+    "TreeSitterAnalyzer",
+    "analyze_file",
+    "analyze_directory"
 ]

@@ -154,18 +154,207 @@ git push origin feature/your-feature-name
 
 ## 📋 VERSION MANAGEMENT
 
-### Framework Version Rules (Current: v1.2.5)
-- **VERSION File**: Must match package.json version
-- **Package.json**: Primary version source for npm
-- **pyproject.toml**: Primary version source for PyPI
-- **__version__.py**: Must match other version files
-- **Synchronization**: All 4 files must have identical versions
+### 🔢 DUAL VERSIONING SYSTEM
+
+The Claude PM Framework uses **TWO INDEPENDENT** versioning systems:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    CLAUDE PM VERSIONING SYSTEM                  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  PACKAGE VERSION (1.4.0)          FRAMEWORK VERSION (014)       │
+│  ├─ Software releases             ├─ Template structure         │
+│  ├─ NPM/PyPI packages            ├─ Agent architecture         │
+│  ├─ Bug fixes & features         ├─ Core system changes        │
+│  └─ Semantic versioning          └─ Serial numbering           │
+│                                                                 │
+│  Examples:                        Examples:                     │
+│  1.3.9 → 1.4.0 (minor)           013 → 014 (structure change)  │
+│  1.4.0 → 1.4.1 (patch)           014 → 014 (no change)         │
+│  1.4.1 → 2.0.0 (major)           014 → 015 (agent updates)     │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### 1. **Package Version** (e.g., `1.4.0`)
+- **Format**: Semantic versioning (MAJOR.MINOR.PATCH)
+- **Purpose**: NPM/PyPI package releases, software versioning
+- **Files**:
+  - `package.json` - Primary for npm
+  - `pyproject.toml` - Primary for PyPI
+  - `VERSION` - Root directory reference
+  - `claude_pm/_version.py` - Python module version
+- **Usage**: CLI `--version`, package installations, release tags
+
+#### 2. **Framework Version** (e.g., `014`, `015`)
+- **Format**: Three-digit serial number (001-999)
+- **Purpose**: Framework template evolution tracking
+- **Files**:
+  - `framework/VERSION` - Primary source (used by core systems)
+  - `claude_pm/utils/versions/FRAMEWORK_VERSION` - Development reference
+  - `claude_pm/data/framework/VERSION` - Framework data copy
+- **Usage**: CLAUDE.md templates, agent system versioning, framework integrity
+
+### 🎯 Version Independence
+- **Package Version**: Changes with software releases (features, fixes)
+- **Framework Version**: Changes ONLY when framework structure evolves
+- **Example**: Package can go from 1.4.0 → 1.4.1 → 1.5.0 while Framework stays at 014
+
+### 📊 CLAUDE_MD_VERSION Format
+- **Format**: Simple serial number (e.g., 016, 017, 018)
+- **Example**: `016` is the 16th framework version
+- **Purpose**: Tracks framework template structure changes
+- **Usage**: Enables proper version comparison for updates
 
 ### Version Update Process
-1. **Update all version files simultaneously**
-2. **Run validation**: `python scripts/validate_version_consistency.py`
-3. **Test thoroughly before release**
-4. **Tag release**: `git tag vX.Y.Z`
+
+#### Package Version Update:
+```bash
+# 1. Update all package version files
+npm version patch  # or minor/major
+# This updates package.json automatically
+
+# 2. Sync other version files
+python scripts/validate_version_consistency.py --fix
+
+# 3. Commit and tag
+git commit -m "chore: bump version to X.Y.Z"
+git tag vX.Y.Z
+```
+
+#### Framework Version Update:
+```bash
+# 1. Update all three framework version files (MANUAL - no automated tool)
+echo "015" > framework/VERSION
+echo "015" > claude_pm/utils/versions/FRAMEWORK_VERSION
+echo "015" > claude_pm/data/framework/VERSION
+
+# 2. Verify all files are synchronized
+cat framework/VERSION
+cat claude_pm/utils/versions/FRAMEWORK_VERSION
+cat claude_pm/data/framework/VERSION
+
+# 3. Reset serial to 001 in CLAUDE.md templates
+# The serial will auto-increment from 001 on next generation
+
+# 4. Document framework changes
+# Update CHANGELOG.md with framework structure changes
+
+# 5. Commit with clear message
+git commit -m "feat: increment framework version to 015"
+```
+
+## 🛠️ VERSIONING TOOLS & SCRIPTS
+
+### Available Versioning Tools
+
+#### 1. **validate_version_consistency.py**
+```bash
+# Check version consistency across all files
+python scripts/validate_version_consistency.py
+
+# Auto-fix version inconsistencies
+python scripts/validate_version_consistency.py --fix
+```
+- Validates package versions across package.json, pyproject.toml, VERSION, _version.py
+- Does NOT handle framework version (014 format)
+
+#### 2. **increment_version.js**
+```bash
+# Increment CLAUDE_MD_VERSION serial number
+node scripts/increment_version.js
+```
+- **DEPRECATED**: This script is no longer needed with simple serial numbers
+- Framework version is now a single number that increments directly
+
+#### 3. **dev-version-manager.py**
+```bash
+# Interactive version management for services
+python scripts/dev-version-manager.py
+
+# Show all service versions
+python scripts/dev-version-manager.py --show-all
+
+# Update specific service version
+python scripts/dev-version-manager.py --service core --increment
+```
+- Manages individual service/subsystem versions
+- Uses serial number format for services
+
+#### 4. **Manual Framework Version Update**
+Currently NO automated tool exists for framework version bumps. Use:
+```bash
+# Update all three framework version files manually
+echo "016" > framework/VERSION
+echo "016" > claude_pm/utils/versions/FRAMEWORK_VERSION
+echo "016" > claude_pm/data/framework/VERSION
+
+# Verify the update
+cat framework/VERSION
+cat claude_pm/utils/versions/FRAMEWORK_VERSION
+cat claude_pm/data/framework/VERSION
+```
+
+### Version Checking Commands
+```bash
+# Check package version
+claude-pm --version
+npm list @bobmatnyc/claude-multiagent-pm
+python -c "import claude_pm; print(claude_pm.__version__)"
+
+# Check framework version
+cat framework/VERSION
+cat claude_pm/utils/versions/FRAMEWORK_VERSION
+cat claude_pm/data/framework/VERSION
+
+# Check CLAUDE_MD_VERSION in deployed projects
+grep "CLAUDE_MD_VERSION" .claude-pm/CLAUDE.md | head -1
+```
+
+### Common Version Operations
+
+#### When to Update Package Version:
+- New features added
+- Bug fixes released
+- Breaking changes introduced
+- Follow semantic versioning rules
+
+#### When to Update Framework Version:
+- Agent system architecture changes
+- CLAUDE.md template structure changes
+- Core framework behavior modifications
+- Major agent hierarchy updates
+
+### ⚠️ Common Version Confusion Points
+
+#### DON'T Confuse These:
+- ❌ `VERSION: 1.4.0` in root → This is PACKAGE version
+- ✅ `framework/VERSION: 015` → This is FRAMEWORK version (primary source)
+- ✅ `FRAMEWORK_VERSION: 015` → This is also framework version
+
+#### Version File Locations Reference:
+```
+claude-multiagent-pm/
+├── VERSION                                    # Package: 1.4.0
+├── package.json                               # Package: 1.4.0
+├── pyproject.toml                             # Package: 1.4.0
+├── framework/
+│   └── VERSION                                # Framework: 015 (primary) ✅
+├── claude_pm/
+│   ├── _version.py                           # Package: 1.4.0
+│   ├── data/framework/
+│   │   └── VERSION                            # Framework: 015 (copy) ✅
+│   └── utils/versions/
+│       └── FRAMEWORK_VERSION                  # Framework: 015 (dev ref) ✅
+```
+
+#### Troubleshooting Version Issues:
+1. **"Version mismatch" errors**: Check you're comparing same version type
+2. **"Framework version 1.4.0"**: Wrong - framework uses 015 format (three digits)
+3. **"Can't find framework version"**: Primary source is `framework/VERSION`
+4. **"CLAUDE_MD_VERSION confusion"**: Now uses simple serial numbers (e.g., 016, 017)
+5. **"Version files out of sync"**: All three framework version files must match
 
 ---
 

@@ -1,9 +1,25 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-07-20T21:33:20.631Z",
+  "lastUpdated": "2025-07-21T13:50:28.767Z",
   "projectPath": "/Users/masa/Projects/claude-multiagent-pm",
   "projects": {},
   "epics": {
+    "EP-0001": {
+      "id": "EP-0001",
+      "title": "Placeholder Epic - EP-0001",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0001-placeholder-epic-ep-0001.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-20T05:38:42.053Z",
+      "fileSize": 1331,
+      "assignee": "masa",
+      "issueIds": [
+        "ISS-0165",
+        "ISS-0166",
+        "ISS-0167"
+      ],
+      "completion_percentage": 0
+    },
     "EP-0003": {
       "id": "EP-0003",
       "title": "Framework Core Infrastructure",
@@ -78,7 +94,8 @@
       "fileSize": 1374,
       "assignee": "masa",
       "issueIds": [
-        "ISS-0038"
+        "ISS-0038",
+        "ISS-0163"
       ],
       "completion_percentage": 0
     },
@@ -408,15 +425,44 @@
     },
     "EP-0043": {
       "id": "EP-0043",
-      "title": "Placeholder Epic - EP-0043",
-      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0043-placeholder-epic-ep-0043.md",
+      "title": "[TEST] E2E System Validation",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0043-test-e2e-system-validation.md",
       "status": "planning",
       "priority": "medium",
-      "lastModified": "2025-07-19T13:20:10.394Z",
-      "fileSize": 1297,
+      "lastModified": "2025-07-21T12:55:40.030Z",
+      "fileSize": 844,
       "assignee": "masa",
       "issueIds": [
-        "ISS-0155"
+        "ISS-0155",
+        "ISS-0168"
+      ],
+      "completion_percentage": 0
+    },
+    "EP-0044": {
+      "id": "EP-0044",
+      "title": "[TEST] E2E System Validation in PyTools",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0044-test-e2e-system-validation-in-pytools.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-21T12:56:11.470Z",
+      "fileSize": 912,
+      "assignee": "masa",
+      "issueIds": [
+        "ISS-0162"
+      ],
+      "completion_percentage": 0
+    },
+    "EP-0045": {
+      "id": "EP-0045",
+      "title": "[TEST] E2E System Validation",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0045-test-e2e-system-validation.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-21T12:57:19.234Z",
+      "fileSize": 1347,
+      "assignee": "masa",
+      "issueIds": [
+        "ISS-0170"
       ],
       "completion_percentage": 0
     },
@@ -445,6 +491,21 @@
       "assignee": "masa",
       "issueIds": [
         "ISS-0126"
+      ],
+      "completion_percentage": 0
+    },
+    "EP-0046": {
+      "id": "EP-0046",
+      "title": "Claude PM Framework Optimization Initiative",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/epics/EP-0046-claude-pm-framework-optimization-initiative.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-21T13:50:28.761Z",
+      "fileSize": 3552,
+      "assignee": "masa",
+      "issueIds": [
+        "ISS-0174",
+        "ISS-0176"
       ],
       "completion_percentage": 0
     }
@@ -2643,17 +2704,84 @@
       "blocked_by": [],
       "blocks": []
     },
+    "ISS-0158": {
+      "id": "ISS-0158",
+      "title": "Update documentation for ai-trackdown-tools v1.3.0 compatibility",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0158-update-documentation-for-ai-trackdown-tools-v130-compatibility.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-19T14:29:09.640Z",
+      "fileSize": 3728,
+      "assignee": "masa",
+      "tags": [
+        "documentation",
+        "compatibility",
+        "enhancement"
+      ],
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0159": {
+      "id": "ISS-0159",
+      "title": "Test local deployment of v1.3.0",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0159-test-local-deployment-of-v130.md",
+      "status": "completed",
+      "priority": "medium",
+      "lastModified": "2025-07-19T14:51:07.829Z",
+      "fileSize": 1293,
+      "assignee": "masa",
+      "tags": [
+        "test",
+        "deployment"
+      ],
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0160": {
+      "id": "ISS-0160",
+      "title": "Test issue with notes",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0160-test-issue-with-notes.md",
+      "status": "completed",
+      "priority": "medium",
+      "lastModified": "2025-07-19T14:52:54.261Z",
+      "fileSize": 1106,
+      "assignee": "masa",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0161": {
+      "id": "ISS-0161",
+      "title": "Test notes and reason functionality",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0161-test-notes-and-reason-functionality.md",
+      "status": "completed",
+      "priority": "medium",
+      "lastModified": "2025-07-19T15:14:49.170Z",
+      "fileSize": 1950,
+      "assignee": "masa",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
     "ISS-0162": {
       "id": "ISS-0162",
       "title": "Continue E2E Test Implementation - Prompt Filtering and Integration",
       "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0162-continue-e2e-test-implementation-prompt-filtering-and-integration.md",
       "status": "planning",
       "priority": "medium",
-      "lastModified": "2025-07-20T03:19:06.771Z",
-      "fileSize": 3758,
+      "lastModified": "2025-07-20T04:23:31.070Z",
+      "fileSize": 6341,
       "assignee": "masa",
       "epicId": "EP-0044",
-      "taskIds": [],
+      "taskIds": [
+        "TSK-0032"
+      ],
       "prIds": [],
       "blocked_by": [],
       "blocks": []
@@ -2662,12 +2790,44 @@
       "id": "ISS-0163",
       "title": "Improve deployment architecture to eliminate source directory dependencies",
       "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0163-improve-deployment-architecture-to-eliminate-source-directory-dependencies.md",
+      "status": "completed",
+      "priority": "high",
+      "lastModified": "2025-07-21T01:30:00.000Z",
+      "fileSize": 20498,
+      "assignee": "masa",
+      "epicId": "EP-0007",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0164": {
+      "id": "ISS-0164",
+      "title": "Test issue without ticketing agent",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0164-test-issue-without-ticketing-agent.md",
       "status": "planning",
-      "priority": "medium",
-      "lastModified": "2025-07-20T03:42:56.093Z",
-      "fileSize": 788,
+      "priority": "high",
+      "lastModified": "2025-07-20T04:58:32.081Z",
+      "fileSize": 706,
       "assignee": "masa",
       "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0165": {
+      "id": "ISS-0165",
+      "title": "Remove all remaining ticketing agent references from framework",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0165-remove-all-remaining-ticketing-agent-references-from-framework.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-20T05:21:38.084Z",
+      "fileSize": 1222,
+      "assignee": "masa",
+      "epicId": "EP-0001",
+      "taskIds": [
+        "TSK-0033"
+      ],
       "prIds": [],
       "blocked_by": [],
       "blocks": []
@@ -2678,10 +2838,46 @@
       "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0166-add-verbose-option-to-claude-pm-for-prompt-logging.md",
       "status": "planning",
       "priority": "medium",
-      "lastModified": "2025-07-20T05:21:11.093Z",
-      "fileSize": 761,
+      "lastModified": "2025-07-20T05:22:01.136Z",
+      "fileSize": 1193,
       "assignee": "masa",
       "epicId": "EP-0001",
+      "taskIds": [
+        "TSK-0034",
+        "TSK-0035"
+      ],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0167": {
+      "id": "ISS-0167",
+      "title": "Update PM and base agents with essential aitrackdown CLI commands",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0167-update-pm-and-base-agents-with-essential-aitrackdown-cli-commands.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-20T05:41:02.883Z",
+      "fileSize": 1247,
+      "assignee": "masa",
+      "epicId": "EP-0001",
+      "taskIds": [
+        "TSK-0036",
+        "TSK-0037"
+      ],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0168": {
+      "id": "ISS-0168",
+      "title": "Optimize Prompt Generation - Reduce Token Usage by 66%",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0168-optimize-prompt-generation-reduce-token-usage-by-66.md",
+      "status": "completed",
+      "priority": "medium",
+      "lastModified": "2025-07-20T22:46:53.699Z",
+      "fileSize": 1371,
+      "assignee": "masa",
+      "epicId": "EP-0043",
       "taskIds": [],
       "prIds": [],
       "blocked_by": [],
@@ -2693,14 +2889,86 @@
       "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0169-add-tree-sitter-support-for-enhanced-semantic-code-analysis.md",
       "status": "planning",
       "priority": "high",
-      "lastModified": "2025-07-20T21:33:20.622Z",
-      "fileSize": 3064,
+      "lastModified": "2025-07-20T21:33:51.043Z",
+      "fileSize": 4681,
       "assignee": "masa",
       "tags": [
         "enhancement",
         "performance",
         "architecture"
       ],
+      "taskIds": [
+        "TSK-0038",
+        "TSK-0039",
+        "TSK-0040"
+      ],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0170": {
+      "id": "ISS-0170",
+      "title": "[TEST] Implement User Authentication",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0170-test-implement-user-authentication.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-21T12:58:24.768Z",
+      "fileSize": 1260,
+      "assignee": "masa",
+      "epicId": "EP-0045",
+      "taskIds": [
+        "TSK-0041"
+      ],
+      "prIds": [
+        "PR-0001"
+      ],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0171": {
+      "id": "ISS-0171",
+      "title": "Fix cross-project file creation and other E2E test findings",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0171-fix-cross-project-file-creation-and-other-e2e-test-findings.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-21T13:01:28.489Z",
+      "fileSize": 2589,
+      "assignee": "masa",
+      "tags": [
+        "bug",
+        "enhancement",
+        "cli"
+      ],
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0174": {
+      "id": "ISS-0174",
+      "title": "P0: Clean Up Unnecessary Async Functions",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0174-p0-clean-up-unnecessary-async-functions.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-21T13:50:07.343Z",
+      "fileSize": 1013,
+      "assignee": "masa",
+      "epicId": "EP-0046",
+      "taskIds": [],
+      "prIds": [],
+      "blocked_by": [],
+      "blocks": []
+    },
+    "ISS-0176": {
+      "id": "ISS-0176",
+      "title": "P1: Consolidate Subprocess Management",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/issues/ISS-0176-p1-consolidate-subprocess-management.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-21T13:50:28.759Z",
+      "fileSize": 989,
+      "assignee": "masa",
+      "epicId": "EP-0046",
       "taskIds": [],
       "prIds": [],
       "blocked_by": [],
@@ -3011,20 +3279,161 @@
       "assignee": "qa",
       "issueId": "ISS-0128",
       "subtasks": []
+    },
+    "TSK-0032": {
+      "id": "TSK-0032",
+      "title": "Test updated ticketing workflow",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0032-test-updated-ticketing-workflow.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-20T04:26:17.951Z",
+      "fileSize": 1200,
+      "assignee": "masa",
+      "issueId": "ISS-0162",
+      "epicId": "EP-0044",
+      "subtasks": []
+    },
+    "TSK-0033": {
+      "id": "TSK-0033",
+      "title": "Remove ticketing agent references from framework/CLAUDE.md",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0033-remove-ticketing-agent-references-from-frameworkclaudemd.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-20T05:21:38.078Z",
+      "fileSize": 730,
+      "assignee": "masa",
+      "issueId": "ISS-0165",
+      "epicId": "EP-0001",
+      "subtasks": []
+    },
+    "TSK-0034": {
+      "id": "TSK-0034",
+      "title": "Research verbose logging implementation patterns for claude-pm",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0034-research-verbose-logging-implementation-patterns-for-claude-pm.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-20T05:21:54.780Z",
+      "fileSize": 738,
+      "assignee": "masa",
+      "issueId": "ISS-0166",
+      "epicId": "EP-0001",
+      "subtasks": []
+    },
+    "TSK-0035": {
+      "id": "TSK-0035",
+      "title": "Implement --verbose option for claude-pm CLI",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0035-implement-verbose-option-for-claude-pm-cli.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-20T05:22:01.133Z",
+      "fileSize": 702,
+      "assignee": "masa",
+      "issueId": "ISS-0166",
+      "epicId": "EP-0001",
+      "subtasks": []
+    },
+    "TSK-0036": {
+      "id": "TSK-0036",
+      "title": "Update PM agent with essential aitrackdown CLI commands",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0036-update-pm-agent-with-essential-aitrackdown-cli-commands.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-20T05:40:56.159Z",
+      "fileSize": 988,
+      "assignee": "masa",
+      "issueId": "ISS-0167",
+      "epicId": "EP-0001",
+      "subtasks": []
+    },
+    "TSK-0037": {
+      "id": "TSK-0037",
+      "title": "Update base agent with correct comment syntax for agents",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0037-update-base-agent-with-correct-comment-syntax-for-agents.md",
+      "status": "completed",
+      "priority": "high",
+      "lastModified": "2025-07-20T05:41:02.881Z",
+      "fileSize": 1758,
+      "assignee": "masa",
+      "issueId": "ISS-0167",
+      "epicId": "EP-0001",
+      "subtasks": []
+    },
+    "TSK-0038": {
+      "id": "TSK-0038",
+      "title": "Add tree-sitter-languages dependency to package.json and pyproject.toml",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0038-add-tree-sitter-languages-dependency-to-packagejson-and-pyprojecttoml.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-20T21:33:32.724Z",
+      "fileSize": 737,
+      "assignee": "masa",
+      "issueId": "ISS-0169",
+      "subtasks": []
+    },
+    "TSK-0039": {
+      "id": "TSK-0039",
+      "title": "Implement TreeSitterAnalyzer class with Python parity",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0039-implement-treesitteranalyzer-class-with-python-parity.md",
+      "status": "planning",
+      "priority": "high",
+      "lastModified": "2025-07-20T21:33:42.761Z",
+      "fileSize": 701,
+      "assignee": "masa",
+      "issueId": "ISS-0169",
+      "subtasks": []
+    },
+    "TSK-0040": {
+      "id": "TSK-0040",
+      "title": "Update Research Agent to use Tree-sitter for codebase analysis",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0040-update-research-agent-to-use-tree-sitter-for-codebase-analysis.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-20T21:33:51.040Z",
+      "fileSize": 721,
+      "assignee": "masa",
+      "issueId": "ISS-0169",
+      "subtasks": []
+    },
+    "TSK-0041": {
+      "id": "TSK-0041",
+      "title": "[TEST] Create login endpoint",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0041-test-create-login-endpoint.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-21T12:58:57.815Z",
+      "fileSize": 1323,
+      "assignee": "masa",
+      "issueId": "ISS-0170",
+      "epicId": "EP-0045",
+      "subtasks": []
     }
   },
-  "prs": {},
+  "prs": {
+    "PR-0001": {
+      "id": "PR-0001",
+      "title": "[TEST] Add login endpoint implementation",
+      "filePath": "/Users/masa/Projects/claude-multiagent-pm/tasks/prs/PR-0001-test-add-login-endpoint-implementation.md",
+      "status": "planning",
+      "priority": "medium",
+      "lastModified": "2025-07-21T12:58:24.765Z",
+      "fileSize": 1077,
+      "assignee": "masa",
+      "issueId": "ISS-0170",
+      "epicId": "EP-0045",
+      "pr_status": "draft"
+    }
+  },
   "stats": {
     "totalProjects": 0,
-    "totalEpics": 26,
-    "totalIssues": 138,
-    "totalTasks": 24,
-    "totalPRs": 0,
-    "lastFullScan": "2025-07-19T14:26:21.274Z",
-    "indexSize": 0,
+    "totalEpics": 30,
+    "totalIssues": 150,
+    "totalTasks": 34,
+    "totalPRs": 1,
+    "lastFullScan": "2025-07-21T12:59:24.700Z",
+    "indexSize": 113443,
     "performanceMetrics": {
-      "lastLoadTime": 2,
-      "lastUpdateTime": 0,
+      "lastLoadTime": 1,
+      "lastUpdateTime": 1,
       "lastRebuildTime": 0
     }
   }
