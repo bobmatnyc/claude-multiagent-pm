@@ -144,15 +144,30 @@ class MinimalPostInstall {
      * Install Claude PM package with comprehensive error handling
      */
     installClaudePmPackage(pythonCmd) {
-        this.log('Installing Claude PM Python package in editable mode...');
+        this.log('Installing Claude PM Python package...');
         
+        // Try installation from PyPI first (preferred)
+        this.log('Trying installation from PyPI (preferred method)...');
+        try {
+            execSync(`${pythonCmd} -m pip install --user claude-multiagent-pm`, { 
+                stdio: 'pipe',
+                timeout: 120000
+            });
+            this.log('✅ Claude PM package installed from PyPI');
+            return true;
+        } catch (pypiError) {
+            this.log('PyPI installation failed, trying editable mode...', 'warn');
+        }
+        
+        // Fallback to editable mode
         try {
             execSync(`${pythonCmd} -m pip install --user -e .`, { 
                 cwd: this.packageRoot,
                 stdio: 'pipe',
                 timeout: 120000
             });
-            this.log('✅ Claude PM Python package installed successfully');
+            this.log('✅ Claude PM Python package installed in editable mode');
+            this.log('⚠️  DEPRECATION: Editable installation is deprecated, please use PyPI', 'warn');
             return true;
         } catch (error) {
             const stderr = error.stderr ? error.stderr.toString() : '';
@@ -174,19 +189,9 @@ class MinimalPostInstall {
                 }
             }
             
-            // Try alternative installation method (from PyPI if available)
-            this.log('Trying installation from PyPI...');
-            try {
-                execSync(`${pythonCmd} -m pip install --user claude-multiagent-pm`, { 
-                    stdio: 'pipe',
-                    timeout: 120000
-                });
-                this.log('✅ Claude PM package installed from PyPI');
-                return true;
-            } catch (pypiError) {
-                this.log(`❌ All installation methods failed: ${error.message}`, 'error');
-                return false;
-            }
+            // All installation methods failed
+            this.log(`❌ All installation methods failed: ${error.message}`, 'error');
+            return false;
         }
     }
 
