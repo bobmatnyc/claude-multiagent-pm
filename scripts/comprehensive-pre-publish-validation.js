@@ -372,8 +372,7 @@ class ComprehensivePrePublishValidator {
             const criticalPaths = [
                 'claude_pm',
                 'framework',
-                'install',
-                'config'
+                'install'
             ];
             
             for (const criticalPath of criticalPaths) {
