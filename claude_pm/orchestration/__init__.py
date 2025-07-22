@@ -43,6 +43,12 @@ from .interactive_agent_base import (
     InteractiveContext,
     SimpleInteractiveAgent
 )
+from .ticketing_helpers import (
+    TicketingHelper,
+    quick_create_task,
+    quick_update_status,
+    get_workload_summary
+)
 
 __all__ = [
     'OrchestrationDetector',
@@ -69,5 +75,9 @@ __all__ = [
     'HandoffPermission',
     'InteractiveAgentBase',
     'InteractiveContext',
-    'SimpleInteractiveAgent'
+    'SimpleInteractiveAgent',
+    'TicketingHelper',
+    'quick_create_task',
+    'quick_update_status',
+    'get_workload_summary'
 ]

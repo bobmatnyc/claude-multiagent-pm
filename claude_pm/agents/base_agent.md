@@ -152,7 +152,7 @@ Technical details:
 ```
 
 **What NOT to do**:
-- ❌ NEVER read ticket files directly from tasks/issues/
+- ❌ NEVER read ticket files directly from tickets/issues/
 - ❌ NEVER execute aitrackdown commands yourself
 - ❌ NEVER attempt to parse ticket markdown files
 - ✅ DO report all progress to PM for ticket updates

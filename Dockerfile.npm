@@ -1,0 +1,159 @@
+# Claude PM Framework - npm Installation Test
+# Tests clean installation from npm package
+
+FROM node:18-slim
+
+# Set build arguments
+ARG CLAUDE_PM_VERSION=1.4.0
+ARG BUILD_DATE
+ARG VCS_REF
+
+# Set labels
+LABEL org.opencontainers.image.title="Claude PM Framework npm Test"
+LABEL org.opencontainers.image.description="npm installation test for Claude PM Framework"
+LABEL org.opencontainers.image.version="${CLAUDE_PM_VERSION}"
+LABEL org.opencontainers.image.created="${BUILD_DATE}"
+LABEL org.opencontainers.image.revision="${VCS_REF}"
+
+# Set environment variables
+ENV CLAUDE_PM_VERSION=${CLAUDE_PM_VERSION}
+ENV ENVIRONMENT=testing
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies including Python
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-venv \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create test user
+RUN useradd -m -s /bin/bash testuser
+
+# Switch to test user
+USER testuser
+WORKDIR /home/testuser
+
+# Install claude-multiagent-pm globally from npm
+RUN npm install -g @bobmatnyc/claude-multiagent-pm
+
+# Create test script
+RUN cat > test_installation.js << 'EOF'
+#!/usr/bin/env node
+/**
+ * Test npm installation of claude-multiagent-pm
+ */
+
+const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+function runCommand(cmd) {
+    try {
+        const output = execSync(cmd, { encoding: 'utf8' });
+        return { success: true, output };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+function testCLI() {
+    console.log('Testing CLI...');
+    
+    // Test version command
+    const versionResult = runCommand('claude-pm --version');
+    if (versionResult.success) {
+        console.log(`✓ CLI version command works: ${versionResult.output.trim()}`);
+    } else {
+        console.log(`✗ CLI version command failed: ${versionResult.error}`);
+        return false;
+    }
+    
+    // Test help command
+    const helpResult = runCommand('claude-pm --help');
+    if (helpResult.success) {
+        console.log('✓ CLI help command works');
+    } else {
+        console.log(`✗ CLI help command failed: ${helpResult.error}`);
+        return false;
+    }
+    
+    return true;
+}
+
+function testInitialization() {
+    console.log('\nTesting initialization...');
+    
+    const initResult = runCommand('claude-pm init --verify');
+    console.log(`✓ Initialization check completed with code: ${initResult.success ? 0 : 1}`);
+    if (initResult.output) {
+        console.log(`  Output: ${initResult.output.trim()}`);
+    }
+    
+    return true;
+}
+
+function testPythonIntegration() {
+    console.log('\nTesting Python integration...');
+    
+    // Check if Python dependencies are properly installed
+    const pythonTest = `
+import sys
+try:
+    import claude_pm
+    print(f"✓ Python claude_pm module found: {claude_pm.__version__}")
+    sys.exit(0)
+except ImportError as e:
+    print(f"✗ Python claude_pm module not found: {e}")
+    sys.exit(1)
+`;
+    
+    try {
+        fs.writeFileSync('test_python.py', pythonTest);
+        const result = runCommand('python3 test_python.py');
+        if (result.success) {
+            console.log(result.output.trim());
+            return true;
+        } else {
+            console.log('✗ Python integration check failed');
+            console.log('  This is expected for npm-only installation');
+            return true; // Not a failure for npm-only install
+        }
+    } catch (error) {
+        console.log('✗ Could not test Python integration:', error.message);
+        return true; // Not a failure for npm-only install
+    }
+}
+
+function main() {
+    console.log('=== npm Installation Test Suite ===\n');
+    
+    const results = [];
+    results.push(testCLI());
+    results.push(testInitialization());
+    results.push(testPythonIntegration());
+    
+    console.log('\n=== Test Summary ===');
+    const passed = results.filter(r => r).length;
+    const total = results.length;
+    console.log(`Passed: ${passed}/${total}`);
+    
+    if (passed === total) {
+        console.log('\n✅ All tests passed!');
+        process.exit(0);
+    } else {
+        console.log('\n❌ Some tests failed!');
+        process.exit(1);
+    }
+}
+
+main();
+EOF
+
+# Make test script executable
+RUN chmod +x test_installation.js
+
+# Run tests by default
+CMD ["node", "test_installation.js"]

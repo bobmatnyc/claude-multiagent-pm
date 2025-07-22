@@ -131,11 +131,15 @@ class SharedPromptCache(BaseService):
         super().__init__("shared_prompt_cache", config)
         
         # Cache configuration
-        self.max_size = self.get_config("max_size", 1000)  # Maximum cache entries
-        self.max_memory_mb = self.get_config("max_memory_mb", 100)  # Maximum memory usage
-        self.default_ttl = self.get_config("default_ttl", 1800)  # 30 minutes default TTL
-        self.cleanup_interval = self.get_config("cleanup_interval", 300)  # 5 minutes cleanup
+        self.max_size = self.get_config("max_size", 500)  # Reduced maximum cache entries
+        self.max_memory_mb = self.get_config("max_memory_mb", 50)  # Reduced maximum memory usage
+        self.default_ttl = self.get_config("default_ttl", 300)  # 5 minutes default TTL (was 30)
+        self.cleanup_interval = self.get_config("cleanup_interval", 60)  # 1 minute cleanup (was 5)
         self.enable_metrics = self.get_config("enable_metrics", True)
+        
+        # Memory pressure handling
+        self.memory_pressure_threshold = 0.8  # 80% of max memory triggers aggressive cleanup
+        self.aggressive_cleanup_active = False
         
         # Cache storage - OrderedDict for LRU behavior
         self._cache: OrderedDict[str, CacheEntry] = OrderedDict()
@@ -187,6 +191,14 @@ class SharedPromptCache(BaseService):
         
         # Start cleanup task
         self._cleanup_task = asyncio.create_task(self._cleanup_expired_entries())
+        
+        # Register with memory pressure coordinator
+        try:
+            from .memory_pressure_coordinator import register_service_cleanup
+            await register_service_cleanup("shared_prompt_cache", self.handle_memory_pressure)
+            self.logger.info("Registered with memory pressure coordinator")
+        except Exception as e:
+            self.logger.warning(f"Failed to register with memory pressure coordinator: {e}")
         
         # Note: Metrics collection is handled by parent class
         # Custom metrics are collected in _collect_custom_metrics()
@@ -434,6 +446,9 @@ class SharedPromptCache(BaseService):
     def get_metrics(self) -> Dict[str, Any]:
         """Get current cache metrics."""
         with self._metrics_lock:
+            size_mb = self._metrics.size_bytes / (1024 * 1024)
+            memory_usage_percent = (size_mb / self.max_memory_mb * 100) if self.max_memory_mb > 0 else 0
+            
             return {
                 "hits": self._metrics.hits,
                 "misses": self._metrics.misses,
@@ -443,13 +458,16 @@ class SharedPromptCache(BaseService):
                 "deletes": self._metrics.deletes,
                 "invalidations": self._metrics.invalidations,
                 "size_bytes": self._metrics.size_bytes,
-                "size_mb": self._metrics.size_bytes / (1024 * 1024),
+                "size_mb": size_mb,
                 "entry_count": self._metrics.entry_count,
                 "max_size": self.max_size,
                 "max_memory_mb": self.max_memory_mb,
                 "evictions": self._metrics.evictions,
                 "expired_removals": self._metrics.expired_removals,
-                "memory_usage_percent": (self._metrics.size_bytes / (1024 * 1024)) / self.max_memory_mb * 100
+                "memory_usage_percent": memory_usage_percent,
+                "memory_pressure": memory_usage_percent > 80,  # Flag high memory usage
+                "ttl_default": self.default_ttl,
+                "cleanup_interval": self.cleanup_interval
             }
     
     def get_cache_info(self) -> Dict[str, Any]:
@@ -487,8 +505,22 @@ class SharedPromptCache(BaseService):
     
     def _ensure_cache_capacity(self, new_entry_size: int) -> None:
         """Ensure cache has capacity for new entry."""
+        current_memory_mb = self._get_memory_usage_mb()
+        max_memory_bytes = self.max_memory_mb * 1024 * 1024
+        
+        # Check if we're under memory pressure
+        memory_usage_ratio = current_memory_mb / self.max_memory_mb
+        if memory_usage_ratio > self.memory_pressure_threshold:
+            # Aggressive cleanup when under pressure
+            target_memory_bytes = max_memory_bytes * 0.5  # Target 50% usage
+            while self._metrics.size_bytes > target_memory_bytes:
+                if not self._evict_lru_entry():
+                    break
+            self.logger.warning(f"Memory pressure detected ({memory_usage_ratio:.1%}), "
+                              f"aggressively cleaned cache to {self._get_memory_usage_mb():.1f} MB")
+        
         # Check memory limit
-        while (self._metrics.size_bytes + new_entry_size) > (self.max_memory_mb * 1024 * 1024):
+        while (self._metrics.size_bytes + new_entry_size) > max_memory_bytes:
             if not self._evict_lru_entry():
                 break
         
@@ -531,6 +563,66 @@ class SharedPromptCache(BaseService):
     def _get_memory_usage_mb(self) -> float:
         """Get current memory usage in MB."""
         return self._metrics.size_bytes / (1024 * 1024)
+    
+    async def handle_memory_pressure(self, severity: str = "warning") -> Dict[str, Any]:
+        """
+        Handle memory pressure by aggressively cleaning cache.
+        
+        Args:
+            severity: "warning" or "critical" level of memory pressure
+            
+        Returns:
+            Dict with cleanup statistics
+        """
+        stats = {
+            "entries_before": len(self._cache),
+            "memory_before_mb": self._get_memory_usage_mb(),
+            "entries_removed": 0,
+            "memory_freed_mb": 0
+        }
+        
+        with self._cache_lock:
+            if severity == "critical":
+                # Critical: Clear 75% of cache
+                target_entries = int(len(self._cache) * 0.25)
+            else:
+                # Warning: Clear 50% of cache
+                target_entries = int(len(self._cache) * 0.5)
+            
+            # Remove oldest entries first
+            while len(self._cache) > target_entries:
+                if not self._evict_lru_entry():
+                    break
+                stats["entries_removed"] += 1
+            
+            # Force cleanup of expired entries
+            expired_count = 0
+            keys_to_remove = []
+            
+            for key, entry in self._cache.items():
+                if entry.is_expired:
+                    keys_to_remove.append(key)
+            
+            for key in keys_to_remove:
+                entry = self._cache.pop(key)
+                with self._metrics_lock:
+                    self._metrics.size_bytes -= entry.size_bytes
+                    self._metrics.expired_removals += 1
+                expired_count += 1
+                stats["entries_removed"] += 1
+            
+            if expired_count > 0:
+                with self._metrics_lock:
+                    self._metrics.entry_count = len(self._cache)
+        
+        stats["entries_after"] = len(self._cache)
+        stats["memory_after_mb"] = self._get_memory_usage_mb()
+        stats["memory_freed_mb"] = stats["memory_before_mb"] - stats["memory_after_mb"]
+        
+        self.logger.info(f"Memory pressure ({severity}): Removed {stats['entries_removed']} entries, "
+                        f"freed {stats['memory_freed_mb']:.2f} MB")
+        
+        return stats
     
     def _trigger_invalidation_callbacks(self, pattern: str) -> None:
         """Trigger invalidation callbacks for pattern."""

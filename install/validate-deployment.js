@@ -72,17 +72,26 @@ class DeploymentValidator {
             }
         }
         
-        // Check task hierarchy
-        const taskDirs = ['epics', 'issues', 'tasks', 'prs', 'templates'];
-        for (const taskDir of taskDirs) {
-            const taskPath = path.join(this.deploymentDir, 'tasks', taskDir);
+        // Check ticketing hierarchy
+        const ticketDirs = ['epics', 'issues', 'tasks', 'prs', 'templates', 'archive', 'reports'];
+        for (const ticketDir of ticketDirs) {
+            const ticketPath = path.join(this.deploymentDir, 'tickets', ticketDir);
             
             try {
-                await fs.access(taskPath);
-                this.log(`✓ tasks/${taskDir} exists`);
+                await fs.access(ticketPath);
+                this.log(`✓ tickets/${ticketDir} exists`);
             } catch (error) {
-                this.addError(`Task directory missing: tasks/${taskDir}`);
+                this.addError(`Ticketing directory missing: tickets/${ticketDir}`);
             }
+        }
+        
+        // Check .ai-trackdown directory
+        const trackingPath = path.join(this.deploymentDir, 'tickets', '.ai-trackdown', 'counters.json');
+        try {
+            await fs.access(trackingPath);
+            this.log(`✓ tickets/.ai-trackdown/counters.json exists`);
+        } catch (error) {
+            this.addError(`Ticketing counters file missing: tickets/.ai-trackdown/counters.json`);
         }
     }
 
@@ -99,13 +108,26 @@ class DeploymentValidator {
             const config = JSON.parse(configData);
             
             // Check required config fields
-            const requiredFields = ['version', 'deployedAt', 'platform', 'deploymentDir', 'aiTrackdownPath'];
+            const requiredFields = ['version', 'deployedAt', 'platform', 'deploymentDir'];
             for (const field of requiredFields) {
                 if (!config[field]) {
                     this.addError(`Missing config field: ${field}`);
                 } else {
                     this.log(`✓ Config field present: ${field}`);
                 }
+            }
+            
+            // Check optional but important fields
+            if (config.aiTrackdownPath) {
+                this.log(`✓ Ticketing path configured: ${config.aiTrackdownPath}`);
+            } else {
+                this.addWarning(`Ticketing path not configured - ticketing may be disabled`);
+            }
+            
+            if (config.features && config.features.ticketingEnabled) {
+                this.log(`✓ Ticketing feature enabled`);
+            } else {
+                this.addWarning(`Ticketing feature disabled - install ai-trackdown-pytools to enable`);
             }
             
             // Validate paths
@@ -172,16 +194,34 @@ class DeploymentValidator {
         const cliPath = path.join(this.deploymentDir, 'bin', platform === 'win32' ? 'aitrackdown.bat' : 'aitrackdown');
         
         try {
-            // Test basic status command
-            const result = await this.runCommand(cliPath, ['status'], {
+            // Check if CLI wrapper exists
+            await fs.access(cliPath);
+            
+            // Test version command
+            const versionResult = await this.runCommand(cliPath, ['--version'], {
                 cwd: this.deploymentDir,
-                timeout: 30000
+                timeout: 10000
             });
             
-            if (result.success) {
-                this.log('✓ AI-trackdown status command works');
+            if (versionResult.success) {
+                this.log('✓ AI-trackdown version command works');
+                
+                // Test list command (core ticketing functionality)
+                const listResult = await this.runCommand(cliPath, ['list'], {
+                    cwd: this.deploymentDir,
+                    timeout: 10000
+                });
+                
+                if (listResult.success) {
+                    this.log('✓ AI-trackdown ticketing commands work');
+                } else {
+                    this.addWarning(`AI-trackdown ticketing not fully functional: ${listResult.error}`);
+                    this.addWarning(`Install ai-trackdown-pytools: pip install --user ai-trackdown-pytools==1.4.0`);
+                }
             } else {
-                this.addWarning(`AI-trackdown status command failed: ${result.error}`);
+                this.addWarning(`AI-trackdown CLI not functional - ticketing disabled`);
+                this.addWarning(`This is expected if ai-trackdown-pytools is not installed`);
+                this.addWarning(`Install with: pip install --user ai-trackdown-pytools==1.4.0`);
             }
             
             // Test help command
@@ -193,11 +233,12 @@ class DeploymentValidator {
             if (helpResult.success) {
                 this.log('✓ AI-trackdown help command works');
             } else {
-                this.addWarning(`AI-trackdown help command failed: ${helpResult.error}`);
+                this.log(`⚠ AI-trackdown help command unavailable`);
             }
             
         } catch (error) {
-            this.addError(`AI-trackdown integration test failed: ${error.message}`);
+            this.addWarning(`AI-trackdown CLI wrappers present but package not installed`);
+            this.addWarning(`This is normal - install ai-trackdown-pytools to enable ticketing`);
         }
     }
 

@@ -118,19 +118,19 @@ echo "=== 6. Directory Structure Validation ==="
 echo
 
 run_test "Tasks Directory Structure" \
-    'ls -la tasks/' \
+    'ls -la tickets/' \
     "epics"
 
 run_test "Epics Directory" \
-    'ls tasks/epics/' \
+    'ls tickets/epics/' \
     ".md"
 
 run_test "Issues Directory" \
-    'ls tasks/issues/' \
+    'ls tickets/issues/' \
     ".md"
 
 run_test "Tasks Directory" \
-    'ls tasks/tasks/' \
+    'ls tickets/tasks/' \
     ".md"
 
 echo "=== 7. AI-Trackdown Health Integration ==="
@@ -149,19 +149,19 @@ echo
 
 # Test task structure counts
 run_test "Count Total Items" \
-    'find tasks/ -name "*.md" | wc -l' \
+    'find tickets/ -name "*.md" | wc -l' \
     ""
 
 run_test "Count Epics" \
-    'find tasks/epics/ -name "*.md" | wc -l' \
+    'find tickets/epics/ -name "*.md" | wc -l' \
     ""
 
 run_test "Count Issues" \
-    'find tasks/issues/ -name "*.md" | wc -l' \
+    'find tickets/issues/ -name "*.md" | wc -l' \
     ""
 
 run_test "Count Tasks" \
-    'find tasks/tasks/ -name "*.md" | wc -l' \
+    'find tickets/tasks/ -name "*.md" | wc -l' \
     ""
 
 echo "=== 9. Performance and Reliability Tests ==="
@@ -195,10 +195,10 @@ if [ $FAILED_TESTS -eq 0 ]; then
     echo "✅ Performance within acceptable limits"
     echo ""
     echo "📊 Framework Status:"
-    echo "  - Total tracked items: $(find tasks/ -name "*.md" | wc -l)"
-    echo "  - Active epics: $(find tasks/epics/ -name "*.md" | wc -l)"
-    echo "  - Active issues: $(find tasks/issues/ -name "*.md" | wc -l)"
-    echo "  - Active tasks: $(find tasks/tasks/ -name "*.md" | wc -l)"
+    echo "  - Total tracked items: $(find tickets/ -name "*.md" | wc -l)"
+    echo "  - Active epics: $(find tickets/epics/ -name "*.md" | wc -l)"
+    echo "  - Active issues: $(find tickets/issues/ -name "*.md" | wc -l)"
+    echo "  - Active tasks: $(find tickets/tasks/ -name "*.md" | wc -l)"
     echo ""
     echo "🚀 AI-Trackdown Tools cutover successful!"
     exit 0
@@ -208,7 +208,7 @@ else
     echo "🔧 Common issues to check:"
     echo "  - Ensure ai-trackdown-tools is properly installed"
     echo "  - Verify CLI links are working (./aitrackdown and ./atd)"
-    echo "  - Check tasks/ directory structure exists"
+    echo "  - Check tickets/ directory structure exists"
     echo "  - Validate framework dependencies"
     echo ""
     echo "🆘 Run individual commands manually to diagnose issues"

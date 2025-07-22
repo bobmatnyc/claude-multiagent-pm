@@ -12,6 +12,9 @@ from typing import Dict, Any, Optional, Tuple
 from datetime import datetime
 from enum import Enum
 
+# Import framework detection utilities
+from ...utils.framework_detection import is_framework_source_directory
+
 
 class DeploymentContext(Enum):
     """Context for template deployment operations."""
@@ -296,6 +299,13 @@ class TemplateDeployer:
         backup_path = None
         
         try:
+            # Check if we're in the framework source directory
+            is_framework, markers = is_framework_source_directory(target_directory)
+            if is_framework:
+                self.logger.warning(f"🚫 Skipping CLAUDE.md deployment - detected framework source directory")
+                self.logger.debug(f"Framework markers found: {', '.join(markers)}")
+                return True, target_path, None, []  # Return success but with no changes
+            
             # Run deduplication if handler provided
             if deduplication_handler:
                 self.logger.info("🔍 Running CLAUDE.md deduplication before deployment...")
@@ -375,6 +385,13 @@ class TemplateDeployer:
         
         changes_made = []
         target_file = target_directory / "CLAUDE.md"
+        
+        # Check if we're in the framework source directory
+        is_framework, markers = is_framework_source_directory(target_directory)
+        if is_framework:
+            self.logger.warning(f"🚫 Skipping CLAUDE.md installation - detected framework source directory")
+            self.logger.debug(f"Framework markers found: {', '.join(markers)}")
+            return True, target_file, None, None, [f"Installation skipped: framework source directory detected"]
         backup_path = None
         
         try:

@@ -34,6 +34,16 @@ ModuleNotFoundError: No module named 'frontmatter'
    ```bash
    pip install --user --break-system-packages python-frontmatter>=1.0.0 mistune>=3.0.0
    ```
+   
+   **📱 macOS Users**: For a comprehensive solution to the "externally-managed-environment" error, see our [macOS Installation Guide](./MACOS_INSTALLATION_GUIDE.md). Quick fix:
+   ```bash
+   # Use pipx (recommended)
+   brew install pipx
+   pipx install @bobmatnyc/claude-multiagent-pm
+   
+   # Or run our installer script
+   ./scripts/install-claude-pm-macos.sh
+   ```
 
 ### Other Missing Dependencies
 

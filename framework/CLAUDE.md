@@ -365,17 +365,13 @@ $PWD/.claude-pm/agents/user-agents/
 # Orchestrator pattern for agent discovery
 registry = AgentRegistry()
 
-# Discover project-specific agents first
-project_agents = registry.listAgents(scope='project')
+# Discover all agents
+all_agents = registry.listAgents()
 
-# Discover user-defined agents
-user_agents = registry.listAgents(scope='user')
-
-# Discover system agents as fallback
-system_agents = registry.listAgents(scope='system')
-
-# Merged discovery with precedence
-all_agents = registry.listAgents(scope='all')  # Automatic precedence handling
+# Filter by tier if needed
+project_agents = {k: v for k, v in all_agents.items() if v.get('tier') == 'project'}
+user_agents = {k: v for k, v in all_agents.items() if v.get('tier') == 'user'}
+system_agents = {k: v for k, v in all_agents.items() if v.get('tier') == 'system'}
 ```
 
 #### Specialized Agent Discovery

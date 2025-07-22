@@ -1,0 +1,226 @@
+# Claude PM Framework - Integration Test
+# Tests both PyPI and npm installations working together
+
+FROM python:3.11-slim
+
+# Set build arguments
+ARG CLAUDE_PM_VERSION=1.4.0
+ARG BUILD_DATE
+ARG VCS_REF
+
+# Set labels
+LABEL org.opencontainers.image.title="Claude PM Framework Integration Test"
+LABEL org.opencontainers.image.description="Integration test for Claude PM Framework installations"
+LABEL org.opencontainers.image.version="${CLAUDE_PM_VERSION}"
+LABEL org.opencontainers.image.created="${BUILD_DATE}"
+LABEL org.opencontainers.image.revision="${VCS_REF}"
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV CLAUDE_PM_VERSION=${CLAUDE_PM_VERSION}
+ENV ENVIRONMENT=testing
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies including Node.js
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    make \
+    gcc \
+    g++ \
+    nodejs \
+    npm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create test user
+RUN useradd -m -s /bin/bash testuser
+
+# Switch to test user
+USER testuser
+WORKDIR /home/testuser
+
+# Test 1: PyPI installation in virtual environment
+RUN python -m venv pypi-env
+RUN /home/testuser/pypi-env/bin/pip install --upgrade pip
+RUN /home/testuser/pypi-env/bin/pip install claude-multiagent-pm
+
+# Test 2: npm global installation
+RUN npm install -g @bobmatnyc/claude-multiagent-pm
+
+# Create comprehensive test script
+RUN cat > test_integration.py << 'EOF'
+#!/usr/bin/env python3
+"""Integration test for multiple installation methods"""
+
+import os
+import sys
+import subprocess
+import json
+from pathlib import Path
+
+class IntegrationTester:
+    def __init__(self):
+        self.results = {
+            "pypi_venv": {},
+            "npm_global": {},
+            "integration": {},
+            "ai_trackdown": {}
+        }
+    
+    def run_command(self, cmd, env=None):
+        """Run a command and return result"""
+        try:
+            result = subprocess.run(
+                cmd, 
+                shell=True, 
+                capture_output=True, 
+                text=True,
+                env=env or os.environ.copy()
+            )
+            return {
+                "success": result.returncode == 0,
+                "stdout": result.stdout,
+                "stderr": result.stderr,
+                "returncode": result.returncode
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+    
+    def test_pypi_installation(self):
+        """Test PyPI installation in virtual environment"""
+        print("\n=== Testing PyPI Installation ===")
+        
+        # Test import in venv
+        test_cmd = "/home/testuser/pypi-env/bin/python -c 'import claude_pm; print(claude_pm.__version__)'"
+        result = self.run_command(test_cmd)
+        
+        if result["success"]:
+            version = result["stdout"].strip()
+            print(f"✓ PyPI installation working: version {version}")
+            self.results["pypi_venv"]["version"] = version
+            self.results["pypi_venv"]["status"] = "success"
+        else:
+            print(f"✗ PyPI installation failed: {result.get('stderr', result.get('error'))}")
+            self.results["pypi_venv"]["status"] = "failed"
+            self.results["pypi_venv"]["error"] = result.get('stderr', result.get('error'))
+        
+        # Test CLI from venv
+        cli_cmd = "/home/testuser/pypi-env/bin/claude-pm --version"
+        result = self.run_command(cli_cmd)
+        
+        if result["success"]:
+            print(f"✓ PyPI CLI working: {result['stdout'].strip()}")
+            self.results["pypi_venv"]["cli"] = "working"
+        else:
+            print("✗ PyPI CLI not working")
+            self.results["pypi_venv"]["cli"] = "failed"
+    
+    def test_npm_installation(self):
+        """Test npm global installation"""
+        print("\n=== Testing npm Installation ===")
+        
+        # Test CLI from npm
+        result = self.run_command("claude-pm --version")
+        
+        if result["success"]:
+            print(f"✓ npm CLI working: {result['stdout'].strip()}")
+            self.results["npm_global"]["status"] = "success"
+            self.results["npm_global"]["version"] = result['stdout'].strip()
+        else:
+            print(f"✗ npm CLI failed: {result.get('stderr', result.get('error'))}")
+            self.results["npm_global"]["status"] = "failed"
+            self.results["npm_global"]["error"] = result.get('stderr', result.get('error'))
+    
+    def test_ai_trackdown_integration(self):
+        """Test ai-trackdown-pytools integration"""
+        print("\n=== Testing ai-trackdown Integration ===")
+        
+        # Test in PyPI environment
+        test_cmd = """/home/testuser/pypi-env/bin/python -c '
+import ai_trackdown_pytools
+from ai_trackdown_pytools.ticket import Ticket
+print("✓ ai-trackdown-pytools imported successfully")
+'"""
+        
+        result = self.run_command(test_cmd)
+        
+        if result["success"]:
+            print(result["stdout"].strip())
+            self.results["ai_trackdown"]["status"] = "success"
+        else:
+            print(f"✗ ai-trackdown integration failed: {result.get('stderr', result.get('error'))}")
+            self.results["ai_trackdown"]["status"] = "failed"
+            self.results["ai_trackdown"]["error"] = result.get('stderr', result.get('error'))
+    
+    def test_framework_initialization(self):
+        """Test framework initialization"""
+        print("\n=== Testing Framework Initialization ===")
+        
+        # Create test directory
+        test_dir = Path("/tmp/claude-pm-test")
+        test_dir.mkdir(exist_ok=True)
+        os.chdir(test_dir)
+        
+        # Test initialization
+        result = self.run_command("claude-pm init --verify")
+        
+        if result["returncode"] == 0 or "not initialized" in result.get("stdout", ""):
+            print("✓ Initialization check completed")
+            self.results["integration"]["init"] = "success"
+        else:
+            print(f"✗ Initialization check failed: {result.get('stderr', result.get('error'))}")
+            self.results["integration"]["init"] = "failed"
+    
+    def generate_report(self):
+        """Generate test report"""
+        print("\n=== Test Report ===")
+        
+        # Count successes
+        total_tests = 0
+        passed_tests = 0
+        
+        for category, results in self.results.items():
+            if results.get("status") == "success":
+                passed_tests += 1
+            total_tests += 1
+        
+        # Write JSON report
+        with open("/home/testuser/integration_test_results.json", "w") as f:
+            json.dump(self.results, f, indent=2)
+        
+        print(f"\nTotal: {passed_tests}/{total_tests} tests passed")
+        
+        return passed_tests == total_tests
+    
+    def run_all_tests(self):
+        """Run all integration tests"""
+        print("=== Claude PM Integration Test Suite ===")
+        
+        self.test_pypi_installation()
+        self.test_npm_installation()
+        self.test_ai_trackdown_integration()
+        self.test_framework_initialization()
+        
+        success = self.generate_report()
+        
+        if success:
+            print("\n✅ All integration tests passed!")
+            return 0
+        else:
+            print("\n❌ Some integration tests failed!")
+            return 1
+
+if __name__ == "__main__":
+    tester = IntegrationTester()
+    sys.exit(tester.run_all_tests())
+EOF
+
+# Make test script executable
+RUN chmod +x test_integration.py
+
+# Run integration tests by default
+CMD ["python", "test_integration.py"]

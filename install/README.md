@@ -105,16 +105,34 @@ Main deployment script that creates a complete framework deployment.
 - Configuration generation
 - Platform-specific optimizations
 - Python package integration
+- **CLAUDE.md preservation** - Protects existing custom project instructions
+
+**CLAUDE.md Protection:**
+- **Default behavior**: Preserves existing CLAUDE.md files to protect custom instructions
+- **Warning displayed**: When existing CLAUDE.md found, script warns and skips generation
+- **Force option**: Use `--force` flag to overwrite (creates backup first)
+- **Backup creation**: When using --force, creates timestamped backup before overwriting
 
 **Usage:**
 ```bash
 node install/deploy.js [options]
 
 Options:
-  --target, -t    Target directory for deployment
-  --verbose, -v   Verbose output
-  --dry-run       Test deployment without changes
-  --skip-validation   Skip environment validation
+  --target, -t       Target directory for deployment
+  --verbose, -v      Verbose output
+  --dry-run          Test deployment without changes
+  --skip-validation  Skip environment validation
+  --force            DANGEROUS: Overwrite existing CLAUDE.md (creates backup)
+```
+
+**Examples:**
+```bash
+# Safe deployment (preserves existing CLAUDE.md)
+node install/deploy.js --target ~/Projects/my-project
+
+# Force regeneration with backup
+node install/deploy.js --target ~/Projects/my-project --force
+# Creates: CLAUDE.md.backup.[timestamp] before overwriting
 ```
 
 ### `validate-deployment.js`
@@ -151,7 +169,7 @@ Legacy installation script (maintained for compatibility).
 ### Configuration File Structure
 ```json
 {
-  "version": "0.7.0",
+  "version": "1.4.2",
   "deployedAt": "2025-07-08T...",
   "platform": "darwin",
   "deploymentDir": "/path/to/deployment",

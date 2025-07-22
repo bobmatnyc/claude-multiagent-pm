@@ -1,6 +1,26 @@
-# Claude PM GitHub Sync Scripts
+# Claude PM Scripts Directory
 
-This directory contains a production-ready system for syncing Claude PM trackdown tickets to GitHub Issues with comprehensive error handling, logging, and management capabilities.
+This directory contains utility scripts for the Claude PM Framework, including GitHub sync tools, installation helpers, and development utilities.
+
+## 🔧 Installation Scripts
+
+### macOS Installation Helpers
+
+**`install-claude-pm-macos.sh`** - Quick installer for macOS users
+- Handles "externally-managed-environment" errors automatically
+- Installs using pipx (recommended method)
+- Checks dependencies and Python version
+- Usage: `./install-claude-pm-macos.sh`
+
+**`diagnose-macos-python.py`** - Diagnostic tool for macOS Python environments
+- Identifies Python installation type (Homebrew, System, etc.)
+- Checks for PEP 668 restrictions
+- Suggests appropriate installation methods
+- Usage: `python3 diagnose-macos-python.py`
+
+## 📦 GitHub Sync System
+
+Production-ready system for syncing Claude PM trackdown tickets to GitHub Issues with comprehensive error handling, logging, and management capabilities.
 
 ## 🚀 Quick Start
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "claude-multiagent-pm"
-version = "1.4.0"
+version = "1.4.7"
 description = "Claude Multi-Agent Project Management Framework for AI-driven orchestration"
 readme = "README.md"
 license = {text = "MIT"}
@@ -188,6 +188,9 @@ claude-pm = "claude_pm.cli:main"
 claude-multiagent-pm = "claude_pm.cli:main"
 claude-multiagent-pm-health = "claude_pm.scripts.health_monitor:main"
 claude-multiagent-pm-service = "claude_pm.scripts.service_manager:main"
+cmpm = "claude_pm.cli:main"
+aitrackdown = "ai_trackdown_pytools.cli:main"
+atd = "ai_trackdown_pytools.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -216,7 +219,7 @@ claude_pm = [
 
 # Testing configuration
 [tool.pytest.ini_options]
-minversion = "6.0"
+minversion = "1.4.7"
 addopts = [
     "-ra",
     "-q", 
@@ -377,7 +380,7 @@ edit_uri = "edit/main/docs/"
 # Development and build tools
 [tool.setuptools_scm]
 write_to = "claude_pm/_version.py"
-fallback_version = "1.4.0"
+fallback_version = "1.4.7"
 
 [tool.wheel]
 universal = false

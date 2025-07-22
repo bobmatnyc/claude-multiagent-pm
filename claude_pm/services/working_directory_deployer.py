@@ -138,6 +138,19 @@ class WorkingDirectoryDeployer(BaseService):
             )
         
         try:
+            # Check for tasks/ to tickets/ migration before deployment
+            try:
+                from ..utils.tasks_to_tickets_migration import check_and_migrate_tasks_directory
+                
+                migration_result = await check_and_migrate_tasks_directory(working_directory, silent=True)
+                
+                if migration_result.get("migrated"):
+                    logger.info(f"Automatically migrated tasks/ to tickets/ in {working_directory}")
+                    
+            except Exception as migration_error:
+                logger.warning(f"Tasks to tickets migration check failed: {migration_error}")
+                # Continue with deployment even if migration fails
+            
             # Pre-deployment validation
             pre_validation = await self._validate_pre_deployment(config)
             if not pre_validation['valid']:

@@ -93,7 +93,7 @@ class TestAgentRegistry:
     def test_list_agents_all(self, registry, mock_agents):
         """Test listing all agents."""
         with patch.object(registry, '_scan_directories', return_value=mock_agents):
-            agents = registry.listAgents(scope='all')
+            agents = registry.listAgents()
             
             assert len(agents) == 2
             assert 'performance' in agents
@@ -131,7 +131,7 @@ class TestAgentRegistry:
         
         with patch.object(registry, '_scan_directories', 
                          return_value=mock_data.get(scope, {})):
-            agents = registry.listAgents(scope=scope)
+            agents = registry.listAgents()
             assert len(agents) == expected_count
 ```
 

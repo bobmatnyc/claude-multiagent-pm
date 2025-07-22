@@ -6,10 +6,20 @@
  * Creates fully functional framework deployments in any directory
  * with complete ai-trackdown-tools integration and 42-ticket management.
  * 
+ * IMPORTANT: This script preserves existing CLAUDE.md files by default
+ * to protect custom project instructions.
+ * 
  * Usage:
  *   node install/deploy.js --target ~/Clients/project-name
  *   node install/deploy.js --target ~/Clients/project-name --verbose
  *   npm run deploy -- --target ~/Clients/project-name
+ *   
+ * Flags:
+ *   --target, -t     Target directory for deployment
+ *   --verbose, -v    Show detailed output
+ *   --dry-run        Show what would be done without making changes
+ *   --force          DANGEROUS: Overwrite existing CLAUDE.md (creates backup)
+ *   --skip-validation  Skip environment validation checks
  */
 
 const fs = require('fs').promises;
@@ -25,6 +35,7 @@ class ClaudePMDeploymentEngine {
         this.verbose = options.verbose || false;
         this.skipValidation = options.skipValidation || false;
         this.dryRun = options.dryRun || false;
+        this.forceOverwrite = options.forceOverwrite || false;
         
         this.packageDir = path.join(__dirname, '..');
         this.frameworkVersion = require('../package.json').version;
@@ -45,6 +56,77 @@ class ClaudePMDeploymentEngine {
     }
 
     /**
+     * Check if directory is the framework source directory
+     */
+    isFrameworkSourceDirectory(directory) {
+        const frameworkMarkers = [];
+        
+        // Check for pyproject.toml with our package name
+        const pyprojectPath = path.join(directory, 'pyproject.toml');
+        if (fsSync.existsSync(pyprojectPath)) {
+            try {
+                const content = fsSync.readFileSync(pyprojectPath, 'utf8');
+                if (content.includes('name = "claude-multiagent-pm"')) {
+                    frameworkMarkers.push('pyproject.toml (claude-multiagent-pm)');
+                }
+            } catch (error) {
+                // Ignore read errors
+            }
+        }
+        
+        // Check for package.json with our package name
+        const packageJsonPath = path.join(directory, 'package.json');
+        if (fsSync.existsSync(packageJsonPath)) {
+            try {
+                const content = fsSync.readFileSync(packageJsonPath, 'utf8');
+                if (content.includes('"@bobmatnyc/claude-multiagent-pm"')) {
+                    frameworkMarkers.push('package.json (@bobmatnyc/claude-multiagent-pm)');
+                }
+            } catch (error) {
+                // Ignore read errors
+            }
+        }
+        
+        // Check for claude_pm source directory
+        if (fsSync.existsSync(path.join(directory, 'claude_pm'))) {
+            frameworkMarkers.push('claude_pm/ source directory');
+        }
+        
+        // Check if CLAUDE.md mentions framework developers
+        const claudeMdPath = path.join(directory, 'CLAUDE.md');
+        if (fsSync.existsSync(claudeMdPath)) {
+            try {
+                const content = fsSync.readFileSync(claudeMdPath, 'utf8');
+                if (content.includes('FRAMEWORK DEVELOPERS ONLY')) {
+                    frameworkMarkers.push('CLAUDE.md (development version)');
+                }
+            } catch (error) {
+                // Ignore read errors
+            }
+        }
+        
+        // Additional framework indicators
+        const indicators = [
+            { path: 'tests/', name: 'tests/ directory' },
+            { path: 'scripts/', name: 'scripts/ directory' },
+            { path: 'requirements/', name: 'requirements/ directory' },
+            { path: 'framework/', name: 'framework/ templates directory' },
+            { path: '.github/workflows/', name: '.github/workflows/ directory' }
+        ];
+        
+        for (const indicator of indicators) {
+            if (fsSync.existsSync(path.join(directory, indicator.path))) {
+                frameworkMarkers.push(indicator.name);
+            }
+        }
+        
+        return {
+            isFramework: frameworkMarkers.length > 0,
+            markers: frameworkMarkers
+        };
+    }
+
+    /**
      * Log message with optional verbose filtering
      */
     log(message, force = false) {
@@ -59,12 +141,14 @@ class ClaudePMDeploymentEngine {
     checkPythonPackage() {
         try {
             const pythonCmd = this.pythonCmd || 'python3';
-            execSync(`${pythonCmd} -c "import ai_trackdown"`, { stdio: 'pipe' });
-            this.log(`Found ai-trackdown-pytools Python package`);
+            // Check both module import and CLI availability
+            execSync(`${pythonCmd} -c "import ai_trackdown_pytools; print('Module OK')"`, { stdio: 'pipe' });
+            execSync(`${pythonCmd} -m ai_trackdown_pytools.cli --version`, { stdio: 'pipe' });
+            this.log(`✓ Found ai-trackdown-pytools Python package`);
             return true;
         } catch (error) {
-            this.log(`Warning: ai-trackdown-pytools not found - ${error.message}`);
-            this.log(`Install with: pip install --user ai-trackdown-pytools==1.1.0`);
+            this.log(`⚠ Warning: ai-trackdown-pytools not found - ticketing features will be unavailable`);
+            this.log(`  Install with: pip install --user ai-trackdown-pytools==1.4.0`);
             return false;
         }
     }
@@ -121,8 +205,12 @@ class ClaudePMDeploymentEngine {
 
         // Check ai-trackdown-pytools availability
         if (!this.pythonPackageAvailable) {
-            this.log('Warning: ai-trackdown-pytools is not installed. Ticketing features will be limited.');
-            this.log('Install with: pip install --user ai-trackdown-pytools==1.1.0');
+            this.log('⚠ WARNING: ai-trackdown-pytools is not installed. Ticketing features will be unavailable.');
+            this.log('  Required for PM orchestration and ticket management.');
+            this.log('  Install with: pip install --user ai-trackdown-pytools==1.4.0');
+            this.log('  After installation, re-run deployment to enable ticketing.');
+        } else {
+            this.log('✓ ai-trackdown-pytools detected - ticketing features enabled');
         }
 
         // Check target directory
@@ -387,6 +475,9 @@ echo "3. The orchestrator will auto-detect available services"
 
     /**
      * Create ai-trackdown-tools CLI wrappers
+     * These wrappers ensure the Python CLI commands work correctly by:
+     * 1. Activating any available virtual environment (project or global)
+     * 2. Running the ai-trackdown-pytools CLI module
      */
     async createAiTrackdownWrappers() {
         this.log('Creating ai-trackdown-tools CLI wrappers...', true);
@@ -447,10 +538,28 @@ echo "3. The orchestrator will auto-detect available services"
         return `@echo off
 REM Claude PM Framework - ${command} wrapper (Python version)
 REM Generated by deployment script v${this.frameworkVersion}
-REM Note: ai-trackdown-pytools does not provide CLI commands
 
-echo ai-trackdown-pytools is a Python library and does not provide CLI commands.
-echo Use it in your Python scripts: from ai_trackdown import Task, Issue, Epic
+REM Get the directory where this script is located
+set SCRIPT_DIR=%~dp0
+set PROJECT_DIR=%SCRIPT_DIR%..
+
+REM Check if virtual environment exists and activate it
+if exist "%PROJECT_DIR%\\venv\\Scripts\\activate.bat" (
+    call "%PROJECT_DIR%\\venv\\Scripts\\activate.bat"
+) else if exist "%PROJECT_DIR%\\.venv\\Scripts\\activate.bat" (
+    call "%PROJECT_DIR%\\.venv\\Scripts\\activate.bat"
+) else if exist "%USERPROFILE%\\.claude-pm\\venv\\Scripts\\activate.bat" (
+    call "%USERPROFILE%\\.claude-pm\\venv\\Scripts\\activate.bat"
+)
+
+REM Run the Python CLI command
+REM First try python3, then python
+where python3 >nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    python3 -m ai_trackdown_pytools.cli %*
+) else (
+    python -m ai_trackdown_pytools.cli %*
+)
 `;
     }
 
@@ -461,42 +570,116 @@ echo Use it in your Python scripts: from ai_trackdown import Task, Issue, Epic
         return `#!/bin/bash
 # Claude PM Framework - ${command} wrapper (Python version)
 # Generated by deployment script v${this.frameworkVersion}
-# Note: ai-trackdown-pytools does not provide CLI commands
 
-echo "ai-trackdown-pytools is a Python library and does not provide CLI commands."
-echo "Use it in your Python scripts: from ai_trackdown import Task, Issue, Epic"
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Check if virtual environment exists and activate it
+if [ -f "$PROJECT_DIR/venv/bin/activate" ]; then
+    source "$PROJECT_DIR/venv/bin/activate"
+elif [ -f "$PROJECT_DIR/.venv/bin/activate" ]; then
+    source "$PROJECT_DIR/.venv/bin/activate"
+elif [ -f "$HOME/.claude-pm/venv/bin/activate" ]; then
+    source "$HOME/.claude-pm/venv/bin/activate"
+fi
+
+# Run the Python CLI command
+# First try with python3, fallback to python if that fails
+if command -v python3 >/dev/null 2>&1; then
+    python3 -m ai_trackdown_pytools.cli "$@"
+else
+    python -m ai_trackdown_pytools.cli "$@"
+fi
 `;
     }
 
     /**
-     * Initialize task hierarchy
+     * Initialize ticketing hierarchy
      */
-    async initializeTaskHierarchy() {
-        this.log('Initializing task hierarchy...', true);
+    async initializeTicketingHierarchy() {
+        this.log('Initializing ticketing hierarchy...', true);
         
-        const tasksDir = path.join(this.targetDir, 'tasks');
+        const ticketsDir = path.join(this.targetDir, 'tickets');
         
         if (this.dryRun) {
-            this.log(`[DRY RUN] Would initialize task hierarchy in: ${tasksDir}`);
+            this.log(`[DRY RUN] Would initialize ticketing hierarchy in: ${ticketsDir}`);
             return;
         }
         
         try {
-            // Copy existing tasks structure if available
-            if (fsSync.existsSync(this.sources.tasks)) {
-                await this.copyDirectory(this.sources.tasks, tasksDir);
-            } else {
-                // Create basic structure
-                await fs.mkdir(path.join(tasksDir, 'epics'), { recursive: true });
-                await fs.mkdir(path.join(tasksDir, 'issues'), { recursive: true });
-                await fs.mkdir(path.join(tasksDir, 'tasks'), { recursive: true });
-                await fs.mkdir(path.join(tasksDir, 'prs'), { recursive: true });
-                await fs.mkdir(path.join(tasksDir, 'templates'), { recursive: true });
+            // Create ticketing structure (ai-trackdown-pytools format)
+            await fs.mkdir(path.join(ticketsDir, 'epics'), { recursive: true });
+            await fs.mkdir(path.join(ticketsDir, 'issues'), { recursive: true });
+            await fs.mkdir(path.join(ticketsDir, 'tasks'), { recursive: true });
+            await fs.mkdir(path.join(ticketsDir, 'prs'), { recursive: true });
+            await fs.mkdir(path.join(ticketsDir, 'templates'), { recursive: true });
+            await fs.mkdir(path.join(ticketsDir, 'archive'), { recursive: true });
+            await fs.mkdir(path.join(ticketsDir, 'reports'), { recursive: true });
+            
+            // Create .ai-trackdown directory for tracking
+            const trackingDir = path.join(ticketsDir, '.ai-trackdown');
+            await fs.mkdir(trackingDir, { recursive: true });
+            
+            // Initialize counters file
+            const countersPath = path.join(trackingDir, 'counters.json');
+            if (!fsSync.existsSync(countersPath)) {
+                const counters = {
+                    epic: 0,
+                    issue: 0,
+                    task: 0,
+                    pr: 0
+                };
+                await fs.writeFile(countersPath, JSON.stringify(counters, null, 2));
             }
             
-            this.log(`✓ Task hierarchy initialized in ${tasksDir}`);
+            // Create README for tickets directory
+            const readmePath = path.join(ticketsDir, 'README.md');
+            const readmeContent = `# Tickets Directory
+
+This directory contains all project tickets managed by ai-trackdown-pytools.
+
+## Structure
+- \`epics/\` - Large features spanning multiple sprints
+- \`issues/\` - Standard development tasks
+- \`tasks/\` - Small, focused work items
+- \`prs/\` - Pull request tracking
+- \`templates/\` - Ticket templates
+- \`archive/\` - Closed tickets
+- \`reports/\` - Sprint and progress reports
+
+## Usage
+Use the \`aitrackdown\` or \`atd\` CLI commands to manage tickets:
+
+\`\`\`bash
+# List all open tickets
+aitrackdown list
+
+# Create a new issue
+aitrackdown create --type issue --title "Implement feature X"
+
+# Update ticket status
+aitrackdown update ISS-0001 --status in-progress
+\`\`\`
+
+For more information, see the framework documentation.
+`;
+            
+            if (!fsSync.existsSync(readmePath)) {
+                await fs.writeFile(readmePath, readmeContent);
+            }
+            
+            this.log(`✓ Ticketing hierarchy initialized in ${ticketsDir}`);
+            
+            // Also check for legacy tasks directory
+            const tasksDir = path.join(this.targetDir, 'tasks');
+            if (fsSync.existsSync(tasksDir)) {
+                this.log(`⚠ Legacy tasks/ directory found - migration may be needed`);
+                this.log(`  Run 'claude-pm init' after deployment to migrate to tickets/`);
+            }
+            
         } catch (error) {
-            throw new Error(`Failed to initialize task hierarchy: ${error.message}`);
+            throw new Error(`Failed to initialize ticketing hierarchy: ${error.message}`);
         }
     }
 
@@ -521,15 +704,17 @@ echo "Use it in your Python scripts: from ai_trackdown import Task, Issue, Epic"
             deploymentDir: this.targetDir,
             pythonCmd: this.pythonCmd || 'python3',
             pythonPackageAvailable: this.pythonPackageAvailable,
+            aiTrackdownPath: path.join(this.targetDir, 'bin', this.platform === 'win32' ? 'aitrackdown.bat' : 'aitrackdown'),
             paths: {
                 framework: path.join(this.targetDir, 'claude_pm'),
                 templates: path.join(this.targetDir, 'templates'),
                 schemas: path.join(this.targetDir, 'schemas'),
-                tasks: path.join(this.targetDir, 'tasks'),
+                tickets: path.join(this.targetDir, 'tickets'),
                 bin: path.join(this.targetDir, 'bin'),
                 config: configDir
             },
             features: {
+                ticketingEnabled: this.pythonPackageAvailable,
                 aiTrackdownIntegration: this.pythonPackageAvailable,
                 memoryIntegration: true,
                 multiAgentSupport: true,
@@ -547,14 +732,45 @@ echo "Use it in your Python scripts: from ai_trackdown import Task, Issue, Epic"
      * Generate deployment-specific CLAUDE.md
      */
     async generateClaudeConfig() {
-        this.log('Generating deployment CLAUDE.md...', true);
+        this.log('Checking for existing CLAUDE.md...', true);
         
-        if (this.dryRun) {
-            this.log(`[DRY RUN] Would generate CLAUDE.md in: ${this.targetDir}`);
+        // Check if we're in the framework source directory
+        const frameworkCheck = this.isFrameworkSourceDirectory(this.targetDir);
+        if (frameworkCheck.isFramework) {
+            this.log(`⚠️  WARNING: Skipping CLAUDE.md generation - detected framework source directory`, true);
+            this.log(`   Framework markers found: ${frameworkCheck.markers.join(', ')}`, true);
+            this.log(`   Framework source should not have deployment CLAUDE.md`, true);
             return;
         }
         
+        if (this.dryRun) {
+            this.log(`[DRY RUN] Would check/generate CLAUDE.md in: ${this.targetDir}`);
+            return;
+        }
+        
+        const claudePath = path.join(this.targetDir, 'CLAUDE.md');
+        
         try {
+            // Check if CLAUDE.md already exists
+            const fileExists = fsSync.existsSync(claudePath);
+            
+            if (fileExists && !this.forceOverwrite) {
+                this.log(`⚠️  WARNING: CLAUDE.md already exists at ${claudePath}`, true);
+                this.log(`   Preserving existing custom instructions.`, true);
+                this.log(`   To regenerate, use --force flag (THIS WILL DESTROY CUSTOM CONTENT!)`, true);
+                return;
+            }
+            
+            if (fileExists && this.forceOverwrite) {
+                this.log(`⚠️  WARNING: Overwriting existing CLAUDE.md due to --force flag`, true);
+                this.log(`   THIS WILL DESTROY ANY CUSTOM INSTRUCTIONS!`, true);
+                
+                // Create backup of existing file
+                const backupPath = `${claudePath}.backup.${Date.now()}`;
+                await fs.copyFile(claudePath, backupPath);
+                this.log(`   Created backup at: ${backupPath}`, true);
+            }
+            
             // Read template
             const templatePath = path.join(this.packageDir, 'framework', 'CLAUDE.md');
             let claudeTemplate = await fs.readFile(templatePath, 'utf8');
@@ -581,7 +797,6 @@ echo "Use it in your Python scripts: from ai_trackdown import Task, Issue, Epic"
                 claudeTemplate = claudeTemplate.replace(new RegExp(placeholder, 'g'), value);
             }
             
-            const claudePath = path.join(this.targetDir, 'CLAUDE.md');
             await fs.writeFile(claudePath, claudeTemplate);
             
             this.log(`✓ CLAUDE.md generated at ${claudePath}`);
@@ -689,10 +904,25 @@ else
 fi
 
 # Test AI-trackdown functionality
-if ./bin/aitrackdown status >/dev/null 2>&1; then
-    echo "✓ AI-trackdown integration working"
+if ./bin/aitrackdown --version >/dev/null 2>&1; then
+    echo "✓ AI-trackdown CLI available"
+    
+    # Test ticketing commands
+    if ./bin/aitrackdown list >/dev/null 2>&1; then
+        echo "✓ Ticketing commands working"
+    else
+        echo "⚠ Ticketing commands not functioning properly"
+    fi
 else
-    echo "⚠ AI-trackdown integration issue"
+    echo "⚠ AI-trackdown CLI not available - ticketing disabled"
+    echo "  Install ai-trackdown-pytools: pip install --user ai-trackdown-pytools==1.4.0"
+fi
+
+# Check tickets directory
+if [ -d "tickets" ]; then
+    echo "✓ Tickets directory present"
+else
+    echo "⚠ Tickets directory missing"
 fi
 
 # Check Python environment
@@ -745,6 +975,30 @@ if exist ".claude-pm\\config.json" (
     exit /b 1
 )
 
+REM Test AI-trackdown functionality
+bin\\aitrackdown.bat --version >nul 2>&1
+if %errorlevel% == 0 (
+    echo ✓ AI-trackdown CLI available
+    
+    REM Test ticketing commands
+    bin\\aitrackdown.bat list >nul 2>&1
+    if %errorlevel% == 0 (
+        echo ✓ Ticketing commands working
+    ) else (
+        echo ⚠ Ticketing commands not functioning properly
+    )
+) else (
+    echo ⚠ AI-trackdown CLI not available - ticketing disabled
+    echo   Install ai-trackdown-pytools: pip install --user ai-trackdown-pytools==1.4.0
+)
+
+REM Check tickets directory
+if exist "tickets" (
+    echo ✓ Tickets directory present
+) else (
+    echo ⚠ Tickets directory missing
+)
+
 REM Check Python environment
 ${this.pythonCmd} --version >nul 2>&1
 if %errorlevel% == 0 (
@@ -793,7 +1047,7 @@ echo 🎉 Health check completed successfully
             await this.deployFrameworkCore();
             await this.deployTemplatesAndSchemas();
             await this.createAiTrackdownWrappers();
-            await this.initializeTaskHierarchy();
+            await this.initializeTicketingHierarchy();
             await this.generateDeploymentConfig();
             await this.generateClaudeConfig();
             await this.createHealthCheck();
@@ -803,7 +1057,15 @@ echo 🎉 Health check completed successfully
             this.log(`Framework location: ${path.join(this.targetDir, 'claude_pm')}`, true);
             this.log(`Configuration: ${path.join(this.targetDir, '.claude-pm', 'config.json')}`, true);
             this.log(`Health check: ${path.join(this.targetDir, 'scripts', this.platform === 'win32' ? 'health-check.bat' : 'health-check.sh')}`, true);
-            this.log(`AI-trackdown CLI: ${path.join(this.targetDir, 'bin', 'aitrackdown')}`, true);
+            
+            if (this.pythonPackageAvailable) {
+                this.log(`✅ Ticketing enabled: ${path.join(this.targetDir, 'bin', 'aitrackdown')}`, true);
+                this.log(`   Tickets directory: ${path.join(this.targetDir, 'tickets')}`, true);
+                this.log(`   Use 'aitrackdown list' to view tickets`, true);
+            } else {
+                this.log(`⚠️ Ticketing disabled - install ai-trackdown-pytools to enable`, true);
+                this.log(`   Run: pip install --user ai-trackdown-pytools==1.4.0`, true);
+            }
             
             if (this.mcpRecommendations && this.mcpRecommendations.length > 0) {
                 this.log(`MCP recommendations: ${path.join(this.targetDir, '.mcp', 'recommended-services.json')}`, true);
@@ -827,7 +1089,8 @@ if (require.main === module) {
         targetDir: process.cwd(),
         verbose: args.includes('--verbose') || args.includes('-v'),
         skipValidation: args.includes('--skip-validation'),
-        dryRun: args.includes('--dry-run')
+        dryRun: args.includes('--dry-run'),
+        forceOverwrite: args.includes('--force')
     };
     
     // Parse target directory
@@ -836,16 +1099,38 @@ if (require.main === module) {
         options.targetDir = path.resolve(args[targetIndex + 1]);
     }
     
-    const deployer = new ClaudePMDeploymentEngine(options);
-    
-    deployer.deploy()
-        .then(() => {
-            process.exit(0);
-        })
-        .catch((error) => {
-            console.error('Deployment failed:', error.message);
-            process.exit(1);
-        });
+    // Show warning if force flag is used
+    if (options.forceOverwrite) {
+        console.log('⚠️  WARNING: --force flag detected!');
+        console.log('   This will OVERWRITE any existing CLAUDE.md file.');
+        console.log('   Custom instructions will be PERMANENTLY LOST!');
+        console.log('   Press Ctrl+C to cancel, or wait 5 seconds to continue...');
+        
+        // Give user time to cancel
+        setTimeout(() => {
+            const deployer = new ClaudePMDeploymentEngine(options);
+            
+            deployer.deploy()
+                .then(() => {
+                    process.exit(0);
+                })
+                .catch((error) => {
+                    console.error('Deployment failed:', error.message);
+                    process.exit(1);
+                });
+        }, 5000);
+    } else {
+        const deployer = new ClaudePMDeploymentEngine(options);
+        
+        deployer.deploy()
+            .then(() => {
+                process.exit(0);
+            })
+            .catch((error) => {
+                console.error('Deployment failed:', error.message);
+                process.exit(1);
+            });
+    }
 }
 
 module.exports = ClaudePMDeploymentEngine;

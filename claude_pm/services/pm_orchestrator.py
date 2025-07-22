@@ -13,7 +13,7 @@ Key Features:
 - Real-time prompt building for PM delegation
 
 Usage Example:
-    from claude_pm.services.pm_orchestrator import PMOrchestrator
+    from claude_pm.services import PMOrchestrator
     
     # Initialize orchestrator
     orchestrator = PMOrchestrator()
@@ -57,6 +57,14 @@ except ImportError as e:
     logging.warning(f"Failed to import CoreAgentLoader, will create simple loader: {e}")
     AGENT_LOADER_AVAILABLE = False
 
+# Import ticketing service for task tracking
+try:
+    from .ticketing_service import TicketingService, TicketData
+    TICKETING_AVAILABLE = True
+except ImportError as e:
+    logging.warning(f"TicketingService not available: {e}")
+    TICKETING_AVAILABLE = False
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -95,6 +103,7 @@ class PMOrchestrator:
         self.working_directory = Path(working_directory or os.getcwd())
         self._delegation_history: List[Dict[str, Any]] = []
         self._active_delegations: Dict[str, AgentDelegationContext] = {}
+        self._delegation_tickets: Dict[str, str] = {}  # Maps delegation_id to ticket_id
         
         # Check for test mode environment variable
         test_mode = os.environ.get('CLAUDE_PM_TEST_MODE', '').lower() == 'true'
@@ -146,13 +155,65 @@ class PMOrchestrator:
                 logger.warning(f"PMOrchestrator: Failed to initialize SharedPromptCache: {e}")
                 self._shared_cache = None
         
+        # Initialize ticketing service integration
+        self._ticketing_service = None
+        self._ticketing_helper = None
+        self._auto_ticket_threshold = 3  # Auto-create tickets for tasks requiring 3+ agents
+        if TICKETING_AVAILABLE:
+            try:
+                self._ticketing_service = TicketingService.get_instance()
+                # Import TicketingHelper locally to avoid circular imports
+                from ..orchestration.ticketing_helpers import TicketingHelper
+                self._ticketing_helper = TicketingHelper()
+                logger.info("PMOrchestrator: TicketingService integration enabled")
+            except Exception as e:
+                logger.warning(f"PMOrchestrator: Failed to initialize TicketingService: {e}")
+                self._ticketing_service = None
+                self._ticketing_helper = None
+        
         logger.info(f"PMOrchestrator initialized with working directory: {self.working_directory}")
         logger.info(f"  Shared cache: {'enabled' if self._shared_cache else 'disabled'}")
         logger.info(f"  Model override: {self.model_override or 'none'}")
         logger.info(f"  Verbose mode: {self.verbose}")
+        logger.info(f"  Ticketing: {'enabled' if self._ticketing_service else 'disabled'}")
         if self.model_override:
             logger.info(f"  Override source: {self.model_config.get('source', 'unknown')}")
     
+    
+    def _should_create_ticket(self, delegation_context: AgentDelegationContext) -> bool:
+        """
+        Determine if a ticket should be created for this delegation.
+        
+        Criteria:
+        - Task has high or critical priority
+        - Task has 3+ requirements or deliverables
+        - Task description indicates multi-agent coordination
+        - Task has explicit escalation triggers
+        """
+        if not self._ticketing_service:
+            return False
+            
+        # High priority tasks always get tickets
+        if delegation_context.priority in ["high", "critical"]:
+            return True
+        
+        # Complex tasks with many requirements/deliverables
+        if (len(delegation_context.requirements) >= self._auto_ticket_threshold or 
+            len(delegation_context.deliverables) >= self._auto_ticket_threshold):
+            return True
+        
+        # Multi-agent coordination keywords
+        multi_agent_keywords = ["coordinate", "multiple agents", "cross-agent", 
+                               "workflow", "integration", "multi-step"]
+        task_lower = delegation_context.task_description.lower()
+        if any(keyword in task_lower for keyword in multi_agent_keywords):
+            return True
+        
+        # Has explicit escalation triggers
+        if delegation_context.escalation_triggers:
+            return True
+        
+        return False
     
     def _initialize_model_selector(self):
         """Initialize model selector with CLI override support."""
@@ -370,13 +431,43 @@ class PMOrchestrator:
             delegation_id = f"{agent_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
             self._active_delegations[delegation_id] = delegation_context
             
+            # Create ticket if criteria met
+            ticket_id = None
+            if self._should_create_ticket(delegation_context):
+                try:
+                    ticket = self._ticketing_helper.create_agent_task_ticket(
+                        agent_name=agent_type,
+                        task_description=task_description,
+                        priority=priority,
+                        additional_context={
+                            "delegation_id": delegation_id,
+                            "requirements": requirements,
+                            "deliverables": deliverables,
+                            "dependencies": dependencies,
+                            "model": effective_model or "default"
+                        }
+                    )
+                    if ticket:
+                        ticket_id = ticket.id
+                        self._delegation_tickets[delegation_id] = ticket_id
+                        logger.info(f"Created ticket {ticket_id} for {agent_type} delegation")
+                        
+                        # Add ticket reference to prompt
+                        enhanced_prompt = enhanced_prompt.replace(
+                            f"**Delegation ID**: {delegation_id}",
+                            f"**Delegation ID**: {delegation_id}\n- **Ticket ID**: {ticket_id}"
+                        )
+                except Exception as e:
+                    logger.warning(f"Failed to create ticket for delegation: {e}")
+            
             # Add to history
             self._delegation_history.append({
                 "delegation_id": delegation_id,
                 "agent_type": agent_type,
                 "task_description": task_description,
                 "timestamp": datetime.now().isoformat(),
-                "status": "delegated"
+                "status": "delegated",
+                "ticket_id": ticket_id
             })
             
             logger.info(f"Generated prompt for {agent_type} delegation: {delegation_id}")
@@ -496,8 +587,30 @@ class PMOrchestrator:
                     entry["results"] = results
                     break
             
+            # Update ticket if exists
+            if delegation_id in self._delegation_tickets and self._ticketing_helper:
+                ticket_id = self._delegation_tickets[delegation_id]
+                try:
+                    success = results.get("success", True)
+                    status = "resolved" if success else "closed"
+                    comment = f"Task completed by {self._active_delegations[delegation_id].agent_type} agent.\n"
+                    comment += f"Success: {success}\n"
+                    if "summary" in results:
+                        comment += f"Summary: {results['summary']}"
+                    
+                    self._ticketing_helper.update_agent_task_status(
+                        ticket_id=ticket_id,
+                        status=status,
+                        comment=comment
+                    )
+                    logger.info(f"Updated ticket {ticket_id} to {status}")
+                except Exception as e:
+                    logger.warning(f"Failed to update ticket {ticket_id}: {e}")
+            
             # Remove from active delegations
             del self._active_delegations[delegation_id]
+            if delegation_id in self._delegation_tickets:
+                del self._delegation_tickets[delegation_id]
             
             logger.info(f"Completed delegation: {delegation_id}")
             return True
@@ -617,6 +730,212 @@ class PMOrchestrator:
         except Exception as e:
             logger.error(f"Error getting agent profile info: {e}")
             return None
+    
+    def get_ticketing_status(self) -> Dict[str, Any]:
+        """Get current ticketing system status and statistics."""
+        status = {
+            "ticketing_enabled": self._ticketing_service is not None,
+            "active_tickets": len(self._delegation_tickets),
+            "ticket_mappings": dict(self._delegation_tickets)
+        }
+        
+        if self._ticketing_helper:
+            try:
+                # Get project overview
+                overview = self._ticketing_helper.get_project_overview()
+                status["project_overview"] = overview
+                
+                # Get workload by agent
+                workload = {}
+                for agent_type in ["documentation", "engineer", "qa", "version_control", 
+                                  "research", "ops", "security", "data_engineer"]:
+                    agent_workload = self._ticketing_helper.get_agent_workload(agent_type)
+                    if agent_workload.get("total_tickets", 0) > 0:
+                        workload[agent_type] = agent_workload
+                
+                status["agent_workload"] = workload
+            except Exception as e:
+                logger.error(f"Error getting ticketing status: {e}")
+                status["error"] = str(e)
+        
+        return status
+    
+    def update_delegation_progress(
+        self, 
+        delegation_id: str, 
+        progress: str,
+        status: str = "in_progress"
+    ) -> bool:
+        """
+        Update progress on a delegation and its associated ticket.
+        
+        Args:
+            delegation_id: The delegation identifier
+            progress: Progress update message
+            status: New status (in_progress, blocked, etc.)
+            
+        Returns:
+            True if update successful
+        """
+        if delegation_id not in self._active_delegations:
+            return False
+        
+        # Update delegation history
+        for entry in self._delegation_history:
+            if entry["delegation_id"] == delegation_id:
+                entry["last_update"] = datetime.now().isoformat()
+                entry["status"] = status
+                if "progress_updates" not in entry:
+                    entry["progress_updates"] = []
+                entry["progress_updates"].append({
+                    "timestamp": datetime.now().isoformat(),
+                    "message": progress,
+                    "status": status
+                })
+                break
+        
+        # Update ticket if exists
+        if delegation_id in self._delegation_tickets and self._ticketing_helper:
+            ticket_id = self._delegation_tickets[delegation_id]
+            try:
+                # Map PM status to ticket status
+                ticket_status_map = {
+                    "in_progress": "in_progress",
+                    "blocked": "in_progress",  # Keep as in_progress but add comment
+                    "waiting": "in_progress",
+                    "delegated": "open"
+                }
+                
+                ticket_status = ticket_status_map.get(status, "in_progress")
+                
+                # Add progress comment
+                comment = f"Progress Update: {progress}"
+                if status == "blocked":
+                    comment = f"BLOCKED: {progress}"
+                
+                self._ticketing_service.add_comment(
+                    ticket_id=ticket_id,
+                    comment=comment,
+                    author="pm_orchestrator"
+                )
+                
+                # Update status if changed
+                if ticket_status != "in_progress" or status == "blocked":
+                    self._ticketing_service.update_ticket(
+                        ticket_id=ticket_id,
+                        status=ticket_status
+                    )
+                
+                logger.info(f"Updated ticket {ticket_id} progress: {progress}")
+                return True
+                
+            except Exception as e:
+                logger.warning(f"Failed to update ticket {ticket_id}: {e}")
+        
+        return True
+    
+    def create_multi_agent_workflow(
+        self,
+        workflow_name: str,
+        workflow_description: str,
+        agent_tasks: List[Dict[str, Any]],
+        priority: str = "medium"
+    ) -> Dict[str, Any]:
+        """
+        Create a multi-agent workflow with automatic ticket creation.
+        
+        Args:
+            workflow_name: Name of the workflow
+            workflow_description: Overall workflow description
+            agent_tasks: List of agent task definitions, each containing:
+                - agent_type: Type of agent
+                - task_description: Task for the agent
+                - requirements: Optional requirements list
+                - deliverables: Optional deliverables list
+                - depends_on: Optional list of agent_types this depends on
+            priority: Overall workflow priority
+            
+        Returns:
+            Dictionary with workflow information and created tickets
+        """
+        workflow_id = f"workflow_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        workflow_result = {
+            "workflow_id": workflow_id,
+            "name": workflow_name,
+            "description": workflow_description,
+            "priority": priority,
+            "agent_tasks": [],
+            "tickets": []
+        }
+        
+        # Create master workflow ticket if ticketing available
+        master_ticket_id = None
+        if self._ticketing_helper:
+            try:
+                master_ticket = self._ticketing_service.create_ticket(
+                    title=f"[Workflow] {workflow_name}",
+                    description=workflow_description,
+                    priority=priority,
+                    labels=["workflow", "multi-agent"],
+                    metadata={
+                        "workflow_id": workflow_id,
+                        "agent_count": len(agent_tasks),
+                        "created_by": "pm_orchestrator"
+                    }
+                )
+                master_ticket_id = master_ticket.id
+                workflow_result["master_ticket_id"] = master_ticket_id
+                logger.info(f"Created master workflow ticket: {master_ticket_id}")
+            except Exception as e:
+                logger.warning(f"Failed to create master workflow ticket: {e}")
+        
+        # Process each agent task
+        for i, task_def in enumerate(agent_tasks):
+            agent_type = task_def.get("agent_type")
+            task_description = task_def.get("task_description")
+            requirements = task_def.get("requirements", [])
+            deliverables = task_def.get("deliverables", [])
+            depends_on = task_def.get("depends_on", [])
+            
+            # Generate prompt for this agent
+            prompt = self.generate_agent_prompt(
+                agent_type=agent_type,
+                task_description=task_description,
+                requirements=requirements,
+                deliverables=deliverables,
+                priority=priority,
+                integration_notes=f"Part of workflow: {workflow_name}"
+            )
+            
+            # Get delegation ID from history (last added)
+            delegation_id = self._delegation_history[-1]["delegation_id"]
+            ticket_id = self._delegation_history[-1].get("ticket_id")
+            
+            task_info = {
+                "agent_type": agent_type,
+                "delegation_id": delegation_id,
+                "ticket_id": ticket_id,
+                "depends_on": depends_on,
+                "prompt_generated": True
+            }
+            
+            workflow_result["agent_tasks"].append(task_info)
+            if ticket_id:
+                workflow_result["tickets"].append(ticket_id)
+                
+                # Link to master ticket if available
+                if master_ticket_id and self._ticketing_service:
+                    try:
+                        self._ticketing_service.add_comment(
+                            ticket_id=ticket_id,
+                            comment=f"Part of workflow: {workflow_name} (Master ticket: {master_ticket_id})",
+                            author="pm_orchestrator"
+                        )
+                    except Exception as e:
+                        logger.warning(f"Failed to link ticket {ticket_id} to workflow: {e}")
+        
+        logger.info(f"Created multi-agent workflow {workflow_id} with {len(agent_tasks)} tasks")
+        return workflow_result
 
 
 # Helper functions for easy PM orchestrator integration

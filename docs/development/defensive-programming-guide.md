@@ -202,6 +202,6 @@ When reviewing code with lazy initialization:
 - [ ] Thread-safety considered for concurrent access
 
 ## Related Issues
-- [ISS-0128: Message Bus NoneType Error](../../tasks/issues/ISS-0128-message-bus-initialization-fix.md)
+- [ISS-0128: Message Bus NoneType Error](../../tickets/issues/ISS-0128-message-bus-initialization-fix.md)
 - [Orchestration Patterns](../technical/orchestration-patterns.md)
 - [Troubleshooting Guide](../TROUBLESHOOTING.md)

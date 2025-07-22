@@ -1,0 +1,152 @@
+# Claude PM Framework - PyPI Installation Test
+# Tests clean installation from PyPI package
+
+FROM python:3.11-slim
+
+# Set build arguments
+ARG CLAUDE_PM_VERSION=1.4.0
+ARG BUILD_DATE
+ARG VCS_REF
+
+# Set labels
+LABEL org.opencontainers.image.title="Claude PM Framework PyPI Test"
+LABEL org.opencontainers.image.description="PyPI installation test for Claude PM Framework"
+LABEL org.opencontainers.image.version="${CLAUDE_PM_VERSION}"
+LABEL org.opencontainers.image.created="${BUILD_DATE}"
+LABEL org.opencontainers.image.revision="${VCS_REF}"
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV CLAUDE_PM_VERSION=${CLAUDE_PM_VERSION}
+ENV ENVIRONMENT=testing
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    make \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create test user
+RUN useradd -m -s /bin/bash testuser
+
+# Switch to test user
+USER testuser
+WORKDIR /home/testuser
+
+# Create virtual environment
+RUN python -m venv venv
+ENV PATH="/home/testuser/venv/bin:$PATH"
+
+# Upgrade pip
+RUN pip install --upgrade pip
+
+# Install claude-multiagent-pm from PyPI with ai-trackdown-pytools
+RUN pip install claude-multiagent-pm ai-trackdown-pytools
+
+# Install test dependencies and additional required packages
+RUN pip install pytest pytest-asyncio tiktoken
+
+# Create test script
+RUN cat > test_installation.py << 'EOF'
+#!/usr/bin/env python3
+"""Test PyPI installation of claude-multiagent-pm"""
+
+import sys
+import subprocess
+import importlib.util
+
+def test_imports():
+    """Test that all main imports work"""
+    print("Testing imports...")
+    try:
+        import claude_pm
+        print(f"✓ claude_pm imported successfully: {claude_pm.__version__}")
+        
+        from claude_pm.cli import main
+        print("✓ CLI main imported successfully")
+        
+        from claude_pm.services.core import unified_core_service
+        print("✓ Core service imported successfully")
+        
+        # Test ai-trackdown integration
+        import ai_trackdown_pytools
+        print("✓ ai-trackdown-pytools imported successfully")
+        
+        return True
+    except Exception as e:
+        print(f"✗ Import failed: {e}")
+        return False
+
+def test_cli():
+    """Test CLI functionality"""
+    print("\nTesting CLI...")
+    try:
+        # Test version command
+        result = subprocess.run(['claude-pm', '--version'], capture_output=True, text=True)
+        if result.returncode == 0:
+            print(f"✓ CLI version command works: {result.stdout.strip()}")
+        else:
+            print(f"✗ CLI version command failed: {result.stderr}")
+            return False
+        
+        # Test help command
+        result = subprocess.run(['claude-pm', '--help'], capture_output=True, text=True)
+        if result.returncode == 0:
+            print("✓ CLI help command works")
+        else:
+            print(f"✗ CLI help command failed: {result.stderr}")
+            return False
+            
+        return True
+    except Exception as e:
+        print(f"✗ CLI test failed: {e}")
+        return False
+
+def test_initialization():
+    """Test framework initialization"""
+    print("\nTesting initialization...")
+    try:
+        result = subprocess.run(['claude-pm', 'init', '--verify'], capture_output=True, text=True)
+        print(f"✓ Initialization check completed with code: {result.returncode}")
+        if result.stdout:
+            print(f"  Output: {result.stdout.strip()}")
+        return True
+    except Exception as e:
+        print(f"✗ Initialization test failed: {e}")
+        return False
+
+def main():
+    """Run all tests"""
+    print("=== PyPI Installation Test Suite ===\n")
+    
+    results = []
+    results.append(test_imports())
+    results.append(test_cli())
+    results.append(test_initialization())
+    
+    print("\n=== Test Summary ===")
+    passed = sum(results)
+    total = len(results)
+    print(f"Passed: {passed}/{total}")
+    
+    if passed == total:
+        print("\n✅ All tests passed!")
+        return 0
+    else:
+        print("\n❌ Some tests failed!")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
+EOF
+
+# Make test script executable
+RUN chmod +x test_installation.py
+
+# Run tests by default
+CMD ["python", "test_installation.py"]

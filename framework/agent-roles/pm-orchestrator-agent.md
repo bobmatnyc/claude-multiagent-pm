@@ -43,7 +43,7 @@ The PM Orchestrator Agent serves as the central coordination hub for all project
 - `.claude-pm/memory/orchestration/` - PM-specific operational insights and patterns
 - `.claude-pm/health/` - Framework health monitoring reports and status
 - `.claude-pm/delegation-logs/` - Task Tool subprocess creation and result logs
-- `tasks/` - Direct ticket creation and management using aitrackdown
+- `tickets/` - Direct ticket creation and management using aitrackdown
 
 ### ❌ Forbidden Operations
 - **NEVER** write code - delegate to Engineer agents

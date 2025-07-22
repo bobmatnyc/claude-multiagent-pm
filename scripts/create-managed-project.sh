@@ -147,7 +147,7 @@ create_structure() {
     
     # Create standard directories
     mkdir -p docs
-    mkdir -p tasks/{epics,issues,tasks,prs,templates,scripts}
+    mkdir -p tickets/{epics,issues,tasks,prs,templates,scripts}
     
     success "Directory structure created"
 }
@@ -197,23 +197,23 @@ copy_trackdown() {
     # Initialize AI-Trackdown Tools structure
     info "Initializing AI-Trackdown Tools..."
     
-    # Create tasks directory structure
-    mkdir -p "tasks/"{epics,issues,tasks,prs,templates,scripts}
+    # Create tickets directory structure
+    mkdir -p "tickets/"{epics,issues,tasks,prs,templates,scripts}
     
     # Initialize with ai-trackdown-tools
     if command -v aitrackdown &> /dev/null; then
-        aitrackdown init "$PROJECT_NAME" --tasks-dir tasks 2>/dev/null || true
+        aitrackdown init "$PROJECT_NAME" --tasks-dir tickets 2>/dev/null || true
     fi
     
     # Copy templates if they exist
     if [ -d "$TEMPLATE_DIR/trackdown/templates" ]; then
-        cp -r "$TEMPLATE_DIR/trackdown/templates/"* "tasks/templates/" 2>/dev/null || true
+        cp -r "$TEMPLATE_DIR/trackdown/templates/"* "tickets/templates/" 2>/dev/null || true
     fi
     
     # Scripts
     if [ -f "$TEMPLATE_DIR/trackdown/scripts/update-progress.py" ]; then
-        cp "$TEMPLATE_DIR/trackdown/scripts/update-progress.py" "tasks/scripts/" 2>/dev/null || true
-        chmod +x "tasks/scripts/update-progress.py" 2>/dev/null || true
+        cp "$TEMPLATE_DIR/trackdown/scripts/update-progress.py" "tickets/scripts/" 2>/dev/null || true
+        chmod +x "tickets/scripts/update-progress.py" 2>/dev/null || true
     fi
     
     success "AI-Trackdown Tools system configured"
@@ -223,7 +223,7 @@ copy_trackdown() {
 create_handoff_ticket() {
     info "Creating implementation handoff ticket..."
     
-    cat > "tasks/issues/${PROJECT_PREFIX}-000-implementation-handoff.md" << EOF
+    cat > "tickets/issues/${PROJECT_PREFIX}-000-implementation-handoff.md" << EOF
 ## **[${PROJECT_PREFIX}-000]** Implementation Handoff - Project Takeover
 
 **Type**: Implementation Handoff  
@@ -442,7 +442,7 @@ generate_summary() {
     echo "4. Begin systematic implementation"
     echo ""
     echo -e "${YELLOW}Key Files:${NC}"
-    echo "  📋 tasks/issues/${PROJECT_PREFIX}-000-implementation-handoff.md - Start here"
+    echo "  📋 tickets/issues/${PROJECT_PREFIX}-000-implementation-handoff.md - Start here"
     echo "  📖 docs/INSTRUCTIONS.md - Implementation guide"
     echo "  📊 Use 'aitrackdown status' for task tracking"
     echo "  ⚙️  CLAUDE.md - Project configuration"

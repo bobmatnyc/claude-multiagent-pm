@@ -16,6 +16,10 @@ from .agent_registry import AgentRegistry, AgentMetadata
 from .agent_management_service import AgentManager
 from .agent_versioning import AgentVersionManager
 from .base_agent_manager import BaseAgentManager, BaseAgentSection
+from .ticketing_service import TicketingService, TicketData, get_ticketing_service
+from .pm_orchestrator import PMOrchestrator
+from .memory_diagnostics import MemoryDiagnosticsService, get_memory_diagnostics
+from .memory_pressure_coordinator import MemoryPressureCoordinator, get_memory_pressure_coordinator
 # DependencyManager removed - use Claude Code Task Tool instead
 
 __all__ = [
@@ -39,4 +43,12 @@ __all__ = [
     "AgentVersionManager",
     "BaseAgentManager",
     "BaseAgentSection",
+    "TicketingService",
+    "TicketData",
+    "get_ticketing_service",
+    "PMOrchestrator",
+    "MemoryDiagnosticsService",
+    "get_memory_diagnostics",
+    "MemoryPressureCoordinator",
+    "get_memory_pressure_coordinator",
 ]

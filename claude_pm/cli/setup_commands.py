@@ -29,6 +29,7 @@ from ..services.project_service import ProjectService
 # TemplateDeploymentIntegration removed - use Claude Code Task Tool instead
 from ..models.health import HealthStatus, create_service_health_report
 # PMAgent removed - use Claude Code Task Tool instead
+from ..utils.framework_detection import is_framework_source_directory
 
 console = Console()
 logger = logging.getLogger(__name__)
@@ -243,8 +244,9 @@ def register_setup_commands(cli_group):
     )
     @click.option("--backup/--no-backup", default=True, help="Create backup of existing CLAUDE.md file")
     @click.option("--force", is_flag=True, help="Force overwrite without confirmation")
+    @click.option('--framework-dev', is_flag=True, help='Allow deployment in framework source directory (developer mode)')
     @click.pass_context
-    def setup(ctx, target_dir, backup, force):
+    def setup(ctx, target_dir, backup, force, framework_dev):
         """🚀 Setup CLAUDE.md template in parent directory with deployment-aware configuration."""
 
         async def run():
@@ -252,6 +254,17 @@ def register_setup_commands(cli_group):
             try:
                 # Import ParentDirectoryManager for CLAUDE.md deployment
                 from ..services.parent_directory_manager import ParentDirectoryManager
+
+                # Check if we're in the framework source directory
+                current_dir = Path.cwd()
+                is_framework_source, framework_markers = is_framework_source_directory(current_dir)
+                
+                if is_framework_source and not framework_dev:
+                    console.print("[bold yellow]⚠️  Framework Source Directory Detected[/bold yellow]")
+                    console.print(f"[dim]   Detected markers: {', '.join(framework_markers)}[/dim]")
+                    console.print("[dim]   Skipping CLAUDE.md deployment to preserve development file[/dim]")
+                    console.print("[dim]   Use --framework-dev flag to force deployment if needed[/dim]")
+                    return
 
                 # Determine target directory
                 if target_dir:
@@ -400,8 +413,9 @@ def register_setup_commands(cli_group):
     @click.option('--postinstall-only', is_flag=True, help='Run only post-installation process')
     @click.option('--validate', is_flag=True, help='Validate post-installation completeness')
     @click.option('--comprehensive-validation', is_flag=True, help='Run comprehensive post-installation validation')
+    @click.option('--framework-dev', is_flag=True, help='Allow deployment in framework source directory (developer mode)')
     @click.pass_context
-    def init(ctx, force, post_install, skip_postinstall, postinstall_only, validate, comprehensive_validation):
+    def init(ctx, force, post_install, skip_postinstall, postinstall_only, validate, comprehensive_validation, framework_dev):
         """🛠️ Initialize Claude PM Framework with comprehensive setup and post-installation support.
         
         This command supports all the functionality previously in NPM postinstall.js:
@@ -471,53 +485,129 @@ def register_setup_commands(cli_group):
                     dir_path.mkdir(parents=True, exist_ok=True)
                     console.print(f"✅ Created directory: {dir_path}")
                 
-                # Always attempt to deploy CLAUDE.md to parent directory (not just with force flag)
-                # This ensures framework is deployed immediately after pip install
-                console.print("[bold blue]🚀 Deploying CLAUDE.md to parent directory[/bold blue]")
+                # Check for tasks/ to tickets/ migration
+                console.print("[bold blue]🔄 Checking for legacy tasks/ directory...[/bold blue]")
+                try:
+                    from ..utils.tasks_to_tickets_migration import check_and_migrate_tasks_directory
+                    
+                    # Check current directory for migration needs
+                    current_dir = Path.cwd()
+                    migration_result = await check_and_migrate_tasks_directory(current_dir, silent=False)
+                    
+                    if migration_result.get("migrated"):
+                        console.print(f"✅ Successfully migrated tasks/ to tickets/")
+                        console.print(f"   Files migrated: {migration_result.get('files_migrated', 0)}")
+                        if migration_result.get('backup_created'):
+                            console.print(f"   Backup saved: {Path(migration_result['backup_created']).name}")
+                    elif migration_result.get("success"):
+                        console.print("[dim]✓ No tasks/ directory migration needed[/dim]")
+                        
+                except Exception as migration_error:
+                    console.print(f"[yellow]⚠️ Migration check failed: {migration_error}[/yellow]")
+                    logger.warning(f"Tasks to tickets migration failed: {migration_error}")
+                    # Continue with initialization even if migration fails
                 
-                # Get current working directory and parent directory
+                # Initialize ticketing if not already present
+                console.print("[bold blue]🎫 Initializing ticketing system...[/bold blue]")
+                try:
+                    tickets_dir = current_dir / "tickets"
+                    if not tickets_dir.exists():
+                        # Create ticketing structure
+                        for subdir in ['epics', 'issues', 'tasks', 'prs', 'templates', 'archive', 'reports']:
+                            (tickets_dir / subdir).mkdir(parents=True, exist_ok=True)
+                        
+                        # Create .ai-trackdown directory and counters
+                        tracking_dir = tickets_dir / '.ai-trackdown'
+                        tracking_dir.mkdir(parents=True, exist_ok=True)
+                        
+                        counters_file = tracking_dir / 'counters.json'
+                        if not counters_file.exists():
+                            counters = {
+                                "epic": 0,
+                                "issue": 0,
+                                "task": 0,
+                                "pr": 0
+                            }
+                            counters_file.write_text(json.dumps(counters, indent=2))
+                        
+                        console.print(f"✅ Created ticketing structure at: {tickets_dir}")
+                    else:
+                        console.print("[dim]✓ Ticketing directory already exists[/dim]")
+                    
+                    # Check if ai-trackdown-pytools is available
+                    try:
+                        import ai_trackdown_pytools
+                        console.print("✅ ai-trackdown-pytools is installed - ticketing enabled")
+                    except ImportError:
+                        console.print("[yellow]⚠️ ai-trackdown-pytools not installed - ticketing features limited[/yellow]")
+                        console.print("[dim]   Install with: pip install --user ai-trackdown-pytools==1.4.0[/dim]")
+                        
+                except Exception as ticketing_error:
+                    console.print(f"[yellow]⚠️ Ticketing initialization failed: {ticketing_error}[/yellow]")
+                    logger.warning(f"Ticketing initialization failed: {ticketing_error}")
+                    # Continue with initialization even if ticketing fails
+                
+                # Check if we're in the framework source directory before deploying CLAUDE.md
                 current_dir = Path.cwd()
                 parent_dir = current_dir.parent
-                target_file = parent_dir / "CLAUDE.md"
                 
-                try:
-                    from ..services.parent_directory_manager import ParentDirectoryManager
+                # Detect framework source directory markers
+                is_framework_source, framework_markers = is_framework_source_directory(current_dir)
+                
+                if is_framework_source and not framework_dev:
+                    console.print("[bold yellow]⚠️  Framework Source Directory Detected[/bold yellow]")
+                    console.print(f"[dim]   Detected markers: {', '.join(framework_markers)}[/dim]")
+                    console.print("[dim]   Skipping CLAUDE.md deployment to preserve development file[/dim]")
+                    console.print("[dim]   Use --framework-dev flag to force deployment if needed[/dim]")
                     
-                    # Initialize Parent Directory Manager
-                    manager = ParentDirectoryManager()
-                    await manager._initialize()
+                    # Skip loading framework into Claude Code since we didn't deploy
+                    console.print("[dim]   Skipping framework loading into Claude Code[/dim]")
+                    target_file = None  # Set to None so we skip the loading step
+                else:
+                    # Always attempt to deploy CLAUDE.md to parent directory (not just with force flag)
+                    # This ensures framework is deployed immediately after pip install
+                    console.print("[bold blue]🚀 Deploying CLAUDE.md to parent directory[/bold blue]")
                     
-                    # Check if CLAUDE.md already exists
-                    if target_file.exists() and not force:
-                        console.print(f"[dim]ℹ️  CLAUDE.md already exists at {target_file}[/dim]")
-                        console.print(f"[dim]   Use --force to update it[/dim]")
-                    else:
-                        # Deploy CLAUDE.md
-                        operation = await manager.install_template_to_parent_directory(
-                            target_directory=parent_dir,
-                            template_id="claude_md",
-                            template_variables=None,  # Use defaults
-                            force=force  # Use force flag if provided
-                        )
+                    target_file = parent_dir / "CLAUDE.md"
+                    
+                    try:
+                        from ..services.parent_directory_manager import ParentDirectoryManager
                         
-                        if operation.success:
-                            console.print(f"✅ CLAUDE.md deployed to: {operation.target_path}")
-                            if operation.backup_path:
-                                console.print(f"📁 Backup created: {operation.backup_path}")
+                        # Initialize Parent Directory Manager
+                        manager = ParentDirectoryManager()
+                        await manager._initialize()
+                        
+                        # Check if CLAUDE.md already exists
+                        if target_file.exists() and not force:
+                            console.print(f"[dim]ℹ️  CLAUDE.md already exists at {target_file}[/dim]")
+                            console.print(f"[dim]   Use --force to update it[/dim]")
                         else:
-                            console.print(f"❌ CLAUDE.md deployment failed: {operation.error_message}")
-                            logger.error(f"CLAUDE.md deployment failed: {operation.error_message}")
-                    
-                    if 'manager' in locals():
-                        await manager._cleanup()
-                    
-                except Exception as deploy_error:
-                    console.print(f"❌ CLAUDE.md deployment error: {deploy_error}")
-                    logger.error(f"CLAUDE.md deployment error: {deploy_error}")
-                    # Continue with initialization even if deployment fails
+                            # Deploy CLAUDE.md
+                            operation = await manager.install_template_to_parent_directory(
+                                target_directory=parent_dir,
+                                template_id="claude_md",
+                                template_variables=None,  # Use defaults
+                                force=force  # Use force flag if provided
+                            )
+                            
+                            if operation.success:
+                                console.print(f"✅ CLAUDE.md deployed to: {operation.target_path}")
+                                if operation.backup_path:
+                                    console.print(f"📁 Backup created: {operation.backup_path}")
+                            else:
+                                console.print(f"❌ CLAUDE.md deployment failed: {operation.error_message}")
+                                logger.error(f"CLAUDE.md deployment failed: {operation.error_message}")
+                        
+                        if 'manager' in locals():
+                            await manager._cleanup()
+                        
+                    except Exception as deploy_error:
+                        console.print(f"❌ CLAUDE.md deployment error: {deploy_error}")
+                        logger.error(f"CLAUDE.md deployment error: {deploy_error}")
+                        # Continue with initialization even if deployment fails
                 
                 # Load framework into Claude Code if CLAUDE.md was deployed
-                if target_file.exists():
+                if target_file and target_file.exists():
                     console.print("[bold blue]🔄 Loading framework into Claude Code...[/bold blue]")
                     try:
                         from ..services.claude_code_integration import load_framework_into_claude_code, create_framework_loading_summary

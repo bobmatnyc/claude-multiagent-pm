@@ -52,6 +52,22 @@ def register_deployment_commands(cli_group):
 
         async def run():
             console.print("[bold blue]🚀 Starting deployment process...[/bold blue]")
+            
+            # Check for tasks/ to tickets/ migration before deployment
+            try:
+                from ..utils.tasks_to_tickets_migration import check_and_migrate_tasks_directory
+                
+                # Check current directory for migration needs
+                current_dir = Path.cwd()
+                migration_result = await check_and_migrate_tasks_directory(current_dir, silent=False)
+                
+                if migration_result.get("migrated"):
+                    console.print(f"✅ Migrated tasks/ to tickets/ before deployment")
+                    
+            except Exception as migration_error:
+                console.print(f"[yellow]⚠️ Migration check failed: {migration_error}[/yellow]")
+                logger.warning(f"Tasks to tickets migration failed: {migration_error}")
+                # Continue with deployment even if migration fails
 
             if service:
                 console.print(f"Deploying specific service: {service}")

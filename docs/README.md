@@ -29,6 +29,7 @@ Everything you need to use Claude Multi-Agent PM effectively.
 - [Agent Types](./user/guides/agent-types.md) - Understanding different agents
 - [Best Practices](./user/guides/best-practices.md) - Tips for effective usage
 - [Troubleshooting](./user/guides/troubleshooting.md) - Common issues and solutions
+- [Ticketing Workflows](./guides/ticketing-workflows.md) - PM ticketing integration patterns
 
 #### Reference
 - [CLI Commands](./user/reference/cli.md) - Complete command reference
@@ -42,6 +43,7 @@ For developers working with or extending the framework.
 - [Core API](./developer/api/core.md) - Core system APIs
 - [Agent API](./developer/api/agents.md) - Agent development interfaces
 - [Services API](./developer/api/services.md) - Service layer documentation
+- [TicketingService API](./api/ticketing-service.md) - Ticket management API reference
 
 #### Extension Development
 - [Creating Custom Agents](./developer/extensions/custom-agents.md)
@@ -97,6 +99,8 @@ Historical documentation and legacy content.
 - **Creating a new project** → [Quick Start](./user/getting-started/quickstart.md)
 - **Understanding agents** → [Agent Types](./user/guides/agent-types.md)
 - **Writing custom agents** → [Custom Agents](./developer/extensions/custom-agents.md)
+- **Managing tickets** → [TicketingService API](./api/ticketing-service.md)
+- **PM workflows** → [Ticketing Workflows](./guides/ticketing-workflows.md)
 - **Debugging issues** → [Troubleshooting](./TROUBLESHOOTING.md)
 - **Contributing code** → [Contributing Guide](./developer/contributing/CONTRIBUTING.md)
 
@@ -124,4 +128,4 @@ All documentation in this repository follows these standards:
 - [Technical Docs](./technical/README.md) - Architecture details
 - [Releases](./releases/README.md) - Version information
 
-Last Updated: 2025-07-18
+Last Updated: 2025-07-21

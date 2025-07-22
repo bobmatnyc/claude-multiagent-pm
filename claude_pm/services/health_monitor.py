@@ -13,6 +13,7 @@ from typing import Dict, List, Optional, Any
 
 from ..core.base_service import BaseService
 from ..core.response_types import TaskToolResponse
+from .memory_diagnostics import get_memory_diagnostics
 
 
 class HealthMonitorService(BaseService):
@@ -40,6 +41,9 @@ class HealthMonitorService(BaseService):
         # Background monitoring process
         self._monitor_process: Optional[asyncio.subprocess.Process] = None
         self._last_health_report: Optional[Dict[str, Any]] = None
+        
+        # Memory diagnostics integration
+        self._memory_diagnostics = None
 
     async def _initialize(self) -> None:
         """Initialize the health monitor service."""
@@ -48,6 +52,23 @@ class HealthMonitorService(BaseService):
         # Verify health monitor script exists
         if not self.health_script.exists():
             raise FileNotFoundError(f"Health monitor script not found: {self.health_script}")
+        
+        # Initialize memory diagnostics
+        try:
+            self._memory_diagnostics = get_memory_diagnostics()
+            await self._memory_diagnostics.start()
+            self.logger.info("Memory diagnostics integrated successfully")
+        except Exception as e:
+            self.logger.warning(f"Failed to initialize memory diagnostics: {e}")
+            self._memory_diagnostics = None
+
+        # Register with memory pressure coordinator
+        try:
+            from .memory_pressure_coordinator import register_service_cleanup
+            await register_service_cleanup("health_monitor", self.handle_memory_pressure)
+            self.logger.info("Registered with memory pressure coordinator")
+        except Exception as e:
+            self.logger.warning(f"Failed to register with memory pressure coordinator: {e}")
 
         # Run initial health check
         await self._run_health_check()
@@ -61,6 +82,13 @@ class HealthMonitorService(BaseService):
         # Stop background monitoring if running
         if self._monitor_process:
             await self._stop_background_monitoring()
+        
+        # Cleanup memory diagnostics
+        if self._memory_diagnostics:
+            try:
+                await self._memory_diagnostics.stop()
+            except Exception as e:
+                self.logger.warning(f"Failed to cleanup memory diagnostics: {e}")
 
         self.logger.info("Health Monitor Service cleanup completed")
 
@@ -336,6 +364,45 @@ class HealthMonitorService(BaseService):
         """Check if background monitoring is active."""
         return self._monitor_process is not None and self._monitor_process.returncode is None
 
+    async def handle_memory_pressure(self, severity: str = "warning") -> Dict[str, Any]:
+        """
+        Handle memory pressure by cleaning up health monitor resources.
+        
+        Args:
+            severity: "warning" or "critical" level of memory pressure
+            
+        Returns:
+            Dict with cleanup statistics
+        """
+        stats = {
+            "health_reports_before": len(self._last_health_report) if self._last_health_report else 0,
+            "memory_freed_mb": 0
+        }
+        
+        try:
+            # Clear last health report to free memory
+            if self._last_health_report:
+                self._last_health_report = None
+                stats["memory_freed_mb"] += 0.1  # Approximate
+            
+            # If critical, stop background monitoring temporarily
+            if severity == "critical" and self._monitor_process:
+                await self._stop_background_monitoring()
+                stats["background_monitoring_stopped"] = True
+                stats["memory_freed_mb"] += 5  # Approximate
+            
+            # Trigger garbage collection
+            import gc
+            gc.collect()
+            
+            self.logger.info(f"Health monitor memory cleanup ({severity}): freed ~{stats['memory_freed_mb']:.1f} MB")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to handle memory pressure: {e}")
+            stats["error"] = str(e)
+        
+        return stats
+    
     async def get_subsystem_versions(self) -> Dict:
         """Get subsystem version information from parent directory manager."""
         try:
@@ -485,6 +552,66 @@ class HealthMonitorService(BaseService):
             return new_loop.run_until_complete(self._health_check())
         finally:
             new_loop.close()
+    
+    # Memory diagnostics methods
+    
+    async def get_memory_profile(self) -> Dict[str, Any]:
+        """Get memory profile from integrated diagnostics."""
+        if self._memory_diagnostics:
+            return await self._memory_diagnostics.get_memory_profile()
+        return {
+            "error": "Memory diagnostics not available",
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    async def get_memory_diagnostics(self) -> Dict[str, Any]:
+        """Get complete memory diagnostics report."""
+        if self._memory_diagnostics:
+            return await self._memory_diagnostics.get_memory_diagnostics()
+        return {
+            "error": "Memory diagnostics not available",
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    async def perform_memory_cleanup(self, force: bool = False) -> Dict[str, Any]:
+        """Perform emergency memory cleanup."""
+        if self._memory_diagnostics:
+            return await self._memory_diagnostics.perform_emergency_cleanup(force=force)
+        return {
+            "success": False,
+            "error": "Memory diagnostics not available",
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    def is_memory_pressure_detected(self) -> bool:
+        """Check if memory pressure is detected."""
+        if self._memory_diagnostics:
+            return self._memory_diagnostics._detect_memory_pressure()
+        return False
+    
+    async def get_enhanced_health_with_memory(self) -> Dict[str, Any]:
+        """Get enhanced health status including memory diagnostics."""
+        try:
+            # Get base health status
+            base_status = await self.get_enhanced_health_status()
+            
+            # Add memory diagnostics
+            if self._memory_diagnostics:
+                memory_data = await self._memory_diagnostics.get_memory_profile()
+                base_status["memory"] = memory_data
+                base_status["memory_pressure"] = self._memory_diagnostics._detect_memory_pressure()
+            else:
+                base_status["memory"] = {"status": "diagnostics_unavailable"}
+                base_status["memory_pressure"] = False
+            
+            return base_status
+            
+        except Exception as e:
+            self.logger.error(f"Failed to get enhanced health with memory: {e}")
+            return {
+                "error": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
 
 
 # Backward compatibility alias for expected HealthMonitor import

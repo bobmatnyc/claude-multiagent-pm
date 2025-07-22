@@ -102,7 +102,7 @@ Cache agent discovery results:
 # Cache agent listings
 @lru_cache(maxsize=100)
 def list_agents_cached(self, scope='all'):
-    return self.listAgents(scope=scope)
+    return self.listAgents()
 ```
 
 ## Performance Monitoring
@@ -295,6 +295,6 @@ asyncio.run(diagnose())
 ```
 
 ## Related Documentation
-- [ISS-0128: Message Bus Performance Fix](../../tasks/issues/ISS-0128-message-bus-initialization-fix.md)
+- [ISS-0128: Message Bus Performance Fix](../../tickets/issues/ISS-0128-message-bus-initialization-fix.md)
 - [Orchestration Patterns](../technical/orchestration-patterns.md)
 - [Defensive Programming Guide](../development/defensive-programming-guide.md)

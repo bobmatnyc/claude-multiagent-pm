@@ -124,7 +124,7 @@ for directory in registry._get_search_directories():
     print(f"  - {directory}: exists={directory.exists()}")
 
 # Manually scan for agents
-agents = registry.listAgents(scope='all')
+agents = registry.listAgents()
 print(f"\nFound {len(agents)} agents:")
 for agent_id, metadata in agents.items():
     print(f"  - {agent_id}: {metadata['path']}")

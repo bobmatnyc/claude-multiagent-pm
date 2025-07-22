@@ -258,13 +258,18 @@ task_type = "performance_optimization"
 required_specializations = ["performance", "monitoring"]
 
 # Discover optimal agent
-optimal_agents = registry.listAgents(
-    specializations=required_specializations,
-    task_capability=task_type
-)
+all_agents = registry.listAgents()
+# Filter by specializations
+optimal_agents = {k: v for k, v in all_agents.items()
+                  if any(spec in v.get('specializations', [])
+                        for spec in required_specializations)}
 
 # Select agent with highest precedence
-selected_agent = registry.selectOptimalAgent(optimal_agents, task_type)
+# Note: selectOptimalAgent method doesn't exist - manual selection needed
+selected_agent = None
+if optimal_agents:
+    # Select first matching agent (should be improved with precedence logic)
+    selected_agent = list(optimal_agents.values())[0]
 
 # Create Task Tool subprocess with discovered agent
 subprocess_result = create_task_subprocess(
@@ -397,17 +402,13 @@ $PWD/.claude-pm/agents/user-agents/
 # Orchestrator pattern for agent discovery
 registry = AgentRegistry()
 
-# Discover project-specific agents first
-project_agents = registry.listAgents(scope='project')
+# Discover all agents
+all_agents = registry.listAgents()
 
-# Discover user-defined agents
-user_agents = registry.listAgents(scope='user')
-
-# Discover system agents as fallback
-system_agents = registry.listAgents(scope='system')
-
-# Merged discovery with precedence
-all_agents = registry.listAgents(scope='all')  # Automatic precedence handling
+# Filter by tier if needed
+project_agents = {k: v for k, v in all_agents.items() if v.get('tier') == 'project'}
+user_agents = {k: v for k, v in all_agents.items() if v.get('tier') == 'user'}
+system_agents = {k: v for k, v in all_agents.items() if v.get('tier') == 'system'}
 ```
 
 #### Specialized Agent Discovery Beyond Core 8
@@ -418,13 +419,17 @@ all_agents = registry.listAgents(scope='all')  # Automatic precedence handling
 
 **Specialized Discovery Usage:**
 ```python
-# Discover agents by specialization
-ui_agents = registry.listAgents(specialization='ui_ux')
-performance_agents = registry.listAgents(specialization='performance')
-architecture_agents = registry.listAgents(specialization='architecture')
+# Discover agents by type (note: specialization filtering would require custom filtering)
+all_agents = registry.listAgents()
+
+# Filter by specialization manually
+ui_agents = {k: v for k, v in all_agents.items() if 'ui_ux' in v.get('specializations', [])}
+performance_agents = {k: v for k, v in all_agents.items() if 'performance' in v.get('specializations', [])}
+architecture_agents = {k: v for k, v in all_agents.items() if 'architecture' in v.get('specializations', [])}
 
 # Multi-specialization discovery
-multi_spec = registry.listAgents(specializations=['integration', 'performance'])
+multi_spec = {k: v for k, v in all_agents.items() 
+              if any(spec in v.get('specializations', []) for spec in ['integration', 'performance'])}
 ```
 
 #### Agent Modification Tracking Integration
@@ -434,11 +439,12 @@ multi_spec = registry.listAgents(specializations=['integration', 'performance'])
 # Track agent changes for workflow optimization
 registry = AgentRegistry()
 
-# Get agents with modification timestamps
-agents_with_tracking = registry.listAgents(include_tracking=True)
+# Get all agents (modification timestamps are included by default)
+agents_with_tracking = registry.listAgents()
 
-# Filter agents modified since last orchestration
-recent_agents = registry.getRecentlyModified(since_timestamp)
+# Filter agents modified since last orchestration manually
+recent_agents = {k: v for k, v in agents_with_tracking.items() 
+                 if v.get('last_modified', 0) > since_timestamp}
 
 # Update orchestration based on agent modifications
 for agent_id, metadata in recent_agents.items():
@@ -457,18 +463,18 @@ from claude_pm.services.shared_prompt_cache import SharedPromptCache
 cache = SharedPromptCache()
 registry = AgentRegistry(prompt_cache=cache)
 
-# Cached agent discovery (99.7% faster)
-cached_agents = registry.listAgents(use_cache=True)
+# Agent discovery (caching is automatic)
+cached_agents = registry.listAgents()
 
 # Cache optimization for repeated orchestration
 cache.preload_agent_prompts(agent_ids=['documentation', 'qa', 'engineer'])
 
-# Batch agent loading with cache optimization
-batch_agents = registry.loadAgents(
-    agent_ids=['researcher', 'security', 'ops'],
-    use_cache=True,
-    optimization_level='high'
-)
+# Get specific agents
+batch_agents = {}
+for agent_id in ['researcher', 'security', 'ops']:
+    agent = registry.get_agent(agent_id)
+    if agent:
+        batch_agents[agent_id] = agent
 ```
 
 #### Task Tool Integration Patterns for Agent Registry
@@ -480,10 +486,10 @@ def select_optimal_agent(task_type, specialization_requirements):
     registry = AgentRegistry()
     
     # Find agents matching requirements
-    matching_agents = registry.listAgents(
-        specializations=specialization_requirements,
-        task_capability=task_type
-    )
+    all_agents = registry.listAgents()
+    matching_agents = {k: v for k, v in all_agents.items() 
+                       if any(spec in v.get('specializations', []) 
+                             for spec in specialization_requirements)}
     
     # Select highest precedence agent
     if matching_agents:
@@ -512,7 +518,7 @@ optimal_agent = select_optimal_agent(
 TEMPORAL CONTEXT: Today is [date]. Using agent registry for optimal agent selection.
 
 **Agent Discovery**: 
-- Registry scan: {registry.listAgents(specialization=required_spec)}
+- Registry scan: Find agents with specialization {required_spec}
 - Selected agent: {optimal_agent_id} (precedence: {agent_precedence})
 - Capabilities: {agent_metadata['specializations']}
 
@@ -556,11 +562,11 @@ def orchestrate_with_registry(task_description, requirements):
     registry = AgentRegistry()
     
     # Discover optimal agents
-    agents = registry.listAgents(
-        specializations=requirements.get('specializations', []),
-        task_type=requirements.get('type'),
-        performance_requirements=requirements.get('performance')
-    )
+    all_agents = registry.listAgents()
+    # Filter by requirements
+    agents = {k: v for k, v in all_agents.items()
+              if any(spec in v.get('specializations', [])
+                    for spec in requirements.get('specializations', []))}
     
     # Create Task Tool subprocess with optimal agent
     selected_agent = registry.selectOptimalAgent(agents, task_description)

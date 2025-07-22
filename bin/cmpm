@@ -42,7 +42,7 @@ def show_help():
   cmpm help
 
 [bold blue]Framework Info:[/bold blue]
-  Version: 0.9.0
+  Version: 1.4.3
   Core Commands: init, status, help
     """
     console.print(help_text)

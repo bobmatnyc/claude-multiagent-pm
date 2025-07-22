@@ -805,5 +805,226 @@ claude-pm test → Run tests with pytest integration
         console.print("[bold]Environment Override Examples:[/bold]")
         console.print("  export CLAUDE_PM_MODEL_OVERRIDE=claude-4-opus")
         console.print("  export CLAUDE_PM_MODEL_ENGINEER=claude-sonnet-4-20250514")
+    
+    # Memory Commands
+    @cli_group.group()
+    def memory():
+        """Memory diagnostics and management commands."""
+        pass
+    
+    @memory.command()
+    @click.option('--json', is_flag=True, help='Output in JSON format')
+    def profile():
+        """Show current memory profile and diagnostics."""
+        from ..services.health_monitor import HealthMonitor
+        
+        async def _show_profile():
+            monitor = HealthMonitor()
+            try:
+                await monitor.start()
+                profile_data = await monitor.get_memory_profile()
+                
+                if click.get_current_context().params.get('json'):
+                    import json
+                    console.print(json.dumps(profile_data, indent=2))
+                else:
+                    # Format output nicely
+                    console.print("[bold blue]💾 Memory Profile[/bold blue]\n")
+                    
+                    # Process memory
+                    process_info = profile_data.get("process", {})
+                    memory_mb = process_info.get("memory_mb", 0)
+                    threshold_mb = process_info.get("threshold_mb", 500)
+                    
+                    memory_color = "red" if memory_mb > threshold_mb else "green"
+                    console.print(f"[bold]Process Memory:[/bold] [{memory_color}]{memory_mb:.1f}MB[/{memory_color}] / {threshold_mb}MB")
+                    
+                    # System memory
+                    system_info = profile_data.get("system", {})
+                    if system_info:
+                        console.print(f"[bold]System Memory:[/bold] {system_info.get('percent', 0):.1f}% used")
+                    
+                    # Cache info
+                    cache_info = profile_data.get("cache", {})
+                    if cache_info and "error" not in cache_info:
+                        console.print(f"\n[bold]Cache Statistics:[/bold]")
+                        console.print(f"  Size: {cache_info.get('size_mb', 0):.2f}MB")
+                        console.print(f"  Entries: {cache_info.get('entry_count', 0)}")
+                        console.print(f"  Hit Rate: {cache_info.get('hit_rate', 0):.1f}%")
+                        console.print(f"  Memory Usage: {cache_info.get('memory_usage_percent', 0):.1f}%")
+                    
+                    # Memory pressure
+                    if profile_data.get("memory_pressure"):
+                        console.print("\n[bold red]⚠️  Memory Pressure Detected![/bold red]")
+                        console.print("Consider running 'claude-pm memory cleanup' to free resources")
+                    
+            finally:
+                await monitor.stop()
+        
+        asyncio.run(_show_profile())
+    
+    @memory.command()
+    @click.option('--force', is_flag=True, help='Force cleanup even if cooldown period not elapsed')
+    @click.option('--json', is_flag=True, help='Output cleanup results in JSON format')
+    def cleanup():
+        """Perform emergency memory cleanup to free resources."""
+        from ..services.health_monitor import HealthMonitor
+        
+        async def _perform_cleanup():
+            monitor = HealthMonitor()
+            try:
+                await monitor.start()
+                
+                console.print("[bold yellow]🧹 Performing memory cleanup...[/bold yellow]\n")
+                
+                # Perform cleanup
+                results = await monitor.perform_memory_cleanup(
+                    force=click.get_current_context().params.get('force', False)
+                )
+                
+                if click.get_current_context().params.get('json'):
+                    import json
+                    console.print(json.dumps(results, indent=2))
+                else:
+                    if results.get("success"):
+                        console.print("[bold green]✅ Cleanup completed successfully![/bold green]\n")
+                        
+                        # Show freed memory
+                        freed_mb = results.get("freed_mb", 0)
+                        if freed_mb > 0:
+                            console.print(f"[bold]Memory Freed:[/bold] {freed_mb:.2f}MB")
+                        
+                        # Show actions taken
+                        actions = results.get("actions", [])
+                        if actions:
+                            console.print("\n[bold]Actions Performed:[/bold]")
+                            for action in actions:
+                                action_name = action.get("action", "unknown")
+                                if "error" in action:
+                                    console.print(f"  ❌ {action_name}: {action['error']}")
+                                elif action_name == "clear_cache":
+                                    console.print(f"  ✅ Cleared cache: {action.get('entries_cleared', 0)} entries, {action.get('freed_mb', 0):.2f}MB freed")
+                                elif action_name == "garbage_collection":
+                                    console.print(f"  ✅ Garbage collection: {action.get('objects_collected', 0)} objects collected")
+                                elif action_name == "terminate_zombies":
+                                    console.print(f"  ✅ Terminated {action.get('processes_terminated', 0)} zombie processes")
+                                else:
+                                    console.print(f"  ✅ {action_name}")
+                        
+                        # Show final state
+                        console.print(f"\n[bold]Final Memory:[/bold] {results.get('after', {}).get('process_mb', 0):.1f}MB")
+                    else:
+                        reason = results.get("reason", "Unknown error")
+                        console.print(f"[bold red]❌ Cleanup failed:[/bold red] {reason}")
+                        
+                        if "cooldown" in reason:
+                            console.print("\n[dim]Use --force flag to override cooldown period[/dim]")
+                
+            finally:
+                await monitor.stop()
+        
+        asyncio.run(_perform_cleanup())
+    
+    @memory.command()
+    def diagnostics():
+        """Show comprehensive memory diagnostics report."""
+        from ..services.health_monitor import HealthMonitor
+        
+        async def _show_diagnostics():
+            monitor = HealthMonitor()
+            try:
+                await monitor.start()
+                diagnostics_data = await monitor.get_memory_diagnostics()
+                
+                console.print("[bold blue]🔍 Memory Diagnostics Report[/bold blue]\n")
+                
+                # Thresholds
+                thresholds = diagnostics_data.get("thresholds", {})
+                console.print("[bold]Configuration Thresholds:[/bold]")
+                console.print(f"  Process Memory: {thresholds.get('process_mb', 0)}MB")
+                console.print(f"  Cache Pressure: {thresholds.get('cache_pressure', 0) * 100:.0f}%")
+                console.print(f"  Subprocess Memory: {thresholds.get('subprocess_mb', 0)}MB")
+                
+                # Profile summary
+                profile = diagnostics_data.get("profile", {})
+                if profile:
+                    console.print(f"\n[bold]Current Status:[/bold]")
+                    console.print(f"  Memory Pressure: {'Yes' if diagnostics_data.get('pressure_detected') else 'No'}")
+                    console.print(f"  Auto Cleanup: {'Enabled' if diagnostics_data.get('auto_cleanup_enabled') else 'Disabled'}")
+                    console.print(f"  Profiling: {'Active' if diagnostics_data.get('profiling_enabled') else 'Inactive'}")
+                    
+                    if diagnostics_data.get("last_cleanup"):
+                        console.print(f"  Last Cleanup: {diagnostics_data['last_cleanup']}")
+                
+                # Subprocess info
+                subprocess_info = profile.get("subprocesses", {})
+                if subprocess_info and "error" not in subprocess_info:
+                    console.print(f"\n[bold]Subprocess Memory:[/bold]")
+                    console.print(f"  Active Processes: {subprocess_info.get('count', 0)}")
+                    console.print(f"  Total Memory: {subprocess_info.get('total_mb', 0):.1f}MB")
+                    
+                    if subprocess_info.get('exceeds_threshold'):
+                        console.print("  [red]⚠️  Exceeds threshold![/red]")
+                
+                # Top allocations (if profiling enabled)
+                top_allocations = profile.get("top_allocations", [])
+                if top_allocations:
+                    console.print(f"\n[bold]Top Memory Allocations:[/bold]")
+                    for i, alloc in enumerate(top_allocations[:5], 1):
+                        console.print(f"  {i}. {alloc['file']}: {alloc['size_diff_mb']:.2f}MB")
+                
+                # Potential leaks
+                potential_leaks = profile.get("potential_leaks", [])
+                if potential_leaks:
+                    console.print(f"\n[bold red]⚠️  Potential Memory Leaks:[/bold red]")
+                    for leak in potential_leaks[:3]:
+                        console.print(f"  • {leak['location']}: {leak['growth_mb']:.2f}MB growth")
+                
+            finally:
+                await monitor.stop()
+        
+        asyncio.run(_show_diagnostics())
+    
+    @memory.command()
+    @click.option('--threshold', type=float, help='Set memory threshold in MB')
+    @click.option('--auto-cleanup/--no-auto-cleanup', help='Enable/disable automatic cleanup')
+    def configure():
+        """Configure memory management settings."""
+        from ..services.health_monitor import HealthMonitor
+        from ..services.memory_diagnostics import get_memory_diagnostics
+        
+        async def _configure():
+            monitor = HealthMonitor()
+            memory_diag = get_memory_diagnostics()
+            
+            try:
+                await monitor.start()
+                await memory_diag.start()
+                
+                # Apply configuration changes
+                threshold = click.get_current_context().params.get('threshold')
+                auto_cleanup = click.get_current_context().params.get('auto_cleanup')
+                
+                if threshold is not None:
+                    memory_diag.set_memory_threshold(threshold)
+                    console.print(f"[green]✅ Memory threshold set to {threshold}MB[/green]")
+                
+                if auto_cleanup is not None:
+                    memory_diag.enable_auto_cleanup(auto_cleanup)
+                    status = "enabled" if auto_cleanup else "disabled"
+                    console.print(f"[green]✅ Auto cleanup {status}[/green]")
+                
+                # Show current configuration
+                console.print("\n[bold]Current Memory Configuration:[/bold]")
+                console.print(f"  Threshold: {memory_diag.memory_threshold_mb}MB")
+                console.print(f"  Auto Cleanup: {'Enabled' if memory_diag.enable_auto_cleanup else 'Disabled'}")
+                console.print(f"  Profile Interval: {memory_diag.profile_interval}s")
+                console.print(f"  Cleanup Cooldown: {memory_diag._cleanup_cooldown}s")
+                
+            finally:
+                await memory_diag.stop()
+                await monitor.stop()
+        
+        asyncio.run(_configure())
 
     return cli_group

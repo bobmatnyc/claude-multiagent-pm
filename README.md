@@ -1,6 +1,6 @@
 # Claude PM Framework
 
-[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://www.npmjs.com/package/@bobmatnyc/claude-multiagent-pm)
+[![Version](https://img.shields.io/badge/version-1.4.4-blue.svg)](https://www.npmjs.com/package/@bobmatnyc/claude-multiagent-pm)
 [![Framework](https://img.shields.io/badge/framework-014--005-green.svg)](./framework/CLAUDE.md)
 [![Node.js](https://img.shields.io/badge/node->=16.0.0-green.svg)](https://nodejs.org/)
 [![Python](https://img.shields.io/badge/python->=3.8.0-green.svg)](https://python.org/)
@@ -27,23 +27,133 @@ Claude PM brings the power of AI orchestration to your development workflow thro
 - Want agents that **learn and improve** from usage patterns
 - Building creative, adaptive workflows with **user-driven customization**
 
-## Install & Run
+## Installation
 
+### Quick Install
+
+Choose your preferred package manager:
+
+#### npm (Recommended for most users)
 ```bash
 npm install -g @bobmatnyc/claude-multiagent-pm
+claude-pm --version
+```
+
+#### pip (Python Package Index)
+```bash
+pip install claude-multiagent-pm
+claude-pm --version
+```
+
+#### pipx (Recommended for macOS)
+```bash
+pipx install claude-multiagent-pm
+claude-pm --version
+```
+
+### Platform-Specific Installation
+
+#### 🍎 macOS
+macOS users often encounter "externally-managed-environment" errors with Homebrew Python. We recommend using **pipx**:
+
+```bash
+# Install pipx if you don't have it
+brew install pipx
+pipx ensurepath
+
+# Install Claude PM Framework
+pipx install claude-multiagent-pm
+```
+
+**Alternative for macOS**: Use npm installation (avoids Python environment issues)
+```bash
+npm install -g @bobmatnyc/claude-multiagent-pm
+```
+
+#### 🐧 Linux
+```bash
+# Using pip with user flag
+pip install --user claude-multiagent-pm
+
+# Or using pipx (recommended)
+pipx install claude-multiagent-pm
+
+# Or using npm
+npm install -g @bobmatnyc/claude-multiagent-pm
+```
+
+#### 🪟 Windows
+```bash
+# Using pip
+pip install claude-multiagent-pm
+
+# Or using npm (requires Node.js)
+npm install -g @bobmatnyc/claude-multiagent-pm
+```
+
+### Verify Installation
+
+After installation, verify everything is working:
+
+```bash
+# Check CLI is available
+claude-pm --version
+
+# Initialize in your project
 cd your-project
+claude-pm init
+
+# Start using the framework
 claude-pm
 ```
 
-> **⚠️ Important Notice for Developers**
-> 
-> Starting with v1.3.0, editable/source installations are deprecated. If you're running from a cloned repository, please migrate to the PyPI package:
-> 
-> ```bash
-> python scripts/migrate_to_pypi.py
-> ```
-> 
-> See [Migration Guide](./docs/MIGRATION.md) for details.
+### Troubleshooting Installation
+
+#### "command not found" after installation
+- **npm**: Make sure npm's global bin directory is in your PATH
+  ```bash
+  echo 'export PATH="$PATH:$(npm prefix -g)/bin"' >> ~/.bashrc
+  source ~/.bashrc
+  ```
+- **pip**: Make sure Python's user bin directory is in your PATH
+  ```bash
+  echo 'export PATH="$PATH:$HOME/.local/bin"' >> ~/.bashrc
+  source ~/.bashrc
+  ```
+- **pipx**: Run `pipx ensurepath` and restart your terminal
+
+#### Python environment errors on macOS
+- Use pipx instead of pip (recommended)
+- Or use npm installation to avoid Python entirely
+- See our [macOS Installation Guide](./docs/MACOS_INSTALLATION_GUIDE.md) for detailed solutions
+
+#### Module import errors
+- Ensure you're using Python 3.8 or higher: `python --version`
+- Try reinstalling: `pip install --force-reinstall claude-multiagent-pm`
+- Check for conflicting installations: `pip show claude-multiagent-pm`
+
+#### npm postinstall errors
+- Ensure Node.js 16+ is installed: `node --version`
+- Clear npm cache: `npm cache clean --force`
+- Try installing without scripts: `npm install -g @bobmatnyc/claude-multiagent-pm --ignore-scripts`
+
+### Development Installation
+
+For contributors who want to work on the framework itself:
+
+```bash
+# Clone the repository
+git clone https://github.com/bobmatnyc/claude-multiagent-pm.git
+cd claude-multiagent-pm
+
+# Install in development mode
+pip install -e .
+
+# Or use npm link
+npm link
+```
+
+> **⚠️ Important**: Development installations are for framework contributors only. For using the framework in your projects, use the standard installation methods above.
 
 ## 📖 Getting Started
 
@@ -53,7 +163,7 @@ claude-pm
 
 The user guide covers everything from basic concepts to advanced workflows, including practical examples and best practices for orchestrating AI-driven development workflows.
 
-## Key Features (v1.3.0)
+## Key Features (v1.4.4)
 
 - **💾 Memory Safety Protection**: Real-time subprocess memory monitoring prevents system crashes from runaway processes
 - **🎯 Custom Agent Creation**: Create project-specific agents tailored to your domain - architecture, performance, UI/UX, compliance, and more
@@ -61,7 +171,7 @@ The user guide covers everything from basic concepts to advanced workflows, incl
 - **⚡ Performance Optimization**: 99.7% improvement through SharedPromptCache integration
 - **💰 Prompt Optimization**: 50-66% token reduction through intelligent task analysis and dynamic model selection
 - **🧠 Agent Training System**: Self-improving agents that learn from experience
-- **📋 AI Trackdown Tools Integration**: GitHub Issues sync with hierarchical Epic → Issue → Task → PR structure
+- **📋 Unified Ticketing System**: Seamless integration with ai-trackdown-pytools for GitHub Issues management
 - **🏗️ Two-Tier Agent Architecture**: Simplified architecture with extensible custom agent support
 - **🔄 Real-Time Agent Modification Tracking**: Monitors agent changes and adapts workflows
 - **📝 Comprehensive Documentation**: Auto-generated changelogs, semantic versioning, and project documentation
@@ -140,7 +250,7 @@ One of Claude PM Framework's most powerful features is its **built-in agent trai
 
 This means your custom agents get **smarter and more efficient** the more you use them, without manual intervention.
 
-## 💰 Prompt Optimization & Token Reduction (v1.3.0)
+## 💰 Prompt Optimization & Token Reduction
 
 The Claude PM Framework includes intelligent prompt optimization that automatically reduces token usage by 50-66% while maintaining or improving task execution quality:
 
@@ -157,7 +267,7 @@ The Claude PM Framework includes intelligent prompt optimization that automatica
 
 ### Configuration
 ```bash
-# Prompt optimization is enabled by default in v1.3.0+
+# Prompt optimization is enabled by default
 # To disable (not recommended):
 export ENABLE_DYNAMIC_MODEL_SELECTION=false
 
@@ -176,6 +286,25 @@ See [Prompt Optimization Guide](./docs/guides/prompt-optimization-guide.md) for 
 - **`push`** - Complete development pipeline: documentation, testing, Git operations, and changelog generation
 - **`deploy`** - Local deployment with validation and health checks
 - **`publish`** - Package publication with validation and registry deployment
+
+## 📋 Ticketing System Integration
+
+The Claude PM Framework now includes seamless integration with **ai-trackdown-pytools** for comprehensive project management:
+
+### Features
+- **GitHub Issues Integration**: Direct synchronization with GitHub Issues
+- **Hierarchical Structure**: Epic → Issue → Task → PR organization
+- **AI-Powered Management**: Intelligent ticket creation and tracking
+- **Unified Experience**: Access ticketing features directly from claude-pm
+
+### Usage
+```bash
+# The ticketing system is automatically available
+# Use ai-trackdown commands within your project workflow
+ai-trackdown --help
+```
+
+For detailed ticketing documentation, see the [ai-trackdown-pytools documentation](https://github.com/ai-track-down/ai-trackdown-pytools).
 
 ## Development Best Practices
 
@@ -197,9 +326,8 @@ claude-pm  # Work with agents in isolated branch
 push  # Multi-agent quality pipeline before merge
 ```
 
-**Agent Specialization**: 9 core agent types + custom agent creation enables domain-specific expertise:
+**Agent Specialization**: 8 core agent types + custom agent creation enables domain-specific expertise:
 - **Documentation Agent (`Documenter`)**: Pattern analysis and operational understanding
-- **Ticketing Agent (`Ticketer`)**: Universal ticketing with GitHub Issues sync
 - **QA Agent (`QA`)**: Testing, linting, and quality validation
 - **Version Control Agent (`Versioner`)**: Git operations and branch management
 - **Research Agent (`Researcher`)**: Investigation and analysis
@@ -219,7 +347,13 @@ push  # Multi-agent quality pipeline before merge
 
 ### Version History (Most Recent First)
 
-#### v1.3.0 (Current) - July 2025
+#### v1.4.4 (Current) - July 2025
+- **Unified Ticketing System**: Complete integration with ai-trackdown-pytools
+- **Multi-Platform Support**: Full support for npm, pip, and pipx installation methods
+- **Enhanced Documentation**: Comprehensive installation guides for all platforms
+- **Improved Reliability**: Better error handling and dependency management
+
+#### v1.3.0 - July 2025
 - **Memory Safety Protection**: Real-time subprocess memory monitoring system
 - **Automatic Resource Protection**: Prevents crashes from runaway processes (8GB+ prevention)
 - **Configurable Thresholds**: Warning (1GB), Critical (2GB), Hard Limit (4GB) with env overrides
@@ -302,21 +436,19 @@ push  # Multi-agent quality pipeline before merge
 - **Memory Expansion**: Enhanced memory system capabilities
 - **Framework Foundation**: Core multi-agent capabilities established
 
-## Installation
+## Quick Start
 
-### NPM (Recommended)
-```bash
-npm install -g @bobmatnyc/claude-multiagent-pm
-```
+After installation (see [Installation](#installation) section above), get started:
 
-### PyPI
 ```bash
-pip install claude-multiagent-pm
-```
+# Navigate to your project
+cd your-project
 
-### Verify Installation
-```bash
-claude-pm --version
+# Initialize Claude PM Framework
+claude-pm init
+
+# Start orchestrating with AI agents
+claude-pm
 ```
 
 ## Common Use Cases
@@ -378,7 +510,7 @@ claude-pm
 - **Documentation Agent**: Analyze existing patterns and architectural decisions
 - **QA Agent**: Identify testing gaps and quality issues
 - **Security Agent**: Scan for security vulnerabilities and compliance concerns
-- **Ticketing Agent**: Create organized task breakdown and tracking system
+- **Ticketing Integration**: Use ai-trackdown for organized task breakdown and tracking
 
 **💡 Recommendation**: Document findings in a project analysis design document. Example prompt:
 > "Analyze the current authentication flow and document any security concerns or improvement opportunities"
@@ -412,7 +544,7 @@ git checkout -b feature/shared-utility-extraction
 # Documentation Agent analyzes package dependencies
 # QA Agent validates cross-package impacts
 # Ops Agent coordinates workspace builds
-# Ticketing Agent tracks cross-package changes
+# Use ai-trackdown to track cross-package changes
 push  # Comprehensive validation across all packages
 ```
 
@@ -451,7 +583,7 @@ The framework includes a sophisticated **Agent Training System** that enables:
    - **User Home**: `~/.claude-pm/agents/` (fallback user location)
 
 2. **System Agents**: `claude_pm/agents/`
-   - Core framework functionality (9 core agent types)
+   - Core framework functionality (8 core agent types)
    - Always available as fallback
 
 #### User-Agents Directory Structure (v1.0.0)
@@ -600,7 +732,7 @@ multi_spec = registry.listAgents(specializations=['integration', 'performance'])
 ### Custom Agent Types You Can Create
 
 **Extensible Agent System:**
-- **Core 9**: Documentation, Ticketing, Version Control, QA, Research, Ops, Security, Engineer, Data Engineer
+- **Core 8**: Documentation, Version Control, QA, Research, Ops, Security, Engineer, Data Engineer
 - **Architecture & Design**: Create agents for Architecture, UI/UX, Design, Strategy
 - **Development**: Build agents for Frontend, Backend, Mobile, API, Integration
 - **Operations**: Define agents for Infrastructure, Deployment, Monitoring, Performance
@@ -697,7 +829,7 @@ claude-pm
 # Documentation Agent: Analyze patterns and requirements
 # QA Agent: Set up testing framework and validation
 # Ops Agent: Configure deployment pipeline
-# Ticketing Agent: Track feature development progress
+# Use ai-trackdown to track feature development progress
 
 # Continuous validation throughout development
 push  # Multi-agent quality pipeline before commit
@@ -710,9 +842,9 @@ push  # Multi-agent quality pipeline before commit
 - Generate and maintain technical documentation
 - Provide operational insights for better development practices
 
-**Ticketing Agent (`Ticketer`)**:
-- Manage tickets using ai-trackdown-tools with GitHub Issues sync
-- Create hierarchical Epic → Issue → Task → PR structure
+**Ticketing Integration**:
+- Unified ticketing through ai-trackdown-pytools
+- Direct GitHub Issues management from the framework
 - Track project progress and coordinate development workflow
 
 **QA Agent (`QA`)**: 

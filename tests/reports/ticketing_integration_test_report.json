@@ -1,0 +1,226 @@
+{
+  "summary": {
+    "total": 30,
+    "passed": 24,
+    "failed": 6,
+    "timestamp": "2025-07-21T18:23:34.280410"
+  },
+  "results": [
+    {
+      "name": "Get TicketingService instance",
+      "passed": true,
+      "details": "Instance: <claude_pm.services.ticketing_service.TicketingService object at 0x102ffe120>",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276534"
+    },
+    {
+      "name": "Create ticket",
+      "passed": true,
+      "details": "Created ticket: CLAUDE-20250721182334",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276549"
+    },
+    {
+      "name": "List tickets",
+      "passed": true,
+      "details": "Found 0 tickets",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276552"
+    },
+    {
+      "name": "Get specific ticket",
+      "passed": false,
+      "details": "Retrieved: None",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276554"
+    },
+    {
+      "name": "Update ticket",
+      "passed": false,
+      "details": "Updated status: Failed",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276556"
+    },
+    {
+      "name": "Add comment",
+      "passed": false,
+      "details": "Comment added: False",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276559"
+    },
+    {
+      "name": "Search tickets",
+      "passed": true,
+      "details": "Found 0 results",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276561"
+    },
+    {
+      "name": "Get statistics",
+      "passed": true,
+      "details": "Stats: {'total': 0, 'by_status': {}, 'by_priority': {}, 'unassigned': 0}",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276564"
+    },
+    {
+      "name": "Close ticket",
+      "passed": false,
+      "details": "Closed ticket: Failed",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276566"
+    },
+    {
+      "name": "Create agent task ticket",
+      "passed": true,
+      "details": "Created: CLAUDE-20250721182334",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276593"
+    },
+    {
+      "name": "Update agent task status",
+      "passed": false,
+      "details": "Updated: False",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276596"
+    },
+    {
+      "name": "Get agent workload",
+      "passed": true,
+      "details": "Engineer workload: {'agent': 'engineer', 'total_tickets': 0, 'open': 0, 'in_progress': 0, 'high_priority': 0, 'critical_priority': 0}",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276600"
+    },
+    {
+      "name": "Get project overview",
+      "passed": true,
+      "details": "Overview: Total tickets = 0",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276604"
+    },
+    {
+      "name": "Find related tickets",
+      "passed": true,
+      "details": "Found 0 related tickets",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276607"
+    },
+    {
+      "name": "Quick create task",
+      "passed": true,
+      "details": "Created: CLAUDE-20250721182334",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276628"
+    },
+    {
+      "name": "Get workload summary",
+      "passed": true,
+      "details": "Agents with tasks: []",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.276637"
+    },
+    {
+      "name": "Initialize PM Orchestrator",
+      "passed": true,
+      "details": "",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.278510"
+    },
+    {
+      "name": "Generate simple prompt (no ticket)",
+      "passed": true,
+      "details": "Prompt generated for simple task",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.278675"
+    },
+    {
+      "name": "Generate complex prompt (ticket expected)",
+      "passed": true,
+      "details": "Prompt generated for complex task",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.278761"
+    },
+    {
+      "name": "Create multi-agent workflow",
+      "passed": true,
+      "details": "Workflow created: workflow_20250721_182334",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.279079"
+    },
+    {
+      "name": "Get ticketing status",
+      "passed": true,
+      "details": "Active tickets: 1",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.279090"
+    },
+    {
+      "name": "Update delegation progress",
+      "passed": true,
+      "details": "Updated delegation: documentation_20250721_182334",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.279095"
+    },
+    {
+      "name": "Get invalid ticket",
+      "passed": true,
+      "details": "Correctly returned None for invalid ID",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.279105"
+    },
+    {
+      "name": "Update non-existent ticket",
+      "passed": true,
+      "details": "Correctly returned None for invalid update",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.279106"
+    },
+    {
+      "name": "Empty search query",
+      "passed": true,
+      "details": "Handled empty search: 0 results",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.279108"
+    },
+    {
+      "name": "Create ticket with invalid priority",
+      "passed": true,
+      "details": "Handled invalid priority gracefully",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.279114"
+    },
+    {
+      "name": "Batch ticket creation",
+      "passed": true,
+      "details": "Created 5 tickets in batch",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.279172"
+    },
+    {
+      "name": "Run basic usage example",
+      "passed": false,
+      "details": "",
+      "error": "'NoneType' object has no attribute 'status'",
+      "timestamp": "2025-07-21T18:23:34.279402"
+    },
+    {
+      "name": "Run PM basic ticketing example",
+      "passed": true,
+      "details": "PM basic example executed successfully",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.279822"
+    },
+    {
+      "name": "Run PM conditional ticketing example",
+      "passed": true,
+      "details": "PM conditional example executed successfully",
+      "error": null,
+      "timestamp": "2025-07-21T18:23:34.280382"
+    }
+  ],
+  "errors": [
+    [
+      "Run basic usage example",
+      "'NoneType' object has no attribute 'status'"
+    ]
+  ]
+}

@@ -10,6 +10,9 @@ from datetime import datetime
 from .version_manager import VersionManager
 from .content_validator import ContentValidator
 
+# Import framework detection utilities
+from ...utils.framework_detection import is_framework_source_directory
+
 
 class DeploymentManager:
     """Manages deployment of framework CLAUDE.md to parent directories."""
@@ -40,6 +43,11 @@ class DeploymentManager:
         Returns:
             Tuple of (success, message)
         """
+        # Check if we're in the framework source directory
+        is_framework, markers = is_framework_source_directory(parent_path)
+        if is_framework:
+            return True, f"Skipping deployment - detected framework source directory (markers: {', '.join(markers)})"
+        
         target_file = parent_path / "CLAUDE.md"
         
         # Validate content before deployment

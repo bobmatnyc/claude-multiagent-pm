@@ -1,0 +1,86 @@
+# Claude PM Framework - Clean Installation Test Suite
+# Tests both PyPI and npm installations in isolated environments
+
+version: '3.8'
+
+services:
+  # PyPI installation test
+  pypi-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.pypi
+      args:
+        CLAUDE_PM_VERSION: ${CLAUDE_PM_VERSION:-1.4.0}
+        BUILD_DATE: ${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
+        VCS_REF: ${VCS_REF:-$(git rev-parse --short HEAD)}
+    container_name: claude-pm-pypi-test
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TEST_TYPE=pypi
+    volumes:
+      - ./test-results:/home/testuser/results
+    networks:
+      - claude-pm-test
+
+  # npm installation test
+  npm-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.npm
+      args:
+        CLAUDE_PM_VERSION: ${CLAUDE_PM_VERSION:-1.4.0}
+        BUILD_DATE: ${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
+        VCS_REF: ${VCS_REF:-$(git rev-parse --short HEAD)}
+    container_name: claude-pm-npm-test
+    environment:
+      - TEST_TYPE=npm
+    volumes:
+      - ./test-results:/home/testuser/results
+    networks:
+      - claude-pm-test
+
+  # Integration test (both PyPI and npm)
+  integration-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.integration
+      args:
+        CLAUDE_PM_VERSION: ${CLAUDE_PM_VERSION:-1.4.0}
+        BUILD_DATE: ${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
+        VCS_REF: ${VCS_REF:-$(git rev-parse --short HEAD)}
+    container_name: claude-pm-integration-test
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TEST_TYPE=integration
+    volumes:
+      - ./test-results:/home/testuser/results
+    networks:
+      - claude-pm-test
+
+  # Combined test runner
+  test-runner:
+    image: python:3.11-slim
+    container_name: claude-pm-test-runner
+    depends_on:
+      - pypi-test
+      - npm-test
+      - integration-test
+    volumes:
+      - ./test-results:/results
+      - ./scripts:/scripts
+    command: >
+      bash -c "
+        echo '=== Claude PM Installation Test Runner ==='
+        echo 'Waiting for tests to complete...'
+        sleep 10
+        echo 'Test results will be available in ./test-results/'
+      "
+    networks:
+      - claude-pm-test
+
+networks:
+  claude-pm-test:
+    driver: bridge
+
+volumes:
+  test-results:

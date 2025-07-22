@@ -16,7 +16,7 @@
 - **Status**: ✅ SUCCESS
 - **Command**: `aitrackdown task create "Test updated ticketing workflow" --issue ISS-0162`
 - **Result**: Task TSK-0032 created successfully
-- **File Location**: `/Users/masa/Projects/claude-multiagent-pm/tasks/tasks/TSK-0032-test-updated-ticketing-workflow.md`
+- **File Location**: `/Users/masa/Projects/claude-multiagent-pm/tickets/tasks/TSK-0032-test-updated-ticketing-workflow.md`
 
 ### 2. Verify Ticket Creation Format
 - **Status**: ✅ SUCCESS

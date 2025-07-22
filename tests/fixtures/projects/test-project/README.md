@@ -4,7 +4,7 @@ An AI-Trackdown project for hierarchical project management.
 
 **Project Type:** general  
 **Created:** 2025-07-20
-**Tasks Directory:** tasks/
+**Tasks Directory:** tickets/
 
 ## Overview
 
@@ -18,7 +18,7 @@ test-project/
 │   ├── config.yaml         # Project configuration
 │   ├── counters.json       # ID generation counters
 │   └── templates/          # Item templates
-├── tasks/                  # Tasks root directory (configurable)
+├── tickets/                # Tasks root directory (configurable)
 │   ├── epics/              # Epic-level planning (.md files)
 │   ├── issues/             # Issue-level work items (.md files)
 │   ├── tasks/              # Task-level activities (.md files)
@@ -39,16 +39,16 @@ test-project/
 ### View Items
 ```bash
 # List all epics
-ls tasks/epics/
+ls tickets/epics/
 
 # List all issues
-ls tasks/issues/
+ls tickets/issues/
 
 # List all tasks
-ls tasks/tasks/
+ls tickets/tasks/
 
 # List all PRs
-ls tasks/prs/
+ls tickets/prs/
 ```
 
 ### Create New Items

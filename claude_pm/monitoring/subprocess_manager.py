@@ -41,10 +41,12 @@ class SubprocessManager:
     def __init__(self, log_dir: Optional[Path] = None):
         self.config = {
             'max_concurrent_subprocesses': 5,
-            'subprocess_memory_limit_mb': 1500,  # 1.5GB per subprocess
+            'subprocess_memory_limit_mb': 1000,  # 1GB per subprocess (reduced from 1.5GB)
             'subprocess_timeout_seconds': 300,  # 5 minutes
             'cleanup_interval_seconds': 30,
             'zombie_check_interval_seconds': 60,
+            'memory_warning_threshold_mb': 500,  # Warning at 500MB (new)
+            'aggregate_memory_limit_mb': 2000,  # Total 2GB for all subprocesses (new)
         }
         
         self.log_dir = log_dir or Path('.claude-pm/logs')
@@ -181,11 +183,14 @@ class SubprocessManager:
         """Enforce configured limits on subprocesses."""
         stats = {
             'memory_violations': 0,
+            'memory_warnings': 0,
             'timeout_violations': 0,
-            'terminated': 0
+            'terminated': 0,
+            'aggregate_memory_mb': 0
         }
         
         current_time = time.time()
+        subprocess_memory_usage = []
         
         for pid, info in list(self._subprocesses.items()):
             try:
@@ -193,9 +198,18 @@ class SubprocessManager:
                 if not status:
                     continue
                 
-                # Check memory limit
-                if status['memory_mb'] > info.memory_limit_mb:
-                    logger.warning(f"Subprocess {pid} exceeds memory limit: {status['memory_mb']:.1f}MB > {info.memory_limit_mb}MB")
+                memory_mb = status['memory_mb']
+                subprocess_memory_usage.append((pid, memory_mb))
+                stats['aggregate_memory_mb'] += memory_mb
+                
+                # Check memory warning threshold
+                if memory_mb > self.config['memory_warning_threshold_mb']:
+                    logger.warning(f"Subprocess {pid} ({info.name}) memory warning: {memory_mb:.1f}MB > {self.config['memory_warning_threshold_mb']}MB")
+                    stats['memory_warnings'] += 1
+                
+                # Check critical memory limit
+                if memory_mb > info.memory_limit_mb:
+                    logger.error(f"Subprocess {pid} ({info.name}) exceeds critical limit: {memory_mb:.1f}MB > {info.memory_limit_mb}MB")
                     stats['memory_violations'] += 1
                     if self.terminate_subprocess(pid, "memory_limit_exceeded"):
                         stats['terminated'] += 1
@@ -210,6 +224,19 @@ class SubprocessManager:
                         
             except Exception as e:
                 logger.error(f"Error enforcing limits for {pid}: {e}")
+        
+        # Check aggregate memory limit
+        if stats['aggregate_memory_mb'] > self.config['aggregate_memory_limit_mb']:
+            logger.error(f"Aggregate memory limit exceeded: {stats['aggregate_memory_mb']:.1f}MB > {self.config['aggregate_memory_limit_mb']}MB")
+            
+            # Terminate highest memory consumers
+            subprocess_memory_usage.sort(key=lambda x: x[1], reverse=True)
+            for pid, memory_mb in subprocess_memory_usage:
+                if stats['aggregate_memory_mb'] <= self.config['aggregate_memory_limit_mb']:
+                    break
+                if self.terminate_subprocess(pid, "aggregate_memory_exceeded"):
+                    stats['terminated'] += 1
+                    stats['aggregate_memory_mb'] -= memory_mb
         
         # Enforce max concurrent subprocesses
         if len(self._subprocesses) > self.config['max_concurrent_subprocesses']:

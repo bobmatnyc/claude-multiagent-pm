@@ -310,7 +310,7 @@ python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
 ## 🚨 CRITICAL: Framework Backlog Location
 
 **The framework backlog is located at:**
-`/Users/masa/Projects/claude-multiagent-pm/tasks/`
+`/Users/masa/Projects/claude-multiagent-pm/tickets/`
 
 **CLI Commands Available:**
 - `./bin/aitrackdown` - Main CLI command (when in framework directory)
@@ -321,7 +321,7 @@ python ~/.claude/commands/cmpm-bridge.py cmcp-init --verify
 ```
 /Users/masa/Projects/claude-multiagent-pm/
 ├── claude_pm/          # Framework core
-├── tasks/              # Ticket hierarchy
+├── tickets/            # Ticket hierarchy
 ├── framework/          # Framework templates and agents
 ├── bin/               # CLI wrappers
 ├── scripts/           # Deployment scripts

@@ -19,6 +19,22 @@ cd your-project
 claude-pm
 ```
 
+### 📱 macOS Installation (Homebrew Python)
+
+If you encounter an "externally-managed-environment" error on macOS:
+
+```bash
+# Option 1: Use pipx (recommended)
+brew install pipx
+pipx ensurepath
+pipx install @bobmatnyc/claude-multiagent-pm
+
+# Option 2: Run the macOS installer
+curl -fsSL https://raw.githubusercontent.com/bobmatnyc/claude-multiagent-pm/main/scripts/install-claude-pm-macos.sh | bash
+```
+
+See our [macOS Installation Guide](../../MACOS_INSTALLATION_GUIDE.md) for detailed instructions.
+
 ## 🎯 What It Does
 
 Claude Multi-Agent PM transforms your development workflow by providing:
