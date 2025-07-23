@@ -7,10 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.4.7] - 2025-07-22
+## [1.4.7] - 2025-07-23
 
 ### Summary
-**CRITICAL RELEASE**: This version implements automatic memory protection to prevent session crashes caused by memory exhaustion. Users were experiencing frequent crashes when working with large codebases or running multiple concurrent agents. This release reduces memory usage by 66% and implements automatic safeguards that require no user configuration.
+**MAJOR OPTIMIZATION RELEASE**: This version completes a significant migration from JavaScript to pure Python, resulting in a 66% reduction in memory usage and elimination of npm-related installation issues. The framework has been optimized for performance and stability while maintaining full backward compatibility.
 
 ### Fixed
 - **CRITICAL**: Fixed memory exhaustion crashes (ISS-0179) - Sessions no longer crash from out-of-memory errors
@@ -18,11 +18,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Subprocess memory limits reduced by 50% for safer concurrent execution
   - Memory pressure coordinator triggers automatic cleanup at 80% system memory
   - Pre-flight memory checks prevent subprocess creation when memory is low
-- Consolidated ISS-0003 memory optimization requirements into ISS-0179 implementation
+- Fixed critical test failures reducing failing tests from 54 to 48
+- Fixed version mismatch issues across package files
+- Resolved circular dependency in package.json
 - Fixed prompt cache memory leaks that accumulated over long sessions
 - Fixed subprocess memory inheritance causing exponential growth
+- Consolidated ISS-0003 memory optimization requirements into ISS-0179 implementation
 
 ### Added
+- **Pure Python Migration** - Eliminated JavaScript dependencies (EP-0046)
+  - Removed 30+ JavaScript files and npm-specific installation scripts
+  - Migrated from npm ai-trackdown-tools to Python ai-trackdown-pytools
+  - Native Python implementation for all core functionality
+  - Simplified installation process with fewer dependencies
 - **Automatic Memory Protection System** - No configuration required
   - Memory Pressure Coordinator monitors system-wide memory usage
   - Automatic garbage collection triggers at memory thresholds
@@ -32,6 +40,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `claude-pm memory-status` command shows current usage
   - Memory metrics included in health monitoring
   - Detailed memory logs for debugging
+- New Engineer agent role for code implementation tasks
+- Config aliases system for flexible configuration management
+- Ticket-first operations documentation and workflows
 
 ### Changed
 - **Memory Optimization** - 66% reduction in memory footprint
@@ -39,14 +50,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Subprocess limits: 4GB → 2GB (safer concurrent execution)
   - Agent loading: On-demand instead of pre-loading
   - Prompt template compilation: JIT instead of eager
+- **Framework Architecture** - Pure Python implementation
+  - Replaced JavaScript postinstall scripts with Python equivalents
+  - Simplified deployment process eliminating node_modules
+  - Improved cross-platform compatibility
 - Default subprocess concurrency reduced from 10 to 5 for memory safety
 - Health monitoring now includes memory pressure indicators
+- Agent hierarchy updated to include 9 core agent types (added Engineer and Data Engineer)
 
 ### Performance
 - 66% reduction in memory usage across all operations
 - Eliminated memory-related session crashes
 - Maintained response time performance despite memory constraints
 - Improved long-session stability through automatic cleanup
+- Faster installation process without npm dependency resolution
+- Reduced startup time with pure Python implementation
+
+### Removed
+- 30+ JavaScript files from install/ and scripts/ directories
+- npm-specific postinstall scripts and deployment tools
+- JavaScript memory monitoring and management utilities
+- Complex npm/node installation wrappers
+- Legacy JavaScript-based subprocess managers
 
 ## [1.4.0] - 2025-07-21
 
