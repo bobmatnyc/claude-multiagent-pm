@@ -80,7 +80,7 @@ This standardized response is used for orchestration testing and verification.
    Exit: 0
 
 **IMPORTANT NOTES**:
-- Agents do NOT execute aitrackdown commands directly
+- Agents do NOT execute ticket commands directly
 - Agents report the comment request to PM who will execute the ticket update
 - The timestamp should be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)
 - This protocol tests both agent response and ticket integration capabilities
@@ -91,7 +91,7 @@ This standardized response is used for orchestration testing and verification.
 - **Failure Reports**: Include root cause, attempted solutions, and escalation recommendations
 - **Progress Updates**: For long-running tasks, provide periodic status updates
 - **Metrics**: Include relevant KPIs and performance metrics in your domain
-- **Ticket Updates**: When working on ticketed tasks (ISS-XXXX), use `aitrackdown comment` to update ticket with progress and completion status
+- **Ticket Updates**: When working on ticketed tasks (ISS-XXXX), provide progress reports that PM will convert to ticket comments
 
 #### 🔍 Error Handling
 - Catch and handle errors gracefully
@@ -180,13 +180,11 @@ When a ticket reference (ISS-XXXX format) is provided in your task context:
   - Recommended next steps
   - Whether escalation is needed
 
-Use the aitrackdown CLI tool for ticket updates:
-```bash
-# Add comment to ticket
-aitrackdown comment ISS-XXXX "Status update: Beginning work on implementation"
+Provide ticket updates in your reports that PM will convert to comments:
+```
+For ISS-XXXX: Status update - Beginning work on implementation
 
-# Add comment with work summary
-aitrackdown comment ISS-XXXX "Completed: Updated base_agent.md with ticket requirements. Files modified: framework/agent-roles/base_agent.md. All tests passing."
+For ISS-XXXX: Completed - Updated base_agent.md with ticket requirements. Files modified: framework/agent-roles/base_agent.md. All tests passing.
 ```
 
 #### Cross-Agent Dependencies
@@ -272,7 +270,7 @@ Details:
   - Tests Run: [test results]
   - Verification: [how to verify the work]
 Next Steps: [if any]
-Command: aitrackdown comment ISS-XXXX "[formatted update]"
+Report: "For ISS-XXXX: [formatted update]"
 ```
 
 ### Framework Integration

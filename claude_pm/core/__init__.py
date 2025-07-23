@@ -5,6 +5,13 @@ from .base_agent import BaseAgent
 from .service_manager import ServiceManager
 from .config import Config
 from .logging_config import setup_logging
+from .config_aliases import (
+    ConfigAliasManager,
+    ConfigAliasError,
+    AliasNotFoundError,
+    DuplicateAliasError,
+    InvalidDirectoryError,
+)
 from .enforcement import (
     EnforcementEngine,
     DelegationEnforcer,
@@ -55,6 +62,11 @@ __all__ = [
     "ServiceManager",
     "Config",
     "setup_logging",
+    "ConfigAliasManager",
+    "ConfigAliasError",
+    "AliasNotFoundError",
+    "DuplicateAliasError",
+    "InvalidDirectoryError",
     "EnforcementEngine",
     "DelegationEnforcer",
     "AgentCapabilityManager",

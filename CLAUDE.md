@@ -71,7 +71,28 @@ git commit -m "feat: Add new capability"
 git push origin feature/your-feature-name
 ```
 
-### 2. Testing Requirements
+### 2. 3-Stage Deployment Model
+
+The framework follows a **3-stage deployment model** for all changes:
+
+#### Stage 1: Development (Automatic)
+- Changes in source code are immediately available
+- Run tests and verify functionality
+- Use: `./scripts/deploy-3stage.sh dev`
+
+#### Stage 2: Local Machine Deployment
+- Deploy changes to your local machine for testing
+- Updates `~/.local/bin/claude-pm` and Python packages
+- Use: `./scripts/deploy-3stage.sh local`
+
+#### Stage 3: Publish
+- Release to npm and PyPI registries
+- Only after thorough local testing
+- Use: `./scripts/deploy-3stage.sh publish`
+
+**📚 Full deployment documentation**: See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#3-stage-deployment-model)
+
+### 3. Testing Requirements
 **MANDATORY before ANY commit:**
 - ✅ Unit tests pass: `pytest tests/unit/`
 - ✅ Integration tests pass: `pytest tests/integration/`
@@ -80,7 +101,7 @@ git push origin feature/your-feature-name
 - ✅ Version consistency verified
 - ✅ Root directory hygiene maintained
 
-### 3. Code Review Checklist
+### 4. Code Review Checklist
 - [ ] No files in root except 4 allowed .md files
 - [ ] All tests in `tests/` directory
 - [ ] All docs in `docs/` directory

@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.7] - 2025-07-22
+
+### Summary
+**CRITICAL RELEASE**: This version implements automatic memory protection to prevent session crashes caused by memory exhaustion. Users were experiencing frequent crashes when working with large codebases or running multiple concurrent agents. This release reduces memory usage by 66% and implements automatic safeguards that require no user configuration.
+
+### Fixed
+- **CRITICAL**: Fixed memory exhaustion crashes (ISS-0179) - Sessions no longer crash from out-of-memory errors
+  - SharedPromptCache now limited to 500MB (was unbounded, consuming 1.5GB+)
+  - Subprocess memory limits reduced by 50% for safer concurrent execution
+  - Memory pressure coordinator triggers automatic cleanup at 80% system memory
+  - Pre-flight memory checks prevent subprocess creation when memory is low
+- Consolidated ISS-0003 memory optimization requirements into ISS-0179 implementation
+- Fixed prompt cache memory leaks that accumulated over long sessions
+- Fixed subprocess memory inheritance causing exponential growth
+
+### Added
+- **Automatic Memory Protection System** - No configuration required
+  - Memory Pressure Coordinator monitors system-wide memory usage
+  - Automatic garbage collection triggers at memory thresholds
+  - Smart subprocess spawning based on available memory
+  - Memory usage tracking and reporting in health checks
+- Enhanced memory diagnostics for troubleshooting
+  - `claude-pm memory-status` command shows current usage
+  - Memory metrics included in health monitoring
+  - Detailed memory logs for debugging
+
+### Changed
+- **Memory Optimization** - 66% reduction in memory footprint
+  - SharedPromptCache: 1.5GB → 500MB (enforced limit)
+  - Subprocess limits: 4GB → 2GB (safer concurrent execution)
+  - Agent loading: On-demand instead of pre-loading
+  - Prompt template compilation: JIT instead of eager
+- Default subprocess concurrency reduced from 10 to 5 for memory safety
+- Health monitoring now includes memory pressure indicators
+
+### Performance
+- 66% reduction in memory usage across all operations
+- Eliminated memory-related session crashes
+- Maintained response time performance despite memory constraints
+- Improved long-session stability through automatic cleanup
+
 ## [1.4.0] - 2025-07-21
 
 ### Summary
@@ -273,7 +314,8 @@ This release includes major architectural changes with the shift to markdown-bas
 - ParentDirectoryManager import error in auto-deployment
 - Manager existence check in setup_commands.py
 
-[Unreleased]: https://github.com/bobmatnyc/claude-multiagent-pm/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/bobmatnyc/claude-multiagent-pm/compare/v1.4.7...HEAD
+[1.4.7]: https://github.com/bobmatnyc/claude-multiagent-pm/compare/v1.4.0...v1.4.7
 [1.4.0]: https://github.com/bobmatnyc/claude-multiagent-pm/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/bobmatnyc/claude-multiagent-pm/compare/v1.2.3...v1.3.0
 [1.2.3]: https://github.com/bobmatnyc/claude-multiagent-pm/compare/v1.2.1...v1.2.3

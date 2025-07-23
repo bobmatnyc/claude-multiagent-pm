@@ -361,7 +361,9 @@ class TestDynamicPromptPerformance:
                 
                 for task, complexity in tasks:
                     # This would normally happen in get_agent_prompt
-                    prepend_base_instructions(f"Agent task: {task}", complexity_score=complexity)
+                    # Import the module to use the patched version
+                    from claude_pm.agents import agent_loader
+                    agent_loader.prepend_base_instructions(f"Agent task: {task}", complexity_score=complexity)
                 
                 print(f"\nReal-World Usage Distribution:")
                 print(f"Total calls: {call_count['total']}")

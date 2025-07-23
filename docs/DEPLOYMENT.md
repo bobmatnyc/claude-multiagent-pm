@@ -4,17 +4,91 @@
 
 This guide provides complete deployment instructions for the Claude PM Framework, covering all deployment scenarios from local development to production environments. The framework supports multiple deployment methods including npm, pip, Docker, and cloud platforms.
 
+## 3-Stage Deployment Model
+
+The Claude PM Framework follows a structured 3-stage deployment model to ensure quality and consistency:
+
+### Stage 1: Development (Automatic)
+- **What**: Changes made in the framework source code
+- **Where**: This project repository (`claude-multiagent-pm`)
+- **When**: Automatic on every file save
+- **How**: Development changes are immediately available in the source directory
+- **Verification**: Run `./scripts/deploy-3stage.sh dev`
+
+### Stage 2: Local Machine Deployment
+- **What**: Deploy framework updates to your local machine
+- **Where**: Updates `~/.local/bin/claude-pm` and Python packages
+- **When**: After development changes are tested and ready
+- **How**: Run `./scripts/deploy-3stage.sh local`
+- **Purpose**: Test changes on your actual machine before publishing
+
+### Stage 3: Publish
+- **What**: Release to npm and PyPI registries
+- **Where**: Public package registries
+- **When**: After local testing confirms stability
+- **How**: Run `./scripts/deploy-3stage.sh publish`
+- **Purpose**: Make changes available to all users
+
+### Quick Deployment Commands
+
+```bash
+# Stage 1: Verify development changes
+./scripts/deploy-3stage.sh dev
+
+# Stage 2: Deploy to local machine
+./scripts/deploy-3stage.sh local
+
+# Stage 3: Publish to registries
+./scripts/deploy-3stage.sh publish
+
+# Check deployment status
+./scripts/deploy-3stage.sh status
+```
+
+### Deployment Workflow Example
+
+When implementing a new feature (like config aliases):
+
+1. **Development Stage**:
+   ```bash
+   # Make changes to source files
+   vim claude_pm/core/config_aliases.py
+   
+   # Run tests
+   pytest tests/unit/test_config_aliases.py
+   
+   # Verify development stage
+   ./scripts/deploy-3stage.sh dev
+   ```
+
+2. **Local Deployment Stage**:
+   ```bash
+   # Deploy to your machine
+   ./scripts/deploy-3stage.sh local
+   
+   # Test the feature locally
+   claude-pm --create-config ~/.claude-personal personal
+   claude-pm --config personal
+   ```
+
+3. **Publication Stage**:
+   ```bash
+   # After thorough testing
+   ./scripts/deploy-3stage.sh publish
+   ```
+
 ## Table of Contents
 
-1. [Quick Start](#quick-start)
-2. [Installation Methods](#installation-methods)
-3. [Local Development Deployment](#local-development-deployment)
-4. [Production Deployment](#production-deployment)
-5. [Docker Deployment](#docker-deployment)
-6. [Cloud Platform Deployment](#cloud-platform-deployment)
-7. [Framework Deployment](#framework-deployment)
-8. [Troubleshooting](#troubleshooting)
-9. [Best Practices](#best-practices)
+1. [3-Stage Deployment Model](#3-stage-deployment-model)
+2. [Quick Start](#quick-start)
+3. [Installation Methods](#installation-methods)
+4. [Local Development Deployment](#local-development-deployment)
+5. [Production Deployment](#production-deployment)
+6. [Docker Deployment](#docker-deployment)
+7. [Cloud Platform Deployment](#cloud-platform-deployment)
+8. [Framework Deployment](#framework-deployment)
+9. [Troubleshooting](#troubleshooting)
+10. [Best Practices](#best-practices)
 
 ## Quick Start
 

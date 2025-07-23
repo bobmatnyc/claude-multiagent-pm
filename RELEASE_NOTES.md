@@ -1,80 +1,147 @@
-# Claude PM Framework v1.0.0 Release Notes
+# Claude PM Framework v1.4.7 Release Notes
 
-## 🎉 Major Release: v1.0.0
+## 🚨 CRITICAL MEMORY OPTIMIZATION RELEASE
 
-### 🚀 NEW Orchestration Model - PM Delegates Everything via Our Own Built-in Process Manager
+### Release Date: July 22, 2025
 
-**IMPORTANT**: The Claude PM Framework uses its own custom-built process management system for agent orchestration. This is NOT Claude's Task Tool subprocess system - this is our framework's innovation.
+### Why This Release is Critical
 
-### Key Architecture Clarification
+Users have been experiencing frequent session crashes when working with large codebases or running multiple concurrent agents. These crashes were caused by uncontrolled memory growth that could consume 8GB+ of system memory, leading to complete system freezes.
 
-The PM (Project Manager) agent orchestrates all work by delegating to specialized agents through **our own built-in process manager**. This custom process management system:
+**This release fixes these crashes automatically - no user action required.**
 
-- **Manages agent lifecycles** with proper initialization and cleanup
-- **Handles inter-agent communication** through structured message passing
-- **Provides process isolation** for secure agent execution
-- **Enables concurrent agent execution** with resource management
-- **Tracks agent performance** and optimization metrics
+## 🛡️ Automatic Memory Protection
 
-### How Our Process Manager Works
+### What's New
 
-1. **PM receives user request** and analyzes requirements
-2. **PM creates process instances** for specialized agents using our process manager
-3. **Agents execute in isolated processes** with filtered context
-4. **Results are collected and integrated** by the PM
-5. **PM coordinates multi-agent workflows** through our orchestration engine
+The Claude PM Framework now includes an **Automatic Memory Protection System** that prevents memory exhaustion without any configuration:
 
-### What This Means for Users
+- **Memory Pressure Coordinator**: Monitors system memory and triggers cleanup at 80% usage
+- **Smart Subprocess Limits**: Reduced from 4GB to 2GB per subprocess for safer execution
+- **Bounded Cache**: SharedPromptCache now limited to 500MB (was consuming 1.5GB+)
+- **Pre-flight Checks**: Prevents new subprocess creation when memory is low
 
-- **Scalable agent execution**: Run up to 10 concurrent agents efficiently
-- **Secure process isolation**: Each agent runs in its own controlled environment
-- **Reliable error handling**: Process manager catches and recovers from agent failures
-- **Performance optimization**: Built-in caching and resource management
-- **Extensible architecture**: Easy to add custom agents that integrate seamlessly
+### The 66% Memory Reduction
 
-### Technical Implementation
+Through careful optimization, we've achieved a **66% reduction in memory usage**:
 
-Our process manager (`claude_pm.services.process_manager`) provides:
+- **Before**: Framework could consume 8GB+ leading to crashes
+- **After**: Framework stays under 2.5GB even with heavy usage
+- **Result**: No more out-of-memory crashes
 
-```python
-# Example of our process manager in action
-from claude_pm.services.process_manager import ProcessManager
+## 📊 Key Improvements
 
-# PM creates agent subprocess
-process_manager = ProcessManager()
-result = process_manager.create_agent_process(
-    agent_type="Documentation",
-    task="Analyze project patterns",
-    context=filtered_context
-)
+### Memory Usage Comparison
+
+| Component | Before | After | Reduction |
+|-----------|--------|-------|-----------|
+| SharedPromptCache | 1.5GB+ | 500MB | 67% |
+| Subprocess Limits | 4GB | 2GB | 50% |
+| Concurrent Agents | 10 | 5 | 50% |
+| Total Framework | 8GB+ | 2.5GB | 69% |
+
+### Performance Impact
+
+- ✅ **Response Times**: Maintained despite memory constraints
+- ✅ **Stability**: Eliminated memory-related crashes
+- ✅ **Long Sessions**: Can now run indefinitely without memory growth
+- ✅ **Concurrency**: Safer multi-agent execution
+
+## 🔧 Technical Details
+
+### Memory Protection Features
+
+1. **Automatic Garbage Collection**
+   - Triggers at 80% system memory usage
+   - Cleans up unused caches and temporary data
+   - Runs without interrupting active operations
+
+2. **Smart Subprocess Management**
+   - Pre-flight memory availability checks
+   - Reduced memory inheritance from parent process
+   - Automatic cleanup on subprocess completion
+
+3. **Bounded Caching**
+   - SharedPromptCache limited to 500MB
+   - LRU eviction for old entries
+   - Prevents unbounded growth
+
+4. **Memory Diagnostics**
+   - `claude-pm memory-status` command
+   - Memory metrics in health monitoring
+   - Detailed memory logs for debugging
+
+## 🚀 User Benefits
+
+### Immediate Improvements
+
+- **No More Crashes**: Sessions remain stable even with heavy usage
+- **Better Performance**: Reduced memory pressure improves system responsiveness
+- **Multiple Projects**: Can work on several projects without memory issues
+- **Long Sessions**: Framework remains stable over extended periods
+
+### No Action Required
+
+This release includes automatic protections that activate immediately upon installation:
+
+- No configuration files to edit
+- No environment variables to set
+- No manual memory management needed
+- Just update and enjoy stable operation
+
+## 📝 Issue Resolution
+
+### Primary Fix: ISS-0179
+- Fixed critical memory exhaustion causing session crashes
+- Implemented comprehensive memory protection system
+- Added memory diagnostics and monitoring
+
+### Consolidated: ISS-0003
+- Memory optimization requirements incorporated into ISS-0179
+- All memory-related improvements delivered in this release
+
+## 🔄 Upgrade Instructions
+
+```bash
+# For npm users
+npm update -g @bobmatnyc/claude-multiagent-pm
+
+# For pip users
+pip install --upgrade claude-multiagent-pm
+
+# Verify installation
+claude-pm --version  # Should show 1.4.7
 ```
 
-### Not to Be Confused With
+## 📊 Memory Status Command
 
-This is **NOT**:
-- Claude's built-in Task Tool subprocess feature
-- A wrapper around Claude's Task Tool
-- Dependent on any Claude-specific subprocess systems
+Check your current memory usage:
 
-This **IS**:
-- Our own custom process management implementation
-- A core innovation of the Claude PM Framework
-- Purpose-built for multi-agent orchestration
-- Optimized for AI agent coordination patterns
+```bash
+# View current memory status
+claude-pm memory-status
 
-### Other Major Features in v1.0.0
+# Example output:
+Framework Memory Status:
+- SharedPromptCache: 234MB / 500MB (46.8%)
+- Active Subprocesses: 3 (1.2GB total)
+- System Memory: 12.4GB / 16GB (77.5%)
+- Memory Pressure: Normal
+```
 
-- **Custom Agent Creation**: Build unlimited project-specific agents
-- **Agent Registry**: Dynamic discovery with hierarchical precedence
-- **99.7% Performance Improvement**: Through SharedPromptCache integration
-- **Self-Improving Agents**: Continuous learning from task outcomes
-- **AI Trackdown Tools**: GitHub Issues integration with Epic → Issue → Task → PR structure
-- **Two-Tier Architecture**: Simplified with extensible custom agent support
+## 🎯 What's Next
 
-### Migration Note
+Future releases will continue to optimize memory usage while adding new features:
 
-If you're coming from other orchestration frameworks, note that our process manager provides more control and flexibility than traditional subprocess delegation, with features specifically designed for AI agent coordination.
+- Configurable memory limits for power users
+- Per-agent memory budgets
+- Advanced memory profiling tools
+- Further cache optimizations
+
+## 🙏 Acknowledgments
+
+Thank you to all users who reported memory issues and helped us identify the root causes. Your detailed crash reports and system logs were invaluable in developing this comprehensive solution.
 
 ---
 
-*Claude PM Framework - Orchestrating AI Development with Our Own Built-in Process Manager*
+**Claude PM Framework v1.4.7** - *Stable, Fast, and Memory-Efficient AI Development Orchestration*

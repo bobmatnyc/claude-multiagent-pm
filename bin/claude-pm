@@ -124,6 +124,14 @@ except ImportError:
 
 console = Console()
 
+# Import ConfigAliasManager after sys.path setup
+try:
+    from claude_pm.core.config_aliases import ConfigAliasManager
+    config_alias_manager = ConfigAliasManager()
+except ImportError:
+    # ConfigAliasManager not available yet - will be available after framework initialization
+    config_alias_manager = None
+
 
 def get_framework_version(framework_path_override=None):
     """Get framework version from multiple sources."""
@@ -1059,21 +1067,31 @@ def attempt_auto_installation():
 
 def validate_claude_cli():
     """Validate that Claude CLI is available."""
-    try:
-        result = subprocess.run(
-            ["claude", "--version"], 
-            capture_output=True, 
-            text=True, 
-            timeout=5
-        )
-        if result.returncode == 0:
-            return {
-                "valid": True,
-                "version": result.stdout.strip(),
-                "command": ["claude"]
-            }
-    except (subprocess.TimeoutExpired, FileNotFoundError):
-        pass
+    # Common claude installation locations
+    claude_paths = [
+        "claude",  # Try PATH first
+        str(Path.home() / ".claude" / "local" / "claude"),  # Common local install
+        "/usr/local/bin/claude",
+        "/opt/homebrew/bin/claude",
+        str(Path.home() / ".local" / "bin" / "claude"),
+    ]
+    
+    for claude_path in claude_paths:
+        try:
+            result = subprocess.run(
+                [claude_path, "--version"], 
+                capture_output=True, 
+                text=True, 
+                timeout=5
+            )
+            if result.returncode == 0:
+                return {
+                    "valid": True,
+                    "version": result.stdout.strip(),
+                    "command": [claude_path]
+                }
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            continue
     
     return {
         "valid": False,
@@ -1110,6 +1128,12 @@ Pure Python CLI for Claude-powered project management and task orchestration
   --deployment-info       Show deployment detection results
   init                    Initialize framework (manual init command)
   --cleanup               Comprehensive framework removal tool
+  
+[bold]⚙️ CONFIG ALIASES:[/bold]
+  --create-config <dir> <alias>    Create a config directory alias
+  --list-configs                   List all configured aliases
+  --delete-config <alias>          Delete a config alias
+  --config <alias>                 Use config alias (sets CLAUDE_CONFIG_DIR env var)
   
 [bold]🚨 ENHANCED FLAGS (Pure Python Implementation):[/bold]
   --safe                  Enable safe mode with confirmations and backups
@@ -1472,55 +1496,27 @@ def launch_claude_cli_yolo(test_mode=False):
     
     # Launch Claude CLI with essential YOLO mode flags using wrapper
     try:
-        import shutil
-        claude_path = shutil.which("claude")
-        if not claude_path:
-            console.print("[red]❌ Claude CLI not found in PATH[/red]")
-            sys.exit(1)
+        # Use the validated claude command path
+        claude_command = validation["command"][0]
         
-        # Check if Node.js wrapper exists for AbortSignal MaxListeners configuration
-        # This wrapper resolves "MaxListeners exceeded" warnings from multi-agent coordination
-        wrapper_path = framework_path / "scripts" / "claude-wrapper.js"
+        # Direct Claude launch - no wrapper needed for Python
+        console.print("[dim]Launching Claude CLI directly (pure Python mode)[/dim]")
         
-        if wrapper_path.exists():
-            # Use Node.js wrapper to configure AbortSignal MaxListeners to 25
-            # This prevents "11 abort listeners added to [AbortSignal]. MaxListeners is 10" warnings
-            console.print("[dim]Using enhanced Claude wrapper for multi-agent coordination[/dim]")
-            
-            # Essential YOLO mode arguments for wrapper
-            wrapper_args = [
-                "node", str(wrapper_path),
-                "--model", "opus", 
-                "--dangerously-skip-permissions"
-            ]
-            
-            # Add test mode flag if enabled
-            if test_mode:
-                wrapper_args.extend(["--test-mode", "--verbose"])
-            
-            console.print(f"[dim]Launching Claude with wrapper: {' '.join(wrapper_args[2:])}[/dim]")
-            
-            # Use os.execvp with the wrapper
-            os.execvp("node", wrapper_args)
-        else:
-            # Fallback to direct Claude launch
-            console.print("[dim]Wrapper not found, using direct Claude launch[/dim]")
-            
-            # Essential YOLO mode arguments
-            claude_args = [
-                "claude",
-                "--model", "opus", 
-                "--dangerously-skip-permissions"
-            ]
-            
-            # Add test mode flag if enabled (verbose flag for prompt logging)
-            if test_mode:
-                claude_args.append("--verbose")
-            
-            console.print(f"[dim]Launching Claude with: {' '.join(claude_args[1:])}[/dim]")
-            
-            # Use os.execvp for proper terminal handling in YOLO mode
-            os.execvp("claude", claude_args)
+        # Essential YOLO mode arguments
+        claude_args = [
+            claude_command,
+            "--model", "opus", 
+            "--dangerously-skip-permissions"
+        ]
+        
+        # Add test mode flag if enabled (verbose flag for prompt logging)
+        if test_mode:
+            claude_args.append("--verbose")
+        
+        console.print(f"[dim]Launching Claude with: {' '.join(claude_args[1:])}[/dim]")
+        
+        # Use os.execvp for proper terminal handling in YOLO mode
+        os.execvp(claude_command, claude_args)
         
     except Exception as e:
         console.print(f"[red]❌ Failed to launch Claude CLI: {e}[/red]")
@@ -1547,61 +1543,35 @@ def launch_claude_cli_with_args(args, test_mode=False):
         else:
             console.print("[yellow]⚠️ Could not create prompts directory for test mode[/yellow]")
     
+    # Resolve any --config aliases in the args before passing to Claude
+    if "--config" in args:
+        args = handle_config_commands(args)
+    
     # Launch Claude CLI with pass-through args plus essential flags using wrapper
     try:
-        import shutil
-        claude_path = shutil.which("claude")
-        if not claude_path:
-            console.print("[red]❌ Claude CLI not found in PATH[/red]")
-            sys.exit(1)
+        # Use the validated claude command path
+        claude_command = validation["command"][0]
         
-        # Check if Node.js wrapper exists for AbortSignal MaxListeners configuration
-        # This wrapper resolves "MaxListeners exceeded" warnings from multi-agent coordination
-        wrapper_path = framework_path / "scripts" / "claude-wrapper.js"
+        # Direct Claude launch - no wrapper needed for Python
+        console.print("[dim]Launching Claude CLI with args (pure Python mode)[/dim]")
         
-        if wrapper_path.exists():
-            # Use Node.js wrapper to configure AbortSignal MaxListeners to 25
-            # This prevents "11 abort listeners added to [AbortSignal]. MaxListeners is 10" warnings
-            console.print("[dim]Using enhanced Claude wrapper for multi-agent coordination[/dim]")
+        # Build command with essential flags + pass-through args
+        claude_args = [
+            claude_command,
+            "--model", "opus",
+            "--dangerously-skip-permissions"
+        ]
+        
+        # Add test mode flag if enabled (verbose flag for prompt logging)
+        if test_mode:
+            claude_args.append("--verbose")
             
-            # Build command with essential flags + pass-through args for wrapper
-            wrapper_args = [
-                "node", str(wrapper_path),
-                "--model", "opus",
-                "--dangerously-skip-permissions"
-            ]
-            
-            # Add test mode flag if enabled
-            if test_mode:
-                wrapper_args.extend(["--test-mode", "--verbose"])
-                
-            wrapper_args.extend(args)
-            
-            console.print(f"[dim]Launching Claude with wrapper: {' '.join(wrapper_args[2:])}[/dim]")
-            
-            # Use os.execvp with the wrapper
-            os.execvp("node", wrapper_args)
-        else:
-            # Fallback to direct Claude launch
-            console.print("[dim]Wrapper not found, using direct Claude launch[/dim]")
-            
-            # Build command with essential flags + pass-through args
-            claude_args = [
-                "claude",
-                "--model", "opus",
-                "--dangerously-skip-permissions"
-            ]
-            
-            # Add test mode flag if enabled (verbose flag for prompt logging)
-            if test_mode:
-                claude_args.append("--verbose")
-                
-            claude_args.extend(args)
-            
-            console.print(f"[dim]Launching Claude with: {' '.join(claude_args[1:])}[/dim]")
-            
-            # Use os.execvp for proper terminal handling
-            os.execvp("claude", claude_args)
+        claude_args.extend(args)
+        
+        console.print(f"[dim]Launching Claude with: {' '.join(claude_args[1:])}[/dim]")
+        
+        # Use os.execvp for proper terminal handling
+        os.execvp(claude_command, claude_args)
         
     except Exception as e:
         console.print(f"[red]❌ Failed to launch Claude CLI: {e}[/red]")
@@ -1623,24 +1593,12 @@ def launch_claude_cli():
     
     # Launch Claude CLI with wrapper support
     try:
-        # Check if Node.js wrapper exists for AbortSignal MaxListeners configuration
-        # This wrapper resolves "MaxListeners exceeded" warnings from multi-agent coordination
-        wrapper_path = framework_path / "scripts" / "claude-wrapper.js"
+        # Use the validated claude command path
+        claude_command = validation["command"][0]
         
-        if wrapper_path.exists():
-            # Use Node.js wrapper to configure AbortSignal MaxListeners to 25
-            # This prevents "11 abort listeners added to [AbortSignal]. MaxListeners is 10" warnings
-            console.print("[dim]Using enhanced Claude wrapper for multi-agent coordination[/dim]")
-            
-            # Launch with wrapper (no additional args for legacy mode)
-            wrapper_args = ["node", str(wrapper_path)]
-            
-            # Use os.execvp with the wrapper
-            os.execvp("node", wrapper_args)
-        else:
-            # Fallback to direct Claude launch
-            console.print("[dim]Wrapper not found, using direct Claude launch[/dim]")
-            os.execvp("claude", ["claude"])
+        # Direct Claude launch - no wrapper needed for Python
+        console.print("[dim]Launching Claude CLI (legacy mode, pure Python)[/dim]")
+        os.execvp(claude_command, [claude_command])
     except FileNotFoundError:
         console.print("[red]❌ Failed to launch Claude CLI[/red]")
         sys.exit(1)
@@ -1979,6 +1937,95 @@ def handle_cleanup_command(args):
         sys.exit(1)
 
 
+def handle_config_commands(args):
+    """Handle config alias commands."""
+    global config_alias_manager
+    
+    # Ensure ConfigAliasManager is available
+    if config_alias_manager is None:
+        try:
+            from claude_pm.core.config_aliases import ConfigAliasManager
+            config_alias_manager = ConfigAliasManager()
+        except ImportError:
+            console.print("[red]❌ Config alias feature not available - framework not initialized[/red]")
+            console.print("[yellow]💡 Run 'claude-pm init' to initialize the framework[/yellow]")
+            sys.exit(1)
+    
+    # Handle --create-config
+    if "--create-config" in args:
+        idx = args.index("--create-config")
+        if idx + 2 >= len(args):
+            console.print("[red]❌ Usage: claude-pm --create-config <directory> <alias>[/red]")
+            sys.exit(1)
+        
+        directory = args[idx + 1]
+        alias = args[idx + 2]
+        
+        try:
+            config_alias_manager.create_alias(alias, directory)
+            console.print(f"[green]✅ Created config alias '{alias}' → {directory}[/green]")
+            sys.exit(0)
+        except Exception as e:
+            console.print(f"[red]❌ Failed to create alias: {e}[/red]")
+            sys.exit(1)
+    
+    # Handle --list-configs
+    if "--list-configs" in args:
+        aliases = config_alias_manager.list_aliases()
+        if not aliases:
+            console.print("[yellow]No config aliases configured[/yellow]")
+            console.print("[dim]💡 Create one with: claude-pm --create-config <directory> <alias>[/dim]")
+        else:
+            console.print("[bold]📋 Config Aliases:[/bold]")
+            for alias, path in aliases:
+                console.print(f"  {alias:<20} → {path}")
+        sys.exit(0)
+    
+    # Handle --delete-config
+    if "--delete-config" in args:
+        idx = args.index("--delete-config")
+        if idx + 1 >= len(args):
+            console.print("[red]❌ Usage: claude-pm --delete-config <alias>[/red]")
+            sys.exit(1)
+        
+        alias = args[idx + 1]
+        
+        try:
+            config_alias_manager.delete_alias(alias)
+            console.print(f"[green]✅ Deleted config alias '{alias}'[/green]")
+            sys.exit(0)
+        except Exception as e:
+            console.print(f"[red]❌ Failed to delete alias: {e}[/red]")
+            sys.exit(1)
+    
+    # Handle --config (resolve alias and set CLAUDE_CONFIG_DIR environment variable)
+    if "--config" in args:
+        idx = args.index("--config")
+        if idx + 1 >= len(args):
+            console.print("[red]❌ Usage: claude-pm --config <alias>[/red]")
+            sys.exit(1)
+        
+        alias = args[idx + 1]
+        
+        try:
+            resolved_path = config_alias_manager.resolve_alias(alias)
+            console.print(f"[green]✅ Using config alias '{alias}' → {resolved_path}[/green]")
+            
+            # Set CLAUDE_CONFIG_DIR environment variable
+            os.environ["CLAUDE_CONFIG_DIR"] = str(resolved_path)
+            console.print(f"[dim]Set CLAUDE_CONFIG_DIR={resolved_path}[/dim]")
+            
+            # Remove --config and alias from args since we're using env var
+            new_args = args[:idx] + args[idx + 2:]
+            return new_args
+        except Exception as e:
+            console.print(f"[red]❌ Failed to resolve alias '{alias}': {e}[/red]")
+            console.print("[yellow]💡 Use 'claude-pm --list-configs' to see available aliases[/yellow]")
+            sys.exit(1)
+    
+    return args
+
+
 def main():
     """Main entry point with pure Python implementation."""
     args = sys.argv[1:]
@@ -1987,6 +2034,7 @@ def main():
     enhanced_flags = ["--safe", "--upgrade", "--rollback", "--dry-run", "--cleanup", "--test-mode"]
     version_flags = ["--version"]  # Removed -v to avoid conflict with verbose
     help_flags = ["--help", "-h"]
+    config_flags = ["--create-config", "--list-configs", "--delete-config", "--config"]
     
     # Auto-initialize project .claude-pm directory if missing (except for cleanup/uninstall)
     # This prevents errors from missing log directories and other project structures
@@ -1996,6 +2044,10 @@ def main():
     if not is_cleanup_command:
         # Silently ensure project is initialized before any operations
         ensure_project_initialized()
+    
+    # Handle config commands early (before other processing)
+    if any(flag in args for flag in config_flags):
+        args = handle_config_commands(args)
     
     # Check for init command
     if args and args[0] == "init":
@@ -2086,7 +2138,8 @@ def main():
     
     # Check for pass-through flags first
     passthrough_flags = ["--continue", "-c", "--resume", "-r"]
-    if any(flag in args for flag in passthrough_flags):
+    # Also pass through --config-dir (which comes from resolved config aliases)
+    if any(flag in args for flag in passthrough_flags) or "--config-dir" in args:
         # Pass through continue/resume flags after validation
         display_comprehensive_status()
         

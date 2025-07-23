@@ -36,8 +36,41 @@ from ..services.task_complexity_analyzer import TaskComplexityAnalyzer, Complexi
 # Module-level logger
 logger = logging.getLogger(__name__)
 
-# Framework agent-roles directory
-FRAMEWORK_AGENT_ROLES_DIR = Path(__file__).parent.parent.parent / "framework" / "agent-roles"
+
+def _get_framework_agent_roles_dir() -> Path:
+    """Get the framework agent-roles directory dynamically."""
+    # Check if we're running from a wheel installation
+    try:
+        import claude_pm
+        package_path = Path(claude_pm.__file__).parent
+        path_str = str(package_path.resolve())
+        if 'site-packages' in path_str or 'dist-packages' in path_str:
+            # For wheel installations, check data directory
+            data_agent_roles = package_path / "data" / "framework" / "agent-roles"
+            if data_agent_roles.exists():
+                logger.debug(f"Using wheel installation agent-roles: {data_agent_roles}")
+                return data_agent_roles
+    except Exception:
+        pass
+    
+    # For development, find framework directory
+    current = Path.cwd()
+    
+    # Check current directory and parents
+    for path in [current] + list(current.parents):
+        framework_agent_roles = path / "framework" / "agent-roles"
+        if framework_agent_roles.exists():
+            logger.debug(f"Using development agent-roles: {framework_agent_roles}")
+            return framework_agent_roles
+    
+    # Fallback to old behavior (though this shouldn't happen)
+    fallback = Path(__file__).parent.parent.parent / "framework" / "agent-roles"
+    logger.warning(f"Using fallback agent-roles path: {fallback}")
+    return fallback
+
+
+# Framework agent-roles directory (dynamically determined)
+FRAMEWORK_AGENT_ROLES_DIR = _get_framework_agent_roles_dir()
 
 # Cache prefix for agent prompts
 AGENT_CACHE_PREFIX = "agent_prompt:"
@@ -52,6 +85,9 @@ AGENT_MAPPINGS = {
     "security": "security-agent.md",
     "engineer": "engineer-agent.md",
     "data_engineer": "data-agent.md",  # Note: data-agent.md maps to data_engineer
+    "pm": "pm-orchestrator-agent.md",
+    "orchestrator": "pm-orchestrator-agent.md",
+    "pm_orchestrator": "pm-orchestrator-agent.md"
 }
 
 # Model configuration thresholds
@@ -64,6 +100,8 @@ MODEL_THRESHOLDS = {
 # Default model for each agent type (fallback when dynamic selection is disabled)
 DEFAULT_AGENT_MODELS = {
     'orchestrator': 'claude-4-opus',
+    'pm': 'claude-4-opus',
+    'pm_orchestrator': 'claude-4-opus',
     'engineer': 'claude-4-opus',
     'architecture': 'claude-4-opus',
     'documentation': 'claude-sonnet-4-20250514',
@@ -111,8 +149,10 @@ def load_agent_prompt_from_md(agent_name: str, force_reload: bool = False) -> Op
         if not md_filename:
             logger.warning(f"No MD file mapping found for agent: {agent_name}")
             return None
-            
-        md_path = FRAMEWORK_AGENT_ROLES_DIR / md_filename
+        
+        # Always get fresh framework directory path to ensure we're using the right location
+        framework_agent_roles_dir = _get_framework_agent_roles_dir()
+        md_path = framework_agent_roles_dir / md_filename
         
         # Check if file exists
         if not md_path.exists():
@@ -429,8 +469,11 @@ def list_available_agents() -> Dict[str, Dict[str, Any]]:
     """
     agents = {}
     
+    # Get fresh framework directory path
+    framework_agent_roles_dir = _get_framework_agent_roles_dir()
+    
     for agent_name, md_filename in AGENT_MAPPINGS.items():
-        md_path = FRAMEWORK_AGENT_ROLES_DIR / md_filename
+        md_path = framework_agent_roles_dir / md_filename
         
         agents[agent_name] = {
             "md_file": md_filename if md_path.exists() else None,
@@ -476,8 +519,11 @@ def validate_agent_files() -> Dict[str, Dict[str, Any]]:
     """
     results = {}
     
+    # Get fresh framework directory path
+    framework_agent_roles_dir = _get_framework_agent_roles_dir()
+    
     for agent_name, md_filename in AGENT_MAPPINGS.items():
-        md_path = FRAMEWORK_AGENT_ROLES_DIR / md_filename
+        md_path = framework_agent_roles_dir / md_filename
         results[agent_name] = {
             "md_exists": md_path.exists(),
             "md_path": str(md_path)

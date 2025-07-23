@@ -1,0 +1,28 @@
+{
+  "id": "BUG-2025-002",
+  "title": "Research Agent initialization error",
+  "description": "User reports errors when trying to use Research Agent. Need to investigate and fix.",
+  "status": "open",
+  "priority": "high",
+  "created_at": "2025-07-22T19:01:39.430812",
+  "created_by": "PM",
+  "tags": [
+    "bug",
+    "research-agent",
+    "user-reported"
+  ],
+  "assignee": "PM",
+  "metadata": {
+    "source": "user_request",
+    "pm_created": true,
+    "creation_method": "programmatic"
+  },
+  "orchestration": {
+    "agents_required": [
+      "Research Agent",
+      "Engineer Agent",
+      "QA Agent"
+    ],
+    "workflow": "investigate -> fix -> test"
+  }
+}

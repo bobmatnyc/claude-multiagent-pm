@@ -35,16 +35,40 @@ logger = logging.getLogger(__name__)
 # Cache key for base agent instructions
 BASE_AGENT_CACHE_KEY = "base_agent:instructions"
 
-# Base agent file path (in framework/agent-roles directory)
-# Check if we're in a wheel installation
-package_path = Path(__file__).parent.parent
-path_str = str(package_path.resolve())
-if 'site-packages' in path_str or 'dist-packages' in path_str:
-    # For wheel installations, use data directory
-    BASE_AGENT_FILE = package_path / "data" / "framework" / "agent-roles" / "base_agent.md"
-else:
-    # Source installation
-    BASE_AGENT_FILE = Path(__file__).parent.parent.parent / "framework" / "agent-roles" / "base_agent.md"
+def _get_base_agent_file() -> Path:
+    """Get the base agent file path dynamically."""
+    # Check if we're running from a wheel installation
+    try:
+        import claude_pm
+        package_path = Path(claude_pm.__file__).parent
+        path_str = str(package_path.resolve())
+        if 'site-packages' in path_str or 'dist-packages' in path_str:
+            # For wheel installations, check data directory
+            data_base_agent = package_path / "data" / "framework" / "agent-roles" / "base_agent.md"
+            if data_base_agent.exists():
+                logger.debug(f"Using wheel installation base_agent: {data_base_agent}")
+                return data_base_agent
+    except Exception:
+        pass
+    
+    # For development, find framework directory
+    current = Path.cwd()
+    
+    # Check current directory and parents
+    for path in [current] + list(current.parents):
+        framework_base_agent = path / "framework" / "agent-roles" / "base_agent.md"
+        if framework_base_agent.exists():
+            logger.debug(f"Using development base_agent: {framework_base_agent}")
+            return framework_base_agent
+    
+    # Fallback to old behavior (though this shouldn't happen)
+    fallback = Path(__file__).parent.parent.parent / "framework" / "agent-roles" / "base_agent.md"
+    logger.warning(f"Using fallback base_agent path: {fallback}")
+    return fallback
+
+
+# Base agent file path (dynamically determined)
+BASE_AGENT_FILE = _get_base_agent_file()
 
 
 class PromptTemplate(Enum):
@@ -164,13 +188,16 @@ def load_base_agent_instructions(force_reload: bool = False) -> Optional[str]:
                 logger.debug(f"Base agent instructions loaded from cache (test_mode={test_mode})")
                 return str(cached_content)
         
+        # Get fresh base agent file path
+        base_agent_file = _get_base_agent_file()
+        
         # Load from file
-        if not BASE_AGENT_FILE.exists():
-            logger.warning(f"Base agent instructions file not found: {BASE_AGENT_FILE}")
+        if not base_agent_file.exists():
+            logger.warning(f"Base agent instructions file not found: {base_agent_file}")
             return None
             
-        logger.debug(f"Loading base agent instructions from: {BASE_AGENT_FILE}")
-        content = BASE_AGENT_FILE.read_text(encoding='utf-8')
+        logger.debug(f"Loading base agent instructions from: {base_agent_file}")
+        content = base_agent_file.read_text(encoding='utf-8')
         
         # If NOT in test mode, remove test-specific instructions to save context
         if not test_mode:

@@ -3,6 +3,35 @@
 ## 🎯 Primary Role
 The PM Orchestrator Agent serves as the central coordination hub for all project management activities, operating exclusively through Task Tool subprocess delegation to orchestrate multi-agent workflows without performing any direct technical work.
 
+## ⚠️ CRITICAL: AITRACKDOWN COMMAND SYNTAX
+
+**ALWAYS use the proper CLI entry points `aitrackdown` or `atd` (for short)**
+
+**The package provides proper CLI entry points that handle Python environment issues automatically:**
+```bash
+aitrackdown [command] [subcommand] [args]
+# or the short form:
+atd [command] [subcommand] [args]
+```
+
+**Correct usage examples:**
+- ✅ `aitrackdown task list` or `atd task list`
+- ✅ `aitrackdown epic list` or `atd epic list`
+- ✅ `aitrackdown create task "[title]"` or `atd create task "[title]"`
+
+**CRITICAL COMMON ERRORS TO AVOID:**
+1. ❌ `ai-trackdown` (with hyphen) → ✅ `aitrackdown` (no hyphen)
+2. ❌ `aitrackdown list` → ✅ `aitrackdown task list` (specify entity type)
+3. ❌ `aitrackdown init` → ✅ `aitrackdown init project` (add subcommand)
+4. ❌ `aitrackdown create epic "Title"` → ✅ `aitrackdown create epic "Title" --goal "Epic goal"`
+   - Epic creation REQUIRES --goal parameter to avoid interactive prompts
+
+**PROPER EPIC CREATION (non-interactive):**
+```bash
+# Always provide --goal to avoid interactive prompt
+aitrackdown create epic "Build Multi-Tenant System" --goal "Complete multi-tenant architecture"
+```
+
 ## 🎯 When to Use This Agent
 
 **Select this agent when:**
@@ -75,36 +104,36 @@ The PM Orchestrator has **EXCLUSIVE RESPONSIBILITY** for ALL ticket lifecycle op
 trigger: Any work request requiring tracking
 process:
   1. Determine ticket type based on complexity:
-     - Epic: aitrackdown create -t epic -n "Major initiative description"
-     - Issue: aitrackdown create -t issue -n "Feature or problem description"
-     - Task: aitrackdown create -t task -n "Specific work item description"
+     - Epic: aitrackdown create epic "Major initiative description"
+     - Issue: aitrackdown create issue "Feature or problem description"
+     - Task: aitrackdown create task "Specific work item description"
   
   2. Get ticket ID from creation output (EP-XXXX, ISS-XXXX, or TSK-XXXX)
   
   3. Create TodoWrite entry with ticket reference
   
   4. Update ticket status as work begins:
-     aitrackdown update [ticket-id] -s in_progress
+     aitrackdown task update [ticket-id] --status in-progress
   
   5. Include ticket ID in ALL Task Tool delegations
   
   6. After agent completes work:
      - Receive agent's progress report
      - PM updates ticket on agent's behalf:
-       aitrackdown comment [ticket-id] -m "Agent reported: [progress details]"
+       aitrackdown comment add [ticket-id] "Agent reported: [progress details]"
      - Update status if needed:
-       aitrackdown update [ticket-id] -s review
+       aitrackdown task update [ticket-id] --status review
   
   7. When work is complete:
-     aitrackdown close [ticket-id] -r "Detailed resolution: [what was accomplished]"
+     aitrackdown task complete [ticket-id]
 
 output: Complete audit trail with PM managing all ticket updates
 ```
 
-### 🚨 IMPORTANT: Use aitrackdown CLI Only
+### 🚨 IMPORTANT: Use ai_trackdown_pytools CLI Only
 - **NEVER** read ticket files directly from the filesystem
-- **ALWAYS** use aitrackdown CLI commands for ALL ticket operations
-- If aitrackdown has bugs, report them for fixing rather than working around them
+- **ALWAYS** use ai_trackdown_pytools CLI commands for ALL ticket operations
+- If ai_trackdown_pytools has bugs, report them for fixing rather than working around them
 
 ## 🚨 MANDATORY WORKFLOW PATTERNS
 
@@ -132,7 +161,7 @@ output: Complete audit trail with PM managing all ticket updates
 trigger: User requests "Implement OAuth2 authentication"
 process:
   1. Create research ticket: 
-     aitrackdown create -t issue -n "Research OAuth2 implementation patterns"
+     aitrackdown create issue "Research OAuth2 implementation patterns"
   
   2. Task Tool → Research Agent: Investigate OAuth2 patterns
      - Research libraries and best practices
@@ -142,7 +171,7 @@ process:
   3. PM receives research results
   
   4. Create engineering ticket:
-     aitrackdown create -t issue -n "Implement OAuth2 based on research findings"
+     aitrackdown create issue "Implement OAuth2 based on research findings"
   
   5. Task Tool → Engineer Agent: Implement OAuth2
      - Include research findings in context
@@ -160,7 +189,7 @@ output: Well-researched, properly implemented feature
 trigger: Any documentation need identified
 process:
   1. Create documentation ticket:
-     aitrackdown create -t task -n "Document API endpoints for auth service"
+     aitrackdown create task "Document API endpoints for auth service"
   
   2. Task Tool → Documentation Agent: Create documentation
      - Include ticket ID in delegation
@@ -169,7 +198,7 @@ process:
   3. Documentation Agent creates files/updates as needed
   
   4. PM updates ticket with completion:
-     aitrackdown close [ticket-id] -r "Documentation completed: Added API docs"
+     aitrackdown task complete [ticket-id]
   
 output: Tracked documentation with audit trail
 ```
@@ -199,7 +228,7 @@ process:
      - If NO: Continue with research phase
   
   2. Create research ticket:
-     aitrackdown create -t issue -n "Research: [feature] implementation patterns"
+     aitrackdown create issue "Research: [feature] implementation patterns"
   
   3. Task Tool → Research Agent: Investigate patterns and best practices
      - Include ticket ID in delegation
@@ -208,7 +237,7 @@ process:
      - Close research ticket with findings summary
   
   4. Create implementation ticket:
-     aitrackdown create -t issue -n "Implement: [feature] based on research"
+     aitrackdown create issue "Implement: [feature] based on research"
   
   5. Task Tool → Engineer Agent: Implement feature
      - Include research findings in context (if applicable)
@@ -228,35 +257,35 @@ output: Well-researched, properly implemented, and tested feature
 ```yaml
 trigger: User requests "push" command
 process:
-  1. Create ticket: aitrackdown create -t issue -n "Push release with multi-agent validation"
+  1. Create ticket: aitrackdown create issue "Push release with multi-agent validation"
   2. Get ticket ID (e.g., ISS-0234)
-  3. Update status: aitrackdown update ISS-0234 -s in_progress
+  3. Update status: aitrackdown issue update ISS-0234 --status in-progress
   4. TodoWrite: Create tasks for each agent with ticket ID
   
   5. Task Tool → Documentation Agent: Generate changelog
      - Include ticket ID in delegation context
      - Receive: Changelog and version analysis
-     - PM updates: aitrackdown comment ISS-0234 -m "Documentation Agent completed: Generated changelog for v1.2.3"
+     - PM updates: aitrackdown comment add ISS-0234 "Documentation Agent completed: Generated changelog for v1.2.3"
   
   6. Task Tool → QA Agent: Execute test suite
      - Include ticket ID in delegation context
      - Receive: Test results and validation status
-     - PM updates: aitrackdown comment ISS-0234 -m "QA Agent completed: All tests passing (245/245)"
+     - PM updates: aitrackdown comment add ISS-0234 "QA Agent completed: All tests passing (245/245)"
   
   7. Task Tool → Data Engineer Agent: Validate data integrity and APIs
      - Include ticket ID in delegation context
      - Receive: Data validation and API connectivity status
-     - PM updates: aitrackdown comment ISS-0234 -m "Data Engineer Agent completed: All data stores and APIs verified"
+     - PM updates: aitrackdown comment add ISS-0234 "Data Engineer Agent completed: All data stores and APIs verified"
   
   8. Task Tool → Version Control Agent: Git operations
      - Include ticket ID in delegation context
      - Receive: Commit status and push confirmation
-     - PM updates: aitrackdown comment ISS-0234 -m "Version Control Agent completed: Pushed to main branch"
+     - PM updates: aitrackdown comment add ISS-0234 "Version Control Agent completed: Pushed to main branch"
   
   9. Integrate all results and update TodoWrite entries
   
   10. Close ticket with comprehensive resolution:
-      aitrackdown close ISS-0234 -r "Push completed successfully. Changelog generated, tests passed, data validated, code pushed to main."
+      aitrackdown issue complete ISS-0234
 
 output: Complete push operation with PM managing all ticket updates
 ```
@@ -265,19 +294,19 @@ output: Complete push operation with PM managing all ticket updates
 ```yaml
 trigger: Large initiative requiring multiple features/agents
 process:
-  1. Create epic: aitrackdown create -t epic -n "Implement complete authentication system"
+  1. Create epic: aitrackdown create epic "Implement complete authentication system"
   2. Get epic ID (e.g., EP-0045)
   3. Break down into issues:
-     - aitrackdown create -t issue -n "Design authentication API" -p EP-0045
-     - aitrackdown create -t issue -n "Implement JWT token service" -p EP-0045
-     - aitrackdown create -t issue -n "Create login/logout UI" -p EP-0045
+     - aitrackdown create issue "Design authentication API" -p EP-0045
+     - aitrackdown create issue "Implement JWT token service" -p EP-0045
+     - aitrackdown create issue "Create login/logout UI" -p EP-0045
   4. For each issue, create tasks as needed:
-     - aitrackdown create -t task -n "Write auth service tests" -p ISS-0246
+     - aitrackdown create task "Write auth service tests" -p ISS-0246
   5. Delegate work to agents with appropriate ticket references
   6. Track progress across all related tickets
   7. Close child tickets as work completes
   8. Close epic when all child work is done:
-     aitrackdown close EP-0045 -r "Authentication system fully implemented"
+     aitrackdown epic complete EP-0045
 output: Hierarchical ticket structure with complete tracking
 ```
 
@@ -294,7 +323,7 @@ process:
      - Issue: Feature development or bug fixes  
      - Task: Specific implementation steps
   
-  3. Update ticket status: aitrackdown update [ticket-id] -s in_progress
+  3. Update ticket status: aitrackdown task update [ticket-id] --status in-progress
   
   4. Identify appropriate agent sequence:
      - Research Agent → Engineer Agent (for complex features)
@@ -318,13 +347,13 @@ process:
   
   8. When agent completes:
      - Receive agent's completion report
-     - PM updates ticket: aitrackdown comment [ticket-id] -m "[Agent] completed: [summary]"
-     - Update status if needed: aitrackdown update [ticket-id] -s [new-status]
+     - PM updates ticket: aitrackdown comment add [ticket-id] "[Agent] completed: [summary]"
+     - Update status if needed: aitrackdown task update [ticket-id] --status [new-status]
   
   9. Integrate results into project context
   
   10. When all related work is done:
-      aitrackdown close [ticket-id] -r "Comprehensive resolution details"
+      aitrackdown task complete [ticket-id]
 
 output: Completed deliverables with PM managing all ticket operations
 ```
@@ -336,7 +365,7 @@ process:
   1. Assess: Complex feature requiring research
   
   2. Create research ticket:
-     aitrackdown create -t issue -n "Research: WebSocket implementation patterns for notifications"
+     aitrackdown create issue "Research: WebSocket implementation patterns for notifications"
   
   3. Task Tool → Research Agent:
      **Research Agent**: Research WebSocket patterns for real-time notifications
@@ -348,7 +377,7 @@ process:
      **Expected Results**: Recommendation report with implementation approach
   
   4. Create implementation ticket:
-     aitrackdown create -t issue -n "Implement WebSocket notifications based on research"
+     aitrackdown create issue "Implement WebSocket notifications based on research"
   
   5. Task Tool → Engineer Agent:
      **Engineer Agent**: Implement WebSocket notifications using Socket.io
@@ -367,7 +396,7 @@ process:
   1. Assess: Simple and obvious task
   
   2. Create task ticket:
-     aitrackdown create -t task -n "Update package version to 1.2.3"
+     aitrackdown create task "Update package version to 1.2.3"
   
   3. Task Tool → Engineer Agent:
      **Engineer Agent**: Update package version
@@ -383,7 +412,7 @@ output: Direct implementation without research overhead
 trigger: "Document the new API endpoints"
 process:
   1. Create documentation ticket:
-     aitrackdown create -t task -n "Document REST API endpoints for user service"
+     aitrackdown create task "Document REST API endpoints for user service"
   
   2. Task Tool → Documentation Agent:
      **Documentation Agent**: Document user service API endpoints
@@ -392,7 +421,7 @@ process:
      **Expected Results**: API documentation in docs/api/user-service.md
   
   3. PM closes ticket:
-     aitrackdown close TSK-0100 -r "API documentation created"
+     aitrackdown task complete TSK-0100
 
 output: Tracked documentation with full audit trail
 ```
@@ -418,50 +447,156 @@ output: Tracked documentation with full audit trail
 - **Memory System**: Needed for operational insight collection
 - **Framework Health Monitor**: Critical for system stability verification
 
+## 🎫 AITRACKDOWN COMMAND REFERENCE
+
+### ⚠️ QUICK REFERENCE: CORRECT OPTION NAMES
+
+**CRITICAL: Use the correct option names for each ticket type:**
+
+| Ticket Type | Priority Option | Multiple Items Option | Parent Option |
+|-------------|----------------|---------------------|---------------|
+| **Task**    | `--priority/-p` | `--tag/-t` (repeat) | NOT AVAILABLE |
+| **Issue**   | `--severity/-s` | `--label/-l` (repeat) | NOT AVAILABLE |
+| **Epic**    | NOT AVAILABLE | NOT AVAILABLE | NOT AVAILABLE |
+
+**Common Errors:**
+- ❌ Using `--priority` for issues → ✅ Use `--severity`
+- ❌ Using `--labels` → ✅ Use `--label` multiple times
+- ❌ Using `-p` for parent → ✅ Parent relationships set separately
+- ❌ Using `--component` → ✅ Not available
+
+### Complete aitrackdown CLI Syntax
+```bash
+# Note: You can use either 'aitrackdown' or 'atd' (short form) for all commands
+
+# TICKET CREATION COMMANDS
+
+# Create tasks (TSK-XXXX)
+# Available options: --description/-d, --assignee/-a, --tag/-t, --priority/-p
+aitrackdown create task "Task title"
+aitrackdown create task "Task title" -d "Description" -p high
+aitrackdown create task "Task title" -a @engineer_agent -t bug -t urgent
+aitrackdown create task "Task title" --priority critical --assignee @qa_agent
+
+# Create issues (ISS-XXXX)  
+# Available options: --description/-d, --type, --severity/-s, --label/-l
+aitrackdown create issue "Issue title"
+aitrackdown create issue "Issue title" -d "Description" -s high --type bug
+aitrackdown create issue "Issue title" --type feature -l frontend -l auth
+aitrackdown create issue "Issue title" --severity critical --label security
+
+# Create epics (EP-XXXX)
+# Available options: --description/-d, --goal/-g
+aitrackdown create epic "Epic title"
+aitrackdown create epic "Epic title" -d "Description" -g "Goal"
+aitrackdown create epic "Epic title" --goal "Complete authentication system"
+
+# IMPORTANT: Common mistakes to avoid:
+# ❌ --priority for issues (use --severity instead)
+# ❌ --labels (use --label/-l multiple times instead)
+# ❌ --component (not available)
+# ❌ -p for parent (not available for parent-child relationships)
+
+# VIEW AND LIST COMMANDS
+
+# List tasks
+aitrackdown task list
+aitrackdown task list --status open
+aitrackdown task list --status in-progress
+aitrackdown task list --assignee @engineer_agent
+
+# List issues
+aitrackdown issue list
+aitrackdown issue list --status open --type bug
+aitrackdown issue list --severity high
+
+# List epics
+aitrackdown epic list
+aitrackdown epic list --status active
+
+# Show ticket details
+aitrackdown task show TSK-0001
+aitrackdown issue show ISS-0234
+aitrackdown epic show EP-0045
+
+# UPDATE COMMANDS
+
+# Update task status
+aitrackdown task update TSK-0001 --status in-progress
+aitrackdown task update TSK-0001 --status review
+aitrackdown task update TSK-0001 --status blocked
+aitrackdown task start TSK-0001  # Shorthand for --status in-progress
+aitrackdown task complete TSK-0001  # Mark as done
+
+# Update issue status
+aitrackdown issue update ISS-0234 --status in-progress
+aitrackdown issue update ISS-0234 --severity critical
+aitrackdown issue update ISS-0234 --type bug
+aitrackdown issue complete ISS-0234
+
+# Update epic status  
+aitrackdown epic update EP-0045 --status active
+aitrackdown epic complete EP-0045
+
+# Update assignments
+aitrackdown task update TSK-0001 --assignee @engineer_agent
+aitrackdown issue update ISS-0234 --assignee @qa_agent
+
+# Update priorities
+aitrackdown task update TSK-0001 --priority high
+aitrackdown issue update ISS-0234 --severity critical
+
+# COMMENT COMMANDS
+
+# Add comments to any ticket type
+aitrackdown comment add TSK-0001 "Comment text"
+aitrackdown comment add ISS-0234 "Documentation Agent reported: Changelog generated"
+aitrackdown comment add EP-0045 "Milestone reached: Auth system design complete"
+
+# List comments
+aitrackdown comment list TSK-0001
+aitrackdown comment list ISS-0234
+
+# LABEL COMMANDS
+
+# Add labels
+aitrackdown label add TSK-0001 bug
+aitrackdown label add ISS-0234 feature,authentication,high-priority
+
+# Remove labels
+aitrackdown label remove TSK-0001 outdated
+aitrackdown label remove ISS-0234 low-priority
+
+# List labels
+aitrackdown label list TSK-0001
+
+# RELATIONSHIP COMMANDS
+
+# Link tickets
+aitrackdown link TSK-0001 TSK-0002 --type blocks
+aitrackdown link ISS-0234 ISS-0235 --type relates_to
+aitrackdown link TSK-0003 TSK-0004 --type duplicates
+
+# Set parent-child relationships
+aitrackdown task update TSK-0001 --parent ISS-0234
+aitrackdown issue update ISS-0234 --parent EP-0045
+
+# SEARCH AND FILTER COMMANDS
+
+# Search across all tickets
+aitrackdown search "authentication"
+aitrackdown search "bug" --type issue
+aitrackdown search "memory leak" --status open
+
+# Filter with multiple criteria
+aitrackdown task list --status open --priority high
+aitrackdown issue list --type bug --severity critical --status open
+aitrackdown epic list --labels milestone-q1
+```
+
 ## 🛠️ Specialized Tools/Commands
 ```bash
-# COMPREHENSIVE TICKET MANAGEMENT - PM EXCLUSIVE OPERATIONS
-
-# Create tickets based on work complexity
-aitrackdown create -t epic -n "Major initiative: Complete authentication system"
-aitrackdown create -t issue -n "Add user profile management feature"
-aitrackdown create -t task -n "Update package version to 1.2.3"
-
-# View and filter tickets
-aitrackdown list                      # List all tickets
-aitrackdown list -s open              # List open tickets
-aitrackdown list -s in_progress       # List in-progress tickets
-aitrackdown list -t issue -s open     # List open issues only
-aitrackdown show [ticket-id]          # View full ticket details
-
-# Update ticket status (PM does this, not agents)
-aitrackdown update [ticket-id] -s in_progress    # Start work
-aitrackdown update [ticket-id] -s review          # Ready for review
-aitrackdown update [ticket-id] -s blocked         # Blocked status
-aitrackdown update [ticket-id] -s testing         # In testing
-
-# Add comments to track agent progress
-aitrackdown comment [ticket-id] -m "Documentation Agent reported: Changelog generated"
-aitrackdown comment [ticket-id] -m "QA Agent reported: All 245 tests passing"
-aitrackdown comment [ticket-id] -m "Engineer Agent reported: Feature implemented"
-
-# Close tickets with detailed resolutions
-aitrackdown close [ticket-id] -r "Feature implemented, tested, and deployed successfully"
-aitrackdown close [ticket-id] -r "Bug fixed: Memory leak resolved in auth service"
-
-# Link related tickets
-aitrackdown link [ticket-id-1] [ticket-id-2] -r blocks
-aitrackdown link [ticket-id-1] [ticket-id-2] -r relates_to
-aitrackdown link [ticket-id-1] [ticket-id-2] -r duplicates
-
-# Assign tickets (for tracking purposes)
-aitrackdown assign [ticket-id] -u @engineer_agent
-aitrackdown assign [ticket-id] -u @qa_agent
-
-# Add labels for categorization
-aitrackdown label [ticket-id] -a bug,high-priority
-aitrackdown label [ticket-id] -a feature,authentication
-aitrackdown label [ticket-id] -r outdated  # Remove label
+# FRAMEWORK HEALTH AND VALIDATION COMMANDS
 
 # Framework health check
 claude-pm init --verify
@@ -474,6 +609,25 @@ python -c "from claude_pm.core.agent_registry import AgentRegistry; print(AgentR
 
 # Task Tool subprocess creation (always include ticket reference)
 python -m claude_pm.tools.task_tool --agent [agent_type] --task "[description]" --ticket "[ticket-id]"
+
+# COMMON PM WORKFLOW COMMANDS
+
+# Quick status check for all open tickets
+aitrackdown task list --status open
+aitrackdown issue list --status open
+aitrackdown epic list --status active
+
+# Check in-progress work
+aitrackdown task list --status in-progress
+aitrackdown issue list --status in-progress
+
+# View recent activity
+aitrackdown comment list --recent
+aitrackdown task list --updated-since yesterday
+
+# Bulk operations (if supported)
+aitrackdown task complete TSK-0001,TSK-0002,TSK-0003
+aitrackdown label add ISS-0234,ISS-0235 ready-for-qa
 ```
 
 ---

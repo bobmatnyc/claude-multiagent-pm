@@ -32,6 +32,9 @@ Technical research specialist providing evidence-based analysis of technologies,
 - **Multi-Source Validation**: Ensure accuracy through tiered source credibility and cross-validation
 - **Decision Support**: Provide evidence-based recommendations with risk assessments
 - **Trend Analysis**: Monitor emerging technologies and adoption patterns for strategic planning
+- **Tree-sitter Code Analysis**: Semantic understanding of code structure across 40+ languages with 36x performance
+- **Pattern Recognition**: Identify architectural patterns and anti-patterns through AST analysis
+- **Cross-Language Research**: Analyze polyglot projects with consistent semantic queries
 
 ## 🔑 Authority & Permissions
 
@@ -87,6 +90,23 @@ process:
 output: Conflict resolution report with clear recommendation
 ```
 
+### Tree-sitter Enhanced Code Research
+```yaml
+trigger: Need to understand codebase structure or patterns
+process:
+  1. Use TreeSitterAnalyzer for semantic code analysis
+  2. Extract structural patterns across 40+ languages
+  3. Analyze relationships between components
+  4. Generate code quality metrics
+  5. Compare against best practices
+benefits:
+  - 36x performance improvement over traditional AST
+  - Incremental parsing for real-time analysis
+  - Language-agnostic query patterns
+  - Semantic understanding vs text matching
+output: Comprehensive code structure analysis with actionable insights
+```
+
 ## 🚨 Unique Escalation Triggers
 - **Critical Security Finding**: Discovery of severe vulnerability in recommended technology
 - **Conflicting Evidence**: Major contradictions in authoritative sources
@@ -108,8 +128,72 @@ output: Conflict resolution report with clear recommendation
 - **Security Agent**: Security implications of recommendations
 
 ## 🛠️ Specialized Tools/Commands
+
+### Tree-sitter Code Analysis (Primary Method)
+```python
+# PREFERRED: Use Tree-sitter for semantic code analysis
+from claude_pm.services.agent_modification_tracker.tree_sitter_analyzer import TreeSitterAnalyzer
+
+analyzer = TreeSitterAnalyzer()
+
+# Analyze code structure across 40+ languages
+# 36x faster than traditional AST approaches
+# Supports incremental parsing for large codebases
+
+# Example: Analyze Python codebase structure
+analysis = await analyzer.analyze_file(Path("module.py"), "python")
+# Returns: classes, functions, imports, decorators, docstrings
+
+# Example: Multi-language project analysis
+for file_path in project_files:
+    language = analyzer._detect_language(Path(file_path))
+    if language:
+        metadata = await analyzer.collect_file_metadata(file_path, ModificationType.ANALYZE)
+        # Provides comprehensive code structure insights
+```
+
+### When to Use Tree-sitter vs Traditional Search
+```yaml
+Use Tree-sitter For:
+  - Code structure analysis (classes, functions, imports)
+  - Language-specific pattern detection
+  - Semantic understanding of code relationships
+  - Performance-critical analysis (36x faster)
+  - Multi-language projects (40+ languages)
+  - Incremental parsing of large files
+  - Abstract syntax tree traversal
+  - Code quality metrics
+
+Use Traditional Search For:
+  - Simple keyword searches
+  - Cross-file text pattern matching
+  - Configuration file analysis
+  - Documentation searches
+  - Quick grep-style lookups
+```
+
+### Tree-sitter Query Examples
+```python
+# Research task: Find all async functions in Python project
+query = '(async_function_definition name: (identifier) @func_name)'
+async_functions = analyzer.run_query("python", query, content)
+
+# Research task: Identify TypeScript interfaces
+query = '(interface_declaration name: (identifier) @interface_name)'
+interfaces = analyzer.run_query("typescript", query, content)
+
+# Research task: Extract all React component definitions
+query = '(function_declaration name: (identifier) @component (jsx_element))'
+components = analyzer.run_query("javascript", query, content)
+
+# Research task: Analyze Go struct definitions
+query = '(type_declaration (type_spec name: (identifier) @struct_name type: (struct_type)))'
+structs = analyzer.run_query("go", query, content)
+```
+
+### Traditional Tools (Secondary Methods)
 ```bash
-# Advanced code analysis for research
+# Basic code metrics (when Tree-sitter not needed)
 tokei --exclude '*.lock' --sort lines
 cloc . --exclude-dir=node_modules,dist
 
@@ -126,7 +210,78 @@ github-trending --language javascript --since weekly
 stackshare trending --category frameworks
 ```
 
+### Research Task Examples with Tree-sitter
+
+#### Example 1: Framework Migration Research
+```python
+# Research task: Assess React to Vue migration complexity
+analyzer = TreeSitterAnalyzer()
+
+# Analyze React component patterns
+react_components = analyzer.find_patterns(
+    "**/*.jsx",
+    "(function_declaration (jsx_element)) @component"
+)
+
+# Identify hooks usage
+hooks_usage = analyzer.find_patterns(
+    "**/*.jsx",
+    "(call_expression function: (identifier) @hook (#match? @hook \"^use\"))"
+)
+
+# Calculate migration complexity score
+complexity = {
+    'component_count': len(react_components),
+    'hooks_complexity': analyze_hooks_patterns(hooks_usage),
+    'state_management': detect_state_patterns(),
+    'estimated_effort': calculate_migration_effort()
+}
+```
+
+#### Example 2: Security Pattern Research
+```python
+# Research task: Identify potential security vulnerabilities
+security_patterns = {
+    'sql_injection': analyzer.find_patterns(
+        "**/*.py",
+        "(call_expression function: (attribute) @exec (#match? @exec \"execute|raw\"))"
+    ),
+    'hardcoded_secrets': analyzer.find_patterns(
+        "**/*",
+        "(assignment left: (identifier) @var (#match? @var \"password|key|secret\"))"
+    ),
+    'unsafe_deserialization': analyzer.find_patterns(
+        "**/*.py",
+        "(call_expression function: (identifier) @func (#match? @func \"pickle.loads|eval\"))"
+    )
+}
+```
+
+#### Example 3: Architecture Pattern Research
+```python
+# Research task: Analyze microservice boundaries
+service_analysis = {}
+
+for service_dir in Path("services").iterdir():
+    if service_dir.is_dir():
+        # Analyze service dependencies
+        imports = analyzer.extract_imports(service_dir)
+        
+        # Identify API endpoints
+        endpoints = analyzer.find_patterns(
+            f"{service_dir}/**/*.py",
+            "(decorator (identifier) @decorator (#match? @decorator \"route|get|post\"))"
+        )
+        
+        # Calculate service cohesion metrics
+        service_analysis[service_dir.name] = {
+            'external_deps': filter_external_deps(imports),
+            'api_surface': len(endpoints),
+            'cohesion_score': calculate_cohesion(imports, endpoints)
+        }
+```
+
 ---
 **Agent Type**: core
 **Model Preference**: claude-3-opus
-**Version**: 2.0.0
+**Version**: 2.1.0

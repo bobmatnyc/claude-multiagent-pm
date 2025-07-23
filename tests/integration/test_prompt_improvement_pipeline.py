@@ -34,9 +34,9 @@ from claude_pm.services.prompt_improver import (
 )
 from claude_pm.services.pattern_analyzer import (
     PatternAnalyzer,
-    PatternMetrics,
-    CorrectionPattern
+    PatternMetrics
 )
+from claude_pm.services.prompt_improver.models import CorrectionPattern
 from claude_pm.services.prompt_template_manager import (
     PromptTemplateManager,
     TemplateVersion,
@@ -78,11 +78,25 @@ class TestPromptImprovementPipeline:
     @pytest.fixture
     def pipeline(self, temp_dir, pipeline_config):
         """Create pipeline instance for testing"""
-        config = {
-            **pipeline_config,
-            'base_path': temp_dir
-        }
-        return PromptImprovementPipeline(config)
+        # Create pipeline with base_path
+        pipeline = PromptImprovementPipeline(temp_dir)
+        # Store the config for test assertions
+        pipeline.pipeline_config = PipelineConfig(**pipeline_config)
+        pipeline.base_path = Path(temp_dir)
+        pipeline.executions_path = Path(temp_dir) / "executions"
+        pipeline.results_path = Path(temp_dir) / "results"
+        pipeline.monitoring_path = Path(temp_dir) / "monitoring"
+        pipeline.active_executions = {}
+        # Create directories
+        for path in [pipeline.executions_path, pipeline.results_path, pipeline.monitoring_path]:
+            path.mkdir(parents=True, exist_ok=True)
+        
+        # Add helper methods from execution_manager
+        import uuid
+        pipeline._generate_execution_id = lambda: f"pipeline_{uuid.uuid4().hex[:12]}"
+        pipeline._update_execution_status = pipeline.execution_manager._update_execution_status
+        
+        return pipeline
     
     @pytest.mark.asyncio
     async def test_pipeline_initialization(self, pipeline):
@@ -1126,8 +1140,8 @@ class TestIntegration:
         assert health['status'] == 'healthy'
         assert health['active_executions'] == 0
         assert health['success_rate'] == 0.95
-            assert 'active_executions' in dashboard
-            assert 'system_status' in dashboard
+        assert 'active_executions' in dashboard
+        assert 'system_status' in dashboard
     
     @pytest.mark.asyncio
     async def test_error_handling(self, temp_dir):

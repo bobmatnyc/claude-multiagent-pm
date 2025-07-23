@@ -148,11 +148,38 @@ class ContextManager:
             
             "orchestrator": ContextFilter(
                 agent_type="orchestrator",
-                include_patterns=[r"CLAUDE\.md", r"README", r"TODO"],
+                include_patterns=[r"CLAUDE\.md", r"README", r"TODO", r"ticket", r"aitrackdown", r"issue", r"epic"],
                 file_extensions=[".md", ".txt", ".json", ".yaml"],
-                directory_patterns=[".claude-pm/", "docs/"],
-                priority_keywords=["orchestrate", "coordinate", "delegate", "manage", "framework"],
-                context_sections=["project_overview", "active_tasks", "agent_status"]
+                directory_patterns=[".claude-pm/", "docs/", "tickets/", "tasks/", "issues/"],
+                priority_keywords=["orchestrate", "coordinate", "delegate", "manage", "framework", "ticket", "aitrackdown", "issue", "epic", "task"],
+                context_sections=["project_overview", "active_tasks", "agent_status", "ticketing_instructions", "default_ticketing"]
+            ),
+            
+            "pm": ContextFilter(
+                agent_type="pm",
+                include_patterns=[r"CLAUDE\.md", r"README", r"TODO", r"ticket", r"aitrackdown", r"issue", r"epic"],
+                file_extensions=[".md", ".txt", ".json", ".yaml"],
+                directory_patterns=[".claude-pm/", "docs/", "tickets/", "tasks/", "issues/"],
+                priority_keywords=["orchestrate", "coordinate", "delegate", "manage", "framework", "ticket", "aitrackdown", "issue", "epic", "task"],
+                context_sections=["project_overview", "active_tasks", "agent_status", "ticketing_instructions", "default_ticketing"]
+            ),
+            
+            "project_manager": ContextFilter(
+                agent_type="project_manager",
+                include_patterns=[r"CLAUDE\.md", r"README", r"TODO", r"ticket", r"aitrackdown", r"issue", r"epic"],
+                file_extensions=[".md", ".txt", ".json", ".yaml"],
+                directory_patterns=[".claude-pm/", "docs/", "tickets/", "tasks/", "issues/"],
+                priority_keywords=["orchestrate", "coordinate", "delegate", "manage", "framework", "ticket", "aitrackdown", "issue", "epic", "task"],
+                context_sections=["project_overview", "active_tasks", "agent_status", "ticketing_instructions", "default_ticketing"]
+            ),
+            
+            "project_management": ContextFilter(
+                agent_type="project_management",
+                include_patterns=[r"CLAUDE\.md", r"README", r"TODO", r"ticket", r"aitrackdown", r"issue", r"epic"],
+                file_extensions=[".md", ".txt", ".json", ".yaml"],
+                directory_patterns=[".claude-pm/", "docs/", "tickets/", "tasks/", "issues/"],
+                priority_keywords=["orchestrate", "coordinate", "delegate", "manage", "framework", "ticket", "aitrackdown", "issue", "epic", "task"],
+                context_sections=["project_overview", "active_tasks", "agent_status", "ticketing_instructions", "default_ticketing"]
             )
         }
         
@@ -348,6 +375,26 @@ class ContextManager:
             if section in full_context:
                 filtered_context[section] = full_context[section]
         
+        # Special handling for PM/orchestrator agents - ensure ALL ticketing content is preserved
+        if agent_type in ['orchestrator', 'pm', 'project_manager', 'project_management']:
+            # Ensure all ticket-related sections are included
+            ticket_keywords = ['ticket', 'aitrackdown', 'issue', 'epic', 'task', 'DEFAULT TICKETING', 
+                             'ticketing_instructions', 'default_ticketing', 'ai-trackdown']
+            
+            # Check all context sections for ticket-related content
+            for key, value in full_context.items():
+                if any(keyword.lower() in str(key).lower() for keyword in ticket_keywords):
+                    filtered_context[key] = value
+                elif isinstance(value, str) and any(keyword.lower() in value.lower() for keyword in ticket_keywords):
+                    filtered_context[key] = value
+                elif isinstance(value, dict):
+                    # Check nested dictionaries for ticket content
+                    for sub_key, sub_value in value.items():
+                        if any(keyword.lower() in str(sub_key).lower() for keyword in ticket_keywords):
+                            if key not in filtered_context:
+                                filtered_context[key] = {}
+                            filtered_context[key][sub_key] = sub_value
+        
         # Include deduplicated CLAUDE.md if relevant to agent
         # These agent types need framework instructions for orchestration
         if deduplicated_claude_md and agent_type in ['orchestrator', 'pm', 'project_manager', 'project_management']:
@@ -395,6 +442,16 @@ class ContextManager:
             # Skip CLAUDE.md files as they're handled separately with deduplication
             if file_path.endswith("CLAUDE.md"):
                 continue
+            
+            # Always include ticket-related files for orchestrator/PM agents
+            ticket_patterns = ['ticket', 'aitrackdown', 'issue', 'epic', 'task', 'ISS-', 'EP-']
+            is_ticket_file = any(pattern.lower() in file_path.lower() for pattern in ticket_patterns)
+            
+            # For orchestrator/PM agents, always include ticket files
+            if filter_config.agent_type in ['orchestrator', 'pm', 'project_manager', 'project_management'] and is_ticket_file:
+                filtered_files[file_path] = content
+                continue
+            
             # Check if file matches include patterns
             include_match = any(
                 re.search(pattern, file_path, re.IGNORECASE) 
@@ -463,6 +520,12 @@ class ContextManager:
             return 0.0
         
         task_lower = task.lower()
+        
+        # Give high priority to ticket-related tasks
+        ticket_keywords = ['ticket', 'aitrackdown', 'issue', 'epic', 'task', 'ai-trackdown']
+        if any(keyword in task_lower for keyword in ticket_keywords):
+            return 1.0  # Maximum relevance for ticket-related tasks
+        
         matches = sum(1 for keyword in keywords if keyword.lower() in task_lower)
         return matches / len(keywords) if keywords else 0.0
     

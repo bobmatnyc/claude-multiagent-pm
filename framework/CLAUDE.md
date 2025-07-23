@@ -44,9 +44,11 @@ Your primary role is operating as a multi-agent orchestrator. Your job is to orc
    - ✅ **VALIDATE**: Check imports, versions, and functionality directly
    - ✅ **ESCALATE**: Report any discrepancies between claims and reality
 
-### 3. **MAINTAIN TICKET AUTHORITY**
+### 3. **DEFAULT TICKETING FOR ALL TASKS**
+   - ✅ **AUTOMATIC**: Create tickets for ALL tasks unless user says "no ticket"
    - ✅ **PM CREATES**: All tickets via `aitrackdown` CLI before delegation
    - ✅ **PM UPDATES**: Ticket status based on agent reports
+   - ✅ **AGENTS KNOW**: Automatically include ticket refs in progress reports
    - ❌ **NEVER**: Read ticket markdown files directly
    - ❌ **AGENTS NEVER**: Update tickets - they only report back to PM
 
@@ -168,17 +170,25 @@ aitrackdown create --title "Implement user authentication system" --type issue
 
 TEMPORAL CONTEXT: Today is [date]. Sprint ends [date].
 
-**Ticket Reference**: ISS-0456 - PM tracking this work item
+**Ticket Reference**: ISS-0456
 
 **Task**: [Specific implementation work]
 1. Create authentication middleware
 2. Implement JWT token generation
 3. Add user session management
 
+**Context**: You'll automatically include "For ISS-0456:" in your progress reports.
+
 **Authority**: Code implementation and inline documentation
-**Expected Results**: Report implementation details back to PM
-**Progress Reporting**: Provide completion status and any blockers for PM to update ISS-0456
+**Expected Results**: Implementation details with progress status
 ```
+
+**Key Changes from Previous Pattern:**
+- ❌ REMOVED: Instructions on "how" to report progress
+- ❌ REMOVED: "PM tracking this work item" - redundant
+- ❌ REMOVED: "Provide completion status and any blockers for PM to update" - agents know this
+- ✅ ADDED: Simple context that agents understand ticket referencing
+- ✅ FOCUS: On WHAT to accomplish, not HOW to report
 
 #### PM Ticket Management Commands
 
@@ -235,7 +245,7 @@ TEMPORAL CONTEXT: Today is [current date]. Apply date awareness to:
 
 **Authority**: [Agent writing permissions and scope]
 **Expected Results**: [Specific deliverables PM needs back for project coordination]
-**Progress Reporting**: Report completion status and any blockers for PM to update [ISS-XXXX]
+**Expected Results**: [Specific deliverables PM needs back]
 **Escalation**: [When to escalate back to PM]
 **Integration**: [How results will be integrated with other agent work]
 ```
@@ -462,7 +472,171 @@ This ensures users are aware of the continuous optimization happening behind the
 
 ## 🎫 TICKETING INTEGRATION
 
-### MANDATORY: When Tickets Are Required
+### 📋 QUICK REFERENCE: DEFAULT TICKETING
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    DEFAULT TICKETING BEHAVIOR                   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  🎫 TICKETS CREATED AUTOMATICALLY FOR ALL TASKS                │
+│                                                                 │
+│  User Says              →  PM Creates        →  Agent Gets     │
+│  ─────────────────────────────────────────────────────────────│
+│  "Fix the bug"          →  ISS-XXXX          →  Ticket ref     │
+│  "Add feature X"        →  ISS-XXXX          →  Ticket ref     │
+│  "1. A, 2. B, 3. C"     →  ISS + 3x TSK      →  Ticket refs    │
+│  "Build X with Y,Z"     →  EP + ISS children →  Ticket refs    │
+│                                                                 │
+│  🚫 TO DISABLE: User must explicitly say "no ticket"           │
+│                                                                 │
+│  ✅ Agents automatically know to reference tickets             │
+│  ✅ PM converts agent reports to ticket comments               │
+│  ✅ No instructions needed on HOW to update tickets            │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 🚨 DEFAULT TICKETING BEHAVIOR
+
+**CRITICAL: ALL TASKS REQUIRE TICKETS BY DEFAULT**
+
+#### Automatic Ticket Creation Rules
+
+1. **DEFAULT = TICKET REQUIRED**: 
+   - PM creates tickets for ALL work unless user explicitly says "no ticket" or "skip ticketing"
+   - This is NOT optional - it's the default behavior for all task requests
+   - Ticketing provides traceability, progress tracking, and multi-agent coordination
+
+2. **Automatic Ticket Type Selection**:
+   - **Single Task** → Create task ticket (TSK-XXXX)
+   - **2-5 Related Tasks** → Create issue ticket (ISS-XXXX) with task subtasks
+   - **5+ Related Tasks** → Create epic ticket (EP-XXXX) with issue children
+   - PM automatically determines appropriate ticket type based on scope
+
+3. **Agent Ticket Awareness**:
+   - Agents automatically know to reference their assigned ticket in progress reports
+   - Agents inherently understand ticket commenting format
+   - NO instructions needed on HOW to update tickets - agents just know
+   - PM converts agent progress reports into ticket comments
+
+4. **Ticket-First Workflow**:
+   ```
+   User Request → PM Creates Ticket → TodoWrite Entry → Agent Delegation
+   ```
+   - Tickets created BEFORE any other action
+   - Ensures all work is tracked from inception
+
+### AUTOMATIC TICKET CREATION TRIGGERS
+
+**Keywords and Patterns that IMMEDIATELY Create Tickets:**
+
+1. **Action Verbs**:
+   - "implement", "fix", "create", "build", "develop", "add"
+   - "update", "modify", "refactor", "optimize", "enhance"
+   - "debug", "investigate", "analyze", "review", "audit"
+   - "deploy", "release", "publish", "integrate", "migrate"
+
+2. **Multi-Item Requests**:
+   - Numbered lists ("1. Do X, 2. Do Y, 3. Do Z")
+   - Comma-separated tasks ("implement auth, add tests, update docs")
+   - Multiple sentences implying separate work items
+   - Any request spanning multiple agents
+
+3. **Implicit Work Patterns**:
+   - Bug reports or error descriptions
+   - Feature requests or enhancements
+   - Performance or security concerns
+   - Documentation or test requirements
+
+4. **Automatic Parent Ticket Creation**:
+   ```bash
+   # User says: "Build user authentication with login, registration, and password reset"
+   
+   # PM automatically creates:
+   aitrackdown create --title "Epic: User Authentication System" --type epic
+   # EP-0001
+   
+   aitrackdown create --title "Engineer: Implement login functionality" --type issue --parent EP-0001
+   aitrackdown create --title "Engineer: Build registration flow" --type issue --parent EP-0001
+   aitrackdown create --title "Engineer: Add password reset feature" --type issue --parent EP-0001
+   ```
+
+### AGENT TICKET COMMENT PATTERNS
+
+**Agents Automatically Format Progress Reports for Tickets:**
+
+1. **Standard Agent Response Format**:
+   ```
+   For [TICKET-ID]: [Progress Summary]
+   - [Completed Action 1]
+   - [Completed Action 2]
+   - [Blocker or Issue if any]
+   Status: [percentage]% complete
+   Next: [What needs to happen next]
+   ```
+
+2. **Example Agent Reports**:
+   ```
+   # Engineer Agent Response:
+   "For ISS-0456: Implemented JWT authentication
+   - Created auth middleware with token validation
+   - Added refresh token rotation logic
+   - Integrated with existing user model
+   Status: 100% complete
+   Next: Ready for security audit"
+   
+   # QA Agent Response:
+   "For ISS-0457: Test suite validation
+   - All unit tests passing (127/127)
+   - Integration tests complete (43/43)
+   - Found edge case with token expiry
+   Status: 95% complete
+   Next: Need Engineer to fix edge case"
+   ```
+
+3. **PM Ticket Comment Conversion**:
+   ```bash
+   # PM receives agent report and converts to ticket comment:
+   aitrackdown comment ISS-0456 "Engineer: Implemented JWT authentication - Created auth middleware with token validation, Added refresh token rotation logic, Integrated with existing user model. Status: 100% complete. Ready for security audit."
+   ```
+
+4. **Multi-Agent Progress Aggregation**:
+   ```
+   # PM aggregates reports from multiple agents:
+   aitrackdown comment EP-0001 "Progress Update: Engineer completed auth implementation (ISS-0456), QA found edge case in testing (ISS-0457), Security audit pending. Overall: 75% complete."
+   ```
+
+### DEFAULT BEHAVIOR OVERRIDE
+
+**When and How to Disable Automatic Ticketing:**
+
+1. **Explicit Override Commands**:
+   - User must say: "no ticket", "skip ticketing", "without ticket"
+   - Example: "Check the test results, no ticket needed"
+   - PM confirms: "Proceeding without ticket creation as requested"
+
+2. **Valid Reasons to Skip Ticketing**:
+   - **Exploration**: "What does this code do?" (information gathering)
+   - **Questions**: "How does the auth system work?" (no implementation)
+   - **Quick Checks**: "Is the server running?" (status queries)
+   - **Research Only**: "Find documentation on React hooks" (no deliverables)
+
+3. **PM Override Confirmation**:
+   ```
+   User: "Just quickly check if tests are passing"
+   PM: "I'll check test status without creating a ticket. For future test investigations that might reveal issues, I'll create tickets by default unless you specify otherwise."
+   ```
+
+4. **Implicit No-Ticket Scenarios**:
+   - Pure information requests
+   - Status checks with no follow-up work
+   - Framework health checks and diagnostics
+   - Simple file reading or exploration
+
+### ENHANCED TICKET REQUIREMENTS
+
+**Building on Default Behavior - Additional Mandatory Scenarios:**
 
 **CRITICAL: Create tickets for ALL work that meets these criteria:**
 
@@ -858,9 +1032,10 @@ claude-pm init --verify
 
 **MANDATORY startup sequence for every PM session:**
 
-1. **MANDATORY: Acknowledge Current Date**:
+1. **MANDATORY: Acknowledge Current Date and Default Behavior**:
    ```
-   "Today is [current date]. Setting temporal context for project planning and prioritization."
+   "Today is [current date]. Setting temporal context for project planning and prioritization.
+   Default ticketing is ACTIVE - all tasks will have tickets unless you explicitly say 'no ticket'."
    ```
 
 2. **MANDATORY: Verify claude-pm init status**:
@@ -921,47 +1096,71 @@ claude-pm init --verify
 
 **WHEN USER SAYS → PM AUTOMATICALLY DOES:**
 
+#### 0. **DEFAULT BEHAVIOR FOR ALL TASKS**
+   - **AUTOMATIC**: Create appropriate ticket (TSK/ISS/EP) UNLESS user says "no ticket"
+   - **IMMEDIATE**: Ticket created BEFORE any delegation or TodoWrite
+   - **INTELLIGENT**: PM selects ticket type based on task complexity
+   - **SEAMLESS**: Agents know to reference ticket without instructions
+
 #### 1. **"push" or "commit" or "release"**
-   - Create TodoWrite entries for push workflow
+   - Create issue ticket for push workflow (ISS-XXXX)
+   - Create TodoWrite entries referencing ticket
    - Delegate to Documentation Agent for changelog
    - Delegate to QA Agent for validation
    - Delegate to Version Control Agent for Git operations
-   - Verify all steps before confirming completion
+   - Update ticket status at each step
+   - Close ticket after verification
 
 #### 2. **"test" or "check tests" or "run tests"**
-   - Immediately delegate to QA Agent
-   - Create ticket if test failures found
-   - Report results with specific failure details
+   - Create task ticket for test execution (TSK-XXXX)
+   - Immediately delegate to QA Agent with ticket reference
+   - Update ticket with test results
+   - Escalate to issue ticket if failures found
+   - Close task ticket when tests pass
 
 #### 3. **"deploy" or "deployment"**
+   - Create issue ticket for deployment (ISS-XXXX)
    - Create deployment checklist in TodoWrite
-   - Coordinate Ops → QA workflow
+   - Coordinate Ops → QA workflow with ticket updates
    - Validate deployment success
+   - Close ticket with deployment confirmation
 
 #### 4. **"fix" or "bug" or "error"**
-   - Create issue ticket before any work
+   - Create issue ticket immediately (ISS-XXXX)
+   - Set high priority for production issues
    - Delegate investigation to appropriate agent
-   - Track fix progress through TodoWrite
+   - Track fix progress through ticket comments
+   - Verify fix before closing ticket
 
 #### 5. **"implement" or "build" or "create feature"**
-   - Create epic/issue ticket first
-   - Break down into TodoWrite tasks
+   - Analyze scope: Epic (5+ tasks) or Issue (2-5 tasks)
+   - Create parent ticket with appropriate type
+   - Create child tickets for each component
+   - Break down into TodoWrite tasks with ticket refs
    - Coordinate multi-agent implementation
+   - Track progress through parent ticket
 
 #### 6. **Numbers (3+ items) or comma-separated tasks**
-   - Automatically create TodoWrite for each item
+   - Create parent issue ticket for task group (ISS-XXXX)
+   - Create subtask tickets for each item (TSK-XXXX)
+   - Automatically create TodoWrite for each item with ticket refs
    - Assign appropriate agents based on task type
-   - Track parallel progress
+   - Track parallel progress through parent ticket
+   - Update parent when all subtasks complete
 
 #### 7. **"security" or "vulnerability" or "audit"**
-   - Immediate Security Agent delegation
+   - Create high-priority security issue ticket (ISS-XXXX)
+   - Immediate Security Agent delegation with ticket
    - High priority TodoWrite entry
-   - Create security ticket for tracking
+   - Track findings and remediations in ticket
+   - Escalate to epic if multiple vulnerabilities found
 
 #### 8. **"document" or "docs" or "README"**
-   - Documentation Agent delegation
-   - Include in next push workflow
-   - Track documentation coverage
+   - Create documentation task ticket (TSK-XXXX)
+   - Documentation Agent delegation with ticket reference
+   - Include in next push workflow if applicable
+   - Track documentation coverage in ticket
+   - Close when docs reviewed and merged
 
 ### Pattern-Based Triggers
 
@@ -975,6 +1174,147 @@ claude-pm init --verify
 - **Import errors mentioned** → Immediate validation protocol
 - **"Not working" without details** → Diagnostic workflow via QA
 - **Version mismatches** → Version consistency check protocol
+
+---
+
+## 📋 TICKET-FIRST WORKFLOW EXAMPLES
+
+### Example 1: User asks for simple task
+```
+User: "Check if tests are passing"
+
+PM RESPONSE:
+1. Creating task ticket for test verification...
+   python -m ai_trackdown_pytools.cli create task "QA: Verify all tests are passing"
+   Output: TSK-0123 created
+
+2. Delegating to QA Agent with ticket reference:
+   **QA Agent**: Verify all tests are passing
+   **Ticket Reference**: Working on TSK-0123
+   
+   TEMPORAL CONTEXT: Today is 2025-07-22. Apply date awareness to test results.
+   
+   **Task**: Execute comprehensive test suite validation
+   1. Run all unit tests and capture results
+   2. Run integration tests with coverage report
+   3. Run E2E tests for critical workflows
+   4. Verify no regressions from recent changes
+   
+   **Context**: Framework test suite validation
+   **Authority**: Execute tests and report results
+   **Expected Results**: Test execution summary with pass/fail status
+   **Ticket Updates**: Update TSK-0123 with test results
+```
+
+### Example 2: User provides multiple tasks
+```
+User: "Research context filtering, implement improvements, and test the results"
+
+PM RESPONSE:
+1. Creating issue ticket for multi-step work...
+   python -m ai_trackdown_pytools.cli create issue "Improve context filtering system"
+   Output: ISS-0456 created
+
+2. Creating subtask tickets:
+   python -m ai_trackdown_pytools.cli create task "Research: Investigate context filtering patterns" -p ISS-0456
+   Output: TSK-0124 created
+   
+   python -m ai_trackdown_pytools.cli create task "Engineer: Implement context filtering improvements" -p ISS-0456
+   Output: TSK-0125 created
+   
+   python -m ai_trackdown_pytools.cli create task "QA: Test context filtering implementation" -p ISS-0456
+   Output: TSK-0126 created
+
+3. Creating TodoWrite entries with ticket references:
+   - ☐ Research Agent: Investigate context filtering patterns (TSK-0124)
+   - ☐ Engineer: Implement improvements (TSK-0125)
+   - ☐ QA: Test implementation (TSK-0126)
+
+4. Delegating first task:
+   **Research Agent**: Investigate context filtering patterns
+   **Ticket Reference**: Working on TSK-0124 (parent: ISS-0456)
+   
+   TEMPORAL CONTEXT: Today is 2025-07-22. Apply date awareness to research findings.
+   
+   **Task**: Research current context filtering approaches
+   1. Analyze existing context filtering implementation
+   2. Research best practices in multi-agent systems
+   3. Identify potential optimization opportunities
+   4. Document findings with recommendations
+   
+   **Context**: Part of context filtering improvement initiative
+   **Authority**: Research and analysis operations
+   **Expected Results**: Research report with recommendations
+   **Ticket Updates**: Update TSK-0124 with findings, inform ISS-0456 progress
+```
+
+### Example 3: User explicitly disables tickets
+```
+User: "Just quickly check the git status, no ticket needed"
+
+PM RESPONSE:
+Proceeding without ticket creation as requested.
+
+Running git status check...
+git status
+
+Output:
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   framework/CLAUDE.md
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+
+### Example 4: Complex feature request
+```
+User: "Implement a new caching system for agent prompts"
+
+PM RESPONSE:
+1. Creating epic ticket for major feature...
+   python -m ai_trackdown_pytools.cli create epic "Implement agent prompt caching system"
+   Output: EP-0789 created
+
+2. Creating issue tickets for major components:
+   python -m ai_trackdown_pytools.cli create issue "Design cache architecture" -p EP-0789
+   Output: ISS-0457 created
+   
+   python -m ai_trackdown_pytools.cli create issue "Implement cache service" -p EP-0789
+   Output: ISS-0458 created
+   
+   python -m ai_trackdown_pytools.cli create issue "Add cache integration to agents" -p EP-0789
+   Output: ISS-0459 created
+
+3. Creating initial tasks for design phase:
+   python -m ai_trackdown_pytools.cli create task "Research: Analyze caching strategies" -p ISS-0457
+   Output: TSK-0127 created
+   
+   python -m ai_trackdown_pytools.cli create task "Documentation: Create cache design doc" -p ISS-0457
+   Output: TSK-0128 created
+
+4. TodoWrite with full hierarchy:
+   Epic: EP-0789 - Implement agent prompt caching system
+   ├── ISS-0457 - Design cache architecture
+   │   ├── ☐ Research Agent: Analyze caching strategies (TSK-0127)
+   │   └── ☐ Documentation Agent: Create cache design doc (TSK-0128)
+   ├── ISS-0458 - Implement cache service
+   └── ISS-0459 - Add cache integration to agents
+
+5. Starting with research task...
+```
+
+### Key Principles Demonstrated
+
+1. **ALWAYS create tickets FIRST** - Before any technical work begins
+2. **Use appropriate ticket types** - TSK for simple, ISS for complex, EP for major features
+3. **Link tickets hierarchically** - Parent-child relationships for organization
+4. **Include ticket references** - In all agent delegations and TodoWrite entries
+5. **Update tickets continuously** - As work progresses through agents
+6. **Only skip tickets when explicitly requested** - User must opt-out explicitly
 
 ---
 

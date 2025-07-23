@@ -39,16 +39,18 @@ class TestLoadBaseAgentInstructions:
         mock_cache.set.assert_not_called()
     
     @patch('claude_pm.agents.base_agent_loader.SharedPromptCache.get_instance')
-    @patch('claude_pm.agents.base_agent_loader.BASE_AGENT_FILE')
-    def test_load_from_file_when_not_cached(self, mock_file, mock_cache_class):
+    @patch('claude_pm.agents.base_agent_loader._get_base_agent_file')
+    def test_load_from_file_when_not_cached(self, mock_get_file, mock_cache_class):
         """Test loading from file when not in cache."""
         # Setup
         mock_cache = Mock()
         mock_cache.get.return_value = None
         mock_cache_class.return_value = mock_cache
         
+        mock_file = Mock()
         mock_file.exists.return_value = True
         mock_file.read_text.return_value = "base agent content from file"
+        mock_get_file.return_value = mock_file
         
         # Execute
         result = load_base_agent_instructions(force_reload=False)
@@ -65,15 +67,17 @@ class TestLoadBaseAgentInstructions:
         mock_file.read_text.assert_called_once_with(encoding='utf-8')
     
     @patch('claude_pm.agents.base_agent_loader.SharedPromptCache.get_instance')
-    @patch('claude_pm.agents.base_agent_loader.BASE_AGENT_FILE')
-    def test_force_reload_bypasses_cache(self, mock_file, mock_cache_class):
+    @patch('claude_pm.agents.base_agent_loader._get_base_agent_file')
+    def test_force_reload_bypasses_cache(self, mock_get_file, mock_cache_class):
         """Test force reload bypasses cache."""
         # Setup
         mock_cache = Mock()
         mock_cache_class.return_value = mock_cache
         
+        mock_file = Mock()
         mock_file.exists.return_value = True
         mock_file.read_text.return_value = "fresh content"
+        mock_get_file.return_value = mock_file
         
         # Execute
         result = load_base_agent_instructions(force_reload=True)
@@ -85,15 +89,17 @@ class TestLoadBaseAgentInstructions:
         mock_cache.set.assert_called_once_with(f"{BASE_AGENT_CACHE_KEY}:normal", "fresh content", ttl=3600)
     
     @patch('claude_pm.agents.base_agent_loader.SharedPromptCache.get_instance')
-    @patch('claude_pm.agents.base_agent_loader.BASE_AGENT_FILE')
-    def test_returns_none_when_file_not_found(self, mock_file, mock_cache_class):
+    @patch('claude_pm.agents.base_agent_loader._get_base_agent_file')
+    def test_returns_none_when_file_not_found(self, mock_get_file, mock_cache_class):
         """Test returns None when file doesn't exist."""
         # Setup
         mock_cache = Mock()
         mock_cache.get.return_value = None
         mock_cache_class.return_value = mock_cache
         
+        mock_file = Mock()
         mock_file.exists.return_value = False
+        mock_get_file.return_value = mock_file
         
         # Execute
         result = load_base_agent_instructions(force_reload=False)
@@ -104,16 +110,18 @@ class TestLoadBaseAgentInstructions:
         mock_cache.set.assert_not_called()
     
     @patch('claude_pm.agents.base_agent_loader.SharedPromptCache.get_instance')
-    @patch('claude_pm.agents.base_agent_loader.BASE_AGENT_FILE')
-    def test_handles_read_error_gracefully(self, mock_file, mock_cache_class):
+    @patch('claude_pm.agents.base_agent_loader._get_base_agent_file')
+    def test_handles_read_error_gracefully(self, mock_get_file, mock_cache_class):
         """Test handles file read errors gracefully."""
         # Setup
         mock_cache = Mock()
         mock_cache.get.return_value = None
         mock_cache_class.return_value = mock_cache
         
+        mock_file = Mock()
         mock_file.exists.return_value = True
         mock_file.read_text.side_effect = IOError("Permission denied")
+        mock_get_file.return_value = mock_file
         
         # Execute
         result = load_base_agent_instructions(force_reload=False)
